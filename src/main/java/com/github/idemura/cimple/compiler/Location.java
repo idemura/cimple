@@ -1,15 +1,16 @@
 package com.github.idemura.cimple.compiler;
 
 public record Location(String file, int line, int column) {
+  public Location(int line, int column) {
+    this(null, line, column);
+  }
+
   public boolean isNone() {
-    return file.isEmpty();
+    return file == null;
   }
 
   @Override
   public String toString() {
-    if (file.isEmpty()) {
-      return "";
-    }
-    return file + ":" + line + "," + column;
+    return "%s[%d,%d]".formatted(file == null ? "" : file, line, column);
   }
 }

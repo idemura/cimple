@@ -25,10 +25,10 @@ record Token(TokenType type, String value, Location location) {
 
   @Override
   public String toString() {
-    return switch (type) {
-      case TokenType.IDENTIFIER, TokenType.NUMBER, TokenType.STRING ->
-          "%s(%s)".formatted(type.printableName(), value);
-      default -> type.printableName();
-    };
+    if (value == null) {
+      return "%s@%s".formatted(type.printableName(), location);
+    } else {
+      return "%s(%s)@%s".formatted(type.printableName(), value, location);
+    }
   }
 }

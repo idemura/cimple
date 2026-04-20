@@ -16,7 +16,7 @@ enum TokenType {
   SEMICOLON(";"),
   COLON(":"),
   COMMA(","),
-  ASSIGN(""),
+  ASSIGN("="),
   PLUS("+"),
   MINUS("-"),
   ASTERISK("*"),

@@ -1,149 +1,138 @@
 package com.github.idemura.cimple.compiler;
 
-import java.util.ArrayList;
+import static java.lang.Character.isDigit;
+import static java.lang.Character.isJavaIdentifierPart;
+import static java.lang.Character.isJavaIdentifierStart;
+import static java.lang.Character.isWhitespace;
 
 // Transforms input code into a token stream.
 class Tokenizer {
-  private final CompilerParams params;
+  private final String fileName;
+  private final String code;
+  private int index;
+  private int line = 1;
+  private int column = 1;
 
-  Tokenizer(CompilerParams params) {
-    this.params = params;
+  Tokenizer(String fileName, String code) {
+    this.fileName = fileName;
+    this.code = code;
   }
 
-  TokenStream split(String fileName, String code) {
+  TokenStream split() {
     final int n = code.length();
-    if (code.length() > 0 && code.charAt(n - 1) != '\n') {
+    if (n > 0 && code.charAt(n - 1) != '\n') {
       throw CompilerException.builder().formatMessage("File must end with new line: \\n").build();
     }
-
-    var tokens = new ArrayList<Token>();
-    int line = 1;
-    int column = 1;
-    for (int i = 0; i < n; ) {
-      char c = code.charAt(i);
-      if (Character.isWhitespace(c)) {
-        if (c == '\n') {
-          line++;
-          column = 1;
-        } else {
-          column++;
-        }
-        i++;
-      } else if (Character.isJavaIdentifierStart(c)) {
-        var location = new Location(fileName, line, column);
-        int first = i;
-        while (i < n) {
-          if (!Character.isJavaIdentifierPart(code.charAt(i))) {
-            break;
-          }
-          column++;
-          i++;
-        }
-        tokens.add(Token.ofIdOrKeyword(code.substring(first, i), location));
-      } else if (Character.isDigit(c)) {
-        var location = new Location(fileName, line, column);
-        int first = i;
-        while (i < n) {
-          if (!Character.isDigit(code.charAt(i))) {
-            break;
-          }
-          column++;
-          i++;
-        }
-        tokens.add(new Token(TokenType.NUMBER, code.substring(first, i), location));
+    var tokens = new TokenStream();
+    while (index < n) {
+      char c = code.charAt(index);
+      if (isWhitespace(c)) {
+        skipWhitespace();
+      } else if (isJavaIdentifierStart(c)) {
+        tokens.add(takeIdentifier());
+      } else if (isDigit(c)) {
+        tokens.add(takeNumber());
       } else {
-        var location = new Location(fileName, line, column);
-        int move = 0;
         switch (c) {
-          case '#' -> {
-            while (i < n && code.charAt(i) != '\n') {
-              column++;
-              i++;
-            }
-          }
-          case '(' -> {
-            tokens.add(new Token(TokenType.LPAREN, location));
-            move = 1;
-          }
-          case ')' -> {
-            tokens.add(new Token(TokenType.RPAREN, location));
-            move = 1;
-          }
-          case '{' -> {
-            tokens.add(new Token(TokenType.LCURLY, location));
-            move = 1;
-          }
-          case '}' -> {
-            tokens.add(new Token(TokenType.RCURLY, location));
-            move = 1;
-          }
-          case ':' -> {
-            tokens.add(new Token(TokenType.COLON, location));
-            move = 1;
-          }
-          case ',' -> {
-            tokens.add(new Token(TokenType.COMMA, location));
-            move = 1;
-          }
-          case '=' -> {
-            tokens.add(new Token(TokenType.ASSIGN, location));
-            move = 1;
-          }
-          case ';' -> {
-            tokens.add(new Token(TokenType.SEMICOLON, location));
-            move = 1;
-          }
-          case '+' -> {
-            tokens.add(new Token(TokenType.PLUS, location));
-            move = 1;
-          }
-          case '-' -> {
-            tokens.add(new Token(TokenType.MINUS, location));
-            move = 1;
-          }
-          case '*' -> {
-            tokens.add(new Token(TokenType.ASTERISK, location));
-            move = 1;
-          }
-          case '/' -> {
-            tokens.add(new Token(TokenType.SLASH, location));
-            move = 1;
-          }
-          case '<' -> {
-            tokens.add(new Token(TokenType.CMP_LT, location));
-            move = 1;
-          }
-          case '>' -> {
-            tokens.add(new Token(TokenType.CMP_GT, location));
-            move = 1;
-          }
-          case '"' -> {
-            // TODO: Escape sequences
-            int first = i++;
-            while (code.charAt(i) != '"') {
-              if (code.charAt(i) == '\n') {
-                throw CompilerException.builder()
-                    .formatMessage("Unterminated string literal")
-                    .setLocation(new Location(fileName, line, first))
-                    .build();
-              }
-              i++;
-              column++;
-            }
-            tokens.add(new Token(TokenType.STRING, code.substring(first + 1, i), location));
-            i++;
-            column++;
-          }
+          case '#' -> skipComment();
+          case '(' -> tokens.add(take1CharToken(TokenType.LPAREN));
+          case ')' -> tokens.add(take1CharToken(TokenType.RPAREN));
+          case '{' -> tokens.add(take1CharToken(TokenType.LCURLY));
+          case '}' -> tokens.add(take1CharToken(TokenType.RCURLY));
+          case ':' -> tokens.add(take1CharToken(TokenType.COLON));
+          case ',' -> tokens.add(take1CharToken(TokenType.COMMA));
+          case '=' -> tokens.add(take1CharToken(TokenType.ASSIGN));
+          case ';' -> tokens.add(take1CharToken(TokenType.SEMICOLON));
+          case '+' -> tokens.add(take1CharToken(TokenType.PLUS));
+          case '-' -> tokens.add(take1CharToken(TokenType.MINUS));
+          case '*' -> tokens.add(take1CharToken(TokenType.ASTERISK));
+          case '/' -> tokens.add(take1CharToken(TokenType.SLASH));
+          case '<' -> tokens.add(take1CharToken(TokenType.CMP_GT));
+          case '>' -> tokens.add(take1CharToken(TokenType.CMP_LT));
+          case '"' -> tokens.add(takeString());
           default ->
               throw CompilerException.builder()
                   .formatMessage("Invalid character: %s", c)
-                  .setLocation(location)
+                  .setLocation(currentLocation())
                   .build();
         }
-        column += move;
-        i += move;
       }
     }
-    return new TokenStream(tokens);
+    return tokens;
+  }
+
+  private void skipWhitespace() {
+    while (index < code.length() && isWhitespace(code.charAt(index))) {
+      next();
+    }
+  }
+
+  private void skipComment() {
+    while (index < code.length() && code.charAt(index) != '\n') {
+      next();
+    }
+  }
+
+  private Token takeIdentifier() {
+    var location = currentLocation();
+    int first = index;
+    while (index < code.length()) {
+      if (!isJavaIdentifierPart(code.charAt(index))) {
+        break;
+      }
+      column++;
+      index++;
+    }
+    return Token.ofIdOrKeyword(code.substring(first, index), location);
+  }
+
+  private Token takeNumber() {
+    var location = currentLocation();
+    int first = index;
+    while (index < code.length()) {
+      if (!isDigit(code.charAt(index))) {
+        break;
+      }
+      column++;
+      index++;
+    }
+    return new Token(TokenType.NUMBER, code.substring(first, index), location);
+  }
+
+  private Token takeString() {
+    // TODO: Escape sequences
+    var location = currentLocation();
+    int first = index++;
+    while (code.charAt(index) != '"') {
+      if (code.charAt(index) == '\n') {
+        throw CompilerException.builder()
+            .formatMessage("Unterminated string literal")
+            .setLocation(new Location(fileName, line, first))
+            .build();
+      }
+      next();
+    }
+    next();
+    return new Token(TokenType.STRING, code.substring(first + 1, index - 1), location);
+  }
+
+  private Token take1CharToken(TokenType tokenType) {
+    var location = currentLocation();
+    next();
+    return new Token(tokenType, null, location);
+  }
+
+  private Location currentLocation() {
+    return new Location(fileName, line, column);
+  }
+
+  void next() {
+    if (code.charAt(index) == '\n') {
+      column = 1;
+      line++;
+    } else {
+      column++;
+    }
+    index++;
   }
 }

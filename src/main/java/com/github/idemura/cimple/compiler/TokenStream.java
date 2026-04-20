@@ -1,13 +1,20 @@
 package com.github.idemura.cimple.compiler;
 
+import java.util.ArrayList;
 import java.util.List;
 
 class TokenStream {
-  private final List<Token> tokens;
+  private final List<Token> tokens = new ArrayList<>();
   private int pos;
 
-  TokenStream(List<Token> tokens) {
-    this.tokens = tokens;
+  TokenStream() {}
+
+  List<Token> tokens() {
+    return List.copyOf(tokens);
+  }
+
+  void add(Token token) {
+    tokens.add(token);
   }
 
   boolean done() {
