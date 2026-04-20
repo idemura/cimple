@@ -1,0 +1,10 @@
+#! /bin/bash
+
+CIMPLE=cimple-1.0-SNAPSHOT
+FILE="$1"
+
+ARGS=$(head -n1 "$FILE" | grep '^#!ARGS ')
+REF="${FILE%.ci}.ref"
+
+java -cp "target/$CIMPLE-bin/$CIMPLE/*" com.github.idemura.cimple.compiler.Cimple ${ARGS:7} $FILE 2> $REF
+git status -s $REF

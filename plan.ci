@@ -1,0 +1,51 @@
+### Exporting/importing.
+
+module example;
+
+export {
+  f1, f2;
+}
+
+# This is always static, variables are never exported.
+var g = 10;
+
+function f1() {}
+function f2() {}
+
+### Import
+
+import {
+  // first is alias
+  mod = external_module_name;
+
+  example.type_name;
+  example.function_name;
+  example.*;
+  example.(f1, f2);
+}
+
+import example::*, example::f1, example::(f1, f2), example;
+
+function g() {
+  example::f1();
+  f1();
+  f2();
+}
+
+There is no nested modules in Cimple, only top level.
+All files in the directory must have the same module name!
+
+For example:
+src/
+  tree/
+    btree/
+      a.ci - module tree_btree
+      b.ci - module tree_btree
+    rb_tree/
+      a.ci - module tree_rb_tree
+      b.ci - module tree_rb_tree
+
+### Overloads
+
+Overloads are ONLY inside the module (or file)?
+

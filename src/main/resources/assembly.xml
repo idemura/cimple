@@ -1,0 +1,22 @@
+<assembly>
+  <id>bin</id>
+
+  <formats>
+    <format>tar</format>
+    <format>dir</format>
+  </formats>
+
+  <dependencySets>
+    <dependencySet>
+      <includes>
+        <include>com.github.idemura:*:jar</include>
+      </includes>
+    </dependencySet>
+    <dependencySet>
+      <useTransitiveDependencies>true</useTransitiveDependencies>
+      <unpack>false</unpack>
+      <scope>runtime</scope>
+      <useProjectArtifact>false</useProjectArtifact>
+    </dependencySet>
+  </dependencySets>
+</assembly>

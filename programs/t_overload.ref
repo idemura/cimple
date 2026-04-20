@@ -1,0 +1,45 @@
+-- SPLIT 0
+Parse tree
+MODULE
+  FUNCTION f: TYPE_REF(void)
+    PARAM a: TYPE_REF(i32)
+    PARAM b: TYPE_REF(bool)
+    PARAM x
+    PARAM y: TYPE_REF(i32)
+    BLOCK
+  FUNCTION f: TYPE_REF(void)
+    PARAM a: TYPE_REF(i32)
+    PARAM b: TYPE_REF(bool)
+    PARAM x
+    PARAM y: TYPE_REF(i64)
+    BLOCK
+  FUNCTION f: TYPE_REF(void)
+    PARAM a: TYPE_REF(i32)
+    PARAM b: TYPE_REF(bool)
+    PARAM x
+    PARAM y: TYPE_REF(string)
+    BLOCK
+  FUNCTION main: TYPE_REF(void)
+    BLOCK
+      VAR a: TYPE_REF(i32)
+      EXPR_STMT
+        APPLY f
+          LITERAL 1
+          IDENTIFIER true
+          IDENTIFIER a
+          IDENTIFIER a
+      VAR b: TYPE_REF(i64)
+      EXPR_STMT
+        APPLY f
+          LITERAL 2
+          IDENTIFIER true
+          IDENTIFIER b
+          IDENTIFIER b
+      VAR s: TYPE_REF(string)
+      EXPR_STMT
+        APPLY f
+          LITERAL 2
+          IDENTIFIER true
+          IDENTIFIER s
+          IDENTIFIER s
+programs/t_overload.ci:14,8: Undefined name true

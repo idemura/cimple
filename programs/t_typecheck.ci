@@ -1,0 +1,47 @@
+#!ARGS --debug --debug_splits --debug_print_ast
+
+function f(a int, b int) int {
+  return a;
+}
+
+#!SPLIT
+
+function f(a, b) int {
+  return a;
+}
+
+#!SPLIT
+
+function f(a int, b string) int {
+  return a;
+}
+
+#!SPLIT
+
+function f(a int, b int) int {
+  var x = b + 1;
+  return x;
+}
+
+#!SPLIT
+
+function f(a, b int) int {
+  if a > 0 {
+    var x = 10;
+  } else {
+    var x = 12;
+  }
+  return a;
+}
+
+#!SPLIT
+
+function f(a int, b int) int {
+  var x;
+}
+
+#!SPLIT
+
+function f(a int, b int) int {
+  var x = 18;
+}

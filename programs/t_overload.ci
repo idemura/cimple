@@ -1,0 +1,34 @@
+#!ARGS --debug --debug_splits --debug_print_ast
+
+overload T int32
+function f(a i32, b bool, x T, y T) {
+}
+
+overload T int
+function f(a i32, b bool, x T, y T) {
+}
+
+overload T string
+function f(a i32, b bool, x T, y T) {
+}
+
+overload T int
+function combine(x T, y T) T {
+  return x | y;
+}
+
+overload T float32
+function combine(x T, y T) T {
+  return x + y;
+}
+
+function main() {
+  var a i32;
+  f(1, true, a, a);
+
+  var b i64;
+  f(2, true, b, b);
+
+  var s string;
+  f(2, true, s, s);
+}

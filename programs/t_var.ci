@@ -1,0 +1,33 @@
+#!ARGS --debug --debug_splits --debug_print_ast
+
+# 0 by default
+var gu;
+
+#!SPLIT
+
+# Error: cyclic dependency
+var gcycle0 = gcycle1 + 1;
+var gcycle1 = gcycle0 + 1;
+
+#!SPLIT
+
+# Error: order
+var g1 = 1;
+var gexpr = g1 + g2;
+var g2 = 2;
+
+#!SPLIT
+
+var g1 = 1;
+var g2 = 2;
+var gexpr = g1 + g2;
+
+function f(a: i32): i32 {
+  var g1 = 3; # Can override global name
+
+  var t = g1;
+  var x = a + 10;
+  var y = a * 10;
+  var z = (a + 10) * (a - 10);
+  var s = "hello";
+}

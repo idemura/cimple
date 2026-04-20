@@ -1,0 +1,58 @@
+-- SPLIT 0
+programs/t_expression.ci:4,11: Primary expression expected
+-- SPLIT 1
+Parse tree
+MODULE
+  FUNCTION f: TYPE_REF(i32)
+    PARAM a: TYPE_REF(i32)
+    BLOCK
+      RETURN
+        APPLY +
+          IDENTIFIER a
+          LITERAL 1
+Type check
+MODULE
+  FUNCTION f: TYPE_REF(i32)
+    PARAM a: TYPE_REF(i32)
+    BLOCK
+      RETURN
+        APPLY +
+          IDENTIFIER a
+          LITERAL 1: TYPE_REF(i32)
+-- SPLIT 2
+Parse tree
+MODULE
+  FUNCTION f: TYPE_REF(i32)
+    PARAM a: TYPE_REF(i32)
+    BLOCK
+      RETURN
+        APPLY *
+          APPLY +
+            IDENTIFIER a
+            LITERAL 1
+          LITERAL 2
+Type check
+MODULE
+  FUNCTION f: TYPE_REF(i32)
+    PARAM a: TYPE_REF(i32)
+    BLOCK
+      RETURN
+        APPLY *
+          APPLY +
+            IDENTIFIER a
+            LITERAL 1: TYPE_REF(i32)
+          LITERAL 2: TYPE_REF(i32)
+-- SPLIT 3
+Parse tree
+MODULE
+  FUNCTION f: TYPE_REF(i32)
+    PARAM a: TYPE_REF(i32)
+    BLOCK
+      RETURN
+        APPLY +
+          IDENTIFIER a
+          LITERAL hello
+programs/t_expression.ci:3,12: Apply +: argument type does not apply to parameter #1
+  Expected: TYPE_REF(i32)
+  Provided: TYPE_REF(string)
+

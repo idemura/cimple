@@ -1,0 +1,100 @@
+-- SPLIT 0
+Parse tree
+MODULE
+  VAR gu
+programs/t_var.ci:4,5: Variable gu: no type spec or initializer expression
+-- SPLIT 1
+Parse tree
+MODULE
+  VAR gcycle0
+    APPLY +
+      IDENTIFIER gcycle1
+      LITERAL 1
+  VAR gcycle1
+    APPLY +
+      IDENTIFIER gcycle0
+      LITERAL 1
+programs/t_var.ci:3,15: Undefined name gcycle1
+-- SPLIT 2
+Parse tree
+MODULE
+  VAR g1
+    LITERAL 1
+  VAR gexpr
+    APPLY +
+      IDENTIFIER g1
+      IDENTIFIER g2
+  VAR g2
+    LITERAL 2
+programs/t_var.ci:4,18: Undefined name g2
+-- SPLIT 3
+Parse tree
+MODULE
+  VAR g1
+    LITERAL 1
+  VAR g2
+    LITERAL 2
+  VAR gexpr
+    APPLY +
+      IDENTIFIER g1
+      IDENTIFIER g2
+  FUNCTION f: TYPE_REF(i32)
+    PARAM a: TYPE_REF(i32)
+    BLOCK
+      VAR g1
+        LITERAL 3
+      VAR t
+        IDENTIFIER g1
+      VAR x
+        APPLY +
+          IDENTIFIER a
+          LITERAL 10
+      VAR y
+        APPLY *
+          IDENTIFIER a
+          LITERAL 10
+      VAR z
+        APPLY *
+          APPLY +
+            IDENTIFIER a
+            LITERAL 10
+          APPLY -
+            IDENTIFIER a
+            LITERAL 10
+      VAR s
+        LITERAL hello
+Type check
+MODULE
+  VAR g1: TYPE_REF(i32)
+    LITERAL 1: TYPE_REF(i32)
+  VAR g2: TYPE_REF(i32)
+    LITERAL 2: TYPE_REF(i32)
+  VAR gexpr: TYPE_REF(i32)
+    APPLY +
+      IDENTIFIER g1
+      IDENTIFIER g2
+  FUNCTION f: TYPE_REF(i32)
+    PARAM a: TYPE_REF(i32)
+    BLOCK
+      VAR g1: TYPE_REF(i32)
+        LITERAL 3: TYPE_REF(i32)
+      VAR t: TYPE_REF(i32)
+        IDENTIFIER g1
+      VAR x: TYPE_REF(i32)
+        APPLY +
+          IDENTIFIER a
+          LITERAL 10: TYPE_REF(i32)
+      VAR y: TYPE_REF(i32)
+        APPLY *
+          IDENTIFIER a
+          LITERAL 10: TYPE_REF(i32)
+      VAR z: TYPE_REF(i32)
+        APPLY *
+          APPLY +
+            IDENTIFIER a
+            LITERAL 10: TYPE_REF(i32)
+          APPLY -
+            IDENTIFIER a
+            LITERAL 10: TYPE_REF(i32)
+      VAR s: TYPE_REF(string)
+        LITERAL hello: TYPE_REF(string)

@@ -1,0 +1,23 @@
+#!ARGS --debug --debug_splits --debug_print_ast
+
+function f(a int) int {
+  return ();
+}
+
+#!SPLIT
+
+function f(a int) int {
+  return a + 1;
+}
+
+#!SPLIT
+
+function f(a int) int {
+  return (a + 1) * 2;
+}
+
+#!SPLIT
+
+function f(a int) int {
+  return a + "hello";
+}

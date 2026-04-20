@@ -1,0 +1,28 @@
+#!ARGS --debug --debug_splits --debug_print_ast
+
+function f(a int) int {
+  if a > 0 {
+    return a;
+  }
+  return 0;
+}
+
+#!SPLIT
+
+function f(a int) int {
+  if a > 0 {
+    return a;
+  } else {
+    return 0 - a;
+  }
+}
+
+#!SPLIT
+# Error condition is not boolean
+
+function f(a int) int {
+  if a {
+    return 1;
+  }
+  return 0;
+}

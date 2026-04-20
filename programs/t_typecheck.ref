@@ -1,0 +1,131 @@
+-- SPLIT 0
+Parse tree
+MODULE
+  FUNCTION f: TYPE_REF(i32)
+    PARAM a
+    PARAM b: TYPE_REF(i32)
+    BLOCK
+      RETURN
+        IDENTIFIER a
+Type check
+MODULE
+  FUNCTION f: TYPE_REF(i32)
+    PARAM a: TYPE_REF(i32)
+    PARAM b: TYPE_REF(i32)
+    BLOCK
+      RETURN
+        IDENTIFIER a
+-- SPLIT 1
+Parse tree
+MODULE
+  FUNCTION f: TYPE_REF(i32)
+    PARAM a
+    PARAM b
+    BLOCK
+      RETURN
+        IDENTIFIER a
+programs/t_typecheck.ci:2,10: Function parameter type not specified
+-- SPLIT 2
+Parse tree
+MODULE
+  FUNCTION f: TYPE_REF(i32)
+    PARAM a
+    PARAM b: TYPE_REF(i32)
+    PARAM b: TYPE_REF(string)
+    BLOCK
+      RETURN
+        IDENTIFIER a
+programs/t_typecheck.ci:2,23: Duplicate parameter b
+-- SPLIT 3
+Parse tree
+MODULE
+  FUNCTION f: TYPE_REF(i32)
+    PARAM a
+    PARAM b: TYPE_REF(i32)
+    BLOCK
+      VAR x
+        APPLY +
+          IDENTIFIER b
+          LITERAL 1
+      RETURN
+        IDENTIFIER x
+Type check
+MODULE
+  FUNCTION f: TYPE_REF(i32)
+    PARAM a: TYPE_REF(i32)
+    PARAM b: TYPE_REF(i32)
+    BLOCK
+      VAR x: TYPE_REF(i32)
+        APPLY +
+          IDENTIFIER b
+          LITERAL 1: TYPE_REF(i32)
+      RETURN
+        IDENTIFIER x
+-- SPLIT 4
+Parse tree
+MODULE
+  FUNCTION f: TYPE_REF(i32)
+    PARAM a
+    PARAM b: TYPE_REF(i32)
+    BLOCK
+      CONDITION
+        APPLY >
+          IDENTIFIER a
+          LITERAL 0
+      THEN
+        BLOCK
+          VAR x
+            LITERAL 10
+      ELSE
+        BLOCK
+          VAR x
+            LITERAL 12
+      RETURN
+        IDENTIFIER a
+Type check
+MODULE
+  FUNCTION f: TYPE_REF(i32)
+    PARAM a: TYPE_REF(i32)
+    PARAM b: TYPE_REF(i32)
+    BLOCK
+      CONDITION
+        APPLY >
+          IDENTIFIER a
+          LITERAL 0: TYPE_REF(i32)
+      THEN
+        BLOCK
+          VAR x: TYPE_REF(i32)
+            LITERAL 10: TYPE_REF(i32)
+      ELSE
+        BLOCK
+          VAR x: TYPE_REF(i32)
+            LITERAL 12: TYPE_REF(i32)
+      RETURN
+        IDENTIFIER a
+-- SPLIT 5
+Parse tree
+MODULE
+  FUNCTION f: TYPE_REF(i32)
+    PARAM a
+    PARAM b: TYPE_REF(i32)
+    BLOCK
+      VAR x
+programs/t_typecheck.ci:3,7: Variable x: no type spec or initializer expression
+-- SPLIT 6
+Parse tree
+MODULE
+  FUNCTION f: TYPE_REF(i32)
+    PARAM a
+    PARAM b: TYPE_REF(i32)
+    BLOCK
+      VAR x: TYPE_REF(i64)
+        LITERAL 18
+Type check
+MODULE
+  FUNCTION f: TYPE_REF(i32)
+    PARAM a: TYPE_REF(i32)
+    PARAM b: TYPE_REF(i32)
+    BLOCK
+      VAR x: TYPE_REF(i64)
+        APPLY $i32_to_i64
+          LITERAL 18: TYPE_REF(i32)

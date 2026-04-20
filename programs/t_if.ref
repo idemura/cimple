@@ -1,0 +1,91 @@
+-- SPLIT 0
+Parse tree
+MODULE
+  FUNCTION f: TYPE_REF(i32)
+    PARAM a: TYPE_REF(i32)
+    BLOCK
+      CONDITION
+        APPLY >
+          IDENTIFIER a
+          LITERAL 0
+      THEN
+        BLOCK
+          RETURN
+            IDENTIFIER a
+      ELSE
+        BLOCK
+      RETURN
+        LITERAL 0
+Type check
+MODULE
+  FUNCTION f: TYPE_REF(i32)
+    PARAM a: TYPE_REF(i32)
+    BLOCK
+      CONDITION
+        APPLY >
+          IDENTIFIER a
+          LITERAL 0: TYPE_REF(i32)
+      THEN
+        BLOCK
+          RETURN
+            IDENTIFIER a
+      ELSE
+        BLOCK
+      RETURN
+        LITERAL 0: TYPE_REF(i32)
+-- SPLIT 1
+Parse tree
+MODULE
+  FUNCTION f: TYPE_REF(i32)
+    PARAM a: TYPE_REF(i32)
+    BLOCK
+      CONDITION
+        APPLY >
+          IDENTIFIER a
+          LITERAL 0
+      THEN
+        BLOCK
+          RETURN
+            IDENTIFIER a
+      ELSE
+        BLOCK
+          RETURN
+            APPLY -
+              LITERAL 0
+              IDENTIFIER a
+Type check
+MODULE
+  FUNCTION f: TYPE_REF(i32)
+    PARAM a: TYPE_REF(i32)
+    BLOCK
+      CONDITION
+        APPLY >
+          IDENTIFIER a
+          LITERAL 0: TYPE_REF(i32)
+      THEN
+        BLOCK
+          RETURN
+            IDENTIFIER a
+      ELSE
+        BLOCK
+          RETURN
+            APPLY -
+              LITERAL 0: TYPE_REF(i32)
+              IDENTIFIER a
+-- SPLIT 2
+Parse tree
+MODULE
+  FUNCTION f: TYPE_REF(i32)
+    PARAM a: TYPE_REF(i32)
+    BLOCK
+      CONDITION
+        IDENTIFIER a
+      THEN
+        BLOCK
+          RETURN
+            LITERAL 1
+      ELSE
+        BLOCK
+      RETURN
+        LITERAL 0
+programs/t_if.ci:4,3: if-condition must be boolean, got TYPE_REF(i32)
