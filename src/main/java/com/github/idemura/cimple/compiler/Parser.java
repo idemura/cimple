@@ -32,10 +32,10 @@ public class Parser {
         case TYPE:
           throw new UnsupportedOperationException();
         case VAR:
-          module.addVariable(parseVariable());
+          module.addVariable(parseVariable(true));
           break;
         case CONST:
-          module.addVariable(parseConst());
+          module.addVariable(parseVariable(false));
           break;
         default:
           throw CompilerException.builder()
@@ -67,19 +67,10 @@ public class Parser {
     return function;
   }
 
-  private AstVariable parseVariable() {
-    tokens.takeKeyword(VAR);
-    return parseVariableDefinition(true);
-  }
-
-  private AstVariable parseConst() {
-    tokens.takeKeyword(CONST);
-    return parseVariableDefinition(false);
-  }
-
-  private AstVariable parseVariableDefinition(boolean isMutable) {
+  private AstVariable parseVariable(boolean mutable) {
+    tokens.takeKeyword(mutable ? VAR : CONST);
     var variable = new AstVariable();
-    variable.setMutable(isMutable);
+    variable.setMutable(mutable);
     var name = tokens.take(IDENTIFIER);
     variable.setLocation(name.location());
     variable.setName(name.value());
@@ -100,10 +91,10 @@ public class Parser {
       var current = tokens.current();
       switch (current.keyword()) {
         case VAR:
-          b.add(parseVariable());
+          b.add(parseVariable(true));
           break;
         case CONST:
-          b.add(parseConst());
+          b.add(parseVariable(false));
           break;
         case RETURN:
           b.add(parseReturn());
@@ -154,6 +145,9 @@ public class Parser {
     var forNode = new AstFor();
     var keyword = tokens.takeKeyword(FOR);
     forNode.setLocation(keyword.location());
+    if (tokens.current().keyword() == VAR) {
+      forNode.setInit(parseVariable(true));
+    }
     if (!tokens.current().is(LCURLY)) {
       forNode.setCondition(parseExpression());
     }

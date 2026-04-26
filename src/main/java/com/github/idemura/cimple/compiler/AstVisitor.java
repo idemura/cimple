@@ -111,6 +111,9 @@ public abstract class AstVisitor {
 
   protected void visitChildren(AstFor node) {
     stack.add(node);
+    if (node.getInit() != null) {
+      node.getInit().accept(this);
+    }
     if (node.getCondition() != null) {
       node.getCondition().accept(this);
     }

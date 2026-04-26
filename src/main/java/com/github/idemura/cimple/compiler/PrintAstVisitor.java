@@ -55,7 +55,7 @@ public class PrintAstVisitor extends AstVisitor {
   @Override
   protected void visit(AstLiteral node) {
     printIndent();
-    printEntity("LITERAL", node.getValue(), node.getTypeRef());
+    output.write("LITERAL %s %s".formatted(node.getValue(), node.getTypeRef()));
   }
 
   @Override
@@ -112,6 +112,9 @@ public class PrintAstVisitor extends AstVisitor {
   protected void visit(AstFor node) {
     printIndent();
     output.write("FOR ");
+    if (node.getInit() != null) {
+      node.getInit().accept(this);
+    }
     if (node.getCondition() != null) {
       node.getCondition().accept(this);
     }

@@ -28,6 +28,11 @@ public class AstNameRef extends AstAbstractExpression {
   }
 
   @Override
+  public String toString() {
+    return "AstNameRef(%s)".formatted(name);
+  }
+
+  @Override
   TypeRef getTypeRef() {
     return variable.getTypeRef();
   }

@@ -1,11 +1,13 @@
 package com.github.idemura.cimple.compiler;
 
+import java.util.Objects;
+
 public class AstLiteral extends AstAbstractExpression {
   private TokenType tokenType;
-  private String value;
+  private Object value;
   private TypeRef typeRef;
 
-  AstLiteral(TokenType tokenType, String value) {
+  AstLiteral(TokenType tokenType, Object value) {
     this.tokenType = tokenType;
     this.value = value;
   }
@@ -15,11 +17,24 @@ public class AstLiteral extends AstAbstractExpression {
     visitor.visit(this);
   }
 
+  @Override
+  public int hashCode() {
+    return tokenType.hashCode();
+  }
+
+  @Override
+  public boolean equals(Object object) {
+    return this == object
+        || (object instanceof AstLiteral other
+            && tokenType == other.tokenType
+            && Objects.equals(value, other.value));
+  }
+
   TokenType getTokenType() {
     return tokenType;
   }
 
-  String getValue() {
+  Object getValue() {
     return value;
   }
 

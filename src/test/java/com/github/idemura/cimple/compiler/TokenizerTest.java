@@ -1,5 +1,6 @@
 package com.github.idemura.cimple.compiler;
 
+import static com.github.idemura.cimple.common.Resources.readResource;
 import static com.github.idemura.cimple.compiler.TokenType.*;
 import static org.junit.jupiter.api.Assertions.*;
 
@@ -9,8 +10,8 @@ import org.junit.jupiter.api.Test;
 class TokenizerTest {
   @Test
   void testSplit() {
-    var code = "function foo() {\n  # comment\n  var bar = 1;\n}\n";
-    var tokens = new Tokenizer(null, code).split().tokens();
+    var tokens =
+        new Tokenizer(null, readResource(getClass(), "/tokenizer/tokens.ci")).split().tokens();
     assertEquals(
         List.of(
             new Token(IDENTIFIER, "function", new Location(1, 1)),
@@ -23,7 +24,17 @@ class TokenizerTest {
             new Token(ASSIGN, null, new Location(3, 11)),
             new Token(NUMBER, "1", new Location(3, 13)),
             new Token(SEMICOLON, null, new Location(3, 14)),
-            new Token(RCURLY, null, new Location(4, 1))),
+            new Token(IDENTIFIER, "var", new Location(4, 3)),
+            new Token(IDENTIFIER, "x", new Location(4, 7)),
+            new Token(ASSIGN, null, new Location(4, 9)),
+            new Token(IDENTIFIER, "true", new Location(4, 11)),
+            new Token(SEMICOLON, null, new Location(4, 15)),
+            new Token(IDENTIFIER, "var", new Location(5, 3)),
+            new Token(IDENTIFIER, "y", new Location(5, 7)),
+            new Token(ASSIGN, null, new Location(5, 9)),
+            new Token(IDENTIFIER, "null", new Location(5, 11)),
+            new Token(SEMICOLON, null, new Location(5, 15)),
+            new Token(RCURLY, null, new Location(6, 1))),
         tokens);
     assertEquals(FUNCTION, tokens.get(0).keyword());
     assertEquals(IDENTIFIER, tokens.get(1).keyword());

@@ -10,12 +10,14 @@ record Token(TokenType type, String value, Location location) {
   }
 
   TokenType keyword() {
-    var keyword = TokenType.ofKeyword(value);
-    if (keyword != null) {
-      return keyword;
-    } else {
-      return type; // Should be IDENTIFIER
+    if (value == null) {
+      return type;
     }
+    var keyword = TokenType.ofKeyword(value);
+    if (keyword == null) {
+      return type;
+    }
+    return keyword;
   }
 
   boolean is(TokenType type) {
