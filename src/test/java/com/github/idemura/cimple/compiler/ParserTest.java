@@ -77,7 +77,7 @@ class ParserTest {
     var module = parseFile("/parser/types.ci");
     assertEquals("type_test", module.getName());
     var types = module.getTypes();
-    assertEquals(2, types.size());
+    assertEquals(3, types.size());
     {
       var type = (AstTypeStruct) types.get(0);
       assertEquals("Empty", type.getName());
@@ -92,6 +92,11 @@ class ParserTest {
       assertEquals(INT, fields.get(0).getTypeRef());
       assertEquals("y", fields.get(1).getName());
       assertEquals(INT, fields.get(1).getTypeRef());
+    }
+    {
+      var type = (AstTypeAlias) types.get(2);
+      assertEquals("Uri", type.getName());
+      assertEquals(STRING, type.getBaseTypeRef());
     }
   }
 

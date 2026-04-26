@@ -46,6 +46,12 @@ public class PrintAstVisitor extends AstVisitor {
   }
 
   @Override
+  protected void visit(AstTypeAlias node) {
+    printIndent();
+    output.write("TYPE ALIAS %s = %s\n".formatted(node.getName(), node.getBaseTypeRef()));
+  }
+
+  @Override
   protected void visit(AstBlock node) {
     printIndent();
     output.write("BLOCK\n");

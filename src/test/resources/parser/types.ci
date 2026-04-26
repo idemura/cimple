@@ -6,3 +6,5 @@ type struct Point {
   var x int;
   var y int;
 }
+
+type alias Uri = string;

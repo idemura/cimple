@@ -53,7 +53,7 @@ public class Parser {
     return switch (tokens.current().keyword()) {
       case STRUCT -> parseTypeStruct();
       case UNION -> throw new UnsupportedOperationException();
-      case ALIAS -> throw new UnsupportedOperationException();
+      case ALIAS -> parseTypeAlias();
       default ->
           throw CompilerException.builder()
               .formatMessage("Expected type declaration kind after type")
@@ -72,6 +72,18 @@ public class Parser {
     while (!tokens.takeIf(RCURLY)) {
       type.addField(parseVariable(true));
     }
+    return type;
+  }
+
+  private AstTypeAlias parseTypeAlias() {
+    var type = new AstTypeAlias();
+    tokens.takeKeyword(ALIAS);
+    var name = tokens.take(IDENTIFIER);
+    type.setLocation(name.location());
+    type.setName(name.value());
+    tokens.take(ASSIGN);
+    type.setBaseTypeRef(parseTypeRef());
+    tokens.take(SEMICOLON);
     return type;
   }
 
