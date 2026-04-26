@@ -1,0 +1,13 @@
+module if_test;
+
+function f(a bool, b bool) {
+  if a {
+  }
+  if a {
+  } else {
+  }
+  if a {
+  } elif b {
+  } else {
+  }
+}

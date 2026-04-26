@@ -1,7 +1,7 @@
 package com.github.idemura.cimple.compiler;
 
 import static com.github.idemura.cimple.common.Resources.readResource;
-import static com.github.idemura.cimple.compiler.BuiltinTypeRefs.INT;
+import static com.github.idemura.cimple.compiler.BuiltinTypeRefs.*;
 import static org.junit.jupiter.api.Assertions.*;
 
 import java.util.List;
@@ -15,9 +15,9 @@ class ParserTest {
 
   @Test
   void testModule() {
-    var m = (AstModule) parseFile("/parser/global_defs.ci");
-    assertEquals("base_test", m.getName());
-    var functions = m.getFunctions();
+    var module = (AstModule) parseFile("/parser/global_defs.ci");
+    assertEquals("base_test", module.getName());
+    var functions = module.getFunctions();
     assertEquals(4, functions.size());
     {
       var f = functions.get(0);
@@ -48,7 +48,7 @@ class ParserTest {
       assertEquals(INT, f.getResultType());
       assertEquals(List.of(), f.getParameters());
     }
-    var variables = m.getVariables();
+    var variables = module.getVariables();
     assertEquals(3, variables.size());
     {
       var v = variables.get(0);
@@ -64,6 +64,38 @@ class ParserTest {
       var v = variables.get(2);
       assertEquals("v2", v.getName());
       assertNull(v.getTypeRef());
+    }
+  }
+
+  @Test
+  void testIfStatement() {
+    var module = (AstModule) parseFile("/parser/statement_if.ci");
+    var function = module.getFunctions().get(0);
+    assertEquals(
+        List.of(new VariableDef("a", BOOL), new VariableDef("b", BOOL)), function.getParameters());
+    var statements = function.getBlock().getStatements();
+    assertEquals(3, statements.size());
+    {
+      var ifStatement = (AstIf) statements.get(0);
+      assertEquals(1, ifStatement.getConditions().size());
+      assertEquals(1, ifStatement.getThenBlocks().size());
+      assertEquals(new AstNameRef("a"), ifStatement.getConditions().get(0));
+      assertNull(ifStatement.getElseBlock());
+    }
+    {
+      var ifStatement = (AstIf) statements.get(1);
+      assertEquals(1, ifStatement.getConditions().size());
+      assertEquals(1, ifStatement.getThenBlocks().size());
+      assertEquals(new AstNameRef("a"), ifStatement.getConditions().get(0));
+      assertNotNull(ifStatement.getElseBlock());
+    }
+    {
+      var ifStatement = (AstIf) statements.get(2);
+      assertEquals(2, ifStatement.getConditions().size());
+      assertEquals(2, ifStatement.getThenBlocks().size());
+      assertEquals(new AstNameRef("a"), ifStatement.getConditions().get(0));
+      assertEquals(new AstNameRef("b"), ifStatement.getConditions().get(1));
+      assertNotNull(ifStatement.getElseBlock());
     }
   }
 }

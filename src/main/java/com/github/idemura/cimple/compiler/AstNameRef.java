@@ -1,5 +1,7 @@
 package com.github.idemura.cimple.compiler;
 
+import java.util.Objects;
+
 public class AstNameRef extends AstExpression {
   private String name;
   // Variable definition that it refers to
@@ -12,6 +14,17 @@ public class AstNameRef extends AstExpression {
   @Override
   public void accept(Visitor visitor) {
     visitor.visit(this);
+  }
+
+  @Override
+  public int hashCode() {
+    return name.hashCode();
+  }
+
+  @Override
+  public boolean equals(Object object) {
+    return this == object
+        || (object instanceof AstNameRef other && Objects.equals(name, other.name));
   }
 
   @Override

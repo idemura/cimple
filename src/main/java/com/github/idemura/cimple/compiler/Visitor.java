@@ -93,9 +93,15 @@ public abstract class Visitor {
 
   protected void visitChildren(AstIf node) {
     stack.add(node);
-    node.getCondition().accept(this);
-    node.getThenBlock().accept(this);
-    node.getElseBlock().accept(this);
+    for (var condition : node.getConditions()) {
+      condition.accept(this);
+    }
+    for (var thenBlock : node.getThenBlocks()) {
+      thenBlock.accept(this);
+    }
+    if (node.getElseBlock() != null) {
+      node.getElseBlock().accept(this);
+    }
     stack.removeLast();
   }
 

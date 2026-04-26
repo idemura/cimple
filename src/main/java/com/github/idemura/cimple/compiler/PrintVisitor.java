@@ -92,23 +92,29 @@ public class PrintVisitor extends Visitor {
 
   @Override
   protected void visit(AstIf node) {
-    printIndent();
-    output.write("CONDITION\n");
-    indent++;
-    node.getCondition().accept(this);
-    indent--;
+    var conditions = node.getConditions();
+    var thenBlocks = node.getThenBlocks();
+    for (var i = 0; i < conditions.size(); i++) {
+      printIndent();
+      output.write("IF\n");
+      indent++;
+      conditions.get(i).accept(this);
+      indent--;
 
-    printIndent();
-    output.write("THEN\n");
-    indent++;
-    node.getThenBlock().accept(this);
-    indent--;
+      printIndent();
+      output.write("THEN\n");
+      indent++;
+      thenBlocks.get(i).accept(this);
+      indent--;
+    }
 
-    printIndent();
-    output.write("ELSE\n");
-    indent++;
-    node.getElseBlock().accept(this);
-    indent--;
+    if (node.getElseBlock() != null) {
+      printIndent();
+      output.write("ELSE\n");
+      indent++;
+      node.getElseBlock().accept(this);
+      indent--;
+    }
   }
 
   @Override

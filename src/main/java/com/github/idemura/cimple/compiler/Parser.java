@@ -95,7 +95,6 @@ public class Parser {
 
   private AstBlock parseBlock() {
     var b = new AstBlock();
-    // b.setLocation(tokens.current().location());
     tokens.take(LCURLY);
     while (!tokens.takeIf(RCURLY)) {
       var current = tokens.current();
@@ -112,6 +111,8 @@ public class Parser {
         case IF:
           b.add(parseIf());
           break;
+        case FOR:
+          throw new UnsupportedOperationException();
         case MATCH:
           throw new UnsupportedOperationException();
         case WHILE:
@@ -139,16 +140,16 @@ public class Parser {
   }
 
   private AstStatement parseIf() {
-    var c = new AstIf();
-    var keyword = tokens.take(IF);
-    // TODO: elif
-    c.setLocation(keyword.location());
-    c.setCondition(parseExpression());
-    c.setThenBlock(parseBlock());
-    if (tokens.takeIf(ELSE)) {
-      c.setElseBlock(parseBlock());
+    var ifNode = new AstIf();
+    var keyword = tokens.takeKeyword(IF);
+    ifNode.setLocation(keyword.location());
+    do {
+      ifNode.addIf(parseExpression(), parseBlock());
+    } while (tokens.takeKeywordIf(ELIF));
+    if (tokens.takeKeywordIf(ELSE)) {
+      ifNode.setElseBlock(parseBlock());
     }
-    return c;
+    return ifNode;
   }
 
   private AstStatement parseExpressionStatement() {

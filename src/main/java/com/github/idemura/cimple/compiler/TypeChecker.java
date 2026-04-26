@@ -1,8 +1,6 @@
 package com.github.idemura.cimple.compiler;
 
-import static com.github.idemura.cimple.compiler.BuiltinTypeRefs.BOOL;
-import static com.github.idemura.cimple.compiler.BuiltinTypeRefs.INT;
-import static com.github.idemura.cimple.compiler.BuiltinTypeRefs.STRING;
+import static com.github.idemura.cimple.compiler.BuiltinTypeRefs.*;
 
 import com.github.idemura.cimple.common.CimpleException;
 import java.util.ArrayList;
@@ -136,11 +134,13 @@ class TypeChecker extends Visitor {
   @Override
   protected void visit(AstIf node) {
     visitChildren(node);
-    if (node.getCondition().getTypeRef() != BOOL) {
-      throw CompilerException.builder()
-          .formatMessage("if-condition must be boolean, got %s", node.getCondition().getTypeRef())
-          .setLocation(node.getLocation())
-          .build();
+    for (var condition : node.getConditions()) {
+      if (condition.getTypeRef() != BOOL) {
+        throw CompilerException.builder()
+            .formatMessage("if-condition must be boolean, got %s", condition.getTypeRef())
+            .setLocation(node.getLocation())
+            .build();
+      }
     }
   }
 

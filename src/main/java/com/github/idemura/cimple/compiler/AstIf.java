@@ -1,8 +1,11 @@
 package com.github.idemura.cimple.compiler;
 
+import java.util.ArrayList;
+import java.util.List;
+
 public class AstIf extends AstStatement {
-  private AstExpression condition;
-  private AstBlock thenBlock;
+  private List<AstExpression> conditions = new ArrayList<>();
+  private List<AstBlock> thenBlocks = new ArrayList<>();
   private AstBlock elseBlock;
 
   AstIf() {}
@@ -12,20 +15,17 @@ public class AstIf extends AstStatement {
     visitor.visit(this);
   }
 
-  void setCondition(AstExpression condition) {
-    this.condition = condition;
+  void addIf(AstExpression condition, AstBlock block) {
+    conditions.add(condition);
+    thenBlocks.add(block);
   }
 
-  AstExpression getCondition() {
-    return condition;
+  List<AstExpression> getConditions() {
+    return conditions;
   }
 
-  void setThenBlock(AstBlock thenBlock) {
-    this.thenBlock = thenBlock;
-  }
-
-  AstBlock getThenBlock() {
-    return thenBlock;
+  List<AstBlock> getThenBlocks() {
+    return thenBlocks;
   }
 
   void setElseBlock(AstBlock elseBlock) {
