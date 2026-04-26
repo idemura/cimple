@@ -54,28 +54,28 @@ enum TokenType {
 
   static TokenType ofKeyword(String value) {
     return switch (value) {
-      case "alias" -> TokenType.ALIAS;
-      case "case" -> TokenType.CASE;
-      case "class" -> TokenType.CLASS;
-      case "const" -> TokenType.CONST;
-      case "do" -> TokenType.DO;
-      case "else" -> TokenType.ELSE;
-      case "elif" -> TokenType.ELIF;
-      case "enum" -> TokenType.ENUM;
-      case "for" -> TokenType.FOR;
-      case "function" -> TokenType.FUNCTION;
-      case "goto" -> TokenType.GOTO;
-      case "if" -> TokenType.IF;
-      case "implement" -> TokenType.IMPLEMENT;
-      case "import" -> TokenType.IMPORT;
-      case "interface" -> TokenType.INTERFACE;
-      case "match" -> TokenType.MATCH;
-      case "module" -> TokenType.MODULE;
-      case "return" -> TokenType.RETURN;
-      case "record" -> TokenType.RECORD;
-      case "type" -> TokenType.TYPE;
-      case "var" -> TokenType.VAR;
-      case "while" -> TokenType.WHILE;
+      case "alias" -> ALIAS;
+      case "case" -> CASE;
+      case "class" -> CLASS;
+      case "const" -> CONST;
+      case "do" -> DO;
+      case "else" -> ELSE;
+      case "elif" -> ELIF;
+      case "enum" -> ENUM;
+      case "for" -> FOR;
+      case "function" -> FUNCTION;
+      case "goto" -> GOTO;
+      case "if" -> IF;
+      case "implement" -> IMPLEMENT;
+      case "import" -> IMPORT;
+      case "interface" -> INTERFACE;
+      case "match" -> MATCH;
+      case "module" -> MODULE;
+      case "return" -> RETURN;
+      case "record" -> RECORD;
+      case "type" -> TYPE;
+      case "var" -> VAR;
+      case "while" -> WHILE;
       default -> null;
     };
   }

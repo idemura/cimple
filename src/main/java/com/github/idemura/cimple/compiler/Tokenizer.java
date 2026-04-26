@@ -1,5 +1,6 @@
 package com.github.idemura.cimple.compiler;
 
+import static com.github.idemura.cimple.compiler.TokenType.*;
 import static java.lang.Character.isDigit;
 import static java.lang.Character.isJavaIdentifierPart;
 import static java.lang.Character.isJavaIdentifierStart;
@@ -35,20 +36,20 @@ class Tokenizer {
       } else {
         switch (c) {
           case '#' -> skipComment();
-          case '(' -> tokens.add(take1CharToken(TokenType.LPAREN));
-          case ')' -> tokens.add(take1CharToken(TokenType.RPAREN));
-          case '{' -> tokens.add(take1CharToken(TokenType.LCURLY));
-          case '}' -> tokens.add(take1CharToken(TokenType.RCURLY));
-          case ':' -> tokens.add(take1CharToken(TokenType.COLON));
-          case ',' -> tokens.add(take1CharToken(TokenType.COMMA));
-          case '=' -> tokens.add(take1CharToken(TokenType.ASSIGN));
-          case ';' -> tokens.add(take1CharToken(TokenType.SEMICOLON));
-          case '+' -> tokens.add(take1CharToken(TokenType.PLUS));
-          case '-' -> tokens.add(take1CharToken(TokenType.MINUS));
-          case '*' -> tokens.add(take1CharToken(TokenType.ASTERISK));
-          case '/' -> tokens.add(take1CharToken(TokenType.SLASH));
-          case '<' -> tokens.add(take1CharToken(TokenType.CMP_GT));
-          case '>' -> tokens.add(take1CharToken(TokenType.CMP_LT));
+          case '(' -> tokens.add(take1CharToken(LPAREN));
+          case ')' -> tokens.add(take1CharToken(RPAREN));
+          case '{' -> tokens.add(take1CharToken(LCURLY));
+          case '}' -> tokens.add(take1CharToken(RCURLY));
+          case ':' -> tokens.add(take1CharToken(COLON));
+          case ',' -> tokens.add(take1CharToken(COMMA));
+          case '=' -> tokens.add(take1CharToken(ASSIGN));
+          case ';' -> tokens.add(take1CharToken(SEMICOLON));
+          case '+' -> tokens.add(take1CharToken(PLUS));
+          case '-' -> tokens.add(take1CharToken(MINUS));
+          case '*' -> tokens.add(take1CharToken(ASTERISK));
+          case '/' -> tokens.add(take1CharToken(SLASH));
+          case '<' -> tokens.add(take1CharToken(CMP_GT));
+          case '>' -> tokens.add(take1CharToken(CMP_LT));
           case '"' -> tokens.add(takeString());
           default ->
               throw CompilerException.builder()
@@ -83,7 +84,7 @@ class Tokenizer {
       column++;
       index++;
     }
-    return new Token(TokenType.IDENTIFIER, code.substring(first, index), location);
+    return new Token(IDENTIFIER, code.substring(first, index), location);
   }
 
   private Token takeNumber() {
@@ -96,7 +97,7 @@ class Tokenizer {
       column++;
       index++;
     }
-    return new Token(TokenType.NUMBER, code.substring(first, index), location);
+    return new Token(NUMBER, code.substring(first, index), location);
   }
 
   private Token takeString() {
@@ -113,7 +114,7 @@ class Tokenizer {
       next();
     }
     next();
-    return new Token(TokenType.STRING, code.substring(first + 1, index - 1), location);
+    return new Token(STRING, code.substring(first + 1, index - 1), location);
   }
 
   private Token take1CharToken(TokenType tokenType) {

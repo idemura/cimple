@@ -1,5 +1,7 @@
 package com.github.idemura.cimple.compiler;
 
+import java.util.Objects;
+
 public class TypeRef {
   final String name;
 
@@ -14,12 +16,12 @@ public class TypeRef {
 
   @Override
   public boolean equals(Object object) {
-    return this == object || (object instanceof TypeRef other && name.equals(other.name));
+    return this == object || (object instanceof TypeRef other && Objects.equals(name, other.name));
   }
 
   @Override
   public String toString() {
-    return "TYPE_REF({%s})".formatted(name);
+    return "TYPE_REF(%s)".formatted(name);
   }
 
   public String getName() {

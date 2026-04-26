@@ -32,8 +32,12 @@ Modules can't be nested.
 ## Functions
 
 ```
-<function> := "function" <bound_name> "(" [<argument_list>] ")" [<type_ref>] <body>
-<bound_name> := (<identifier> | <identifier> "." <identfier>)
+<function> := "function" <function_name> "(" <argument_list>? ")" <type_ref>? <block>
+<function_name> := <identifier> ("." <identfier>)?
+<type_ref> := <identifier> ("[]" | "*")*
+<argument_list> := <argument> ("," <argument>)*
+<argument> := <identifier> <type_ref>?
+<block> := "{" <statement>* "}"
 ```
 
 ## Code Style

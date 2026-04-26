@@ -37,13 +37,13 @@ class TokenStream {
     return token;
   }
 
-  Token takeIf(TokenType type) {
+  boolean takeIf(TokenType type) {
     var token = tokens.get(pos);
     if (token.type() != type) {
-      return null;
+      return false;
     }
     pos++;
-    return token;
+    return true;
   }
 
   Token takeKeyword(TokenType type) {
@@ -59,18 +59,26 @@ class TokenStream {
     return new Token(type, token.value(), token.location());
   }
 
-  Token takeKeywordIf(TokenType type) {
+  boolean takeKeywordIf(TokenType type) {
     var token = tokens.get(pos);
     var kw = token.keyword();
     if (kw != type) {
-      return null;
+      return false;
     }
     pos++;
-    return new Token(type, token.value(), token.location());
+    return true;
   }
 
   Token current() {
     return tokens.get(pos);
+  }
+
+  TokenType next() {
+    if (pos + 1 < tokens.size()) {
+      return tokens.get(pos + 1).type();
+    } else {
+      return TokenType.EOF;
+    }
   }
 
   @Override

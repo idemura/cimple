@@ -1,5 +1,7 @@
 package com.github.idemura.cimple.compiler;
 
+import static com.github.idemura.cimple.compiler.TokenType.*;
+
 import java.util.ArrayList;
 import java.util.List;
 
@@ -45,19 +47,19 @@ public class Parser {
   }
 
   private void parseModuleName(AstModule module) {
-    tokens.takeKeyword(TokenType.MODULE);
-    var tokenName = tokens.take(TokenType.IDENTIFIER);
+    tokens.takeKeyword(MODULE);
+    var tokenName = tokens.take(IDENTIFIER);
     module.setName(tokenName.value());
     module.setLocation(tokenName.location());
-    tokens.take(TokenType.SEMICOLON);
+    tokens.take(SEMICOLON);
   }
 
   private AstFunction parseFunction() {
-    tokens.takeKeyword(TokenType.FUNCTION);
+    tokens.takeKeyword(FUNCTION);
     var function = new AstFunction();
     parseFunctionQualifiedName(function);
     parseParameters(function);
-    if (!tokens.current().is(TokenType.LCURLY)) {
+    if (!tokens.current().is(LCURLY)) {
       function.setResultType(parseTypeRef());
     }
     function.setBlock(parseBlock());
@@ -65,24 +67,26 @@ public class Parser {
   }
 
   private AstVariable parseVariable() {
-    tokens.take(TokenType.VAR);
+    tokens.takeKeyword(VAR);
     var v = new AstVariable();
-    var name = tokens.take(TokenType.IDENTIFIER);
+    var name = tokens.take(IDENTIFIER);
     v.setLocation(name.location());
     v.setName(name.value());
-    v.setTypeRef(parseTypeRef());
-    if (tokens.takeIf(TokenType.ASSIGN) != null) {
+    if (tokens.current().is(IDENTIFIER)) {
+      v.setTypeRef(parseTypeRef());
+    }
+    if (tokens.takeIf(ASSIGN)) {
       v.setInit(parseExpression());
     }
-    tokens.take(TokenType.SEMICOLON);
+    tokens.take(SEMICOLON);
     return v;
   }
 
   private AstBlock parseBlock() {
     var b = new AstBlock();
     // b.setLocation(tokens.current().location());
-    tokens.take(TokenType.LCURLY);
-    while (tokens.takeIf(TokenType.RCURLY) == null) {
+    tokens.take(LCURLY);
+    while (!tokens.takeIf(RCURLY)) {
       var current = tokens.current();
       switch (current.keyword()) {
         case VAR:
@@ -113,21 +117,21 @@ public class Parser {
 
   private AstStatement parseReturn() {
     var r = new AstReturn();
-    var keyword = tokens.takeKeyword(TokenType.RETURN);
+    var keyword = tokens.takeKeyword(RETURN);
     r.setLocation(keyword.location());
     r.setExpression(parseExpression());
-    tokens.take(TokenType.SEMICOLON);
+    tokens.take(SEMICOLON);
     return r;
   }
 
   private AstStatement parseIf() {
     var c = new AstIf();
-    var keyword = tokens.take(TokenType.IF);
+    var keyword = tokens.take(IF);
     // TODO: elif
     c.setLocation(keyword.location());
     c.setCondition(parseExpression());
     c.setThenBlock(parseBlock());
-    if (tokens.takeIf(TokenType.ELSE) != null) {
+    if (tokens.takeIf(ELSE)) {
       c.setElseBlock(parseBlock());
     }
     return c;
@@ -137,7 +141,7 @@ public class Parser {
     var e = new AstExpressionStatement();
     e.setLocation(tokens.current().location());
     e.setExpression(parseExpression());
-    tokens.take(TokenType.SEMICOLON);
+    tokens.take(SEMICOLON);
     return e;
   }
 
@@ -150,7 +154,7 @@ public class Parser {
     if (expr == null) {
       return null;
     }
-    while (tokens.current().is(TokenType.CMP_LT) || tokens.current().is(TokenType.CMP_GT)) {
+    while (tokens.current().is(CMP_LT) || tokens.current().is(CMP_GT)) {
       var operator = tokens.take();
       var m = parseExpressionAdditive();
       if (m == null) {
@@ -170,7 +174,7 @@ public class Parser {
     if (expr == null) {
       return null;
     }
-    while (tokens.current().is(TokenType.PLUS) || tokens.current().is(TokenType.MINUS)) {
+    while (tokens.current().is(PLUS) || tokens.current().is(MINUS)) {
       var operator = tokens.take();
       var m = parseExpressionMultiple();
       if (m == null) {
@@ -190,7 +194,7 @@ public class Parser {
     if (expr == null) {
       return null;
     }
-    while (tokens.current().is(TokenType.ASTERISK) || tokens.current().is(TokenType.SLASH)) {
+    while (tokens.current().is(ASTERISK) || tokens.current().is(SLASH)) {
       var operator = tokens.take();
       var m = parseExpressionPrimary();
       if (m == null) {
@@ -206,15 +210,15 @@ public class Parser {
   }
 
   private AstExpression parseExpressionPrimary() {
-    if (tokens.takeIf(TokenType.LPAREN) != null) {
+    if (tokens.takeIf(LPAREN)) {
       var e = parseExpression();
-      tokens.take(TokenType.RPAREN);
+      tokens.take(RPAREN);
       return e;
     }
     var t = tokens.take();
     switch (t.type()) {
-      case TokenType.IDENTIFIER -> {
-        if (tokens.current().is(TokenType.LPAREN)) {
+      case IDENTIFIER -> {
+        if (tokens.current().is(LPAREN)) {
           var a = new AstFunctionApply();
           return a;
         } else {
@@ -223,7 +227,7 @@ public class Parser {
           return n;
         }
       }
-      case TokenType.NUMBER, TokenType.STRING -> {
+      case NUMBER, STRING -> {
         var l = new AstLiteral(t.type(), t.value());
         l.setLocation(t.location());
         return l;
@@ -238,8 +242,8 @@ public class Parser {
 
   private List<AstExpression> parseExpressionList() {
     List<AstExpression> result = new ArrayList<>();
-    tokens.take(TokenType.LPAREN);
-    if (tokens.takeIf(TokenType.RPAREN) == null) {
+    tokens.take(LPAREN);
+    if (!tokens.takeIf(RPAREN)) {
       do {
         result.add(parseExpression());
       } while (expressionListHasNext());
@@ -248,9 +252,9 @@ public class Parser {
   }
 
   private boolean expressionListHasNext() {
-    if (tokens.takeIf(TokenType.COMMA) != null) {
+    if (tokens.takeIf(COMMA)) {
       return true;
-    } else if (tokens.takeIf(TokenType.RPAREN) != null) {
+    } else if (tokens.takeIf(RPAREN)) {
       return false;
     } else {
       throw CompilerException.builder()
@@ -261,33 +265,32 @@ public class Parser {
   }
 
   private void parseFunctionQualifiedName(AstFunction function) {
-    var first = tokens.take(TokenType.IDENTIFIER);
-    function.setLocation(first.location());
-    if (tokens.takeIf(TokenType.PERIOD) != null) {
-      function.setBoundTypeName(first.value());
-      function.setName(tokens.take(TokenType.IDENTIFIER).value());
-    } else {
-      function.setName(first.value());
+    function.setLocation(tokens.current().location());
+    if (tokens.next() == PERIOD) {
+      function.setBoundTypeName(tokens.take(IDENTIFIER).value());
+      tokens.take(PERIOD);
     }
+    function.setName(tokens.take(IDENTIFIER).value());
   }
 
   private void parseParameters(AstFunction function) {
-    tokens.take(TokenType.LPAREN);
-    while (tokens.takeIf(TokenType.RPAREN) == null) {
-      var variable = new VariableDef();
-      var tokenName = tokens.take(TokenType.IDENTIFIER);
-      variable.setName(tokenName.value());
-      variable.setLocation(tokenName.location());
-      if (tokens.takeIf(TokenType.COMMA) != null) {
-        // If we have only a name - this is a bound variable.
-      } else {
-        variable.setTypeRef(parseTypeRef());
-      }
-      function.addParameter(variable);
+    tokens.take(LPAREN);
+    if (!tokens.current().is(RPAREN)) {
+      do {
+        var variable = new VariableDef();
+        var tokenName = tokens.take(IDENTIFIER);
+        variable.setName(tokenName.value());
+        variable.setLocation(tokenName.location());
+        if (tokens.current().is(IDENTIFIER)) {
+          variable.setTypeRef(parseTypeRef());
+        }
+        function.addParameter(variable);
+      } while (tokens.takeIf(COMMA));
     }
+    tokens.take(RPAREN);
   }
 
   private TypeRef parseTypeRef() {
-    return new TypeRef(tokens.take(TokenType.IDENTIFIER).value());
+    return new TypeRef(tokens.take(IDENTIFIER).value());
   }
 }
