@@ -1,16 +1,20 @@
 package com.github.idemura.cimple.compiler;
 
 import com.github.idemura.cimple.common.IndentWriter;
+import com.github.idemura.cimple.compiler.ast.PrintAstVisitor;
+import com.github.idemura.cimple.compiler.codegen.CodeGenerator;
+import com.github.idemura.cimple.compiler.parser.Parser;
+import com.github.idemura.cimple.compiler.tokens.Tokenizer;
 
 public class Compiler {
   private final CompilerParams params;
   private final IndentWriter debugOutput;
-  private final CodeGen codeGen;
+  private final CodeGenerator codeGenerator;
 
-  public Compiler(CompilerParams params, IndentWriter debugOutput, CodeGen codeGen) {
+  public Compiler(CompilerParams params, IndentWriter debugOutput, CodeGenerator codeGenerator) {
     this.params = params;
     this.debugOutput = debugOutput;
-    this.codeGen = codeGen;
+    this.codeGenerator = codeGenerator;
   }
 
   public void compile(String fileName, String code) {
@@ -30,6 +34,6 @@ public class Compiler {
       new PrintAstVisitor(debugOutput).print(root);
     }
     // Outside of try because codegen should not generate user errors.
-    codeGen.generateCode(root);
+    codeGenerator.generateCode(root);
   }
 }

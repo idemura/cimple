@@ -1,15 +1,17 @@
-package com.github.idemura.cimple.compiler;
+package com.github.idemura.cimple.compiler.tokens;
 
-record Token(TokenType type, String value, Location location) {
-  Token(TokenType type) {
+import com.github.idemura.cimple.compiler.Location;
+
+public record Token(TokenType type, String value, Location location) {
+  public Token(TokenType type) {
     this(type, null, null);
   }
 
-  Token(TokenType type, String value) {
+  public Token(TokenType type, String value) {
     this(type, value, null);
   }
 
-  TokenType keyword() {
+  public TokenType keyword() {
     if (value == null) {
       return type;
     }
@@ -20,7 +22,7 @@ record Token(TokenType type, String value, Location location) {
     return keyword;
   }
 
-  boolean is(TokenType type) {
+  public boolean is(TokenType type) {
     return this.type == type;
   }
 

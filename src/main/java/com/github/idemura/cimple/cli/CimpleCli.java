@@ -1,13 +1,13 @@
-package com.github.idemura.cimple.driver;
+package com.github.idemura.cimple.cli;
 
 import com.beust.jcommander.JCommander;
 import com.beust.jcommander.Parameter;
-import com.github.idemura.cimple.codegen.empty.CodeGenNoop;
 import com.github.idemura.cimple.common.CimpleException;
 import com.github.idemura.cimple.common.IndentWriter;
 import com.github.idemura.cimple.compiler.Compiler;
 import com.github.idemura.cimple.compiler.CompilerException;
 import com.github.idemura.cimple.compiler.CompilerParams;
+import com.github.idemura.cimple.compiler.codegen.NoopCodeGenerator;
 import java.io.IOException;
 import java.io.PrintStream;
 import java.nio.file.Files;
@@ -107,7 +107,7 @@ public class CimpleCli implements CompilerParams {
 
   boolean compile(String fileName, String code) {
     try {
-      new Compiler(this, getDebugOutput(), new CodeGenNoop()).compile(fileName, code);
+      new Compiler(this, getDebugOutput(), new NoopCodeGenerator()).compile(fileName, code);
     } catch (CompilerException e) {
       getErrorOutput().writeLine(e.getMessage());
       getErrorOutput().writeLine("\n");

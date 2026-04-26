@@ -102,16 +102,12 @@ class TypeChecker extends AstVisitor {
 
   @Override
   protected void visit(AstLiteral node) {
-    switch (node.getTokenType()) {
-      case NUMBER:
-        // TODO: Check literal suffix, range, etc. and assign type
-        node.setTypeRef(INT);
-        break;
-      case STRING:
-        node.setTypeRef(STRING);
-        break;
-      default:
-        throw new CimpleException("Invalid token type %s".formatted(node.getTokenType()));
+    if (node instanceof AstNumber) {
+      // TODO: Check literal suffix, range, etc. and assign type
+    } else if (node instanceof AstString) {
+    } else {
+      throw new CimpleException(
+          "Invalid literal node %s".formatted(node.getClass().getSimpleName()));
     }
   }
 
@@ -136,24 +132,25 @@ class TypeChecker extends AstVisitor {
   protected void visit(AstIf node) {
     visitChildren(node);
     for (var condition : node.getConditions()) {
-      if (condition.getTypeRef() != BOOL) {
-        throw CompilerException.builder()
-            .formatMessage("if-condition must be boolean, got %s", condition.getTypeRef())
-            .setLocation(node.getLocation())
-            .build();
-      }
+      // if (condition.getTypeRef() != BOOL) {
+      //   throw CompilerException.builder()
+      //       .formatMessage("if-condition must be boolean, got %s", condition.getTypeRef())
+      //       .setLocation(node.getLocation())
+      //       .build();
+      // }
     }
   }
 
   @Override
   protected void visit(AstFor node) {
     visitChildren(node);
-    if (node.getCondition() != null && node.getCondition().getTypeRef() != BOOL) {
-      throw CompilerException.builder()
-          .formatMessage("for-condition must be boolean, got %s", node.getCondition().getTypeRef())
-          .setLocation(node.getLocation())
-          .build();
-    }
+    // if (node.getCondition() != null && node.getCondition().getTypeRef() != BOOL) {
+    //   throw CompilerException.builder()
+    //       .formatMessage("for-condition must be boolean, got %s",
+    // node.getCondition().getTypeRef())
+    //       .setLocation(node.getLocation())
+    //       .build();
+    // }
   }
 
   // private AstExpression promoteExpression(AstExpression expr, TypeRef resultType) {

@@ -1,31 +1,32 @@
-package com.github.idemura.cimple.compiler;
+package com.github.idemura.cimple.compiler.tokens;
 
+import com.github.idemura.cimple.compiler.CompilerException;
 import java.util.ArrayList;
 import java.util.List;
 
-class TokenStream {
+public class TokenStream {
   private final List<Token> tokens = new ArrayList<>();
   private int pos;
 
-  TokenStream() {}
+  public TokenStream() {}
 
-  List<Token> tokens() {
+  public List<Token> tokens() {
     return List.copyOf(tokens);
   }
 
-  void add(Token token) {
+  public void add(Token token) {
     tokens.add(token);
   }
 
-  boolean done() {
+  public boolean done() {
     return pos == tokens.size();
   }
 
-  Token take() {
+  public Token take() {
     return tokens.get(pos++);
   }
 
-  Token take(TokenType type) {
+  public Token take(TokenType type) {
     var token = tokens.get(pos);
     if (token.type() != type) {
       throw CompilerException.builder()
@@ -37,7 +38,7 @@ class TokenStream {
     return token;
   }
 
-  boolean takeIf(TokenType type) {
+  public boolean takeIf(TokenType type) {
     var token = tokens.get(pos);
     if (token.type() != type) {
       return false;
@@ -46,7 +47,7 @@ class TokenStream {
     return true;
   }
 
-  Token takeKeyword(TokenType type) {
+  public Token takeKeyword(TokenType type) {
     var token = tokens.get(pos);
     var kw = token.keyword();
     if (kw != type) {
@@ -59,7 +60,7 @@ class TokenStream {
     return new Token(type, token.value(), token.location());
   }
 
-  boolean takeKeywordIf(TokenType type) {
+  public boolean takeKeywordIf(TokenType type) {
     var token = tokens.get(pos);
     var kw = token.keyword();
     if (kw != type) {
@@ -69,11 +70,11 @@ class TokenStream {
     return true;
   }
 
-  Token current() {
+  public Token current() {
     return tokens.get(pos);
   }
 
-  TokenType next() {
+  public TokenType next() {
     if (pos + 1 < tokens.size()) {
       return tokens.get(pos + 1).type();
     } else {

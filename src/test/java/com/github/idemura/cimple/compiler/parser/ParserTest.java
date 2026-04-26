@@ -1,11 +1,12 @@
-package com.github.idemura.cimple.compiler;
+package com.github.idemura.cimple.compiler.parser;
 
 import static com.github.idemura.cimple.common.Resources.readResource;
 import static com.github.idemura.cimple.compiler.BuiltinTypeRefs.*;
-import static com.github.idemura.cimple.compiler.TokenType.NUMBER;
 import static org.junit.jupiter.api.Assertions.*;
 
+import com.github.idemura.cimple.compiler.VariableDef;
 import com.github.idemura.cimple.compiler.ast.*;
+import com.github.idemura.cimple.compiler.tokens.Tokenizer;
 import java.util.List;
 import org.junit.jupiter.api.Test;
 
@@ -152,7 +153,7 @@ class ParserTest {
       var init = stmtFor.getInit();
       assertEquals("i", init.getName());
       assertNull(init.getTypeRef());
-      assertEquals(new AstLiteral(NUMBER, "0"), init.getInit());
+      assertEquals(new AstNumber("0"), init.getInit());
       assertNull(stmtFor.getCondition());
       assertEquals(List.of(), stmtFor.getBlock().getStatements());
     }
@@ -161,7 +162,7 @@ class ParserTest {
       var init = stmtFor.getInit();
       assertEquals("i", init.getName());
       assertNull(init.getTypeRef());
-      assertEquals(new AstLiteral(NUMBER, "0"), init.getInit());
+      assertEquals(new AstNumber("0"), init.getInit());
       assertEquals(new AstNameRef("true"), stmtFor.getCondition());
       assertEquals(List.of(), stmtFor.getBlock().getStatements());
     }

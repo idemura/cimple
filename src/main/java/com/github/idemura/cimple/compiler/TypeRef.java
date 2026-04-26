@@ -3,9 +3,10 @@ package com.github.idemura.cimple.compiler;
 import java.util.Objects;
 
 public class TypeRef {
-  final String name;
+  private String name;
+  private Type type;
 
-  TypeRef(String name) {
+  public TypeRef(String name) {
     this.name = name;
   }
 
@@ -26,5 +27,17 @@ public class TypeRef {
 
   public String getName() {
     return name;
+  }
+
+  public void setName(String name) {
+    this.name = name;
+  }
+
+  public Type getType() {
+    return type;
+  }
+
+  public void setType(Type type) {
+    this.type = type;
   }
 }

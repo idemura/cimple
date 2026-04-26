@@ -1,25 +1,28 @@
-package com.github.idemura.cimple.compiler;
+package com.github.idemura.cimple.compiler.tokens;
 
-import static com.github.idemura.cimple.compiler.TokenType.*;
+import static com.github.idemura.cimple.compiler.tokens.TokenType.*;
 import static java.lang.Character.isDigit;
 import static java.lang.Character.isJavaIdentifierPart;
 import static java.lang.Character.isJavaIdentifierStart;
 import static java.lang.Character.isWhitespace;
 
+import com.github.idemura.cimple.compiler.CompilerException;
+import com.github.idemura.cimple.compiler.Location;
+
 // Transforms input code into a token stream.
-class Tokenizer {
+public class Tokenizer {
   private final String fileName;
   private final String code;
   private int index;
   private int line = 1;
   private int column = 1;
 
-  Tokenizer(String fileName, String code) {
+  public Tokenizer(String fileName, String code) {
     this.fileName = fileName;
     this.code = code;
   }
 
-  TokenStream split() {
+  public TokenStream split() {
     final int n = code.length();
     if (n > 0 && code.charAt(n - 1) != '\n') {
       throw CompilerException.builder().formatMessage("File must end with new line").build();

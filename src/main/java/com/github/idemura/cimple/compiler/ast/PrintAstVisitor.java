@@ -1,23 +1,7 @@
-package com.github.idemura.cimple.compiler;
+package com.github.idemura.cimple.compiler.ast;
 
 import com.github.idemura.cimple.common.IndentWriter;
-import com.github.idemura.cimple.compiler.ast.AstBlock;
-import com.github.idemura.cimple.compiler.ast.AstDefer;
-import com.github.idemura.cimple.compiler.ast.AstExpressionStatement;
-import com.github.idemura.cimple.compiler.ast.AstFor;
-import com.github.idemura.cimple.compiler.ast.AstFunction;
-import com.github.idemura.cimple.compiler.ast.AstFunctionApply;
-import com.github.idemura.cimple.compiler.ast.AstGoto;
-import com.github.idemura.cimple.compiler.ast.AstIf;
-import com.github.idemura.cimple.compiler.ast.AstLiteral;
-import com.github.idemura.cimple.compiler.ast.AstModule;
-import com.github.idemura.cimple.compiler.ast.AstNameRef;
-import com.github.idemura.cimple.compiler.ast.AstNode;
-import com.github.idemura.cimple.compiler.ast.AstReturn;
-import com.github.idemura.cimple.compiler.ast.AstTypeAlias;
-import com.github.idemura.cimple.compiler.ast.AstTypeStruct;
-import com.github.idemura.cimple.compiler.ast.AstVariable;
-import com.github.idemura.cimple.compiler.ast.AstVisitor;
+import com.github.idemura.cimple.compiler.Type;
 
 public class PrintAstVisitor extends AstVisitor {
   private final IndentWriter output;
@@ -41,10 +25,13 @@ public class PrintAstVisitor extends AstVisitor {
 
   @Override
   protected void visit(AstFunction node) {
-    printEntity("FUNCTION", node.getName(), node.getResultType());
+    printEntity(
+        "FUNCTION",
+        node.getName(),
+        node.getResultType() == null ? null : node.getResultType().getType());
     output.indent();
     for (var p : node.getParameters()) {
-      printEntity("ARG", p.getName(), p.getTypeRef());
+      printEntity("ARG", p.getName(), p.getTypeRef().getType());
     }
     node.getBlock().accept(this);
     output.unindent();
@@ -84,7 +71,7 @@ public class PrintAstVisitor extends AstVisitor {
 
   @Override
   protected void visit(AstLiteral node) {
-    printEntity("LITERAL", node.getValue(), node.getTypeRef());
+    printEntity("LITERAL", node.getValue(), node.getType());
   }
 
   @Override
@@ -97,7 +84,7 @@ public class PrintAstVisitor extends AstVisitor {
 
   @Override
   protected void visit(AstVariable node) {
-    printEntity(node.getMutable() ? "VAR" : "CONST", node.getName(), node.getTypeRef());
+    printEntity(node.getMutable() ? "VAR" : "CONST", node.getName(), node.getTypeRef().getType());
     output.indent();
     if (node.getInit() != null) {
       node.getInit().accept(this);
@@ -173,11 +160,11 @@ public class PrintAstVisitor extends AstVisitor {
     output.unindent();
   }
 
-  private void printEntity(String clazz, Object value, TypeRef typeRef) {
-    if (typeRef == null) {
+  private void printEntity(String clazz, Object value, Type type) {
+    if (type == null) {
       output.writeLine("%s %s".formatted(clazz, value));
     } else {
-      output.writeLine("%s %s %s".formatted(clazz, value, typeRef));
+      output.writeLine("%s %s %s".formatted(clazz, value, type));
     }
   }
 }

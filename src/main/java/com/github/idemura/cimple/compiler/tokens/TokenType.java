@@ -1,4 +1,4 @@
-package com.github.idemura.cimple.compiler;
+package com.github.idemura.cimple.compiler.tokens;
 
 public enum TokenType {
   EOF("EOF"),
@@ -48,7 +48,7 @@ public enum TokenType {
 
   private final String printableName;
 
-  static TokenType ofKeyword(String value) {
+  public static TokenType ofKeyword(String value) {
     return switch (value) {
       case "alias" -> ALIAS;
       case "case" -> CASE;
@@ -83,7 +83,7 @@ public enum TokenType {
     this.printableName = printableName;
   }
 
-  String printableName() {
+  public String printableName() {
     return printableName;
   }
 }

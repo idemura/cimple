@@ -1,12 +1,12 @@
 package com.github.idemura.cimple.compiler.ast;
 
-import com.github.idemura.cimple.compiler.TypeRef;
+import com.github.idemura.cimple.compiler.Type;
 import java.util.List;
 
 public class AstFunctionApply extends AstExpression {
   private String functionName;
   private List<AstExpression> args;
-  private AstFunction func;
+  private AstFunction function;
 
   public AstFunctionApply() {}
 
@@ -16,8 +16,8 @@ public class AstFunctionApply extends AstExpression {
   }
 
   @Override
-  public TypeRef getTypeRef() {
-    return func.getResultType();
+  public Type getType() {
+    return function.getResultType().getType();
   }
 
   public void setFunctionName(String functionName) {
@@ -36,15 +36,11 @@ public class AstFunctionApply extends AstExpression {
     return List.copyOf(args);
   }
 
-  public List<TypeRef> getArgsTypes() {
-    return args.stream().map(AstExpression::getTypeRef).toList();
+  public void setFunction(AstFunction function) {
+    this.function = function;
   }
 
-  public void setFunc(AstFunction func) {
-    this.func = func;
-  }
-
-  public AstFunction getFunc() {
-    return func;
+  public AstFunction getFunction() {
+    return function;
   }
 }

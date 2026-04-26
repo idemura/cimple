@@ -7,12 +7,12 @@ public class VariableDef {
   private String name;
   private TypeRef typeRef;
 
-  VariableDef(String name, TypeRef typeRef) {
+  public VariableDef(String name, TypeRef typeRef) {
     this.name = name;
     this.typeRef = typeRef;
   }
 
-  VariableDef() {}
+  public VariableDef() {}
 
   @Override
   public String toString() {
@@ -32,7 +32,7 @@ public class VariableDef {
             && Objects.equals(typeRef, other.typeRef));
   }
 
-  void setName(String name) {
+  public void setName(String name) {
     this.name = name;
   }
 
@@ -40,7 +40,7 @@ public class VariableDef {
     return name;
   }
 
-  void setTypeRef(TypeRef typeRef) {
+  public void setTypeRef(TypeRef typeRef) {
     this.typeRef = typeRef;
   }
 
@@ -48,11 +48,11 @@ public class VariableDef {
     return typeRef;
   }
 
-  void setLocation(Location location) {
+  public void setLocation(Location location) {
     this.location = location;
   }
 
-  Location getLocation() {
+  public Location getLocation() {
     return location;
   }
 }

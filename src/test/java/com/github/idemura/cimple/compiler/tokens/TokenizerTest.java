@@ -1,9 +1,10 @@
-package com.github.idemura.cimple.compiler;
+package com.github.idemura.cimple.compiler.tokens;
 
 import static com.github.idemura.cimple.common.Resources.readResource;
-import static com.github.idemura.cimple.compiler.TokenType.*;
+import static com.github.idemura.cimple.compiler.tokens.TokenType.*;
 import static org.junit.jupiter.api.Assertions.*;
 
+import com.github.idemura.cimple.compiler.Location;
 import java.util.List;
 import org.junit.jupiter.api.Test;
 

@@ -1,8 +1,12 @@
-package com.github.idemura.cimple.compiler;
+package com.github.idemura.cimple.compiler.parser;
 
-import static com.github.idemura.cimple.compiler.TokenType.*;
+import static com.github.idemura.cimple.compiler.tokens.TokenType.*;
 
+import com.github.idemura.cimple.compiler.CompilerException;
+import com.github.idemura.cimple.compiler.TypeRef;
+import com.github.idemura.cimple.compiler.VariableDef;
 import com.github.idemura.cimple.compiler.ast.*;
+import com.github.idemura.cimple.compiler.tokens.TokenStream;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -10,11 +14,11 @@ import java.util.List;
 public class Parser {
   private final TokenStream tokens;
 
-  Parser(TokenStream tokens) {
+  public Parser(TokenStream tokens) {
     this.tokens = tokens;
   }
 
-  AstNode parse() {
+  public AstNode parse() {
     return parseModule();
   }
 
@@ -293,8 +297,13 @@ public class Parser {
           return n;
         }
       }
-      case NUMBER, STRING -> {
-        var l = new AstLiteral(t.type(), t.value());
+      case NUMBER -> {
+        var l = new AstNumber(t.value());
+        l.setLocation(t.location());
+        return l;
+      }
+      case STRING -> {
+        var l = new AstString(t.value());
         l.setLocation(t.location());
         return l;
       }
