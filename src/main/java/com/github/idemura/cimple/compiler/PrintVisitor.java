@@ -76,7 +76,7 @@ public class PrintVisitor extends Visitor {
   @Override
   protected void visit(AstVariable node) {
     printIndent();
-    printEntity("VAR", node.getName(), node.getTypeRef());
+    printEntity(node.getMutable() ? "VAR" : "CONST", node.getName(), node.getTypeRef());
     indent++;
     if (node.getInit() != null) {
       node.getInit().accept(this);

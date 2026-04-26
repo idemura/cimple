@@ -1,6 +1,7 @@
 package com.github.idemura.cimple.compiler;
 
 public class AstVariable extends AstStatement {
+  private boolean mutable;
   private String name;
   private TypeRef typeRef;
   private AstExpression init;
@@ -10,6 +11,14 @@ public class AstVariable extends AstStatement {
   @Override
   public void accept(Visitor visitor) {
     visitor.visit(this);
+  }
+
+  boolean getMutable() {
+    return mutable;
+  }
+
+  void setMutable(boolean mutable) {
+    this.mutable = mutable;
   }
 
   void setName(String name) {

@@ -35,7 +35,8 @@ public class Parser {
           module.addVariable(parseVariable());
           break;
         case CONST:
-          throw new UnsupportedOperationException();
+          module.addVariable(parseConst());
+          break;
         default:
           throw CompilerException.builder()
               .formatMessage("Invalid module definition")
@@ -68,18 +69,28 @@ public class Parser {
 
   private AstVariable parseVariable() {
     tokens.takeKeyword(VAR);
-    var v = new AstVariable();
+    return parseVariableDefinition(true);
+  }
+
+  private AstVariable parseConst() {
+    tokens.takeKeyword(CONST);
+    return parseVariableDefinition(false);
+  }
+
+  private AstVariable parseVariableDefinition(boolean isMutable) {
+    var variable = new AstVariable();
+    variable.setMutable(isMutable);
     var name = tokens.take(IDENTIFIER);
-    v.setLocation(name.location());
-    v.setName(name.value());
+    variable.setLocation(name.location());
+    variable.setName(name.value());
     if (tokens.current().is(IDENTIFIER)) {
-      v.setTypeRef(parseTypeRef());
+      variable.setTypeRef(parseTypeRef());
     }
     if (tokens.takeIf(ASSIGN)) {
-      v.setInit(parseExpression());
+      variable.setInit(parseExpression());
     }
     tokens.take(SEMICOLON);
-    return v;
+    return variable;
   }
 
   private AstBlock parseBlock() {
@@ -91,6 +102,9 @@ public class Parser {
       switch (current.keyword()) {
         case VAR:
           b.add(parseVariable());
+          break;
+        case CONST:
+          b.add(parseConst());
           break;
         case RETURN:
           b.add(parseReturn());
