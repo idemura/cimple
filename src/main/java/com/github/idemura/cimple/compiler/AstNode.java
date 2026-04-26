@@ -1,7 +1,9 @@
 package com.github.idemura.cimple.compiler;
 
-abstract class AstNode implements VisitorNode {
+public abstract class AstNode {
   protected Location location;
+
+  public abstract void accept(Visitor visitor);
 
   void setLocation(Location location) {
     this.location = location;

@@ -4,13 +4,13 @@ import java.util.ArrayList;
 import java.util.List;
 
 public abstract class Visitor {
-  private final List<VisitorNode> stack = new ArrayList<>();
+  private final List<AstNode> stack = new ArrayList<>();
 
-  protected VisitorNode getParent() {
+  protected AstNode getParent() {
     return getParent(0);
   }
 
-  protected VisitorNode getParent(int n) {
+  protected AstNode getParent(int n) {
     return n < stack.size() ? stack.get(stack.size() - (n + 1)) : null;
   }
 

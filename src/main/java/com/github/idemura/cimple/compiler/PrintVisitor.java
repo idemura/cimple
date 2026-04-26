@@ -10,7 +10,7 @@ public class PrintVisitor extends Visitor {
     this.output = output;
   }
 
-  public void print(VisitorNode node) {
+  public void print(AstNode node) {
     node.accept(this);
   }
 

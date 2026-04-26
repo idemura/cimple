@@ -4,10 +4,10 @@ import com.github.idemura.cimple.common.CimpleException;
 import com.github.idemura.cimple.common.StringOutput;
 import com.github.idemura.cimple.compiler.AstBlock;
 import com.github.idemura.cimple.compiler.AstFunction;
+import com.github.idemura.cimple.compiler.AstNode;
 import com.github.idemura.cimple.compiler.CodeGen;
 import com.github.idemura.cimple.compiler.TypeRef;
 import com.github.idemura.cimple.compiler.Visitor;
-import com.github.idemura.cimple.compiler.VisitorNode;
 
 public class CodeGenC extends Visitor implements CodeGen {
   private final StringOutput out;
@@ -17,7 +17,7 @@ public class CodeGenC extends Visitor implements CodeGen {
   }
 
   @Override
-  public void generateCode(VisitorNode root) {
+  public void generateCode(AstNode root) {
     emitPrologue();
     root.accept(this);
     emitEpilogue();
