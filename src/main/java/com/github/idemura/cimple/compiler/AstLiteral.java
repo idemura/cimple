@@ -1,6 +1,6 @@
 package com.github.idemura.cimple.compiler;
 
-public class AstLiteral extends AstExpression {
+public class AstLiteral extends AstAbstractExpression {
   private TokenType tokenType;
   private String value;
   private TypeRef typeRef;

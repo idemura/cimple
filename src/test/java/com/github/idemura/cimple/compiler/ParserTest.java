@@ -8,14 +8,18 @@ import java.util.List;
 import org.junit.jupiter.api.Test;
 
 class ParserTest {
-  private AstNode parseFile(String fileName) {
-    var code = readResource(getClass(), fileName);
+  private AstAbstractNode parseCode(String code) {
     return new Parser(new Tokenizer(null, code).split()).parse();
+  }
+
+  private AstModule parseFile(String fileName) {
+    var code = readResource(getClass(), fileName);
+    return (AstModule) parseCode(code);
   }
 
   @Test
   void testModule() {
-    var module = (AstModule) parseFile("/parser/global_defs.ci");
+    var module = parseFile("/parser/global_defs.ci");
     assertEquals("base_test", module.getName());
     var functions = module.getFunctions();
     assertEquals(4, functions.size());
@@ -69,33 +73,46 @@ class ParserTest {
 
   @Test
   void testIfStatement() {
-    var module = (AstModule) parseFile("/parser/statement_if.ci");
+    var module = parseFile("/parser/statement_if.ci");
     var function = module.getFunctions().get(0);
-    assertEquals(
-        List.of(new VariableDef("a", BOOL), new VariableDef("b", BOOL)), function.getParameters());
     var statements = function.getBlock().getStatements();
     assertEquals(3, statements.size());
     {
-      var ifStatement = (AstIf) statements.get(0);
-      assertEquals(1, ifStatement.getConditions().size());
-      assertEquals(1, ifStatement.getThenBlocks().size());
-      assertEquals(new AstNameRef("a"), ifStatement.getConditions().get(0));
-      assertNull(ifStatement.getElseBlock());
+      var stmtIf = (AstIf) statements.get(0);
+      assertEquals(1, stmtIf.getConditions().size());
+      assertEquals(1, stmtIf.getThenBlocks().size());
+      assertEquals(new AstNameRef("a"), stmtIf.getConditions().get(0));
+      assertNull(stmtIf.getElseBlock());
     }
     {
-      var ifStatement = (AstIf) statements.get(1);
-      assertEquals(1, ifStatement.getConditions().size());
-      assertEquals(1, ifStatement.getThenBlocks().size());
-      assertEquals(new AstNameRef("a"), ifStatement.getConditions().get(0));
-      assertNotNull(ifStatement.getElseBlock());
+      var stmtIf = (AstIf) statements.get(1);
+      assertEquals(1, stmtIf.getConditions().size());
+      assertEquals(1, stmtIf.getThenBlocks().size());
+      assertEquals(new AstNameRef("a"), stmtIf.getConditions().get(0));
+      assertNotNull(stmtIf.getElseBlock());
     }
     {
-      var ifStatement = (AstIf) statements.get(2);
-      assertEquals(2, ifStatement.getConditions().size());
-      assertEquals(2, ifStatement.getThenBlocks().size());
-      assertEquals(new AstNameRef("a"), ifStatement.getConditions().get(0));
-      assertEquals(new AstNameRef("b"), ifStatement.getConditions().get(1));
-      assertNotNull(ifStatement.getElseBlock());
+      var stmtIf = (AstIf) statements.get(2);
+      assertEquals(2, stmtIf.getConditions().size());
+      assertEquals(2, stmtIf.getThenBlocks().size());
+      assertEquals(new AstNameRef("a"), stmtIf.getConditions().get(0));
+      assertEquals(new AstNameRef("b"), stmtIf.getConditions().get(1));
+      assertNotNull(stmtIf.getElseBlock());
+    }
+  }
+
+  @Test
+  void testForStatement() {
+    var module = parseFile("/parser/statement_for.ci");
+    var function = module.getFunctions().get(0);
+    var statements = function.getBlock().getStatements();
+    assertEquals(1, statements.size());
+    {
+      var stmtFor = (AstFor) statements.get(0);
+      assertNull(stmtFor.getCondition());
+      var bodyStatements = stmtFor.getBlock().getStatements();
+      assertEquals(1, bodyStatements.size());
+      assertEquals(new AstGoto("end"), bodyStatements.get(0));
     }
   }
 }

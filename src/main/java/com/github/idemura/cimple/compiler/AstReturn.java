@@ -1,18 +1,18 @@
 package com.github.idemura.cimple.compiler;
 
-public class AstReturn extends AstStatement {
-  private AstExpression expression;
+public class AstReturn extends AstAbstractStatement {
+  private AstAbstractExpression expression;
 
   @Override
   public void accept(Visitor visitor) {
     visitor.visit(this);
   }
 
-  AstExpression getExpression() {
+  AstAbstractExpression getExpression() {
     return expression;
   }
 
-  void setExpression(AstExpression expression) {
+  void setExpression(AstAbstractExpression expression) {
     this.expression = expression;
   }
 }

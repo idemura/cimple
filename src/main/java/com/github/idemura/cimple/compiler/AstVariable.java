@@ -1,10 +1,10 @@
 package com.github.idemura.cimple.compiler;
 
-public class AstVariable extends AstStatement {
+public class AstVariable extends AstAbstractStatement {
   private boolean mutable;
   private String name;
   private TypeRef typeRef;
-  private AstExpression init;
+  private AstAbstractExpression init;
 
   AstVariable() {}
 
@@ -37,11 +37,11 @@ public class AstVariable extends AstStatement {
     return typeRef;
   }
 
-  void setInit(AstExpression init) {
+  void setInit(AstAbstractExpression init) {
     this.init = init;
   }
 
-  AstExpression getInit() {
+  AstAbstractExpression getInit() {
     return init;
   }
 }

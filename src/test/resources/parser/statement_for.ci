@@ -1,0 +1,7 @@
+module test_for;
+
+function f() {
+  for {
+    goto end;
+  }
+}

@@ -2,7 +2,7 @@ package com.github.idemura.cimple.compiler;
 
 import java.util.Objects;
 
-public class AstNameRef extends AstExpression {
+public class AstNameRef extends AstAbstractExpression {
   private String name;
   // Variable definition that it refers to
   private VariableDef variable;

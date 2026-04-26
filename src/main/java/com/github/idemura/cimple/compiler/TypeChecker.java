@@ -144,6 +144,17 @@ class TypeChecker extends Visitor {
     }
   }
 
+  @Override
+  protected void visit(AstFor node) {
+    visitChildren(node);
+    if (node.getCondition() != null && node.getCondition().getTypeRef() != BOOL) {
+      throw CompilerException.builder()
+          .formatMessage("for-condition must be boolean, got %s", node.getCondition().getTypeRef())
+          .setLocation(node.getLocation())
+          .build();
+    }
+  }
+
   // private AstExpression promoteExpression(AstExpression expr, TypeRef resultType) {
   //   // Quick check for the same type.
   //   var exprType = expr.getTypeRef();

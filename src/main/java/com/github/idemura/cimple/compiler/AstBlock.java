@@ -3,8 +3,8 @@ package com.github.idemura.cimple.compiler;
 import java.util.ArrayList;
 import java.util.List;
 
-public class AstBlock extends AstNode {
-  private List<AstStatement> statements = new ArrayList<>();
+public class AstBlock extends AstAbstractNode {
+  private List<AstAbstractStatement> statements = new ArrayList<>();
 
   AstBlock() {}
 
@@ -13,11 +13,11 @@ public class AstBlock extends AstNode {
     visitor.visit(this);
   }
 
-  void add(AstStatement s) {
+  void add(AstAbstractStatement s) {
     statements.add(s);
   }
 
-  List<AstStatement> getStatements() {
+  List<AstAbstractStatement> getStatements() {
     return List.copyOf(statements);
   }
 }

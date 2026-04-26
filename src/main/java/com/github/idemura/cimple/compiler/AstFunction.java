@@ -3,7 +3,7 @@ package com.github.idemura.cimple.compiler;
 import java.util.ArrayList;
 import java.util.List;
 
-public class AstFunction extends AstNode {
+public class AstFunction extends AstAbstractNode {
   private String boundTypeName;
   private String name;
   private TypeRef resultType;

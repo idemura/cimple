@@ -2,9 +2,9 @@ package com.github.idemura.cimple.compiler;
 
 import java.util.List;
 
-public class AstFunctionApply extends AstExpression {
+public class AstFunctionApply extends AstAbstractExpression {
   private String functionName;
-  private List<AstExpression> args;
+  private List<AstAbstractExpression> args;
   private AstFunction func;
 
   AstFunctionApply() {}
@@ -27,16 +27,16 @@ public class AstFunctionApply extends AstExpression {
     return functionName;
   }
 
-  void setArgs(List<AstExpression> args) {
+  void setArgs(List<AstAbstractExpression> args) {
     this.args = args;
   }
 
-  List<AstExpression> getArgs() {
+  List<AstAbstractExpression> getArgs() {
     return List.copyOf(args);
   }
 
   List<TypeRef> getArgsTypes() {
-    return args.stream().map(AstExpression::getTypeRef).toList();
+    return args.stream().map(AstAbstractExpression::getTypeRef).toList();
   }
 
   void setFunc(AstFunction func) {

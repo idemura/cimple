@@ -10,15 +10,14 @@ public class PrintVisitor extends Visitor {
     this.output = output;
   }
 
-  public void print(AstNode node) {
+  public void print(AstAbstractNode node) {
     node.accept(this);
   }
 
   @Override
   protected void visit(AstModule node) {
     printIndent();
-    output.write("MODULE\n");
-
+    output.write("MODULE %s\n".formatted(node.getName()));
     indent++;
     visitChildren(node);
     indent--;
@@ -28,12 +27,11 @@ public class PrintVisitor extends Visitor {
   protected void visit(AstFunction node) {
     printIndent();
     printEntity("FUNCTION", node.getName(), node.getResultType());
-
-    indent++;
     for (var p : node.getParameters()) {
       printIndent();
-      printEntity("PARAM", p.getName(), p.getTypeRef());
+      printEntity("ARG", p.getName(), p.getTypeRef());
     }
+    indent++;
     node.getBlock().accept(this);
     indent--;
   }
@@ -42,7 +40,6 @@ public class PrintVisitor extends Visitor {
   protected void visit(AstBlock node) {
     printIndent();
     output.write("BLOCK\n");
-
     indent++;
     visitChildren(node);
     indent--;
@@ -51,11 +48,8 @@ public class PrintVisitor extends Visitor {
   @Override
   protected void visit(AstReturn node) {
     printIndent();
-    output.write("RETURN\n");
-
-    indent++;
+    output.write("RETURN");
     visitChildren(node);
-    indent--;
   }
 
   @Override
@@ -96,18 +90,15 @@ public class PrintVisitor extends Visitor {
     var thenBlocks = node.getThenBlocks();
     for (var i = 0; i < conditions.size(); i++) {
       printIndent();
-      output.write("IF\n");
-      indent++;
+      output.write("IF ");
       conditions.get(i).accept(this);
-      indent--;
-
+      output.write("\n");
       printIndent();
       output.write("THEN\n");
       indent++;
       thenBlocks.get(i).accept(this);
       indent--;
     }
-
     if (node.getElseBlock() != null) {
       printIndent();
       output.write("ELSE\n");
@@ -118,9 +109,27 @@ public class PrintVisitor extends Visitor {
   }
 
   @Override
+  protected void visit(AstFor node) {
+    printIndent();
+    output.write("FOR ");
+    if (node.getCondition() != null) {
+      node.getCondition().accept(this);
+    }
+    indent++;
+    node.getBlock().accept(this);
+    indent--;
+  }
+
+  @Override
+  protected void visit(AstGoto node) {
+    printIndent();
+    output.write("GOTO %s\n".formatted(node.getLabel()));
+  }
+
+  @Override
   protected void visit(AstExpressionStatement node) {
     printIndent();
-    output.write("EXPR_STMT\n");
+    output.write("EXPR\n");
     indent++;
     node.getExpression().accept(this);
     indent--;

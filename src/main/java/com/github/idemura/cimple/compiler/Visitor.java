@@ -4,13 +4,13 @@ import java.util.ArrayList;
 import java.util.List;
 
 public abstract class Visitor {
-  private final List<AstNode> stack = new ArrayList<>();
+  private final List<AstAbstractNode> stack = new ArrayList<>();
 
-  protected AstNode getParent() {
+  protected AstAbstractNode getParent() {
     return getParent(0);
   }
 
-  protected AstNode getParent(int n) {
+  protected AstAbstractNode getParent(int n) {
     return n < stack.size() ? stack.get(stack.size() - (n + 1)) : null;
   }
 
@@ -104,6 +104,25 @@ public abstract class Visitor {
     }
     stack.removeLast();
   }
+
+  protected void visit(AstFor node) {
+    visitChildren(node);
+  }
+
+  protected void visitChildren(AstFor node) {
+    stack.add(node);
+    if (node.getCondition() != null) {
+      node.getCondition().accept(this);
+    }
+    node.getBlock().accept(this);
+    stack.removeLast();
+  }
+
+  protected void visit(AstGoto node) {
+    visitChildren(node);
+  }
+
+  protected void visitChildren(AstGoto node) {}
 
   protected void visit(AstVariable node) {
     visitChildren(node);

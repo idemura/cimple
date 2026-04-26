@@ -3,8 +3,8 @@ package com.github.idemura.cimple.compiler;
 import java.util.ArrayList;
 import java.util.List;
 
-public class AstIf extends AstStatement {
-  private List<AstExpression> conditions = new ArrayList<>();
+public class AstIf extends AstAbstractStatement {
+  private List<AstAbstractExpression> conditions = new ArrayList<>();
   private List<AstBlock> thenBlocks = new ArrayList<>();
   private AstBlock elseBlock;
 
@@ -15,12 +15,12 @@ public class AstIf extends AstStatement {
     visitor.visit(this);
   }
 
-  void addIf(AstExpression condition, AstBlock block) {
+  void addIf(AstAbstractExpression condition, AstBlock block) {
     conditions.add(condition);
     thenBlocks.add(block);
   }
 
-  List<AstExpression> getConditions() {
+  List<AstAbstractExpression> getConditions() {
     return conditions;
   }
 

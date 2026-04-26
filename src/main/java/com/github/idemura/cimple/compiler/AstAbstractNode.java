@@ -1,6 +1,6 @@
 package com.github.idemura.cimple.compiler;
 
-public abstract class AstNode {
+public abstract class AstAbstractNode {
   protected Location location;
 
   public abstract void accept(Visitor visitor);

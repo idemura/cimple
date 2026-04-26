@@ -1,8 +1,7 @@
 package com.github.idemura.cimple.compiler;
 
-// Assignment expression
-public class AstExpressionStatement extends AstStatement {
-  private AstExpression expression;
+public class AstExpressionStatement extends AstAbstractStatement {
+  private AstAbstractExpression expression;
 
   AstExpressionStatement() {}
 
@@ -11,11 +10,11 @@ public class AstExpressionStatement extends AstStatement {
     visitor.visit(this);
   }
 
-  void setExpression(AstExpression expression) {
+  void setExpression(AstAbstractExpression expression) {
     this.expression = expression;
   }
 
-  AstExpression getExpression() {
+  AstAbstractExpression getExpression() {
     return expression;
   }
 }

@@ -13,7 +13,7 @@ public class Parser {
     this.tokens = tokens;
   }
 
-  AstNode parse() {
+  AstAbstractNode parse() {
     return parseModule();
   }
 
@@ -112,11 +112,13 @@ public class Parser {
           b.add(parseIf());
           break;
         case FOR:
-          throw new UnsupportedOperationException();
+          b.add(parseFor());
+          break;
         case MATCH:
           throw new UnsupportedOperationException();
         case GOTO:
-          throw new UnsupportedOperationException();
+          b.add(parseGoto());
+          break;
         default:
           // TODO: Should be an expression with a side effect
           b.add(parseExpressionStatement());
@@ -126,7 +128,7 @@ public class Parser {
     return b;
   }
 
-  private AstStatement parseReturn() {
+  private AstAbstractStatement parseReturn() {
     var r = new AstReturn();
     var keyword = tokens.takeKeyword(RETURN);
     r.setLocation(keyword.location());
@@ -135,7 +137,7 @@ public class Parser {
     return r;
   }
 
-  private AstStatement parseIf() {
+  private AstAbstractStatement parseIf() {
     var ifNode = new AstIf();
     var keyword = tokens.takeKeyword(IF);
     ifNode.setLocation(keyword.location());
@@ -148,7 +150,27 @@ public class Parser {
     return ifNode;
   }
 
-  private AstStatement parseExpressionStatement() {
+  private AstAbstractStatement parseFor() {
+    var forNode = new AstFor();
+    var keyword = tokens.takeKeyword(FOR);
+    forNode.setLocation(keyword.location());
+    if (!tokens.current().is(LCURLY)) {
+      forNode.setCondition(parseExpression());
+    }
+    forNode.setBlock(parseBlock());
+    return forNode;
+  }
+
+  private AstAbstractStatement parseGoto() {
+    var gotoNode = new AstGoto();
+    var keyword = tokens.takeKeyword(GOTO);
+    gotoNode.setLocation(keyword.location());
+    gotoNode.setLabel(tokens.take(IDENTIFIER).value());
+    tokens.take(SEMICOLON);
+    return gotoNode;
+  }
+
+  private AstAbstractStatement parseExpressionStatement() {
     var e = new AstExpressionStatement();
     e.setLocation(tokens.current().location());
     e.setExpression(parseExpression());
@@ -156,12 +178,12 @@ public class Parser {
     return e;
   }
 
-  private AstExpression parseExpression() {
+  private AstAbstractExpression parseExpression() {
     return parseExpressionComparison();
   }
 
-  private AstExpression parseExpressionComparison() {
-    AstExpression expr = parseExpressionAdditive();
+  private AstAbstractExpression parseExpressionComparison() {
+    AstAbstractExpression expr = parseExpressionAdditive();
     if (expr == null) {
       return null;
     }
@@ -180,8 +202,8 @@ public class Parser {
     return expr;
   }
 
-  private AstExpression parseExpressionAdditive() {
-    AstExpression expr = parseExpressionMultiple();
+  private AstAbstractExpression parseExpressionAdditive() {
+    AstAbstractExpression expr = parseExpressionMultiple();
     if (expr == null) {
       return null;
     }
@@ -200,8 +222,8 @@ public class Parser {
     return expr;
   }
 
-  private AstExpression parseExpressionMultiple() {
-    AstExpression expr = parseExpressionPrimary();
+  private AstAbstractExpression parseExpressionMultiple() {
+    AstAbstractExpression expr = parseExpressionPrimary();
     if (expr == null) {
       return null;
     }
@@ -220,7 +242,7 @@ public class Parser {
     return expr;
   }
 
-  private AstExpression parseExpressionPrimary() {
+  private AstAbstractExpression parseExpressionPrimary() {
     if (tokens.takeIf(LPAREN)) {
       var e = parseExpression();
       tokens.take(RPAREN);
@@ -251,8 +273,8 @@ public class Parser {
     }
   }
 
-  private List<AstExpression> parseExpressionList() {
-    List<AstExpression> result = new ArrayList<>();
+  private List<AstAbstractExpression> parseExpressionList() {
+    List<AstAbstractExpression> result = new ArrayList<>();
     tokens.take(LPAREN);
     if (!tokens.takeIf(RPAREN)) {
       do {

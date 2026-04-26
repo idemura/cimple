@@ -2,9 +2,9 @@ package com.github.idemura.cimple.codegen.c;
 
 import com.github.idemura.cimple.common.CimpleException;
 import com.github.idemura.cimple.common.StringOutput;
+import com.github.idemura.cimple.compiler.AstAbstractNode;
 import com.github.idemura.cimple.compiler.AstBlock;
 import com.github.idemura.cimple.compiler.AstFunction;
-import com.github.idemura.cimple.compiler.AstNode;
 import com.github.idemura.cimple.compiler.CodeGen;
 import com.github.idemura.cimple.compiler.TypeRef;
 import com.github.idemura.cimple.compiler.Visitor;
@@ -17,7 +17,7 @@ public class CodeGenC extends Visitor implements CodeGen {
   }
 
   @Override
-  public void generateCode(AstNode root) {
+  public void generateCode(AstAbstractNode root) {
     emitPrologue();
     root.accept(this);
     emitEpilogue();
