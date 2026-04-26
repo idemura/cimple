@@ -30,7 +30,6 @@ enum TokenType {
   CASE,
   CLASS,
   CONST,
-  DO,
   IF,
   ENUM,
   ELIF,
@@ -47,8 +46,7 @@ enum TokenType {
   RETURN,
   TEMPLATE,
   TYPE,
-  VAR,
-  WHILE;
+  VAR;
 
   private final String printableName;
 
@@ -58,7 +56,6 @@ enum TokenType {
       case "case" -> CASE;
       case "class" -> CLASS;
       case "const" -> CONST;
-      case "do" -> DO;
       case "else" -> ELSE;
       case "elif" -> ELIF;
       case "enum" -> ENUM;
@@ -75,7 +72,6 @@ enum TokenType {
       case "record" -> RECORD;
       case "type" -> TYPE;
       case "var" -> VAR;
-      case "while" -> WHILE;
       default -> null;
     };
   }

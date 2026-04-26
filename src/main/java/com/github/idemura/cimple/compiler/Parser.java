@@ -115,10 +115,6 @@ public class Parser {
           throw new UnsupportedOperationException();
         case MATCH:
           throw new UnsupportedOperationException();
-        case WHILE:
-          throw new UnsupportedOperationException();
-        case DO:
-          throw new UnsupportedOperationException();
         case GOTO:
           throw new UnsupportedOperationException();
         default:
