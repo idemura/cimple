@@ -1,9 +1,9 @@
 package com.github.idemura.cimple.compiler;
 
-import com.github.idemura.cimple.common.StringOutput;
+import com.github.idemura.cimple.common.IndentWriter;
 
 public interface CompilerParams {
-  StringOutput getDebugOutput();
+  IndentWriter getDebugOutput();
 
   default boolean printTokens() {
     return false;

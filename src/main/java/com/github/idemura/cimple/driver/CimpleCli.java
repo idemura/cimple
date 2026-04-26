@@ -4,7 +4,7 @@ import com.beust.jcommander.JCommander;
 import com.beust.jcommander.Parameter;
 import com.github.idemura.cimple.codegen.empty.CodeGenNoop;
 import com.github.idemura.cimple.common.CimpleException;
-import com.github.idemura.cimple.common.StringOutput;
+import com.github.idemura.cimple.common.IndentWriter;
 import com.github.idemura.cimple.compiler.Compiler;
 import com.github.idemura.cimple.compiler.CompilerException;
 import com.github.idemura.cimple.compiler.CompilerParams;
@@ -35,16 +35,16 @@ public class CimpleCli implements CompilerParams {
   @Parameter(names = {"--debug_print_ast"})
   boolean debugPrintAst;
 
-  public static StringOutput getOutput() {
+  public static IndentWriter getOutput() {
     return ofPrintStream(System.out);
   }
 
-  public static StringOutput getErrorOutput() {
+  public static IndentWriter getErrorOutput() {
     return ofPrintStream(System.err);
   }
 
   @Override
-  public StringOutput getDebugOutput() {
+  public IndentWriter getDebugOutput() {
     return ofPrintStream(System.err);
   }
 
@@ -58,8 +58,8 @@ public class CimpleCli implements CompilerParams {
     return debug && debugPrintAst;
   }
 
-  public static StringOutput ofPrintStream(PrintStream ps) {
-    return ps::print;
+  public static IndentWriter ofPrintStream(PrintStream ps) {
+    return new IndentWriter(ps, 2);
   }
 
   CimpleCli() {}
@@ -84,13 +84,13 @@ public class CimpleCli implements CompilerParams {
           int first = 0;
           int split = code.indexOf(DIR_SPLIT, first);
           while (split >= 0) {
-            getDebugOutput().write("-- SPLIT %d\n".formatted(splitCount));
+            getDebugOutput().writeLine("-- SPLIT %d\n".formatted(splitCount));
             compile(fileName, code.substring(first, split));
             first = split + DIR_SPLIT.length();
             split = code.indexOf(DIR_SPLIT, first);
             splitCount++;
           }
-          getDebugOutput().write("-- SPLIT %d\n".formatted(splitCount));
+          getDebugOutput().writeLine("-- SPLIT %d\n".formatted(splitCount));
           compile(fileName, code.substring(first));
         } else {
           if (!compile(fileName, code)) {
@@ -98,7 +98,7 @@ public class CimpleCli implements CompilerParams {
           }
         }
       } catch (CimpleException e) {
-        getErrorOutput().write("INTERNAL ERROR: %s\n".formatted(e.getMessage()));
+        getErrorOutput().writeLine("INTERNAL ERROR: %s\n".formatted(e.getMessage()));
         return 2;
       }
     }
@@ -109,15 +109,15 @@ public class CimpleCli implements CompilerParams {
     try {
       new Compiler(this, getDebugOutput(), new CodeGenNoop()).compile(fileName, code);
     } catch (CompilerException e) {
-      getErrorOutput().write(e.getMessage());
-      getErrorOutput().write("\n");
+      getErrorOutput().writeLine(e.getMessage());
+      getErrorOutput().writeLine("\n");
       return false;
     }
     return true;
   }
 
   private static void printFileError(String fileName, String message) {
-    getErrorOutput().write("Error reading file '%s': %s\n".formatted(fileName, message));
+    getErrorOutput().writeLine("Error reading file '%s': %s\n".formatted(fileName, message));
   }
 
   public static void main(String[] args) {

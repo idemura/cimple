@@ -1,12 +1,11 @@
 package com.github.idemura.cimple.compiler;
 
-import com.github.idemura.cimple.common.StringOutput;
+import com.github.idemura.cimple.common.IndentWriter;
 
 public class PrintAstVisitor extends AstVisitor {
-  private final StringOutput output;
-  private int indent;
+  private final IndentWriter output;
 
-  public PrintAstVisitor(StringOutput output) {
+  public PrintAstVisitor(IndentWriter output) {
     this.output = output;
   }
 
@@ -16,89 +15,82 @@ public class PrintAstVisitor extends AstVisitor {
 
   @Override
   protected void visit(AstModule node) {
-    printIndent();
-    output.write("MODULE %s\n".formatted(node.getName()));
-    indent++;
+    output.writeLine("MODULE %s".formatted(node.getName()));
+    output.indent();
     visitChildren(node);
-    indent--;
+    output.unindent();
+    output.writeLine("END");
   }
 
   @Override
   protected void visit(AstFunction node) {
-    printIndent();
     printEntity("FUNCTION", node.getName(), node.getResultType());
+    output.indent();
     for (var p : node.getParameters()) {
-      printIndent();
       printEntity("ARG", p.getName(), p.getTypeRef());
     }
-    indent++;
     node.getBlock().accept(this);
-    indent--;
+    output.unindent();
+    output.writeLine("END");
   }
 
   @Override
   protected void visit(AstTypeStruct node) {
-    printIndent();
-    output.write("TYPE STRUCT %s\n".formatted(node.getName()));
-    indent++;
+    output.writeLine("TYPE STRUCT %s".formatted(node.getName()));
+    output.indent();
     visitChildren(node);
-    indent--;
+    output.unindent();
+    output.writeLine("END");
   }
 
   @Override
   protected void visit(AstTypeAlias node) {
-    printIndent();
-    output.write("TYPE ALIAS %s = %s\n".formatted(node.getName(), node.getBaseTypeRef()));
+    output.writeLine("TYPE ALIAS %s = %s".formatted(node.getName(), node.getBaseTypeRef()));
   }
 
   @Override
   protected void visit(AstBlock node) {
-    printIndent();
-    output.write("BLOCK\n");
-    indent++;
+    output.writeLine("BLOCK");
+    output.indent();
     visitChildren(node);
-    indent--;
+    output.unindent();
+    output.writeLine("END");
   }
 
   @Override
   protected void visit(AstReturn node) {
-    printIndent();
-    output.write("RETURN\n");
-    indent++;
+    output.writeLine("RETURN");
+    output.indent();
     visitChildren(node);
-    indent--;
+    output.unindent();
   }
 
   @Override
   protected void visit(AstLiteral node) {
-    printIndent();
-    output.write("LITERAL %s %s".formatted(node.getValue(), node.getTypeRef()));
+    printEntity("LITERAL", node.getValue(), node.getTypeRef());
   }
 
   @Override
   protected void visit(AstFunctionApply node) {
-    printIndent();
-    output.write("APPLY %s\n".formatted(node.getFunctionName()));
-    indent++;
+    output.writeLine("APPLY %s".formatted(node.getFunctionName()));
+    output.indent();
     visitChildren(node);
-    indent--;
+    output.unindent();
   }
 
   @Override
   protected void visit(AstVariable node) {
-    printIndent();
     printEntity(node.getMutable() ? "VAR" : "CONST", node.getName(), node.getTypeRef());
-    indent++;
+    output.indent();
     if (node.getInit() != null) {
       node.getInit().accept(this);
     }
-    indent--;
+    output.unindent();
   }
 
   @Override
   protected void visit(AstNameRef node) {
-    printIndent();
-    output.write("IDENTIFIER %s\n".formatted(node.getName()));
+    output.writeLine("IDENTIFIER %s".formatted(node.getName()));
   }
 
   @Override
@@ -106,82 +98,69 @@ public class PrintAstVisitor extends AstVisitor {
     var conditions = node.getConditions();
     var thenBlocks = node.getThenBlocks();
     for (var i = 0; i < conditions.size(); i++) {
-      printIndent();
-      output.write("IF\n");
-      indent++;
+      output.writeLine("IF");
+      output.indent();
       conditions.get(i).accept(this);
-      indent--;
-      printIndent();
-      output.write("THEN\n");
-      indent++;
+      output.unindent();
+      output.writeLine("THEN");
+      output.indent();
       thenBlocks.get(i).accept(this);
-      indent--;
+      output.unindent();
     }
     if (node.getElseBlock() != null) {
-      printIndent();
-      output.write("ELSE\n");
-      indent++;
+      output.writeLine("ELSE");
+      output.indent();
       node.getElseBlock().accept(this);
-      indent--;
+      output.unindent();
     }
+    output.writeLine("END");
   }
 
   @Override
   protected void visit(AstFor node) {
-    printIndent();
-    output.write("FOR\n");
-    indent++;
-    printIndent();
-    output.write("INIT\n");
+    output.writeLine("FOR");
+    output.indent();
     if (node.getInit() != null) {
       node.getInit().accept(this);
+    } else {
+      output.writeLine("NONE");
     }
-    indent--;
-    printIndent();
-    output.write("INIT\n");
     if (node.getCondition() != null) {
-      indent++;
       node.getCondition().accept(this);
-      indent--;
+    } else {
+      output.writeLine("NONE");
     }
-    indent++;
     node.getBlock().accept(this);
-    indent--;
+    output.unindent();
+    output.writeLine("END");
   }
 
   @Override
   protected void visit(AstGoto node) {
-    printIndent();
-    output.write("GOTO %s\n".formatted(node.getLabel()));
+    output.writeLine("GOTO %s".formatted(node.getLabel()));
   }
 
   @Override
   protected void visit(AstDefer node) {
-    printIndent();
-    output.write("DEFER\n");
-    indent++;
+    output.writeLine("DEFER");
+    output.indent();
     node.getExpression().accept(this);
-    indent--;
+    output.unindent();
   }
 
   @Override
   protected void visit(AstExpressionStatement node) {
-    printIndent();
-    output.write("EXPR\n");
-    indent++;
+    output.writeLine("EXPR");
+    output.indent();
     node.getExpression().accept(this);
-    indent--;
+    output.unindent();
   }
 
-  private void printIndent() {
-    output.write("  ".repeat(indent));
-  }
-
-  private void printEntity(String clazz, String name, TypeRef typeRef) {
+  private void printEntity(String clazz, Object value, TypeRef typeRef) {
     if (typeRef == null) {
-      output.write("%s %s\n".formatted(clazz, name));
+      output.writeLine("%s %s".formatted(clazz, value));
     } else {
-      output.write("%s %s: %s\n".formatted(clazz, name, typeRef));
+      output.writeLine("%s %s %s".formatted(clazz, value, typeRef));
     }
   }
 }
