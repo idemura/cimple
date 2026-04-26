@@ -5,11 +5,11 @@ import com.github.idemura.cimple.common.StringOutput;
 import com.github.idemura.cimple.compiler.AstAbstractNode;
 import com.github.idemura.cimple.compiler.AstBlock;
 import com.github.idemura.cimple.compiler.AstFunction;
+import com.github.idemura.cimple.compiler.AstVisitor;
 import com.github.idemura.cimple.compiler.CodeGen;
 import com.github.idemura.cimple.compiler.TypeRef;
-import com.github.idemura.cimple.compiler.Visitor;
 
-public class CodeGenC extends Visitor implements CodeGen {
+public class CodeGenC extends AstVisitor implements CodeGen {
   private final StringOutput out;
 
   CodeGenC(StringOutput out) {

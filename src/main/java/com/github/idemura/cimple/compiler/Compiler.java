@@ -22,12 +22,12 @@ public class Compiler {
     var root = new Parser(tokens).parse();
     if (params.printAst()) {
       debugOutput.write("Parse tree\n");
-      new PrintVisitor(debugOutput).print(root);
+      new PrintAstVisitor(debugOutput).print(root);
     }
     root.accept(new TypeChecker());
     if (params.printAst()) {
       debugOutput.write("Type checked\n");
-      new PrintVisitor(debugOutput).print(root);
+      new PrintAstVisitor(debugOutput).print(root);
     }
     // Outside of try because codegen should not generate user errors.
     codeGen.generateCode(root);

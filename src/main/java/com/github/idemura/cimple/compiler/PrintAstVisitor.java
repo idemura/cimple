@@ -2,11 +2,11 @@ package com.github.idemura.cimple.compiler;
 
 import com.github.idemura.cimple.common.StringOutput;
 
-public class PrintVisitor extends Visitor {
+public class PrintAstVisitor extends AstVisitor {
   private final StringOutput output;
   private int indent;
 
-  public PrintVisitor(StringOutput output) {
+  public PrintAstVisitor(StringOutput output) {
     this.output = output;
   }
 

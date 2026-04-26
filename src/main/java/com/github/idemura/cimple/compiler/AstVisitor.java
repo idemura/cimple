@@ -3,7 +3,7 @@ package com.github.idemura.cimple.compiler;
 import java.util.ArrayList;
 import java.util.List;
 
-public abstract class Visitor {
+public abstract class AstVisitor {
   private final List<AstAbstractNode> stack = new ArrayList<>();
 
   protected AstAbstractNode getParent() {

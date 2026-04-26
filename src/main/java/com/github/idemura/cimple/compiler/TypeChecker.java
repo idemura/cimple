@@ -8,7 +8,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-class TypeChecker extends Visitor {
+class TypeChecker extends AstVisitor {
   private final ScopeNameMap<VariableDef> variables = new ScopeNameMap<>();
 
   TypeChecker() {}

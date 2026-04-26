@@ -9,7 +9,7 @@ public class AstFor extends AstAbstractStatement {
   AstFor() {}
 
   @Override
-  public void accept(Visitor visitor) {
+  public void accept(AstVisitor visitor) {
     visitor.visit(this);
   }
 

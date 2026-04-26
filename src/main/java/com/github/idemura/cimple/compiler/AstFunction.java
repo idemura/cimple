@@ -29,7 +29,7 @@ public class AstFunction extends AstAbstractNode {
   }
 
   @Override
-  public void accept(Visitor visitor) {
+  public void accept(AstVisitor visitor) {
     visitor.visit(this);
   }
 
