@@ -1,0 +1,9 @@
+module base_test;
+
+# var counter = 0;
+
+function f(x int) int {
+  return 1;
+}
+
+function g() {}

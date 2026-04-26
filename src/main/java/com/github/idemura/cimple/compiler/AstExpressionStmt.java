@@ -2,16 +2,17 @@ package com.github.idemura.cimple.compiler;
 
 // Assignment expression
 public class AstExpressionStmt extends AstStatement {
-  private final AstExpression expression;
+  private AstExpression expression;
 
-  AstExpressionStmt(Location location, AstExpression expression) {
-    super(location);
-    this.expression = expression;
-  }
+  AstExpressionStmt() {}
 
   @Override
   public void accept(Visitor visitor) {
     visitor.visit(this);
+  }
+
+  void setExpression(AstExpression expression) {
+    this.expression = expression;
   }
 
   AstExpression getExpression() {

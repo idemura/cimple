@@ -87,11 +87,11 @@ public abstract class Visitor {
 
   protected void visitChildren(AstNameRef node) {}
 
-  protected void visit(AstIfElse node) {
+  protected void visit(AstIf node) {
     visitChildren(node);
   }
 
-  protected void visitChildren(AstIfElse node) {
+  protected void visitChildren(AstIf node) {
     stack.add(node);
     node.getCondition().accept(this);
     node.getThenBlock().accept(this);

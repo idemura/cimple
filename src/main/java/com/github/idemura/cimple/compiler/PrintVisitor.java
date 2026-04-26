@@ -76,8 +76,7 @@ public class PrintVisitor extends Visitor {
   @Override
   protected void visit(AstVariable node) {
     printIndent();
-    var v = node.getVariableDef();
-    printEntity("VAR", v.getName(), v.getTypeRef());
+    printEntity("VAR", node.getName(), node.getTypeRef());
     indent++;
     if (node.getInit() != null) {
       node.getInit().accept(this);
@@ -92,7 +91,7 @@ public class PrintVisitor extends Visitor {
   }
 
   @Override
-  protected void visit(AstIfElse node) {
+  protected void visit(AstIf node) {
     printIndent();
     output.write("CONDITION\n");
     indent++;

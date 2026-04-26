@@ -1,36 +1,14 @@
 package com.github.idemura.cimple.compiler;
 
-import static com.google.common.base.Preconditions.checkNotNull;
-
+import java.util.ArrayList;
 import java.util.List;
 
 public class AstFunction extends AstNode {
-  private final String name;
+  private String boundTypeName;
+  private String name;
   private TypeRef resultType;
-  private final List<VariableDef> parameters;
-  private final AstBlock block;
-
-  static AstFunction std(String name, TypeRef resultTypeRef, List<TypeRef> parameters) {
-    return new AstFunction(
-        null,
-        name,
-        resultTypeRef,
-        parameters.stream().map(t -> new VariableDef(null, "_", t)).toList(),
-        null);
-  }
-
-  AstFunction(
-      Location location,
-      String name,
-      TypeRef resultType,
-      List<VariableDef> parameters,
-      AstBlock block) {
-    super(location);
-    this.name = name;
-    this.resultType = checkNotNull(resultType);
-    this.parameters = parameters;
-    this.block = block;
-  }
+  private List<VariableDef> parameters = new ArrayList<>();
+  private AstBlock block;
 
   @Override
   public int hashCode() {
@@ -42,10 +20,7 @@ public class AstFunction extends AstNode {
     if (this == o) {
       return true;
     }
-    return (o instanceof AstFunction other)
-        && name.equals(other.name)
-        && resultType.equals(other.resultType)
-        && getParameterTypes().equals(other.getParameterTypes());
+    return (o instanceof AstFunction other) && name.equals(other.name);
   }
 
   @Override
@@ -58,31 +33,43 @@ public class AstFunction extends AstNode {
     visitor.visit(this);
   }
 
+  void setName(String name) {
+    this.name = name;
+  }
+
   public String getName() {
     return name;
   }
 
-  public TypeRef getResultType() {
-    return resultType;
+  void setBoundTypeName(String boundTypeName) {
+    this.boundTypeName = boundTypeName;
+  }
+
+  String getBoundTypeName() {
+    return boundTypeName;
   }
 
   void setResultType(TypeRef resultType) {
     this.resultType = resultType;
   }
 
+  public TypeRef getResultType() {
+    return resultType;
+  }
+
+  void addParameter(VariableDef parameter) {
+    this.parameters.add(parameter);
+  }
+
   public List<VariableDef> getParameters() {
     return parameters;
   }
 
-  public List<TypeRef> getParameterTypes() {
-    return parameters.stream().map(VariableDef::getTypeRef).toList();
+  void setBlock(AstBlock block) {
+    this.block = block;
   }
 
   public AstBlock getBlock() {
     return block;
-  }
-
-  public TypeRef getOverloadType() {
-    return parameters.isEmpty() ? null : parameters.getLast().getTypeRef();
   }
 }

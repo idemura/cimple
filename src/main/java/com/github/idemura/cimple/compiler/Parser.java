@@ -5,90 +5,140 @@ import java.util.List;
 
 // Parses token stream, type checks and build the AST.
 public class Parser {
-  private final CompilerParams params;
   private final TokenStream tokens;
 
-  Parser(CompilerParams params, TokenStream tokens) {
-    this.params = params;
+  Parser(TokenStream tokens) {
     this.tokens = tokens;
   }
 
-  VisitorNode parse() {
+  AstNode parse() {
     return parseModule();
   }
 
   private AstModule parseModule() {
-    // TODO: 'module xxx;' syntax
     var module = new AstModule();
+    parseModuleName(module);
+
+    // TODO: Parse imports
+
     while (!tokens.done()) {
-      var tok = tokens.current();
-      switch (tok.type()) {
+      var token = tokens.current();
+      switch (token.keyword()) {
         case FUNCTION:
           module.addFunction(parseFunction());
           break;
-        case VARIABLE:
+        case TYPE:
+          throw new UnsupportedOperationException();
+        case VAR:
           module.addVariable(parseVariable());
           break;
+        case CONST:
+          throw new UnsupportedOperationException();
         default:
           throw CompilerException.builder()
               .formatMessage("Invalid module definition")
-              .setLocation(tok.location())
+              .setLocation(token.location())
               .build();
       }
     }
     return module;
   }
 
+  private void parseModuleName(AstModule module) {
+    tokens.takeKeyword(TokenType.MODULE);
+    var tokenName = tokens.take(TokenType.IDENTIFIER);
+    module.setName(tokenName.value());
+    module.setLocation(tokenName.location());
+    tokens.take(TokenType.SEMICOLON);
+  }
+
   private AstFunction parseFunction() {
-    tokens.take(TokenType.FUNCTION);
-    var name = tokens.take(TokenType.IDENTIFIER);
-    var parameters = parseParameters();
-    var type = parseTypeRef();
-    return new AstFunction(
-        name.location(),
-        name.value(),
-        type == null ? BuiltinTypes.VOID : type,
-        parameters,
-        parseBlock());
+    tokens.takeKeyword(TokenType.FUNCTION);
+    var function = new AstFunction();
+    parseFunctionQualifiedName(function);
+    parseParameters(function);
+    if (!tokens.current().is(TokenType.LCURLY)) {
+      function.setResultType(parseTypeRef());
+    }
+    function.setBlock(parseBlock());
+    return function;
   }
 
   private AstVariable parseVariable() {
-    tokens.take(TokenType.VARIABLE);
+    tokens.take(TokenType.VAR);
+    var v = new AstVariable();
     var name = tokens.take(TokenType.IDENTIFIER);
-    var type = parseTypeRef();
-    var init = tokens.takeIf(TokenType.ASSIGN) != null ? parseExpression() : null;
+    v.setLocation(name.location());
+    v.setName(name.value());
+    v.setTypeRef(parseTypeRef());
+    if (tokens.takeIf(TokenType.ASSIGN) != null) {
+      v.setInit(parseExpression());
+    }
     tokens.take(TokenType.SEMICOLON);
-    return new AstVariable(new VariableDef(name.location(), name.value(), type), init);
+    return v;
   }
 
   private AstBlock parseBlock() {
-    var block = new AstBlock(tokens.current().location());
+    var b = new AstBlock();
+    // b.setLocation(tokens.current().location());
     tokens.take(TokenType.LCURLY);
     while (tokens.takeIf(TokenType.RCURLY) == null) {
       var current = tokens.current();
-      switch (current.type()) {
+      switch (current.keyword()) {
+        case VAR:
+          b.add(parseVariable());
+          break;
         case RETURN:
-          tokens.take();
-          block.add(new AstReturn(current.location(), parseExpression()));
-          tokens.take(TokenType.SEMICOLON);
+          b.add(parseReturn());
           break;
         case IF:
-          tokens.take();
-          var condition = parseExpression();
-          var thenBlock = parseBlock();
-          var elseBlock = tokens.takeIf(TokenType.ELSE) != null ? parseBlock() : new AstBlock(null);
-          block.add(new AstIfElse(current.location(), condition, thenBlock, elseBlock));
+          b.add(parseIf());
           break;
-        case VARIABLE:
-          block.add(parseVariable());
-          break;
+        case MATCH:
+          throw new UnsupportedOperationException();
+        case WHILE:
+          throw new UnsupportedOperationException();
+        case DO:
+          throw new UnsupportedOperationException();
+        case GOTO:
+          throw new UnsupportedOperationException();
         default:
           // TODO: Should be an expression with a side effect
-          block.add(new AstExpressionStmt(current.location(), parseExpression()));
-          tokens.take(TokenType.SEMICOLON);
+          b.add(parseExpressionStatement());
+          break;
       }
     }
-    return block;
+    return b;
+  }
+
+  private AstStatement parseReturn() {
+    var r = new AstReturn();
+    var keyword = tokens.takeKeyword(TokenType.RETURN);
+    r.setLocation(keyword.location());
+    r.setExpression(parseExpression());
+    tokens.take(TokenType.SEMICOLON);
+    return r;
+  }
+
+  private AstStatement parseIf() {
+    var c = new AstIf();
+    var keyword = tokens.take(TokenType.IF);
+    // TODO: elif
+    c.setLocation(keyword.location());
+    c.setCondition(parseExpression());
+    c.setThenBlock(parseBlock());
+    if (tokens.takeIf(TokenType.ELSE) != null) {
+      c.setElseBlock(parseBlock());
+    }
+    return c;
+  }
+
+  private AstStatement parseExpressionStatement() {
+    var e = new AstExpressionStmt();
+    e.setLocation(tokens.current().location());
+    e.setExpression(parseExpression());
+    tokens.take(TokenType.SEMICOLON);
+    return e;
   }
 
   private AstExpression parseExpression() {
@@ -109,7 +159,8 @@ public class Parser {
             .setLocation(operator.location())
             .build();
       }
-      expr = new AstFunctionApply(operator.location(), operator.toString(), List.of(expr, m));
+      // expr = new AstFunctionApply(operator.location(), operator.toString(), List.of(expr, m));
+      expr = new AstFunctionApply();
     }
     return expr;
   }
@@ -128,7 +179,8 @@ public class Parser {
             .setLocation(operator.location())
             .build();
       }
-      expr = new AstFunctionApply(operator.location(), operator.toString(), List.of(expr, m));
+      // expr = new AstFunctionApply(operator.location(), operator.toString(), List.of(expr, m));
+      expr = new AstFunctionApply();
     }
     return expr;
   }
@@ -147,7 +199,8 @@ public class Parser {
             .setLocation(operator.location())
             .build();
       }
-      expr = new AstFunctionApply(operator.location(), operator.toString(), List.of(expr, m));
+      // expr = new AstFunctionApply(operator.location(), operator.toString(), List.of(expr, m));
+      expr = new AstFunctionApply();
     }
     return expr;
   }
@@ -162,16 +215,18 @@ public class Parser {
     switch (t.type()) {
       case TokenType.IDENTIFIER -> {
         if (tokens.current().is(TokenType.LPAREN)) {
-          return new AstFunctionApply(t.location(), t.value(), parseExpressionList());
+          var a = new AstFunctionApply();
+          return a;
         } else {
-          return new AstNameRef(t.location(), t.value());
+          var n = new AstNameRef(t.value());
+          n.setLocation(t.location());
+          return n;
         }
       }
-      case TokenType.NUMBER -> {
-        return new AstLiteral(t.location(), t.type(), t.value());
-      }
-      case TokenType.STRING -> {
-        return new AstLiteral(t.location(), t.type(), t.value());
+      case TokenType.NUMBER, TokenType.STRING -> {
+        var l = new AstLiteral(t.type(), t.value());
+        l.setLocation(t.location());
+        return l;
       }
       default ->
           throw CompilerException.builder()
@@ -205,22 +260,34 @@ public class Parser {
     }
   }
 
-  private List<VariableDef> parseParameters() {
-    tokens.take(TokenType.LPAREN);
-    List<VariableDef> params = new ArrayList<>();
-    for (var t = tokens.takeIf(TokenType.IDENTIFIER);
-        t != null;
-        t = tokens.takeIf(TokenType.IDENTIFIER)) {
-      params.add(new VariableDef(t.location(), t.value(), parseTypeRef()));
-      if (tokens.takeIf(TokenType.COMMA) == null) {
-        break;
-      }
+  private void parseFunctionQualifiedName(AstFunction function) {
+    var first = tokens.take(TokenType.IDENTIFIER);
+    function.setLocation(first.location());
+    if (tokens.takeIf(TokenType.PERIOD) != null) {
+      function.setBoundTypeName(first.value());
+      function.setName(tokens.take(TokenType.IDENTIFIER).value());
+    } else {
+      function.setName(first.value());
     }
-    tokens.take(TokenType.RPAREN);
-    return params;
+  }
+
+  private void parseParameters(AstFunction function) {
+    tokens.take(TokenType.LPAREN);
+    while (tokens.takeIf(TokenType.RPAREN) == null) {
+      var variable = new VariableDef();
+      var tokenName = tokens.take(TokenType.IDENTIFIER);
+      variable.setName(tokenName.value());
+      variable.setLocation(tokenName.location());
+      if (tokens.takeIf(TokenType.COMMA) != null) {
+        // If we have only a name - this is a bound variable.
+      } else {
+        variable.setTypeRef(parseTypeRef());
+      }
+      function.addParameter(variable);
+    }
   }
 
   private TypeRef parseTypeRef() {
-    return TypeRef.ofName(tokens.take(TokenType.IDENTIFIER).value());
+    return new TypeRef(tokens.take(TokenType.IDENTIFIER).value());
   }
 }

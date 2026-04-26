@@ -3,15 +3,11 @@ package com.github.idemura.cimple.compiler;
 import java.util.List;
 
 public class AstFunctionApply extends AstExpression {
-  private final String functionName;
-  private final List<AstExpression> args;
+  private String functionName;
+  private List<AstExpression> args;
   private AstFunction func;
 
-  AstFunctionApply(Location location, String functionName, List<AstExpression> args) {
-    super(location);
-    this.functionName = functionName;
-    this.args = args;
-  }
+  AstFunctionApply() {}
 
   @Override
   public void accept(Visitor visitor) {
@@ -23,8 +19,16 @@ public class AstFunctionApply extends AstExpression {
     return func.getResultType();
   }
 
+  void setFunctionName(String functionName) {
+    this.functionName = functionName;
+  }
+
   String getFunctionName() {
     return functionName;
+  }
+
+  void setArgs(List<AstExpression> args) {
+    this.args = args;
   }
 
   List<AstExpression> getArgs() {

@@ -4,11 +4,9 @@ import java.util.ArrayList;
 import java.util.List;
 
 public class AstBlock extends AstNode {
-  private final List<AstStatement> statements = new ArrayList<>();
+  private List<AstStatement> statements = new ArrayList<>();
 
-  AstBlock(Location location) {
-    super(location);
-  }
+  AstBlock() {}
 
   @Override
   public void accept(Visitor visitor) {

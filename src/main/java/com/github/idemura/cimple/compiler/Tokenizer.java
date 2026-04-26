@@ -21,7 +21,7 @@ class Tokenizer {
   TokenStream split() {
     final int n = code.length();
     if (n > 0 && code.charAt(n - 1) != '\n') {
-      throw CompilerException.builder().formatMessage("File must end with new line: \\n").build();
+      throw CompilerException.builder().formatMessage("File must end with new line").build();
     }
     var tokens = new TokenStream();
     while (index < n) {
@@ -83,7 +83,7 @@ class Tokenizer {
       column++;
       index++;
     }
-    return Token.ofIdOrKeyword(code.substring(first, index), location);
+    return new Token(TokenType.IDENTIFIER, code.substring(first, index), location);
   }
 
   private Token takeNumber() {
@@ -126,7 +126,7 @@ class Tokenizer {
     return new Location(fileName, line, column);
   }
 
-  void next() {
+  private void next() {
     if (code.charAt(index) == '\n') {
       column = 1;
       line++;

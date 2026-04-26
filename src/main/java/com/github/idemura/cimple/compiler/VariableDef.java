@@ -1,34 +1,38 @@
 package com.github.idemura.cimple.compiler;
 
 public class VariableDef {
-  private final Location location;
-  private final String name;
+  private Location location;
+  private String name;
   private TypeRef typeRef;
 
-  VariableDef(Location location, String name, TypeRef typeRef) {
-    this.location = location;
-    this.name = name;
-    this.typeRef = typeRef;
-  }
+  VariableDef() {}
 
   @Override
   public String toString() {
     return "VariableDef(" + name + (typeRef == null ? "" : ": " + typeRef) + ")";
   }
 
+  void setName(String name) {
+    this.name = name;
+  }
+
   public String getName() {
     return name;
   }
 
-  public Location getLocation() {
-    return location;
+  void setTypeRef(TypeRef typeRef) {
+    this.typeRef = typeRef;
   }
 
   public TypeRef getTypeRef() {
     return typeRef;
   }
 
-  void setTypeRef(TypeRef typeRef) {
-    this.typeRef = typeRef;
+  void setLocation(Location location) {
+    this.location = location;
+  }
+
+  Location getLocation() {
+    return location;
   }
 }

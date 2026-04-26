@@ -1,12 +1,11 @@
 package com.github.idemura.cimple.compiler;
 
 public class AstNameRef extends AstExpression {
-  private final String name;
+  private String name;
   // Variable definition that it refers to
   private VariableDef variable;
 
-  AstNameRef(Location location, String name) {
-    super(location);
+  AstNameRef(String name) {
     this.name = name;
   }
 

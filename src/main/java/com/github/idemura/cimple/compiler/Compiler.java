@@ -19,7 +19,7 @@ public class Compiler {
       debugOutput.write(tokens.toString());
       debugOutput.write("\n");
     }
-    var root = new Parser(params, tokens).parse();
+    var root = new Parser(tokens).parse();
     if (params.printAst()) {
       debugOutput.write("Parse tree\n");
       new PrintVisitor(debugOutput).print(root);

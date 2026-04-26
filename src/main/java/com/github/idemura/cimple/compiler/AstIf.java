@@ -1,28 +1,35 @@
 package com.github.idemura.cimple.compiler;
 
-public class AstIfElse extends AstStatement {
+public class AstIf extends AstStatement {
   private AstExpression condition;
   private AstBlock thenBlock;
   private AstBlock elseBlock;
 
-  AstIfElse(Location location, AstExpression condition, AstBlock thenBlock, AstBlock elseBlock) {
-    super(location);
-    this.condition = condition;
-    this.thenBlock = thenBlock;
-    this.elseBlock = elseBlock;
-  }
+  AstIf() {}
 
   @Override
   public void accept(Visitor visitor) {
     visitor.visit(this);
   }
 
+  void setCondition(AstExpression condition) {
+    this.condition = condition;
+  }
+
   AstExpression getCondition() {
     return condition;
   }
 
+  void setThenBlock(AstBlock thenBlock) {
+    this.thenBlock = thenBlock;
+  }
+
   AstBlock getThenBlock() {
     return thenBlock;
+  }
+
+  void setElseBlock(AstBlock elseBlock) {
+    this.elseBlock = elseBlock;
   }
 
   AstBlock getElseBlock() {

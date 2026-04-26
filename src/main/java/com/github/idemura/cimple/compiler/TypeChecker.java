@@ -1,6 +1,8 @@
 package com.github.idemura.cimple.compiler;
 
-import static com.google.common.base.Preconditions.checkNotNull;
+import static com.github.idemura.cimple.compiler.BuiltinTypeRefs.BOOL;
+import static com.github.idemura.cimple.compiler.BuiltinTypeRefs.INT;
+import static com.github.idemura.cimple.compiler.BuiltinTypeRefs.STRING;
 
 import com.github.idemura.cimple.common.CimpleException;
 import java.util.ArrayList;
@@ -9,7 +11,6 @@ import java.util.List;
 import java.util.Map;
 
 class TypeChecker extends Visitor {
-  private final ScopeNameMap<FunctionOverload> functions = new ScopeNameMap<>();
   private final ScopeNameMap<VariableDef> variables = new ScopeNameMap<>();
 
   TypeChecker() {}
@@ -18,21 +19,11 @@ class TypeChecker extends Visitor {
   protected void visit(AstModule node) {
     // Collect all functions. Then, we can collect variables - their init expressions may
     // reference functions.
-    Map<String, List<AstFunction>> stdOverloadLists = new HashMap<>();
-    for (var f : BuiltinFunctions.getList()) {
-      stdOverloadLists.computeIfAbsent(f.getName(), key -> new ArrayList<>()).add(f);
-    }
-    for (var e : stdOverloadLists.entrySet()) {
-      functions.putGlobal(e.getKey(), FunctionOverload.create(e.getValue()));
-    }
 
     Map<String, List<AstFunction>> overloads = new HashMap<>();
     for (var f : node.getFunctions()) {
       assignParameterTypes(f);
       overloads.computeIfAbsent(f.getName(), (k) -> new ArrayList<>()).add(f);
-    }
-    for (var e : overloads.entrySet()) {
-      functions.putGlobal(e.getKey(), FunctionOverload.create(e.getValue()));
     }
 
     // Variables collected as children visit pass. There relative order is preserved as
@@ -45,47 +36,47 @@ class TypeChecker extends Visitor {
   protected void visit(AstVariable node) {
     visitChildren(node);
 
-    var def = node.getVariableDef();
-
-    VariableDef conflict;
-    if (getParent() instanceof AstModule) {
-      conflict = variables.putGlobal(def.getName(), def);
-    } else {
-      conflict = variables.put(def.getName(), def);
-    }
-    if (conflict != null) {
-      throw CompilerException.builder()
-          .formatMessage("Variable %s: duplicate definition", def.getName())
-          .setLocation(def.getLocation())
-          .build();
-    }
-
-    var init = node.getInit();
-    if (init == null && def.getTypeRef() == null) {
-      throw CompilerException.builder()
-          .formatMessage("Variable %s: no type spec or initializer expression", def.getName())
-          .setLocation(def.getLocation())
-          .build();
-    }
-
-    if (def.getTypeRef() == null) {
-      def.setTypeRef(init.getTypeRef());
-    }
-
-    // Now typeRef of the variable is populated.
-    checkNotNull(def.getTypeRef());
-
-    // Check type compatibility if not the same.
-    if (init != null && init.getTypeRef() != def.getTypeRef()) {
-      init = promoteExpression(init, def.getTypeRef());
-      if (init == null) {
-        throw CompilerException.builder()
-            .formatMessage("Variable %s: incompatible initializer and type spec", def.getName())
-            .setLocation(def.getLocation())
-            .build();
-      }
-      node.setInit(init);
-    }
+    // var def = node.getVariableDef();
+    //
+    // VariableDef conflict;
+    // if (getParent() instanceof AstModule) {
+    //   conflict = variables.putGlobal(def.getName(), def);
+    // } else {
+    //   conflict = variables.put(def.getName(), def);
+    // }
+    // if (conflict != null) {
+    //   throw CompilerException.builder()
+    //       .formatMessage("Variable %s: duplicate definition", def.getName())
+    //       .setLocation(def.getLocation())
+    //       .build();
+    // }
+    //
+    // var init = node.getInit();
+    // if (init == null && def.getTypeRef() == null) {
+    //   throw CompilerException.builder()
+    //       .formatMessage("Variable %s: no type spec or initializer expression", def.getName())
+    //       .setLocation(def.getLocation())
+    //       .build();
+    // }
+    //
+    // if (def.getTypeRef() == null) {
+    //   def.setTypeRef(init.getTypeRef());
+    // }
+    //
+    // // Now typeRef of the variable is populated.
+    // checkNotNull(def.getTypeRef());
+    //
+    // // Check type compatibility if not the same.
+    // if (init != null && init.getTypeRef() != def.getTypeRef()) {
+    //   init = promoteExpression(init, def.getTypeRef());
+    //   if (init == null) {
+    //     throw CompilerException.builder()
+    //         .formatMessage("Variable %s: incompatible initializer and type spec", def.getName())
+    //         .setLocation(def.getLocation())
+    //         .build();
+    //   }
+    //   node.setInit(init);
+    // }
   }
 
   @Override
@@ -99,9 +90,7 @@ class TypeChecker extends Visitor {
             .build();
       }
     }
-
     visitChildren(node);
-
     variables.popScope();
   }
 
@@ -115,15 +104,13 @@ class TypeChecker extends Visitor {
   @Override
   protected void visit(AstLiteral node) {
     switch (node.getTokenType()) {
-      case TokenType.NUMBER:
+      case NUMBER:
         // TODO: Check literal suffix, range, etc. and assign type
-        node.setTypeRef(BuiltinTypes.INT32);
+        node.setTypeRef(INT);
         break;
-
-      case TokenType.STRING:
-        node.setTypeRef(BuiltinTypes.STRING);
+      case STRING:
+        node.setTypeRef(STRING);
         break;
-
       default:
         throw new CimpleException("Invalid token type %s".formatted(node.getTokenType()));
     }
@@ -144,29 +131,12 @@ class TypeChecker extends Visitor {
   @Override
   protected void visit(AstFunctionApply node) {
     visitChildren(node);
-
-    var overload = functions.get(node.getFunctionName());
-    if (overload == null) {
-      throw CompilerException.builder()
-          .formatMessage("Function %s not found", node.getFunctionName())
-          .setLocation(node.getLocation())
-          .build();
-    }
-
-    try {
-      var def = overload.resolve(node.getArgsTypes());
-      node.setFunc(def);
-    } catch (CompilerException e) {
-      // Add more information
-      // e.withLocation(node.getLocation());
-      throw e;
-    }
   }
 
   @Override
-  protected void visit(AstIfElse node) {
+  protected void visit(AstIf node) {
     visitChildren(node);
-    if (node.getCondition().getTypeRef() != BuiltinTypes.BOOL) {
+    if (node.getCondition().getTypeRef() != BOOL) {
       throw CompilerException.builder()
           .formatMessage("if-condition must be boolean, got %s", node.getCondition().getTypeRef())
           .setLocation(node.getLocation())
@@ -174,29 +144,29 @@ class TypeChecker extends Visitor {
     }
   }
 
-  private AstExpression promoteExpression(AstExpression expr, TypeRef resultType) {
-    // Quick check for the same type.
-    var exprType = expr.getTypeRef();
-    if (exprType.equals(resultType)) {
-      return expr;
-    }
-
-    if (exprType.isPrimitive() != resultType.isPrimitive()) {
-      return null;
-    }
-
-    // If both are primitive, use convert function.
-    if (exprType.isPrimitive()) {
-      if (resultType == BuiltinTypes.INT64 && exprType == BuiltinTypes.INT32) {
-        return new AstFunctionApply(null, "$i32_to_i64", List.of(expr));
-      }
-      if (resultType == BuiltinTypes.FLOAT64 && exprType == BuiltinTypes.FLOAT32) {
-        return new AstFunctionApply(null, "$f32_to_f64", List.of(expr));
-      }
-    }
-
-    return null;
-  }
+  // private AstExpression promoteExpression(AstExpression expr, TypeRef resultType) {
+  //   // Quick check for the same type.
+  //   var exprType = expr.getTypeRef();
+  //   if (exprType.equals(resultType)) {
+  //     return expr;
+  //   }
+  //
+  //   if (exprType.isPrimitive() != resultType.isPrimitive()) {
+  //     return null;
+  //   }
+  //
+  //   // If both are primitive, use convert function.
+  //   if (exprType.isPrimitive()) {
+  //     if (resultType == BuiltinTypes.INT64 && exprType == BuiltinTypes.INT32) {
+  //       return new AstFunctionApply(null, "$i32_to_i64", List.of(expr));
+  //     }
+  //     if (resultType == BuiltinTypes.FLOAT64 && exprType == BuiltinTypes.FLOAT32) {
+  //       return new AstFunctionApply(null, "$f32_to_f64", List.of(expr));
+  //     }
+  //   }
+  //
+  //   return null;
+  // }
 
   static void assignParameterTypes(AstFunction func) {
     // function f(x, y: i32) { ... }

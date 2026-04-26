@@ -1,12 +1,11 @@
 package com.github.idemura.cimple.compiler;
 
 public class AstLiteral extends AstExpression {
-  private final TokenType tokenType;
-  private final String value;
+  private TokenType tokenType;
+  private String value;
   private TypeRef typeRef;
 
-  AstLiteral(Location location, TokenType tokenType, String value) {
-    super(location);
+  AstLiteral(TokenType tokenType, String value) {
     this.tokenType = tokenType;
     this.value = value;
   }
@@ -16,17 +15,17 @@ public class AstLiteral extends AstExpression {
     visitor.visit(this);
   }
 
-  @Override
-  TypeRef getTypeRef() {
-    return typeRef;
+  TokenType getTokenType() {
+    return tokenType;
   }
 
   String getValue() {
     return value;
   }
 
-  TokenType getTokenType() {
-    return tokenType;
+  @Override
+  TypeRef getTypeRef() {
+    return typeRef;
   }
 
   void setTypeRef(TypeRef typeRef) {

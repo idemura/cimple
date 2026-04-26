@@ -4,11 +4,20 @@ import java.util.ArrayList;
 import java.util.List;
 
 public class AstModule extends AstNode {
-  private final List<AstFunction> functions = new ArrayList<>();
-  private final List<AstVariable> variables = new ArrayList<>();
+  private String name;
+  private List<AstFunction> functions = new ArrayList<>();
+  private List<AstVariable> variables = new ArrayList<>();
 
   AstModule() {
-    super(null);
+    super();
+  }
+
+  void setName(String name) {
+    this.name = name;
+  }
+
+  String getName() {
+    return name;
   }
 
   void addFunction(AstFunction f) {

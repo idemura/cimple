@@ -1,22 +1,31 @@
 package com.github.idemura.cimple.compiler;
 
 public class AstVariable extends AstStatement {
-  private final VariableDef variable;
+  private String name;
+  private TypeRef typeRef;
   private AstExpression init;
 
-  AstVariable(VariableDef variable, AstExpression init) {
-    super(null);
-    this.variable = variable;
-    this.init = init;
-  }
+  AstVariable() {}
 
   @Override
   public void accept(Visitor visitor) {
     visitor.visit(this);
   }
 
-  VariableDef getVariableDef() {
-    return variable;
+  void setName(String name) {
+    this.name = name;
+  }
+
+  String getName() {
+    return name;
+  }
+
+  void setTypeRef(TypeRef typeRef) {
+    this.typeRef = typeRef;
+  }
+
+  TypeRef getTypeRef() {
+    return typeRef;
   }
 
   void setInit(AstExpression init) {

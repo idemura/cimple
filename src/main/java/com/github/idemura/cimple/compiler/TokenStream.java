@@ -37,13 +37,36 @@ class TokenStream {
     return token;
   }
 
-  Token takeIf(TokenType tokenType) {
+  Token takeIf(TokenType type) {
     var token = tokens.get(pos);
-    if (token.type() != tokenType) {
+    if (token.type() != type) {
       return null;
     }
     pos++;
     return token;
+  }
+
+  Token takeKeyword(TokenType type) {
+    var token = tokens.get(pos);
+    var kw = token.keyword();
+    if (kw != type) {
+      throw CompilerException.builder()
+          .formatMessage("Expected token %s, got %s", type, token)
+          .setLocation(token.location())
+          .build();
+    }
+    pos++;
+    return new Token(type, token.value(), token.location());
+  }
+
+  Token takeKeywordIf(TokenType type) {
+    var token = tokens.get(pos);
+    var kw = token.keyword();
+    if (kw != type) {
+      return null;
+    }
+    pos++;
+    return new Token(type, token.value(), token.location());
   }
 
   Token current() {
