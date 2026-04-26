@@ -52,7 +52,7 @@ public class Parser {
     tokens.takeKeyword(TYPE);
     return switch (tokens.current().keyword()) {
       case STRUCT -> parseTypeStruct();
-      case ENUM -> throw new UnsupportedOperationException();
+      case UNION -> throw new UnsupportedOperationException();
       case ALIAS -> throw new UnsupportedOperationException();
       default ->
           throw CompilerException.builder()

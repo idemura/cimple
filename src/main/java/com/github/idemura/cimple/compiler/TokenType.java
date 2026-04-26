@@ -29,7 +29,7 @@ enum TokenType {
   CONST,
   DEFER,
   IF,
-  ENUM,
+  UNION,
   ELIF,
   ELSE,
   FOR,
@@ -57,7 +57,7 @@ enum TokenType {
       case "defer" -> DEFER;
       case "else" -> ELSE;
       case "elif" -> ELIF;
-      case "enum" -> ENUM;
+      case "union" -> UNION;
       case "for" -> FOR;
       case "function" -> FUNCTION;
       case "goto" -> GOTO;
