@@ -37,6 +37,15 @@ public class PrintAstVisitor extends AstVisitor {
   }
 
   @Override
+  protected void visit(AstTypeStruct node) {
+    printIndent();
+    output.write("TYPE STRUCT %s\n".formatted(node.getName()));
+    indent++;
+    visitChildren(node);
+    indent--;
+  }
+
+  @Override
   protected void visit(AstBlock node) {
     printIndent();
     output.write("BLOCK\n");
@@ -48,8 +57,10 @@ public class PrintAstVisitor extends AstVisitor {
   @Override
   protected void visit(AstReturn node) {
     printIndent();
-    output.write("RETURN");
+    output.write("RETURN\n");
+    indent++;
     visitChildren(node);
+    indent--;
   }
 
   @Override
@@ -90,9 +101,10 @@ public class PrintAstVisitor extends AstVisitor {
     var thenBlocks = node.getThenBlocks();
     for (var i = 0; i < conditions.size(); i++) {
       printIndent();
-      output.write("IF ");
+      output.write("IF\n");
+      indent++;
       conditions.get(i).accept(this);
-      output.write("\n");
+      indent--;
       printIndent();
       output.write("THEN\n");
       indent++;
@@ -111,12 +123,20 @@ public class PrintAstVisitor extends AstVisitor {
   @Override
   protected void visit(AstFor node) {
     printIndent();
-    output.write("FOR ");
+    output.write("FOR\n");
+    indent++;
+    printIndent();
+    output.write("INIT\n");
     if (node.getInit() != null) {
       node.getInit().accept(this);
     }
+    indent--;
+    printIndent();
+    output.write("INIT\n");
     if (node.getCondition() != null) {
+      indent++;
       node.getCondition().accept(this);
+      indent--;
     }
     indent++;
     node.getBlock().accept(this);

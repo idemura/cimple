@@ -6,6 +6,7 @@ import java.util.List;
 public class AstModule extends AstAbstractNode {
   private String name;
   private List<AstFunction> functions = new ArrayList<>();
+  private List<AstAbstractType> types = new ArrayList<>();
   private List<AstVariable> variables = new ArrayList<>();
 
   AstModule() {
@@ -24,6 +25,10 @@ public class AstModule extends AstAbstractNode {
     functions.add(f);
   }
 
+  void addType(AstAbstractType type) {
+    types.add(type);
+  }
+
   void addVariable(AstVariable v) {
     variables.add(v);
   }
@@ -35,6 +40,10 @@ public class AstModule extends AstAbstractNode {
 
   List<AstFunction> getFunctions() {
     return List.copyOf(functions);
+  }
+
+  List<AstAbstractType> getTypes() {
+    return List.copyOf(types);
   }
 
   List<AstVariable> getVariables() {

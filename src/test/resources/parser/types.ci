@@ -1,0 +1,8 @@
+module type_test;
+
+type struct Empty {}
+
+type struct Point {
+  var x int;
+  var y int;
+}

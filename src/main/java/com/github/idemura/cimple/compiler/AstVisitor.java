@@ -20,11 +20,26 @@ public abstract class AstVisitor {
 
   protected void visitChildren(AstModule node) {
     stack.add(node);
+    for (var t : node.getTypes()) {
+      t.accept(this);
+    }
     for (var v : node.getVariables()) {
       v.accept(this);
     }
     for (var f : node.getFunctions()) {
       f.accept(this);
+    }
+    stack.removeLast();
+  }
+
+  protected void visit(AstTypeStruct node) {
+    visitChildren(node);
+  }
+
+  protected void visitChildren(AstTypeStruct node) {
+    stack.add(node);
+    for (var field : node.getFields()) {
+      field.accept(this);
     }
     stack.removeLast();
   }

@@ -73,6 +73,29 @@ class ParserTest {
   }
 
   @Test
+  void testTypes() {
+    var module = parseFile("/parser/types.ci");
+    assertEquals("type_test", module.getName());
+    var types = module.getTypes();
+    assertEquals(2, types.size());
+    {
+      var type = (AstTypeStruct) types.get(0);
+      assertEquals("Empty", type.getName());
+      assertEquals(List.of(), type.getFields());
+    }
+    {
+      var type = (AstTypeStruct) types.get(1);
+      assertEquals("Point", type.getName());
+      var fields = type.getFields();
+      assertEquals(2, fields.size());
+      assertEquals("x", fields.get(0).getName());
+      assertEquals(INT, fields.get(0).getTypeRef());
+      assertEquals("y", fields.get(1).getName());
+      assertEquals(INT, fields.get(1).getTypeRef());
+    }
+  }
+
+  @Test
   void testIfStatement() {
     var module = parseFile("/parser/statements.ci");
     var function = module.getFunctions().get(0);

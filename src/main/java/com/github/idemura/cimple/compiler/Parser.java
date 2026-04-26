@@ -30,7 +30,8 @@ public class Parser {
           module.addFunction(parseFunction());
           break;
         case TYPE:
-          throw new UnsupportedOperationException();
+          module.addType(parseType());
+          break;
         case VAR:
           module.addVariable(parseVariable(true));
           break;
@@ -45,6 +46,33 @@ public class Parser {
       }
     }
     return module;
+  }
+
+  private AstAbstractType parseType() {
+    tokens.takeKeyword(TYPE);
+    return switch (tokens.current().keyword()) {
+      case STRUCT -> parseTypeStruct();
+      case ENUM -> throw new UnsupportedOperationException();
+      case ALIAS -> throw new UnsupportedOperationException();
+      default ->
+          throw CompilerException.builder()
+              .formatMessage("Expected type declaration kind after type")
+              .setLocation(tokens.current().location())
+              .build();
+    };
+  }
+
+  private AstTypeStruct parseTypeStruct() {
+    var type = new AstTypeStruct();
+    tokens.takeKeyword(STRUCT);
+    var name = tokens.take(IDENTIFIER);
+    type.setLocation(name.location());
+    type.setName(name.value());
+    tokens.take(LCURLY);
+    while (!tokens.takeIf(RCURLY)) {
+      type.addField(parseVariable(true));
+    }
+    return type;
   }
 
   private void parseModuleName(AstModule module) {

@@ -40,8 +40,8 @@ enum TokenType {
   INTERFACE,
   MATCH,
   MODULE,
-  RECORD,
   RETURN,
+  STRUCT,
   TEMPLATE,
   TYPE,
   VAR;
@@ -68,7 +68,7 @@ enum TokenType {
       case "match" -> MATCH;
       case "module" -> MODULE;
       case "return" -> RETURN;
-      case "record" -> RECORD;
+      case "struct" -> STRUCT;
       case "type" -> TYPE;
       case "var" -> VAR;
       default -> null;
