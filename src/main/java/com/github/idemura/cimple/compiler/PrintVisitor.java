@@ -112,7 +112,7 @@ public class PrintVisitor extends Visitor {
   }
 
   @Override
-  protected void visit(AstExpressionStmt node) {
+  protected void visit(AstExpressionStatement node) {
     printIndent();
     output.write("EXPR_STMT\n");
     indent++;

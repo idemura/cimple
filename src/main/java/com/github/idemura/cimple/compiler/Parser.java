@@ -134,7 +134,7 @@ public class Parser {
   }
 
   private AstStatement parseExpressionStatement() {
-    var e = new AstExpressionStmt();
+    var e = new AstExpressionStatement();
     e.setLocation(tokens.current().location());
     e.setExpression(parseExpression());
     tokens.take(TokenType.SEMICOLON);

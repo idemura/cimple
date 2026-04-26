@@ -111,11 +111,11 @@ public abstract class Visitor {
     }
   }
 
-  protected void visit(AstExpressionStmt node) {
+  protected void visit(AstExpressionStatement node) {
     visitChildren(node);
   }
 
-  protected void visitChildren(AstExpressionStmt node) {
+  protected void visitChildren(AstExpressionStatement node) {
     stack.add(node);
     node.getExpression().accept(this);
     stack.removeLast();

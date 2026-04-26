@@ -1,10 +1,10 @@
 package com.github.idemura.cimple.compiler;
 
 // Assignment expression
-public class AstExpressionStmt extends AstStatement {
+public class AstExpressionStatement extends AstStatement {
   private AstExpression expression;
 
-  AstExpressionStmt() {}
+  AstExpressionStatement() {}
 
   @Override
   public void accept(Visitor visitor) {
