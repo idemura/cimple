@@ -1,13 +1,13 @@
-package com.github.idemura.cimple.compiler;
+package com.github.idemura.cimple.compiler.ast;
 
 import java.util.Objects;
 
-public class AstGoto extends AstAbstractStatement {
+public class AstGoto extends AstStatement {
   private String label;
 
-  AstGoto() {}
+  public AstGoto() {}
 
-  AstGoto(String label) {
+  public AstGoto(String label) {
     this.label = label;
   }
 
@@ -27,11 +27,11 @@ public class AstGoto extends AstAbstractStatement {
         || (object instanceof AstGoto other && Objects.equals(label, other.label));
   }
 
-  void setLabel(String label) {
+  public void setLabel(String label) {
     this.label = label;
   }
 
-  String getLabel() {
+  public String getLabel() {
     return label;
   }
 }

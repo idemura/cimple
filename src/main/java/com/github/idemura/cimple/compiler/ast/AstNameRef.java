@@ -1,13 +1,15 @@
-package com.github.idemura.cimple.compiler;
+package com.github.idemura.cimple.compiler.ast;
 
+import com.github.idemura.cimple.compiler.TypeRef;
+import com.github.idemura.cimple.compiler.VariableDef;
 import java.util.Objects;
 
-public class AstNameRef extends AstAbstractExpression {
+public class AstNameRef extends AstExpression {
   private String name;
   // Variable definition that it refers to
   private VariableDef variable;
 
-  AstNameRef(String name) {
+  public AstNameRef(String name) {
     this.name = name;
   }
 
@@ -33,19 +35,19 @@ public class AstNameRef extends AstAbstractExpression {
   }
 
   @Override
-  TypeRef getTypeRef() {
+  public TypeRef getTypeRef() {
     return variable.getTypeRef();
   }
 
-  String getName() {
+  public String getName() {
     return name;
   }
 
-  void setVariable(VariableDef variable) {
+  public void setVariable(VariableDef variable) {
     this.variable = variable;
   }
 
-  VariableDef getVariable() {
+  public VariableDef getVariable() {
     return variable;
   }
 }

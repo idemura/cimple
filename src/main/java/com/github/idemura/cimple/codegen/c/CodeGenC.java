@@ -2,12 +2,12 @@ package com.github.idemura.cimple.codegen.c;
 
 import com.github.idemura.cimple.common.CimpleException;
 import com.github.idemura.cimple.common.IndentWriter;
-import com.github.idemura.cimple.compiler.AstAbstractNode;
-import com.github.idemura.cimple.compiler.AstBlock;
-import com.github.idemura.cimple.compiler.AstFunction;
-import com.github.idemura.cimple.compiler.AstVisitor;
 import com.github.idemura.cimple.compiler.CodeGen;
 import com.github.idemura.cimple.compiler.TypeRef;
+import com.github.idemura.cimple.compiler.ast.AstBlock;
+import com.github.idemura.cimple.compiler.ast.AstFunction;
+import com.github.idemura.cimple.compiler.ast.AstNode;
+import com.github.idemura.cimple.compiler.ast.AstVisitor;
 
 public class CodeGenC extends AstVisitor implements CodeGen {
   private final IndentWriter out;
@@ -17,7 +17,7 @@ public class CodeGenC extends AstVisitor implements CodeGen {
   }
 
   @Override
-  public void generateCode(AstAbstractNode root) {
+  public void generateCode(AstNode root) {
     emitPrologue();
     root.accept(this);
     emitEpilogue();

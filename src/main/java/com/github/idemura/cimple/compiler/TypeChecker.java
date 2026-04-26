@@ -3,6 +3,7 @@ package com.github.idemura.cimple.compiler;
 import static com.github.idemura.cimple.compiler.BuiltinTypeRefs.*;
 
 import com.github.idemura.cimple.common.CimpleException;
+import com.github.idemura.cimple.compiler.ast.*;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;

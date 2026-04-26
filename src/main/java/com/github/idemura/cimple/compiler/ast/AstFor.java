@@ -1,13 +1,13 @@
-package com.github.idemura.cimple.compiler;
+package com.github.idemura.cimple.compiler.ast;
 
 import java.util.Objects;
 
-public class AstFor extends AstAbstractStatement {
+public class AstFor extends AstStatement {
   private AstVariable init;
-  private AstAbstractExpression condition;
+  private AstExpression condition;
   private AstBlock block;
 
-  AstFor() {}
+  public AstFor() {}
 
   @Override
   public void accept(AstVisitor visitor) {
@@ -28,27 +28,27 @@ public class AstFor extends AstAbstractStatement {
             && Objects.equals(block, other.block));
   }
 
-  void setInit(AstVariable init) {
+  public void setInit(AstVariable init) {
     this.init = init;
   }
 
-  AstVariable getInit() {
+  public AstVariable getInit() {
     return init;
   }
 
-  AstAbstractExpression getCondition() {
+  public AstExpression getCondition() {
     return condition;
   }
 
-  void setCondition(AstAbstractExpression condition) {
+  public void setCondition(AstExpression condition) {
     this.condition = condition;
   }
 
-  AstBlock getBlock() {
+  public AstBlock getBlock() {
     return block;
   }
 
-  void setBlock(AstBlock block) {
+  public void setBlock(AstBlock block) {
     this.block = block;
   }
 }

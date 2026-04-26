@@ -1,5 +1,7 @@
 package com.github.idemura.cimple.compiler;
 
+import com.github.idemura.cimple.compiler.ast.AstNode;
+
 public interface CodeGen {
-  void generateCode(AstAbstractNode root);
+  void generateCode(AstNode root);
 }

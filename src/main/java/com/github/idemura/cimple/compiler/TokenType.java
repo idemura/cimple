@@ -1,6 +1,6 @@
 package com.github.idemura.cimple.compiler;
 
-enum TokenType {
+public enum TokenType {
   EOF("EOF"),
   IDENTIFIER("<identifier>"),
   NUMBER("<number>"),

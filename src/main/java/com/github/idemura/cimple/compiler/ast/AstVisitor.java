@@ -1,16 +1,16 @@
-package com.github.idemura.cimple.compiler;
+package com.github.idemura.cimple.compiler.ast;
 
 import java.util.ArrayList;
 import java.util.List;
 
 public abstract class AstVisitor {
-  private final List<AstAbstractNode> stack = new ArrayList<>();
+  private final List<AstNode> stack = new ArrayList<>();
 
-  protected AstAbstractNode getParent() {
+  protected AstNode getParent() {
     return getParent(0);
   }
 
-  protected AstAbstractNode getParent(int n) {
+  protected AstNode getParent(int n) {
     return n < stack.size() ? stack.get(stack.size() - (n + 1)) : null;
   }
 

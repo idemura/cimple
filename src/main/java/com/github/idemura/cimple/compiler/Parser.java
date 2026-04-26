@@ -2,6 +2,7 @@ package com.github.idemura.cimple.compiler;
 
 import static com.github.idemura.cimple.compiler.TokenType.*;
 
+import com.github.idemura.cimple.compiler.ast.*;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -13,7 +14,7 @@ public class Parser {
     this.tokens = tokens;
   }
 
-  AstAbstractNode parse() {
+  AstNode parse() {
     return parseModule();
   }
 
@@ -48,7 +49,7 @@ public class Parser {
     return module;
   }
 
-  private AstAbstractType parseType() {
+  private AstType parseType() {
     tokens.takeKeyword(TYPE);
     return switch (tokens.current().keyword()) {
       case STRUCT -> parseTypeStruct();
@@ -133,7 +134,7 @@ public class Parser {
     return b;
   }
 
-  private AstAbstractStatement parseStatement() {
+  private AstStatement parseStatement() {
     var current = tokens.current();
     return switch (current.keyword()) {
       case VAR -> parseVariable(true);
@@ -148,7 +149,7 @@ public class Parser {
     };
   }
 
-  private AstAbstractStatement parseReturn() {
+  private AstStatement parseReturn() {
     var stmt = new AstReturn();
     var keyword = tokens.takeKeyword(RETURN);
     stmt.setLocation(keyword.location());
@@ -157,7 +158,7 @@ public class Parser {
     return stmt;
   }
 
-  private AstAbstractStatement parseIf() {
+  private AstStatement parseIf() {
     var stmt = new AstIf();
     var keyword = tokens.takeKeyword(IF);
     stmt.setLocation(keyword.location());
@@ -170,7 +171,7 @@ public class Parser {
     return stmt;
   }
 
-  private AstAbstractStatement parseFor() {
+  private AstStatement parseFor() {
     var stmt = new AstFor();
     var keyword = tokens.takeKeyword(FOR);
     stmt.setLocation(keyword.location());
@@ -184,7 +185,7 @@ public class Parser {
     return stmt;
   }
 
-  private AstAbstractStatement parseGoto() {
+  private AstStatement parseGoto() {
     var stmt = new AstGoto();
     var keyword = tokens.takeKeyword(GOTO);
     stmt.setLocation(keyword.location());
@@ -193,7 +194,7 @@ public class Parser {
     return stmt;
   }
 
-  private AstAbstractStatement parseDefer() {
+  private AstStatement parseDefer() {
     var stmt = new AstDefer();
     var keyword = tokens.takeKeyword(DEFER);
     stmt.setLocation(keyword.location());
@@ -202,7 +203,7 @@ public class Parser {
     return stmt;
   }
 
-  private AstAbstractStatement parseExpressionStatement() {
+  private AstStatement parseExpressionStatement() {
     var e = new AstExpressionStatement();
     e.setLocation(tokens.current().location());
     e.setExpression(parseExpression());
@@ -210,12 +211,12 @@ public class Parser {
     return e;
   }
 
-  private AstAbstractExpression parseExpression() {
+  private AstExpression parseExpression() {
     return parseExpressionComparison();
   }
 
-  private AstAbstractExpression parseExpressionComparison() {
-    AstAbstractExpression expr = parseExpressionAdditive();
+  private AstExpression parseExpressionComparison() {
+    AstExpression expr = parseExpressionAdditive();
     if (expr == null) {
       return null;
     }
@@ -234,8 +235,8 @@ public class Parser {
     return expr;
   }
 
-  private AstAbstractExpression parseExpressionAdditive() {
-    AstAbstractExpression expr = parseExpressionMultiple();
+  private AstExpression parseExpressionAdditive() {
+    AstExpression expr = parseExpressionMultiple();
     if (expr == null) {
       return null;
     }
@@ -254,8 +255,8 @@ public class Parser {
     return expr;
   }
 
-  private AstAbstractExpression parseExpressionMultiple() {
-    AstAbstractExpression expr = parseExpressionPrimary();
+  private AstExpression parseExpressionMultiple() {
+    AstExpression expr = parseExpressionPrimary();
     if (expr == null) {
       return null;
     }
@@ -274,7 +275,7 @@ public class Parser {
     return expr;
   }
 
-  private AstAbstractExpression parseExpressionPrimary() {
+  private AstExpression parseExpressionPrimary() {
     if (tokens.takeIf(LPAREN)) {
       var e = parseExpression();
       tokens.take(RPAREN);
@@ -305,8 +306,8 @@ public class Parser {
     }
   }
 
-  private List<AstAbstractExpression> parseExpressionList() {
-    List<AstAbstractExpression> result = new ArrayList<>();
+  private List<AstExpression> parseExpressionList() {
+    List<AstExpression> result = new ArrayList<>();
     tokens.take(LPAREN);
     if (!tokens.takeIf(RPAREN)) {
       do {

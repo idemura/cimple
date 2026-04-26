@@ -5,11 +5,12 @@ import static com.github.idemura.cimple.compiler.BuiltinTypeRefs.*;
 import static com.github.idemura.cimple.compiler.TokenType.NUMBER;
 import static org.junit.jupiter.api.Assertions.*;
 
+import com.github.idemura.cimple.compiler.ast.*;
 import java.util.List;
 import org.junit.jupiter.api.Test;
 
 class ParserTest {
-  private AstAbstractNode parseCode(String code) {
+  private AstNode parseCode(String code) {
     return new Parser(new Tokenizer(null, code).split()).parse();
   }
 

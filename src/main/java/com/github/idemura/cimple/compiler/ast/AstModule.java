@@ -1,35 +1,35 @@
-package com.github.idemura.cimple.compiler;
+package com.github.idemura.cimple.compiler.ast;
 
 import java.util.ArrayList;
 import java.util.List;
 
-public class AstModule extends AstAbstractNode {
+public class AstModule extends AstNode {
   private String name;
   private List<AstFunction> functions = new ArrayList<>();
-  private List<AstAbstractType> types = new ArrayList<>();
+  private List<AstType> types = new ArrayList<>();
   private List<AstVariable> variables = new ArrayList<>();
 
-  AstModule() {
+  public AstModule() {
     super();
   }
 
-  void setName(String name) {
+  public void setName(String name) {
     this.name = name;
   }
 
-  String getName() {
+  public String getName() {
     return name;
   }
 
-  void addFunction(AstFunction f) {
+  public void addFunction(AstFunction f) {
     functions.add(f);
   }
 
-  void addType(AstAbstractType type) {
+  public void addType(AstType type) {
     types.add(type);
   }
 
-  void addVariable(AstVariable v) {
+  public void addVariable(AstVariable v) {
     variables.add(v);
   }
 
@@ -38,15 +38,15 @@ public class AstModule extends AstAbstractNode {
     visitor.visit(this);
   }
 
-  List<AstFunction> getFunctions() {
+  public List<AstFunction> getFunctions() {
     return List.copyOf(functions);
   }
 
-  List<AstAbstractType> getTypes() {
+  public List<AstType> getTypes() {
     return List.copyOf(types);
   }
 
-  List<AstVariable> getVariables() {
+  public List<AstVariable> getVariables() {
     return List.copyOf(variables);
   }
 }

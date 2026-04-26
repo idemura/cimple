@@ -1,6 +1,23 @@
 package com.github.idemura.cimple.compiler;
 
 import com.github.idemura.cimple.common.IndentWriter;
+import com.github.idemura.cimple.compiler.ast.AstBlock;
+import com.github.idemura.cimple.compiler.ast.AstDefer;
+import com.github.idemura.cimple.compiler.ast.AstExpressionStatement;
+import com.github.idemura.cimple.compiler.ast.AstFor;
+import com.github.idemura.cimple.compiler.ast.AstFunction;
+import com.github.idemura.cimple.compiler.ast.AstFunctionApply;
+import com.github.idemura.cimple.compiler.ast.AstGoto;
+import com.github.idemura.cimple.compiler.ast.AstIf;
+import com.github.idemura.cimple.compiler.ast.AstLiteral;
+import com.github.idemura.cimple.compiler.ast.AstModule;
+import com.github.idemura.cimple.compiler.ast.AstNameRef;
+import com.github.idemura.cimple.compiler.ast.AstNode;
+import com.github.idemura.cimple.compiler.ast.AstReturn;
+import com.github.idemura.cimple.compiler.ast.AstTypeAlias;
+import com.github.idemura.cimple.compiler.ast.AstTypeStruct;
+import com.github.idemura.cimple.compiler.ast.AstVariable;
+import com.github.idemura.cimple.compiler.ast.AstVisitor;
 
 public class PrintAstVisitor extends AstVisitor {
   private final IndentWriter output;
@@ -9,7 +26,7 @@ public class PrintAstVisitor extends AstVisitor {
     this.output = output;
   }
 
-  public void print(AstAbstractNode node) {
+  public void print(AstNode node) {
     node.accept(this);
   }
 

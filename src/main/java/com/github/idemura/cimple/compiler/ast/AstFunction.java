@@ -1,9 +1,11 @@
-package com.github.idemura.cimple.compiler;
+package com.github.idemura.cimple.compiler.ast;
 
+import com.github.idemura.cimple.compiler.TypeRef;
+import com.github.idemura.cimple.compiler.VariableDef;
 import java.util.ArrayList;
 import java.util.List;
 
-public class AstFunction extends AstAbstractNode {
+public class AstFunction extends AstNode {
   private String boundTypeName;
   private String name;
   private TypeRef resultType;
@@ -33,7 +35,7 @@ public class AstFunction extends AstAbstractNode {
     visitor.visit(this);
   }
 
-  void setName(String name) {
+  public void setName(String name) {
     this.name = name;
   }
 
@@ -41,15 +43,15 @@ public class AstFunction extends AstAbstractNode {
     return name;
   }
 
-  void setBoundTypeName(String boundTypeName) {
+  public void setBoundTypeName(String boundTypeName) {
     this.boundTypeName = boundTypeName;
   }
 
-  String getBoundTypeName() {
+  public String getBoundTypeName() {
     return boundTypeName;
   }
 
-  void setResultType(TypeRef resultType) {
+  public void setResultType(TypeRef resultType) {
     this.resultType = resultType;
   }
 
@@ -57,7 +59,7 @@ public class AstFunction extends AstAbstractNode {
     return resultType;
   }
 
-  void addParameter(VariableDef parameter) {
+  public void addParameter(VariableDef parameter) {
     this.parameters.add(parameter);
   }
 
@@ -65,7 +67,7 @@ public class AstFunction extends AstAbstractNode {
     return parameters;
   }
 
-  void setBlock(AstBlock block) {
+  public void setBlock(AstBlock block) {
     this.block = block;
   }
 

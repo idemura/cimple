@@ -1,13 +1,15 @@
-package com.github.idemura.cimple.compiler;
+package com.github.idemura.cimple.compiler.ast;
 
+import com.github.idemura.cimple.compiler.TokenType;
+import com.github.idemura.cimple.compiler.TypeRef;
 import java.util.Objects;
 
-public class AstLiteral extends AstAbstractExpression {
+public class AstLiteral extends AstExpression {
   private TokenType tokenType;
   private Object value;
   private TypeRef typeRef;
 
-  AstLiteral(TokenType tokenType, Object value) {
+  public AstLiteral(TokenType tokenType, Object value) {
     this.tokenType = tokenType;
     this.value = value;
   }
@@ -30,20 +32,20 @@ public class AstLiteral extends AstAbstractExpression {
             && Objects.equals(value, other.value));
   }
 
-  TokenType getTokenType() {
+  public TokenType getTokenType() {
     return tokenType;
   }
 
-  Object getValue() {
+  public Object getValue() {
     return value;
   }
 
   @Override
-  TypeRef getTypeRef() {
+  public TypeRef getTypeRef() {
     return typeRef;
   }
 
-  void setTypeRef(TypeRef typeRef) {
+  public void setTypeRef(TypeRef typeRef) {
     this.typeRef = typeRef;
   }
 }
