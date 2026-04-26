@@ -130,6 +130,15 @@ public class PrintAstVisitor extends AstVisitor {
   }
 
   @Override
+  protected void visit(AstDefer node) {
+    printIndent();
+    output.write("DEFER\n");
+    indent++;
+    node.getExpression().accept(this);
+    indent--;
+  }
+
+  @Override
   protected void visit(AstExpressionStatement node) {
     printIndent();
     output.write("EXPR\n");

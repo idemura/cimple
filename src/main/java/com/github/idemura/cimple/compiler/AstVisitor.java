@@ -127,6 +127,16 @@ public abstract class AstVisitor {
 
   protected void visitChildren(AstGoto node) {}
 
+  protected void visit(AstDefer node) {
+    visitChildren(node);
+  }
+
+  protected void visitChildren(AstDefer node) {
+    stack.add(node);
+    node.getExpression().accept(this);
+    stack.removeLast();
+  }
+
   protected void visit(AstVariable node) {
     visitChildren(node);
   }

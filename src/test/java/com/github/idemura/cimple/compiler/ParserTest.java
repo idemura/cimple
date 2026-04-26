@@ -74,8 +74,9 @@ class ParserTest {
 
   @Test
   void testIfStatement() {
-    var module = parseFile("/parser/statement_if.ci");
+    var module = parseFile("/parser/statements.ci");
     var function = module.getFunctions().get(0);
+    assertEquals("f", function.getName());
     var statements = function.getBlock().getStatements();
     assertEquals(3, statements.size());
     {
@@ -104,8 +105,9 @@ class ParserTest {
 
   @Test
   void testForStatement() {
-    var module = parseFile("/parser/statement_for.ci");
-    var function = module.getFunctions().get(0);
+    var module = parseFile("/parser/statements.ci");
+    var function = module.getFunctions().get(1);
+    assertEquals("g", function.getName());
     var statements = function.getBlock().getStatements();
     assertEquals(3, statements.size());
     {
@@ -133,6 +135,19 @@ class ParserTest {
       assertEquals(new AstLiteral(NUMBER, "0"), init.getInit());
       assertEquals(new AstNameRef("true"), stmtFor.getCondition());
       assertEquals(List.of(), stmtFor.getBlock().getStatements());
+    }
+  }
+
+  @Test
+  void testDeferStatement() {
+    var module = parseFile("/parser/statements.ci");
+    var function = module.getFunctions().get(2);
+    assertEquals("d", function.getName());
+    var statements = function.getBlock().getStatements();
+    assertEquals(1, statements.size());
+    {
+      var stmtDefer = (AstDefer) statements.get(0);
+      assertEquals(new AstNameRef("value"), stmtDefer.getExpression());
     }
   }
 }

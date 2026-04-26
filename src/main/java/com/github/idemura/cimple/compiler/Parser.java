@@ -88,80 +88,78 @@ public class Parser {
     var b = new AstBlock();
     tokens.take(LCURLY);
     while (!tokens.takeIf(RCURLY)) {
-      var current = tokens.current();
-      switch (current.keyword()) {
-        case VAR:
-          b.add(parseVariable(true));
-          break;
-        case CONST:
-          b.add(parseVariable(false));
-          break;
-        case RETURN:
-          b.add(parseReturn());
-          break;
-        case IF:
-          b.add(parseIf());
-          break;
-        case FOR:
-          b.add(parseFor());
-          break;
-        case MATCH:
-          throw new UnsupportedOperationException();
-        case GOTO:
-          b.add(parseGoto());
-          break;
-        default:
-          // TODO: Should be an expression with a side effect
-          b.add(parseExpressionStatement());
-          break;
-      }
+      b.add(parseStatement());
     }
     return b;
   }
 
+  private AstAbstractStatement parseStatement() {
+    var current = tokens.current();
+    return switch (current.keyword()) {
+      case VAR -> parseVariable(true);
+      case CONST -> parseVariable(false);
+      case RETURN -> parseReturn();
+      case IF -> parseIf();
+      case FOR -> parseFor();
+      case DEFER -> parseDefer();
+      case MATCH -> throw new UnsupportedOperationException();
+      case GOTO -> parseGoto();
+      default -> parseExpressionStatement();
+    };
+  }
+
   private AstAbstractStatement parseReturn() {
-    var r = new AstReturn();
+    var stmt = new AstReturn();
     var keyword = tokens.takeKeyword(RETURN);
-    r.setLocation(keyword.location());
-    r.setExpression(parseExpression());
+    stmt.setLocation(keyword.location());
+    stmt.setExpression(parseExpression());
     tokens.take(SEMICOLON);
-    return r;
+    return stmt;
   }
 
   private AstAbstractStatement parseIf() {
-    var ifNode = new AstIf();
+    var stmt = new AstIf();
     var keyword = tokens.takeKeyword(IF);
-    ifNode.setLocation(keyword.location());
+    stmt.setLocation(keyword.location());
     do {
-      ifNode.addIf(parseExpression(), parseBlock());
+      stmt.addIf(parseExpression(), parseBlock());
     } while (tokens.takeKeywordIf(ELIF));
     if (tokens.takeKeywordIf(ELSE)) {
-      ifNode.setElseBlock(parseBlock());
+      stmt.setElseBlock(parseBlock());
     }
-    return ifNode;
+    return stmt;
   }
 
   private AstAbstractStatement parseFor() {
-    var forNode = new AstFor();
+    var stmt = new AstFor();
     var keyword = tokens.takeKeyword(FOR);
-    forNode.setLocation(keyword.location());
+    stmt.setLocation(keyword.location());
     if (tokens.current().keyword() == VAR) {
-      forNode.setInit(parseVariable(true));
+      stmt.setInit(parseVariable(true));
     }
     if (!tokens.current().is(LCURLY)) {
-      forNode.setCondition(parseExpression());
+      stmt.setCondition(parseExpression());
     }
-    forNode.setBlock(parseBlock());
-    return forNode;
+    stmt.setBlock(parseBlock());
+    return stmt;
   }
 
   private AstAbstractStatement parseGoto() {
-    var gotoNode = new AstGoto();
+    var stmt = new AstGoto();
     var keyword = tokens.takeKeyword(GOTO);
-    gotoNode.setLocation(keyword.location());
-    gotoNode.setLabel(tokens.take(IDENTIFIER).value());
+    stmt.setLocation(keyword.location());
+    stmt.setLabel(tokens.take(IDENTIFIER).value());
     tokens.take(SEMICOLON);
-    return gotoNode;
+    return stmt;
+  }
+
+  private AstAbstractStatement parseDefer() {
+    var stmt = new AstDefer();
+    var keyword = tokens.takeKeyword(DEFER);
+    stmt.setLocation(keyword.location());
+    stmt.setExpression(parseExpression());
+    tokens.take(SEMICOLON);
+    return stmt;
   }
 
   private AstAbstractStatement parseExpressionStatement() {

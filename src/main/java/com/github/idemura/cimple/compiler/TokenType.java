@@ -27,6 +27,7 @@ enum TokenType {
   CASE,
   CLASS,
   CONST,
+  DEFER,
   IF,
   ENUM,
   ELIF,
@@ -53,6 +54,7 @@ enum TokenType {
       case "case" -> CASE;
       case "class" -> CLASS;
       case "const" -> CONST;
+      case "defer" -> DEFER;
       case "else" -> ELSE;
       case "elif" -> ELIF;
       case "enum" -> ENUM;

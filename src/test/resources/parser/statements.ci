@@ -1,0 +1,27 @@
+module test_statements;
+
+function f(a bool, b bool) {
+  if a {
+  }
+  if a {
+  } else {
+  }
+  if a {
+  } elif b {
+  } else {
+  }
+}
+
+function g() {
+  for {
+    goto end;
+  }
+  for var i = 0; {
+  }
+  for var i = 0; true {
+  }
+}
+
+function d() {
+  defer value;
+}
