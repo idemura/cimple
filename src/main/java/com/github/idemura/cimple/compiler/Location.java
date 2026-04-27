@@ -5,8 +5,8 @@ public record Location(String file, int line, int column) {
     this(null, line, column);
   }
 
-  public boolean isNone() {
-    return file == null;
+  public boolean hasFile() {
+    return file != null;
   }
 
   @Override
