@@ -59,11 +59,12 @@ openConnection
 action
 ```
 
-### Fundamental Types
+### Builtin Types
 
-Cimple has following fundamental types:
+Cimple has following basic types:
 
 ```
+void
 bool
 char
 int8
@@ -77,13 +78,13 @@ float
 string
 ```
 
-`int` is just a synonym for `int64` and float is a synonym for `float64`.
+`int` is a synonym for `int64` and `float` is a synonym for `float64`.
 
 ### Numbers
 
 Numbers start with a decimal digit. Integers do not contain decimal point (`.`) while floats do.
 Integer literals are of type `int64` and floats of type `float64`.
-When used to init variable  of a smaller type or passed as a argument of a smaller type,
+When used to init variable of a smaller type or passed as a argument of a smaller type,
 the compiler checks it is withing the smaller type range.
 
 ### Booleans

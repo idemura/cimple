@@ -1,9 +1,9 @@
 package com.github.idemura.cimple.compiler.parser;
 
 import static com.github.idemura.cimple.common.Resources.readResource;
-import static com.github.idemura.cimple.compiler.BuiltinTypeRefs.*;
 import static org.junit.jupiter.api.Assertions.*;
 
+import com.github.idemura.cimple.compiler.TypeRef;
 import com.github.idemura.cimple.compiler.VariableDef;
 import com.github.idemura.cimple.compiler.ast.*;
 import com.github.idemura.cimple.compiler.tokens.Tokenizer;
@@ -38,7 +38,7 @@ class ParserTest {
       assertNull(f.getResultType());
       var params = f.getParameters();
       assertEquals(1, params.size());
-      assertEquals(new VariableDef("x", INT), params.get(0));
+      assertEquals(new VariableDef("x", new TypeRef("int")), params.get(0));
     }
     {
       var f = functions.get(2);
@@ -46,13 +46,13 @@ class ParserTest {
       assertNull(f.getResultType());
       var params = f.getParameters();
       assertEquals(2, params.size());
-      assertEquals(new VariableDef("x", INT), params.get(0));
-      assertEquals(new VariableDef("y", INT), params.get(1));
+      assertEquals(new VariableDef("x", new TypeRef("int")), params.get(0));
+      assertEquals(new VariableDef("y", new TypeRef("int")), params.get(1));
     }
     {
       var f = functions.get(3);
       assertEquals("r", f.getName());
-      assertEquals(INT, f.getResultType());
+      assertEquals(new TypeRef("int"), f.getResultType());
       assertEquals(List.of(), f.getParameters());
     }
     var variables = module.getVariables();
@@ -60,12 +60,12 @@ class ParserTest {
     {
       var v = variables.get(0);
       assertEquals("v0", v.getName());
-      assertEquals(INT, v.getTypeRef());
+      assertEquals(new TypeRef("int"), v.getTypeRef());
     }
     {
       var v = variables.get(1);
       assertEquals("v1", v.getName());
-      assertEquals(INT, v.getTypeRef());
+      assertEquals(new TypeRef("int"), v.getTypeRef());
     }
     {
       var v = variables.get(2);
@@ -91,14 +91,14 @@ class ParserTest {
       var fields = type.getFields();
       assertEquals(2, fields.size());
       assertEquals("x", fields.get(0).getName());
-      assertEquals(INT, fields.get(0).getTypeRef());
+      assertEquals(new TypeRef("int"), fields.get(0).getTypeRef());
       assertEquals("y", fields.get(1).getName());
-      assertEquals(INT, fields.get(1).getTypeRef());
+      assertEquals(new TypeRef("int"), fields.get(1).getTypeRef());
     }
     {
       var type = (AstTypeAlias) types.get(2);
       assertEquals("Uri", type.getName());
-      assertEquals(STRING, type.getBaseTypeRef());
+      assertEquals(new TypeRef("string"), type.getBaseTypeRef());
     }
   }
 
