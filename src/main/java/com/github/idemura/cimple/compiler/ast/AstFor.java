@@ -2,7 +2,7 @@ package com.github.idemura.cimple.compiler.ast;
 
 import java.util.Objects;
 
-public class AstFor extends AstStatement {
+public final class AstFor extends AstStatement {
   private AstVariable init;
   private AstExpression condition;
   private AstBlock block;

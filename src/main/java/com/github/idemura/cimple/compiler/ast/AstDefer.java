@@ -1,6 +1,6 @@
 package com.github.idemura.cimple.compiler.ast;
 
-public class AstDefer extends AstStatement {
+public final class AstDefer extends AstStatement {
   private AstExpression expression;
 
   public AstDefer() {}

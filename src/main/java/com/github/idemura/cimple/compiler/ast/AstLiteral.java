@@ -4,7 +4,7 @@ import com.github.idemura.cimple.compiler.BuiltinType;
 import com.github.idemura.cimple.compiler.Type;
 import java.util.Objects;
 
-public class AstLiteral extends AstExpression {
+public final class AstLiteral extends AstExpression {
   // String literal stores values as String.
   // Number(integer/float) literal - as long(double), but actual type is defined by @type.
   private Object value;

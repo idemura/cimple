@@ -4,7 +4,7 @@ import com.github.idemura.cimple.compiler.Type;
 import com.github.idemura.cimple.compiler.VariableDef;
 import java.util.Objects;
 
-public class AstNameRef extends AstExpression {
+public final class AstNameRef extends AstExpression {
   private String name;
   // Variable definition that it refers to.
   private VariableDef variable;

@@ -3,7 +3,7 @@ package com.github.idemura.cimple.compiler.ast;
 import com.github.idemura.cimple.compiler.Type;
 import java.util.List;
 
-public class AstFunctionApply extends AstExpression {
+public final class AstFunctionApply extends AstExpression {
   private String functionName;
   private List<AstExpression> args;
   private AstFunction function;

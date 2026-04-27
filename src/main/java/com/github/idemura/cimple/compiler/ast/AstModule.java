@@ -3,7 +3,7 @@ package com.github.idemura.cimple.compiler.ast;
 import java.util.ArrayList;
 import java.util.List;
 
-public class AstModule extends AstNode {
+public final class AstModule extends AstNode {
   private String name;
   private List<AstFunction> functions = new ArrayList<>();
   private List<AstType> types = new ArrayList<>();

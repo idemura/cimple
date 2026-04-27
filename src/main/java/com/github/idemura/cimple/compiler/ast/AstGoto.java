@@ -2,7 +2,7 @@ package com.github.idemura.cimple.compiler.ast;
 
 import java.util.Objects;
 
-public class AstGoto extends AstStatement {
+public final class AstGoto extends AstStatement {
   private String label;
 
   public AstGoto() {}

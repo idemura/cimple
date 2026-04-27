@@ -1,6 +1,6 @@
 package com.github.idemura.cimple.compiler.ast;
 
-public class AstExpressionStatement extends AstStatement {
+public final class AstExpressionStatement extends AstStatement {
   private AstExpression expression;
 
   public AstExpressionStatement() {}

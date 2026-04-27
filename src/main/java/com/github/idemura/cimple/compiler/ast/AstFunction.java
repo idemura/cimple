@@ -5,7 +5,7 @@ import com.github.idemura.cimple.compiler.VariableDef;
 import java.util.ArrayList;
 import java.util.List;
 
-public class AstFunction extends AstNode {
+public final class AstFunction extends AstNode {
   private String boundTypeName;
   private String name;
   private TypeRef resultType;

@@ -3,7 +3,7 @@ package com.github.idemura.cimple.compiler.ast;
 import java.util.ArrayList;
 import java.util.List;
 
-public class AstTypeStruct extends AstType {
+public final class AstTypeStruct extends AstType {
   private List<AstVariable> fields = new ArrayList<>();
 
   public AstTypeStruct() {}

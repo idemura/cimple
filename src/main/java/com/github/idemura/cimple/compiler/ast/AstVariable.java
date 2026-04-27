@@ -2,7 +2,7 @@ package com.github.idemura.cimple.compiler.ast;
 
 import com.github.idemura.cimple.compiler.TypeRef;
 
-public class AstVariable extends AstStatement {
+public final class AstVariable extends AstStatement {
   private boolean mutable;
   private String name;
   private TypeRef typeRef;

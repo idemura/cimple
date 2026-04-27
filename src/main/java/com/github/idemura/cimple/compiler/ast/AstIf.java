@@ -3,7 +3,7 @@ package com.github.idemura.cimple.compiler.ast;
 import java.util.ArrayList;
 import java.util.List;
 
-public class AstIf extends AstStatement {
+public final class AstIf extends AstStatement {
   private List<AstExpression> conditions = new ArrayList<>();
   private List<AstBlock> thenBlocks = new ArrayList<>();
   private AstBlock elseBlock;

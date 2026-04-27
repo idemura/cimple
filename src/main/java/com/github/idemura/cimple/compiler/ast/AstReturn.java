@@ -1,6 +1,6 @@
 package com.github.idemura.cimple.compiler.ast;
 
-public class AstReturn extends AstStatement {
+public final class AstReturn extends AstStatement {
   private AstExpression expression;
 
   @Override

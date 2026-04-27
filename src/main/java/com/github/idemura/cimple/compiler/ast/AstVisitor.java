@@ -48,11 +48,7 @@ public abstract class AstVisitor {
     stack.removeLast();
   }
 
-  protected void visit(AstTypeAlias node) {
-    visitChildren(node);
-  }
-
-  protected void visitChildren(AstTypeAlias node) {}
+  protected void visit(AstTypeAlias node) {}
 
   protected void visit(AstFunction node) {
     visitChildren(node);
@@ -88,11 +84,7 @@ public abstract class AstVisitor {
     }
   }
 
-  protected void visit(AstLiteral node) {
-    visitChildren(node);
-  }
-
-  protected void visitChildren(AstLiteral node) {}
+  protected void visit(AstLiteral node) {}
 
   protected void visit(AstFunctionApply node) {
     visitChildren(node);
@@ -106,11 +98,7 @@ public abstract class AstVisitor {
     stack.removeLast();
   }
 
-  protected void visit(AstNameRef node) {
-    visitChildren(node);
-  }
-
-  protected void visitChildren(AstNameRef node) {}
+  protected void visit(AstNameRef node) {}
 
   protected void visit(AstIf node) {
     visitChildren(node);
@@ -146,11 +134,7 @@ public abstract class AstVisitor {
     stack.removeLast();
   }
 
-  protected void visit(AstGoto node) {
-    visitChildren(node);
-  }
-
-  protected void visitChildren(AstGoto node) {}
+  protected void visit(AstGoto node) {}
 
   protected void visit(AstDefer node) {
     visitChildren(node);
