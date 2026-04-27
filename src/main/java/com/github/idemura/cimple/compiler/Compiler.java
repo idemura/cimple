@@ -4,6 +4,7 @@ import com.github.idemura.cimple.common.IndentWriter;
 import com.github.idemura.cimple.compiler.ast.PrintAstVisitor;
 import com.github.idemura.cimple.compiler.codegen.CodeGenerator;
 import com.github.idemura.cimple.compiler.parser.Parser;
+import com.github.idemura.cimple.compiler.semantics.TypeChecker;
 import com.github.idemura.cimple.compiler.tokens.Tokenizer;
 
 public class Compiler {

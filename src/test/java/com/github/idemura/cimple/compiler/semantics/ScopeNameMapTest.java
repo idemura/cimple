@@ -1,4 +1,4 @@
-package com.github.idemura.cimple.compiler;
+package com.github.idemura.cimple.compiler.semantics;
 
 import static org.junit.jupiter.api.Assertions.*;
 

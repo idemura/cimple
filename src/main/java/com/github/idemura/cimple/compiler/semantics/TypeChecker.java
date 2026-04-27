@@ -1,18 +1,19 @@
-package com.github.idemura.cimple.compiler;
-
-import static com.github.idemura.cimple.compiler.BuiltinTypeRefs.*;
+package com.github.idemura.cimple.compiler.semantics;
 
 import com.github.idemura.cimple.common.CimpleException;
+import com.github.idemura.cimple.compiler.CompilerException;
+import com.github.idemura.cimple.compiler.TypeRef;
+import com.github.idemura.cimple.compiler.VariableDef;
 import com.github.idemura.cimple.compiler.ast.*;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-class TypeChecker extends AstVisitor {
+public class TypeChecker extends AstVisitor {
   private final ScopeNameMap<VariableDef> variables = new ScopeNameMap<>();
 
-  TypeChecker() {}
+  public TypeChecker() {}
 
   @Override
   protected void visit(AstModule node) {

@@ -6,12 +6,16 @@ import java.util.List;
 public abstract class AstVisitor {
   private final List<AstNode> stack = new ArrayList<>();
 
+  protected boolean hasParent(int n) {
+    return n < stack.size();
+  }
+
   protected AstNode getParent() {
     return getParent(0);
   }
 
   protected AstNode getParent(int n) {
-    return n < stack.size() ? stack.get(stack.size() - (n + 1)) : null;
+    return stack.get(stack.size() - (n + 1));
   }
 
   protected void visit(AstModule node) {

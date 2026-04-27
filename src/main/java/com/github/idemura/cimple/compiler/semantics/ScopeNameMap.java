@@ -1,4 +1,4 @@
-package com.github.idemura.cimple.compiler;
+package com.github.idemura.cimple.compiler.semantics;
 
 import static com.google.common.base.Preconditions.checkNotNull;
 
