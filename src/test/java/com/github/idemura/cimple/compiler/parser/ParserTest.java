@@ -153,7 +153,7 @@ class ParserTest {
       var init = stmtFor.getInit();
       assertEquals("i", init.getName());
       assertNull(init.getTypeRef());
-      assertEquals(new AstNumber("0"), init.getInit());
+      assertEquals(AstLiteral.ofInt(0), init.getInit());
       assertNull(stmtFor.getCondition());
       assertEquals(List.of(), stmtFor.getBlock().getStatements());
     }
@@ -162,7 +162,7 @@ class ParserTest {
       var init = stmtFor.getInit();
       assertEquals("i", init.getName());
       assertNull(init.getTypeRef());
-      assertEquals(new AstNumber("0"), init.getInit());
+      assertEquals(AstLiteral.ofInt(0), init.getInit());
       assertEquals(new AstNameRef("true"), stmtFor.getCondition());
       assertEquals(List.of(), stmtFor.getBlock().getStatements());
     }

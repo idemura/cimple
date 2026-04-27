@@ -48,11 +48,6 @@ public class PrintAstVisitor extends AstVisitor {
   }
 
   @Override
-  protected void visit(AstBuiltinType node) {
-    output.writeLine("TYPE BASIC %s".formatted(node.getName()));
-  }
-
-  @Override
   protected void visit(AstTypeAlias node) {
     output.writeLine("TYPE ALIAS %s = %s".formatted(node.getName(), node.getBaseTypeRef()));
   }

@@ -1,10 +1,11 @@
 package com.github.idemura.cimple.compiler;
 
 import com.github.idemura.cimple.common.IndentWriter;
+import com.github.idemura.cimple.compiler.ast.AstModule;
 import com.github.idemura.cimple.compiler.ast.PrintAstVisitor;
 import com.github.idemura.cimple.compiler.codegen.CodeGenerator;
 import com.github.idemura.cimple.compiler.parser.Parser;
-import com.github.idemura.cimple.compiler.semantics.TypeChecker;
+import com.github.idemura.cimple.compiler.semantics.SemanticAnalyzer;
 import com.github.idemura.cimple.compiler.tokens.Tokenizer;
 
 public class Compiler {
@@ -29,9 +30,10 @@ public class Compiler {
       debugOutput.writeLine("Parse tree\n");
       new PrintAstVisitor(debugOutput).print(root);
     }
-    root.accept(new TypeChecker());
+    var analyzer = new SemanticAnalyzer();
+    analyzer.analyze((AstModule) root);
     if (params.printAst()) {
-      debugOutput.writeLine("Type checked\n");
+      debugOutput.writeLine("Analyzed\n");
       new PrintAstVisitor(debugOutput).print(root);
     }
     // Outside of try because codegen should not generate user errors.

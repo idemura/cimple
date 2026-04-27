@@ -48,12 +48,6 @@ public abstract class AstVisitor {
     stack.removeLast();
   }
 
-  protected void visit(AstBuiltinType node) {
-    visitChildren(node);
-  }
-
-  protected void visitChildren(AstBuiltinType node) {}
-
   protected void visit(AstTypeAlias node) {
     visitChildren(node);
   }

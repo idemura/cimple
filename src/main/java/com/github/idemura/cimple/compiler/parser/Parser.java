@@ -1,7 +1,10 @@
 package com.github.idemura.cimple.compiler.parser;
 
 import static com.github.idemura.cimple.compiler.tokens.TokenType.*;
+import static java.lang.Double.parseDouble;
+import static java.lang.Long.parseLong;
 
+import com.github.idemura.cimple.compiler.BuiltinType;
 import com.github.idemura.cimple.compiler.CompilerException;
 import com.github.idemura.cimple.compiler.TypeRef;
 import com.github.idemura.cimple.compiler.VariableDef;
@@ -298,12 +301,21 @@ public class Parser {
         }
       }
       case NUMBER -> {
-        var l = new AstNumber(t.value());
+        var l = new AstLiteral();
+        if (t.value().contains(".")) {
+          l.setValue(parseDouble(t.value()));
+          l.setType(BuiltinType.FLOAT64);
+        } else {
+          l.setValue(parseLong(t.value()));
+          l.setType(BuiltinType.INT64);
+        }
         l.setLocation(t.location());
         return l;
       }
       case STRING -> {
-        var l = new AstString(t.value());
+        var l = new AstLiteral();
+        l.setValue(t.value());
+        l.setType(BuiltinType.STRING);
         l.setLocation(t.location());
         return l;
       }

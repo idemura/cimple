@@ -1,6 +1,5 @@
 package com.github.idemura.cimple.compiler.semantics;
 
-import com.github.idemura.cimple.common.CimpleException;
 import com.github.idemura.cimple.compiler.CompilerException;
 import com.github.idemura.cimple.compiler.TypeRef;
 import com.github.idemura.cimple.compiler.VariableDef;
@@ -10,10 +9,10 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-public class TypeChecker extends AstVisitor {
+class TypeChecker extends AstVisitor {
   private final ScopeNameMap<VariableDef> variables = new ScopeNameMap<>();
 
-  public TypeChecker() {}
+  TypeChecker() {}
 
   @Override
   protected void visit(AstModule node) {
@@ -103,13 +102,6 @@ public class TypeChecker extends AstVisitor {
 
   @Override
   protected void visit(AstLiteral node) {
-    if (node instanceof AstNumber) {
-      // TODO: Check literal suffix, range, etc. and assign type
-    } else if (node instanceof AstString) {
-    } else {
-      throw new CimpleException(
-          "Invalid literal node %s".formatted(node.getClass().getSimpleName()));
-    }
   }
 
   @Override
