@@ -11,13 +11,13 @@ import java.util.List;
 import org.junit.jupiter.api.Test;
 
 class ParserTest {
-  private AstNode parseCode(String code) {
+  private AstModule parseCode(String code) {
     return new Parser(new Tokenizer(null, code).split()).parse();
   }
 
   private AstModule parseFile(String fileName) {
     var code = readResource(getClass(), fileName);
-    return (AstModule) parseCode(code);
+    return parseCode(code);
   }
 
   @Test

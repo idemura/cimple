@@ -21,7 +21,7 @@ public class Parser {
     this.tokens = tokens;
   }
 
-  public AstNode parse() {
+  public AstModule parse() {
     return parseModule();
   }
 

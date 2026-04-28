@@ -4,8 +4,8 @@ public final class AstReturn extends AstStatement {
   private AstExpression expression;
 
   @Override
-  public void accept(AstVisitor visitor) {
-    visitor.visit(this);
+  public Object accept(AstVisitor visitor) {
+    return visitor.visit(this);
   }
 
   public AstExpression getExpression() {

@@ -20,8 +20,8 @@ public final class AstLiteral extends AstExpression {
   public AstLiteral() {}
 
   @Override
-  public void accept(AstVisitor visitor) {
-    visitor.visit(this);
+  public Object accept(AstVisitor visitor) {
+    return visitor.visit(this);
   }
 
   @Override

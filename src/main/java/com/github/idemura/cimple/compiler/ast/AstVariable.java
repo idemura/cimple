@@ -11,8 +11,8 @@ public final class AstVariable extends AstStatement {
   public AstVariable() {}
 
   @Override
-  public void accept(AstVisitor visitor) {
-    visitor.visit(this);
+  public Object accept(AstVisitor visitor) {
+    return visitor.visit(this);
   }
 
   public boolean getMutable() {

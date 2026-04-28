@@ -9,5 +9,7 @@ class PrepareAstVisitor extends AstVisitor {
   PrepareAstVisitor() {}
 
   @Override
-  protected void visit(AstModule module) {}
+  protected Object visit(AstModule module) {
+    return null;
+  }
 }

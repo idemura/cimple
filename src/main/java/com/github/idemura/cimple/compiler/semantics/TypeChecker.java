@@ -15,7 +15,7 @@ class TypeChecker extends AstVisitor {
   TypeChecker() {}
 
   @Override
-  protected void visit(AstModule node) {
+  protected Object visit(AstModule node) {
     // Collect all functions. Then, we can collect variables - their init expressions may
     // reference functions.
 
@@ -29,10 +29,11 @@ class TypeChecker extends AstVisitor {
     // we add them. Thus, we check initializer only references a variable declared before.
 
     visitChildren(node);
+    return null;
   }
 
   @Override
-  protected void visit(AstVariable node) {
+  protected Object visit(AstVariable node) {
     visitChildren(node);
 
     // var def = node.getVariableDef();
@@ -76,10 +77,11 @@ class TypeChecker extends AstVisitor {
     //   }
     //   node.setInit(init);
     // }
+    return null;
   }
 
   @Override
-  protected void visit(AstFunction node) {
+  protected Object visit(AstFunction node) {
     variables.pushScope();
     for (var p : node.getParameters()) {
       if (variables.put(p.getName(), p) != null) {
@@ -91,20 +93,24 @@ class TypeChecker extends AstVisitor {
     }
     visitChildren(node);
     variables.popScope();
+    return null;
   }
 
   @Override
-  protected void visit(AstBlock node) {
+  protected Object visit(AstBlock node) {
     variables.pushScope();
     visitChildren(node);
     variables.popScope();
+    return null;
   }
 
   @Override
-  protected void visit(AstLiteral node) {}
+  protected Object visit(AstLiteral node) {
+    return null;
+  }
 
   @Override
-  protected void visit(AstNameRef node) {
+  protected Object visit(AstNameRef node) {
     var v = variables.get(node.getName());
     if (v == null) {
       throw CompilerException.builder()
@@ -113,15 +119,17 @@ class TypeChecker extends AstVisitor {
           .build();
     }
     node.setVariable(v);
+    return null;
   }
 
   @Override
-  protected void visit(AstFunctionApply node) {
+  protected Object visit(AstFunctionApply node) {
     visitChildren(node);
+    return null;
   }
 
   @Override
-  protected void visit(AstIf node) {
+  protected Object visit(AstIf node) {
     visitChildren(node);
     for (var condition : node.getConditions()) {
       // if (condition.getTypeRef() != BOOL) {
@@ -131,10 +139,11 @@ class TypeChecker extends AstVisitor {
       //       .build();
       // }
     }
+    return null;
   }
 
   @Override
-  protected void visit(AstFor node) {
+  protected Object visit(AstFor node) {
     visitChildren(node);
     // if (node.getCondition() != null && node.getCondition().getTypeRef() != BOOL) {
     //   throw CompilerException.builder()
@@ -143,6 +152,7 @@ class TypeChecker extends AstVisitor {
     //       .setLocation(node.getLocation())
     //       .build();
     // }
+    return null;
   }
 
   // private AstExpression promoteExpression(AstExpression expr, TypeRef resultType) {

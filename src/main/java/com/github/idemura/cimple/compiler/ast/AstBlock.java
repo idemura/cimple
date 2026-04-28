@@ -9,8 +9,8 @@ public final class AstBlock extends AstNode {
   public AstBlock() {}
 
   @Override
-  public void accept(AstVisitor visitor) {
-    visitor.visit(this);
+  public Object accept(AstVisitor visitor) {
+    return visitor.visit(this);
   }
 
   public void add(AstStatement s) {

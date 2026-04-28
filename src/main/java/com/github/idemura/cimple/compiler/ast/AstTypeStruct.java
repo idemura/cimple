@@ -9,8 +9,8 @@ public final class AstTypeStruct extends AstType {
   public AstTypeStruct() {}
 
   @Override
-  public void accept(AstVisitor visitor) {
-    visitor.visit(this);
+  public Object accept(AstVisitor visitor) {
+    return visitor.visit(this);
   }
 
   public void addField(AstVariable field) {

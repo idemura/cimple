@@ -11,8 +11,8 @@ public final class AstIf extends AstStatement {
   public AstIf() {}
 
   @Override
-  public void accept(AstVisitor visitor) {
-    visitor.visit(this);
+  public Object accept(AstVisitor visitor) {
+    return visitor.visit(this);
   }
 
   public void addIf(AstExpression condition, AstBlock block) {

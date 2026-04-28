@@ -5,6 +5,7 @@
 ## Motivation
 
 * Statically typed
+* Reduced amount of language concepts
 * Compiled
 * Compatible with C, but safer.
 * Simple: to read, to grep.

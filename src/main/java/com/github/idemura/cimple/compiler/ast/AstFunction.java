@@ -31,8 +31,8 @@ public final class AstFunction extends AstNode {
   }
 
   @Override
-  public void accept(AstVisitor visitor) {
-    visitor.visit(this);
+  public Object accept(AstVisitor visitor) {
+    return visitor.visit(this);
   }
 
   public void setName(String name) {

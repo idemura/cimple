@@ -1,7 +1,6 @@
 package com.github.idemura.cimple.compiler;
 
 import com.github.idemura.cimple.common.IndentWriter;
-import com.github.idemura.cimple.compiler.ast.AstModule;
 import com.github.idemura.cimple.compiler.ast.PrintAstVisitor;
 import com.github.idemura.cimple.compiler.codegen.CodeGenerator;
 import com.github.idemura.cimple.compiler.parser.Parser;
@@ -25,18 +24,18 @@ public class Compiler {
       debugOutput.writeLine(tokens.toString());
       debugOutput.writeLine("\n");
     }
-    var root = new Parser(tokens).parse();
+    var module = new Parser(tokens).parse();
     if (params.printAst()) {
       debugOutput.writeLine("Parse tree\n");
-      new PrintAstVisitor(debugOutput).print(root);
+      new PrintAstVisitor(debugOutput).print(module);
     }
     var analyzer = new SemanticAnalyzer();
-    analyzer.analyze((AstModule) root);
+    analyzer.analyze(module);
     if (params.printAst()) {
       debugOutput.writeLine("Analyzed\n");
-      new PrintAstVisitor(debugOutput).print(root);
+      new PrintAstVisitor(debugOutput).print(module);
     }
     // Outside of try because codegen should not generate user errors.
-    codeGenerator.generateCode(root);
+    codeGenerator.generateCode(module);
   }
 }
