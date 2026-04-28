@@ -1,29 +1,13 @@
 package com.github.idemura.cimple.compiler.ast;
 
-import java.util.ArrayList;
-import java.util.List;
-
 public abstract class AstVisitor {
-  private final List<AstNode> stack = new ArrayList<>();
-
-  protected boolean hasParent(int n) {
-    return n < stack.size();
-  }
-
-  protected AstNode getParent() {
-    return getParent(0);
-  }
-
-  protected AstNode getParent(int n) {
-    return stack.get(stack.size() - (n + 1));
-  }
+  protected AstVisitor() {}
 
   protected void visit(AstModule node) {
     visitChildren(node);
   }
 
   protected void visitChildren(AstModule node) {
-    stack.add(node);
     for (var t : node.getTypes()) {
       t.accept(this);
     }
@@ -33,7 +17,6 @@ public abstract class AstVisitor {
     for (var f : node.getFunctions()) {
       f.accept(this);
     }
-    stack.removeLast();
   }
 
   protected void visit(AstTypeStruct node) {
@@ -41,11 +24,9 @@ public abstract class AstVisitor {
   }
 
   protected void visitChildren(AstTypeStruct node) {
-    stack.add(node);
     for (var field : node.getFields()) {
       field.accept(this);
     }
-    stack.removeLast();
   }
 
   protected void visit(AstTypeAlias node) {}
@@ -55,9 +36,7 @@ public abstract class AstVisitor {
   }
 
   protected void visitChildren(AstFunction node) {
-    stack.add(node);
     node.getBlock().accept(this);
-    stack.removeLast();
   }
 
   protected void visit(AstBlock node) {
@@ -65,11 +44,9 @@ public abstract class AstVisitor {
   }
 
   protected void visitChildren(AstBlock node) {
-    stack.add(node);
     for (var s : node.getStatements()) {
       s.accept(this);
     }
-    stack.removeLast();
   }
 
   protected void visit(AstReturn node) {
@@ -78,34 +55,29 @@ public abstract class AstVisitor {
 
   protected void visitChildren(AstReturn node) {
     if (node.getExpression() != null) {
-      stack.add(node);
       node.getExpression().accept(this);
-      stack.removeLast();
     }
   }
 
   protected void visit(AstLiteral node) {}
+
+  protected void visit(AstNameRef node) {}
 
   protected void visit(AstFunctionApply node) {
     visitChildren(node);
   }
 
   protected void visitChildren(AstFunctionApply node) {
-    stack.add(node);
     for (var a : node.getArgs()) {
       a.accept(this);
     }
-    stack.removeLast();
   }
-
-  protected void visit(AstNameRef node) {}
 
   protected void visit(AstIf node) {
     visitChildren(node);
   }
 
   protected void visitChildren(AstIf node) {
-    stack.add(node);
     for (var condition : node.getConditions()) {
       condition.accept(this);
     }
@@ -115,7 +87,6 @@ public abstract class AstVisitor {
     if (node.getElseBlock() != null) {
       node.getElseBlock().accept(this);
     }
-    stack.removeLast();
   }
 
   protected void visit(AstFor node) {
@@ -123,7 +94,6 @@ public abstract class AstVisitor {
   }
 
   protected void visitChildren(AstFor node) {
-    stack.add(node);
     if (node.getInit() != null) {
       node.getInit().accept(this);
     }
@@ -131,7 +101,6 @@ public abstract class AstVisitor {
       node.getCondition().accept(this);
     }
     node.getBlock().accept(this);
-    stack.removeLast();
   }
 
   protected void visit(AstGoto node) {}
@@ -141,9 +110,7 @@ public abstract class AstVisitor {
   }
 
   protected void visitChildren(AstDefer node) {
-    stack.add(node);
     node.getExpression().accept(this);
-    stack.removeLast();
   }
 
   protected void visit(AstVariable node) {
@@ -152,9 +119,7 @@ public abstract class AstVisitor {
 
   protected void visitChildren(AstVariable node) {
     if (node.getInit() != null) {
-      stack.add(node);
       node.getInit().accept(this);
-      stack.removeLast();
     }
   }
 
@@ -163,8 +128,6 @@ public abstract class AstVisitor {
   }
 
   protected void visitChildren(AstExpressionStatement node) {
-    stack.add(node);
     node.getExpression().accept(this);
-    stack.removeLast();
   }
 }

@@ -75,6 +75,11 @@ public class PrintAstVisitor extends AstVisitor {
   }
 
   @Override
+  protected void visit(AstNameRef node) {
+    output.writeLine("IDENTIFIER %s".formatted(node.getName()));
+  }
+
+  @Override
   protected void visit(AstFunctionApply node) {
     output.writeLine("APPLY %s".formatted(node.getFunctionName()));
     output.indent();
@@ -90,11 +95,6 @@ public class PrintAstVisitor extends AstVisitor {
       node.getInit().accept(this);
     }
     output.unindent();
-  }
-
-  @Override
-  protected void visit(AstNameRef node) {
-    output.writeLine("IDENTIFIER %s".formatted(node.getName()));
   }
 
   @Override

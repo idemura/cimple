@@ -101,8 +101,7 @@ class TypeChecker extends AstVisitor {
   }
 
   @Override
-  protected void visit(AstLiteral node) {
-  }
+  protected void visit(AstLiteral node) {}
 
   @Override
   protected void visit(AstNameRef node) {
