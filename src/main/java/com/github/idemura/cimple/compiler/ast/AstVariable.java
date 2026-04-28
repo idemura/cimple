@@ -6,7 +6,7 @@ public final class AstVariable extends AstStatement {
   private boolean mutable;
   private String name;
   private TypeRef typeRef;
-  private AstExpression init;
+  private AstExpression expression;
 
   public AstVariable() {}
 
@@ -39,11 +39,11 @@ public final class AstVariable extends AstStatement {
     return typeRef;
   }
 
-  public void setInit(AstExpression init) {
-    this.init = init;
+  public void setExpression(AstExpression expression) {
+    this.expression = expression;
   }
 
-  public AstExpression getInit() {
-    return init;
+  public AstExpression getExpression() {
+    return expression;
   }
 }

@@ -20,6 +20,10 @@ public final class AstIf extends AstStatement {
     thenBlocks.add(block);
   }
 
+  public void setConditions(List<AstExpression> conditions) {
+    this.conditions = conditions;
+  }
+
   public List<AstExpression> getConditions() {
     return conditions;
   }

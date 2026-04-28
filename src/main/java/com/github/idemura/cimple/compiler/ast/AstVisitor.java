@@ -20,6 +20,10 @@ public abstract class AstVisitor {
     }
   }
 
+  protected Object visit(AstTypeAlias node) {
+    return null;
+  }
+
   protected Object visit(AstTypeStruct node) {
     visitChildren(node);
     return null;
@@ -31,8 +35,15 @@ public abstract class AstVisitor {
     }
   }
 
-  protected Object visit(AstTypeAlias node) {
+  protected Object visit(AstVariable node) {
+    visitChildren(node);
     return null;
+  }
+
+  protected void visitChildren(AstVariable node) {
+    if (node.getExpression() != null) {
+      node.getExpression().accept(this);
+    }
   }
 
   protected Object visit(AstFunction node) {
@@ -55,15 +66,13 @@ public abstract class AstVisitor {
     }
   }
 
-  protected Object visit(AstReturn node) {
+  protected Object visit(AstExpressionStatement node) {
     visitChildren(node);
     return null;
   }
 
-  protected void visitChildren(AstReturn node) {
-    if (node.getExpression() != null) {
-      node.getExpression().accept(this);
-    }
+  protected void visitChildren(AstExpressionStatement node) {
+    node.getExpression().accept(this);
   }
 
   protected Object visit(AstLiteral node) {
@@ -82,6 +91,17 @@ public abstract class AstVisitor {
   protected void visitChildren(AstFunctionApply node) {
     for (var a : node.getArgs()) {
       a.accept(this);
+    }
+  }
+
+  protected Object visit(AstReturn node) {
+    visitChildren(node);
+    return null;
+  }
+
+  protected void visitChildren(AstReturn node) {
+    if (node.getExpression() != null) {
+      node.getExpression().accept(this);
     }
   }
 
@@ -127,26 +147,6 @@ public abstract class AstVisitor {
   }
 
   protected void visitChildren(AstDefer node) {
-    node.getExpression().accept(this);
-  }
-
-  protected Object visit(AstVariable node) {
-    visitChildren(node);
-    return null;
-  }
-
-  protected void visitChildren(AstVariable node) {
-    if (node.getInit() != null) {
-      node.getInit().accept(this);
-    }
-  }
-
-  protected Object visit(AstExpressionStatement node) {
-    visitChildren(node);
-    return null;
-  }
-
-  protected void visitChildren(AstExpressionStatement node) {
     node.getExpression().accept(this);
   }
 }

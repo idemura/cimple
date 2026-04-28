@@ -126,7 +126,7 @@ public class Parser {
       variable.setTypeRef(parseTypeRef());
     }
     if (tokens.takeIf(ASSIGN)) {
-      variable.setInit(parseExpression());
+      variable.setExpression(parseExpression());
     }
     tokens.take(SEMICOLON);
     return variable;

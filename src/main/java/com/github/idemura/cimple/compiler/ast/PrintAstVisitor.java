@@ -100,8 +100,8 @@ public class PrintAstVisitor extends AstVisitor {
   protected Object visit(AstVariable node) {
     printEntity(node.getMutable() ? "VAR" : "CONST", node.getName(), node.getTypeRef().getType());
     output.indent();
-    if (node.getInit() != null) {
-      node.getInit().accept(this);
+    if (node.getExpression() != null) {
+      node.getExpression().accept(this);
     }
     output.unindent();
     return null;
