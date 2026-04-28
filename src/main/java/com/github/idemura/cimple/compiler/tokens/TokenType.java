@@ -30,7 +30,6 @@ public enum TokenType {
   DEFER,
   IF,
   UNION,
-  ELIF,
   ELSE,
   FOR,
   FUNCTION,
@@ -56,7 +55,6 @@ public enum TokenType {
       case "const" -> CONST;
       case "defer" -> DEFER;
       case "else" -> ELSE;
-      case "elif" -> ELIF;
       case "union" -> UNION;
       case "for" -> FOR;
       case "function" -> FUNCTION;

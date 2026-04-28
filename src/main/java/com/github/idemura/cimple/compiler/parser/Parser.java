@@ -169,11 +169,14 @@ public class Parser {
     var stmt = new AstIf();
     var keyword = tokens.takeKeyword(IF);
     stmt.setLocation(keyword.location());
-    do {
-      stmt.addIf(parseExpression(), parseBlock());
-    } while (tokens.takeKeywordIf(ELIF));
-    if (tokens.takeKeywordIf(ELSE)) {
-      stmt.setElseBlock(parseBlock());
+    stmt.addIf(parseExpression(), parseBlock());
+    while (tokens.takeKeywordIf(ELSE)) {
+      if (tokens.takeKeywordIf(IF)) {
+        stmt.addIf(parseExpression(), parseBlock());
+      } else {
+        stmt.setElseBlock(parseBlock());
+        break;
+      }
     }
     return stmt;
   }

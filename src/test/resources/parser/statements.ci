@@ -7,7 +7,7 @@ function f(a bool, b bool) {
   } else {
   }
   if a {
-  } elif b {
+  } else if b {
   } else {
   }
 }
