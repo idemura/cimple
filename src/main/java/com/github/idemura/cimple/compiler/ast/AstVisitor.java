@@ -134,6 +134,9 @@ public abstract class AstVisitor {
     if (node.getCondition() != null) {
       node.getCondition().accept(this);
     }
+    if (node.getIncrement() != null) {
+      node.getIncrement().accept(this);
+    }
     node.getBlock().accept(this);
   }
 

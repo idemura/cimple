@@ -13,12 +13,12 @@ function f(a bool, b bool) {
 }
 
 function g() {
-  for {
+  for true {
     goto end;
   }
-  for var i = 0; {
-  }
   for var i = 0; true {
+  }
+  for var i = 0; true; i {
   }
 }
 

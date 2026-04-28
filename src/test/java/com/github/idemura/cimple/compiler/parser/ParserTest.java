@@ -3,6 +3,7 @@ package com.github.idemura.cimple.compiler.parser;
 import static com.github.idemura.cimple.common.Resources.readResource;
 import static org.junit.jupiter.api.Assertions.*;
 
+import com.github.idemura.cimple.compiler.CompilerException;
 import com.github.idemura.cimple.compiler.TypeRef;
 import com.github.idemura.cimple.compiler.VariableDef;
 import com.github.idemura.cimple.compiler.ast.*;
@@ -143,7 +144,8 @@ class ParserTest {
     {
       var stmtFor = (AstFor) statements.get(0);
       assertNull(stmtFor.getInit());
-      assertNull(stmtFor.getCondition());
+      assertEquals(new AstNameRef("true"), stmtFor.getCondition());
+      assertNull(stmtFor.getIncrement());
       var bodyStatements = stmtFor.getBlock().getStatements();
       assertEquals(1, bodyStatements.size());
       assertEquals(new AstGoto("end"), bodyStatements.get(0));
@@ -154,7 +156,8 @@ class ParserTest {
       assertEquals("i", init.getName());
       assertNull(init.getTypeRef());
       assertEquals(AstLiteral.ofInt(0), init.getExpression());
-      assertNull(stmtFor.getCondition());
+      assertEquals(new AstNameRef("true"), stmtFor.getCondition());
+      assertNull(stmtFor.getIncrement());
       assertEquals(List.of(), stmtFor.getBlock().getStatements());
     }
     {
@@ -164,7 +167,45 @@ class ParserTest {
       assertNull(init.getTypeRef());
       assertEquals(AstLiteral.ofInt(0), init.getExpression());
       assertEquals(new AstNameRef("true"), stmtFor.getCondition());
+      assertEquals(new AstNameRef("i"), stmtFor.getIncrement());
       assertEquals(List.of(), stmtFor.getBlock().getStatements());
+    }
+  }
+
+  @Test
+  void testForStatementDanglingSemicolonNotAllowed() {
+    {
+      var code =
+          """
+          module test_statements;
+          function f() {
+            for var i = 0; {
+            }
+          }
+          """;
+      assertThrows(CompilerException.class, () -> parseCode(code));
+    }
+    {
+      var code =
+          """
+          module test_statements;
+          function f() {
+            for var i = 0; true; {
+            }
+          }
+          """;
+      assertThrows(CompilerException.class, () -> parseCode(code));
+    }
+    {
+      var code =
+          """
+          module test_statements;
+          function f() {
+            for var i = 0; true; i; {
+            }
+          }
+          """;
+      assertThrows(CompilerException.class, () -> parseCode(code));
     }
   }
 

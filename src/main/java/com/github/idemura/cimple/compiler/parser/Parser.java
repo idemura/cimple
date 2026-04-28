@@ -188,8 +188,10 @@ public class Parser {
     if (tokens.current().keyword() == VAR) {
       stmt.setInit(parseVariable(true));
     }
-    if (!tokens.current().is(LCURLY)) {
-      stmt.setCondition(parseExpression());
+    // Condition must be present, even if simple "true".
+    stmt.setCondition(parseExpression());
+    if (tokens.takeIf(SEMICOLON)) {
+      stmt.setIncrement(parseExpression());
     }
     stmt.setBlock(parseBlock());
     return stmt;

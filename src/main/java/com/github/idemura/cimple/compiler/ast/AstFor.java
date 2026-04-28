@@ -5,6 +5,7 @@ import java.util.Objects;
 public final class AstFor extends AstStatement {
   private AstVariable init;
   private AstExpression condition;
+  private AstExpression increment;
   private AstBlock block;
 
   public AstFor() {}
@@ -16,7 +17,7 @@ public final class AstFor extends AstStatement {
 
   @Override
   public int hashCode() {
-    return Objects.hash(init, condition, block);
+    return Objects.hash(init, condition, increment, block);
   }
 
   @Override
@@ -25,6 +26,7 @@ public final class AstFor extends AstStatement {
         || (object instanceof AstFor other
             && Objects.equals(init, other.init)
             && Objects.equals(condition, other.condition)
+            && Objects.equals(increment, other.increment)
             && Objects.equals(block, other.block));
   }
 
@@ -42,6 +44,14 @@ public final class AstFor extends AstStatement {
 
   public void setCondition(AstExpression condition) {
     this.condition = condition;
+  }
+
+  public AstExpression getIncrement() {
+    return increment;
+  }
+
+  public void setIncrement(AstExpression increment) {
+    this.increment = increment;
   }
 
   public AstBlock getBlock() {

@@ -145,6 +145,11 @@ public class PrintAstVisitor extends AstVisitor {
     } else {
       output.writeLine("NONE");
     }
+    if (node.getIncrement() != null) {
+      node.getIncrement().accept(this);
+    } else {
+      output.writeLine("NONE");
+    }
     node.getBlock().accept(this);
     output.unindent();
     output.writeLine("END");
