@@ -10,6 +10,7 @@ import com.github.idemura.cimple.compiler.ast.AstIf;
 import com.github.idemura.cimple.compiler.ast.AstLiteral;
 import com.github.idemura.cimple.compiler.ast.AstModule;
 import com.github.idemura.cimple.compiler.ast.AstNameRef;
+import com.github.idemura.cimple.compiler.ast.AstReturn;
 import com.github.idemura.cimple.compiler.ast.AstTypeAlias;
 import com.github.idemura.cimple.compiler.ast.AstTypeFunction;
 import com.github.idemura.cimple.compiler.ast.AstTypeStruct;
@@ -248,26 +249,26 @@ class ParserTest {
     assertEquals(3, statements.size());
     int i = 0;
     {
-      var stmtIf = (AstIf) statements.get(i++);
-      assertEquals(1, stmtIf.getConditions().size());
-      assertEquals(1, stmtIf.getThenBlocks().size());
-      assertEquals(new AstNameRef("a"), stmtIf.getConditions().get(0));
-      assertNull(stmtIf.getElseBlock());
+      var stmt = (AstIf) statements.get(i++);
+      assertEquals(1, stmt.getConditions().size());
+      assertEquals(1, stmt.getThenBlocks().size());
+      assertEquals(new AstNameRef("a"), stmt.getConditions().get(0));
+      assertNull(stmt.getElseBlock());
     }
     {
-      var stmtIf = (AstIf) statements.get(i++);
-      assertEquals(1, stmtIf.getConditions().size());
-      assertEquals(1, stmtIf.getThenBlocks().size());
-      assertEquals(new AstNameRef("a"), stmtIf.getConditions().get(0));
-      assertNotNull(stmtIf.getElseBlock());
+      var stmt = (AstIf) statements.get(i++);
+      assertEquals(1, stmt.getConditions().size());
+      assertEquals(1, stmt.getThenBlocks().size());
+      assertEquals(new AstNameRef("a"), stmt.getConditions().get(0));
+      assertNotNull(stmt.getElseBlock());
     }
     {
-      var stmtIf = (AstIf) statements.get(i++);
-      assertEquals(2, stmtIf.getConditions().size());
-      assertEquals(2, stmtIf.getThenBlocks().size());
-      assertEquals(new AstNameRef("a"), stmtIf.getConditions().get(0));
-      assertEquals(new AstNameRef("b"), stmtIf.getConditions().get(1));
-      assertNotNull(stmtIf.getElseBlock());
+      var stmt = (AstIf) statements.get(i++);
+      assertEquals(2, stmt.getConditions().size());
+      assertEquals(2, stmt.getThenBlocks().size());
+      assertEquals(new AstNameRef("a"), stmt.getConditions().get(0));
+      assertEquals(new AstNameRef("b"), stmt.getConditions().get(1));
+      assertNotNull(stmt.getElseBlock());
     }
   }
 
@@ -294,33 +295,33 @@ class ParserTest {
     assertEquals(3, statements.size());
     int i = 0;
     {
-      var stmtFor = (AstFor) statements.get(i++);
-      assertNull(stmtFor.getInit());
-      assertEquals(new AstNameRef("true"), stmtFor.getCondition());
-      assertNull(stmtFor.getIncrement());
-      var bodyStatements = stmtFor.getBlock().statements();
+      var stmt = (AstFor) statements.get(i++);
+      assertNull(stmt.getInit());
+      assertEquals(new AstNameRef("true"), stmt.getCondition());
+      assertNull(stmt.getIncrement());
+      var bodyStatements = stmt.getBlock().statements();
       assertEquals(1, bodyStatements.size());
       assertEquals(new AstGoto("end"), bodyStatements.get(0));
     }
     {
-      var stmtFor = (AstFor) statements.get(i++);
-      var init = stmtFor.getInit();
+      var stmt = (AstFor) statements.get(i++);
+      var init = stmt.getInit();
       assertEquals(new QualifiedName("i"), init.getName());
       assertNull(init.getTypeRef());
       assertEquals(AstLiteral.ofInt(0), init.getExpression());
-      assertEquals(new AstNameRef("true"), stmtFor.getCondition());
-      assertNull(stmtFor.getIncrement());
-      assertEquals(ImmutableList.of(), stmtFor.getBlock().statements());
+      assertEquals(new AstNameRef("true"), stmt.getCondition());
+      assertNull(stmt.getIncrement());
+      assertEquals(ImmutableList.of(), stmt.getBlock().statements());
     }
     {
-      var stmtFor = (AstFor) statements.get(i++);
-      var init = stmtFor.getInit();
+      var stmt = (AstFor) statements.get(i++);
+      var init = stmt.getInit();
       assertEquals(new QualifiedName("i"), init.getName());
       assertNull(init.getTypeRef());
       assertEquals(AstLiteral.ofInt(0), init.getExpression());
-      assertEquals(new AstNameRef("true"), stmtFor.getCondition());
-      assertEquals(new AstNameRef("i"), stmtFor.getIncrement());
-      assertEquals(ImmutableList.of(), stmtFor.getBlock().statements());
+      assertEquals(new AstNameRef("true"), stmt.getCondition());
+      assertEquals(new AstNameRef("i"), stmt.getIncrement());
+      assertEquals(ImmutableList.of(), stmt.getBlock().statements());
     }
   }
 
@@ -362,6 +363,25 @@ class ParserTest {
   }
 
   @Test
+  void testReturnStatement() {
+    var code =
+        """
+        module test;
+        function f() {
+          return value;
+        }
+        """;
+    var module = parseCode(code);
+    var function = module.functions().get(0);
+    assertEquals(new QualifiedName("f"), function.getHeader().getName());
+    var statements = function.getBlock().statements();
+    {
+      var stmt = (AstReturn) statements.get(0);
+      assertEquals(new AstNameRef("value"), stmt.getExpression());
+    }
+  }
+
+  @Test
   void testDeferStatement() {
     var code =
         """
@@ -375,8 +395,8 @@ class ParserTest {
     assertEquals(new QualifiedName("f"), function.getHeader().getName());
     var statements = function.getBlock().statements();
     {
-      var stmtDefer = (AstDefer) statements.get(0);
-      assertEquals(new AstNameRef("value"), stmtDefer.getExpression());
+      var stmt = (AstDefer) statements.get(0);
+      assertEquals(new AstNameRef("value"), stmt.getExpression());
     }
   }
 
