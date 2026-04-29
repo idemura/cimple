@@ -80,7 +80,7 @@ public class Parser {
     type.setName(name.value());
     tokens.take(LCURLY);
     while (!tokens.takeIf(RCURLY)) {
-      type.addField(parseVariable(true));
+      type.addField(parseVariable(tokens.current().keyword() != CONST));
     }
     return type;
   }

@@ -5,6 +5,7 @@ type struct Empty {}
 type struct Point {
   var x int;
   var y int;
+  const name string;
 }
 
 type alias Uri = string;

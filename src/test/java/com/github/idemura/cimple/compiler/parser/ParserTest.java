@@ -91,11 +91,26 @@ class ParserTest {
       var type = (AstTypeStruct) types.get(i++);
       assertEquals("Point", type.getName());
       var fields = type.getFields();
-      assertEquals(2, fields.size());
-      assertEquals("x", fields.get(0).getName());
-      assertEquals(new TypeRef("int"), fields.get(0).getTypeRef());
-      assertEquals("y", fields.get(1).getName());
-      assertEquals(new TypeRef("int"), fields.get(1).getTypeRef());
+      assertEquals(3, fields.size());
+      int j = 0;
+      {
+        var f = fields.get(j++);
+        assertEquals("x", f.getName());
+        assertEquals(new TypeRef("int"), f.getTypeRef());
+        assertTrue(f.isMutable());
+      }
+      {
+        var f = fields.get(j++);
+        assertEquals("y", f.getName());
+        assertEquals(new TypeRef("int"), f.getTypeRef());
+        assertTrue(f.isMutable());
+      }
+      {
+        var f = fields.get(j++);
+        assertEquals("name", f.getName());
+        assertEquals(new TypeRef("string"), f.getTypeRef());
+        assertFalse(f.isMutable());
+      }
     }
     {
       var type = (AstTypeAlias) types.get(i++);
