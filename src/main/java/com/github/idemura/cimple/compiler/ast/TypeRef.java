@@ -3,10 +3,14 @@ package com.github.idemura.cimple.compiler.ast;
 import java.util.Objects;
 
 public final class TypeRef {
-  private String name;
+  private QualifiedName name;
   private AstType type;
 
   public static TypeRef ofName(String name) {
+    return new TypeRef(new QualifiedName(name), null);
+  }
+
+  public static TypeRef ofName(QualifiedName name) {
     return new TypeRef(name, null);
   }
 
@@ -14,7 +18,7 @@ public final class TypeRef {
     return new TypeRef(type.getName(), type);
   }
 
-  private TypeRef(String name, AstType type) {
+  private TypeRef(QualifiedName name, AstType type) {
     this.name = name;
     this.type = type;
   }
@@ -34,11 +38,15 @@ public final class TypeRef {
     return "TYPE_REF(%s)".formatted(name);
   }
 
-  public String getName() {
+  public QualifiedName getName() {
     return name;
   }
 
   public void setName(String name) {
+    this.name = new QualifiedName(name);
+  }
+
+  public void setName(QualifiedName name) {
     this.name = name;
   }
 

@@ -5,7 +5,7 @@ import static com.github.idemura.cimple.compiler.tokens.TokenType.*;
 import static org.junit.jupiter.api.Assertions.*;
 
 import com.github.idemura.cimple.compiler.Location;
-import java.util.List;
+import com.google.common.collect.ImmutableList;
 import org.junit.jupiter.api.Test;
 
 class TokenizerTest {
@@ -13,7 +13,7 @@ class TokenizerTest {
   void testSplit() {
     var tokens = new Tokenizer(readResource(getClass(), "/tokenizer/tokens.ci")).split().tokens();
     assertEquals(
-        List.of(
+        ImmutableList.of(
             new Token(IDENTIFIER, "function", new Location(1, 1)),
             new Token(IDENTIFIER, "foo", new Location(1, 10)),
             new Token(LPAREN, null, new Location(1, 13)),

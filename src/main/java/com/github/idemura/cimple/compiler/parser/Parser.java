@@ -27,9 +27,11 @@ import com.github.idemura.cimple.compiler.ast.AstTypeFunction;
 import com.github.idemura.cimple.compiler.ast.AstTypeStruct;
 import com.github.idemura.cimple.compiler.ast.AstTypeUnion;
 import com.github.idemura.cimple.compiler.ast.AstVariable;
+import com.github.idemura.cimple.compiler.ast.QualifiedName;
 import com.github.idemura.cimple.compiler.ast.TypeRef;
 import com.github.idemura.cimple.compiler.ast.UnionVariant;
 import com.github.idemura.cimple.compiler.tokens.TokenStream;
+import com.google.common.collect.ImmutableList;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -55,16 +57,16 @@ public class Parser {
       var token = tokens.current();
       switch (token.keyword()) {
         case FUNCTION:
-          module.addFunction(parseFunction());
+          module.functions().add(parseFunction());
           break;
         case TYPE:
-          module.addType(parseType());
+          module.types().add(parseType());
           break;
         case VAR:
-          module.addVariable(parseVariable(true));
+          module.variables().add(parseVariable(true));
           break;
         case CONST:
-          module.addVariable(parseVariable(false));
+          module.variables().add(parseVariable(false));
           break;
         default:
           throw CompilerException.builder()
@@ -96,11 +98,13 @@ public class Parser {
     tokens.takeKeyword(STRUCT);
     var name = tokens.take(IDENTIFIER);
     type.setLocation(name.location());
-    type.setName(name.value());
+    type.setName(new QualifiedName(name.value()));
     tokens.take(LCURLY);
+    var fields = new ImmutableList.Builder<AstVariable>();
     while (!tokens.takeIf(RCURLY)) {
-      type.addField(parseVariable(tokens.current().keyword() != CONST));
+      fields.add(parseVariable(tokens.current().keyword() != CONST));
     }
+    type.setFields(fields.build());
     return type;
   }
 
@@ -109,12 +113,14 @@ public class Parser {
     tokens.takeKeyword(UNION);
     var name = tokens.take(IDENTIFIER);
     type.setLocation(name.location());
-    type.setName(name.value());
+    type.setName(new QualifiedName(name.value()));
     tokens.take(LCURLY);
+    var variants = new ImmutableList.Builder<UnionVariant>();
     while (!tokens.takeIf(RCURLY)) {
-      type.addVariant(parseTypeUnionVariant());
+      variants.add(parseTypeUnionVariant());
       tokens.take(SEMICOLON);
     }
+    type.setVariants(variants.build());
     return type;
   }
 
@@ -133,7 +139,7 @@ public class Parser {
     tokens.takeKeyword(ALIAS);
     var name = tokens.take(IDENTIFIER);
     type.setLocation(name.location());
-    type.setName(name.value());
+    type.setName(new QualifiedName(name.value()));
     tokens.take(ASSIGN);
     type.setBaseTypeRef(parseTypeRef());
     tokens.take(SEMICOLON);
@@ -186,12 +192,12 @@ public class Parser {
   }
 
   private AstBlock parseBlock() {
-    var b = new AstBlock();
+    var block = new AstBlock();
     tokens.take(LCURLY);
     while (!tokens.takeIf(RCURLY)) {
-      b.add(parseStatement());
+      block.statements().add(parseStatement());
     }
-    return b;
+    return block;
   }
 
   private AstStatement parseStatement() {
@@ -222,15 +228,21 @@ public class Parser {
     var stmt = new AstIf();
     var keyword = tokens.takeKeyword(IF);
     stmt.setLocation(keyword.location());
-    stmt.addIf(parseExpression(), parseBlock());
+    var conditions = new ImmutableList.Builder<AstExpression>();
+    var thenBlocks = new ImmutableList.Builder<AstBlock>();
+    conditions.add(parseExpression());
+    thenBlocks.add(parseBlock());
     while (tokens.takeKeywordIf(ELSE)) {
       if (tokens.takeKeywordIf(IF)) {
-        stmt.addIf(parseExpression(), parseBlock());
+        conditions.add(parseExpression());
+        thenBlocks.add(parseBlock());
       } else {
         stmt.setElseBlock(parseBlock());
         break;
       }
     }
+    stmt.setConditions(conditions.build());
+    stmt.setThenBlocks(thenBlocks.build());
     return stmt;
   }
 
@@ -269,11 +281,11 @@ public class Parser {
   }
 
   private AstStatement parseExpressionStatement() {
-    var e = new AstExpressionStatement();
-    e.setLocation(tokens.current().location());
-    e.setExpression(parseExpression());
+    var stmt = new AstExpressionStatement();
+    stmt.setLocation(tokens.current().location());
+    stmt.setExpression(parseExpression());
     tokens.take(SEMICOLON);
-    return e;
+    return stmt;
   }
 
   private AstExpression parseExpression() {
@@ -294,7 +306,6 @@ public class Parser {
             .setLocation(operator.location())
             .build();
       }
-      // expr = new AstFunctionApply(operator.location(), operator.toString(), List.of(expr, m));
       expr = new AstApplyFunction();
     }
     return expr;
@@ -314,7 +325,6 @@ public class Parser {
             .setLocation(operator.location())
             .build();
       }
-      // expr = new AstFunctionApply(operator.location(), operator.toString(), List.of(expr, m));
       expr = new AstApplyFunction();
     }
     return expr;
@@ -334,7 +344,6 @@ public class Parser {
             .setLocation(operator.location())
             .build();
       }
-      // expr = new AstFunctionApply(operator.location(), operator.toString(), List.of(expr, m));
       expr = new AstApplyFunction();
     }
     return expr;
@@ -419,7 +428,7 @@ public class Parser {
       tokens.take(PERIOD);
     }
     header.setBoundTypeName(boundTypeName);
-    header.setName(tokens.take(IDENTIFIER).value());
+    header.setName(new QualifiedName(tokens.take(IDENTIFIER).value()));
     var parameters = parseParameters();
     header.setParameters(parameters);
     if (!tokens.current().is(LCURLY) && !tokens.current().is(SEMICOLON)) {

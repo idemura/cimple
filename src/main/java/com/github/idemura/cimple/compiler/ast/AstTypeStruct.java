@@ -1,10 +1,11 @@
 package com.github.idemura.cimple.compiler.ast;
 
-import java.util.ArrayList;
+import com.google.common.collect.ImmutableList;
 import java.util.List;
 
 public final class AstTypeStruct extends AstType {
-  private List<AstVariable> fields = new ArrayList<>();
+  private QualifiedName name;
+  private List<AstVariable> fields;
 
   public AstTypeStruct() {}
 
@@ -13,11 +14,20 @@ public final class AstTypeStruct extends AstType {
     return visitor.visit(this);
   }
 
-  public void addField(AstVariable field) {
-    fields.add(field);
+  @Override
+  public QualifiedName getName() {
+    return name;
+  }
+
+  public void setName(QualifiedName name) {
+    this.name = name;
+  }
+
+  public void setFields(List<AstVariable> fields) {
+    this.fields = ImmutableList.copyOf(fields);
   }
 
   public List<AstVariable> getFields() {
-    return List.copyOf(fields);
+    return ImmutableList.copyOf(fields);
   }
 }

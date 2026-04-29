@@ -1,11 +1,11 @@
 package com.github.idemura.cimple.compiler.ast;
 
-import java.util.ArrayList;
+import com.google.common.collect.ImmutableList;
 import java.util.List;
 
 public final class AstIf extends AstStatement {
-  private List<AstExpression> conditions = new ArrayList<>();
-  private List<AstBlock> thenBlocks = new ArrayList<>();
+  private List<AstExpression> conditions;
+  private List<AstBlock> thenBlocks;
   private AstBlock elseBlock;
 
   public AstIf() {}
@@ -15,21 +15,20 @@ public final class AstIf extends AstStatement {
     return visitor.visit(this);
   }
 
-  public void addIf(AstExpression condition, AstBlock block) {
-    conditions.add(condition);
-    thenBlocks.add(block);
-  }
-
-  public void setConditions(List<AstExpression> conditions) {
-    this.conditions = conditions;
-  }
-
   public List<AstExpression> getConditions() {
     return conditions;
   }
 
+  public void setConditions(List<AstExpression> conditions) {
+    this.conditions = ImmutableList.copyOf(conditions);
+  }
+
   public List<AstBlock> getThenBlocks() {
     return thenBlocks;
+  }
+
+  public void setThenBlocks(List<AstBlock> thenBlocks) {
+    this.thenBlocks = ImmutableList.copyOf(thenBlocks);
   }
 
   public void setElseBlock(AstBlock elseBlock) {

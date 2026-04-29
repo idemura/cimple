@@ -126,7 +126,7 @@ public class PrintAstVisitor extends AstVisitor {
 
   @Override
   protected Object visit(AstApplyFunction node) {
-    output.writeLine("APPLY %s".formatted(node.getFunctionName()));
+    output.writeLine("APPLY %s".formatted(node.getName()));
     output.indent();
     visitChildren(node);
     output.unindent();

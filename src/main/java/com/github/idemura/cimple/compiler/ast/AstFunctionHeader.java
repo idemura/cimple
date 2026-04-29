@@ -1,16 +1,16 @@
 package com.github.idemura.cimple.compiler.ast;
 
 import com.github.idemura.cimple.compiler.Location;
-import java.util.ArrayList;
+import com.google.common.collect.ImmutableList;
 import java.util.List;
 import java.util.Objects;
 
 public final class AstFunctionHeader {
   private Location location;
   private String boundTypeName;
-  private String name;
+  private QualifiedName name;
   private TypeRef resultType;
-  private List<AstVariable> parameters = new ArrayList<>();
+  private List<AstVariable> parameters;
 
   public AstFunctionHeader() {}
 
@@ -44,11 +44,11 @@ public final class AstFunctionHeader {
     this.boundTypeName = boundTypeName;
   }
 
-  public String getName() {
+  public QualifiedName getName() {
     return name;
   }
 
-  public void setName(String name) {
+  public void setName(QualifiedName name) {
     this.name = name;
   }
 
@@ -60,15 +60,11 @@ public final class AstFunctionHeader {
     this.resultType = resultType;
   }
 
-  public void addParameter(AstVariable parameter) {
-    parameters.add(parameter);
-  }
-
   public void setParameters(List<AstVariable> parameters) {
-    this.parameters = new ArrayList<>(parameters);
+    this.parameters = ImmutableList.copyOf(parameters);
   }
 
   public List<AstVariable> getParameters() {
-    return List.copyOf(parameters);
+    return ImmutableList.copyOf(parameters);
   }
 }

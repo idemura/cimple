@@ -9,13 +9,13 @@ public abstract class AstVisitor {
   }
 
   protected void visitChildren(AstModule node) {
-    for (var t : node.getTypes()) {
+    for (var t : node.types()) {
       t.accept(this);
     }
-    for (var v : node.getVariables()) {
+    for (var v : node.variables()) {
       v.accept(this);
     }
-    for (var f : node.getFunctions()) {
+    for (var f : node.functions()) {
       f.accept(this);
     }
   }
@@ -73,7 +73,7 @@ public abstract class AstVisitor {
   }
 
   protected void visitChildren(AstBlock node) {
-    for (var s : node.getStatements()) {
+    for (var s : node.statements()) {
       s.accept(this);
     }
   }

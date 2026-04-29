@@ -3,7 +3,7 @@ package com.github.idemura.cimple.compiler.ast;
 import java.util.Objects;
 
 public final class UnionVariant {
-  private String name;
+  private QualifiedName name;
   private TypeRef valueType;
 
   @Override
@@ -19,11 +19,15 @@ public final class UnionVariant {
             && Objects.equals(valueType, other.valueType));
   }
 
-  public String getName() {
+  public QualifiedName getName() {
     return name;
   }
 
   public void setName(String name) {
+    this.name = new QualifiedName(name);
+  }
+
+  public void setName(QualifiedName name) {
     this.name = name;
   }
 

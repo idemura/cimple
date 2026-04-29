@@ -1,9 +1,10 @@
 package com.github.idemura.cimple.compiler.ast;
 
+import com.google.common.collect.ImmutableList;
 import java.util.List;
 
 public final class AstApplyFunction extends AstExpression {
-  private String functionName;
+  private QualifiedName name;
   private List<AstExpression> args;
   private AstFunction function;
 
@@ -19,20 +20,20 @@ public final class AstApplyFunction extends AstExpression {
     return function.getHeader().getResultType().getType();
   }
 
-  public void setFunctionName(String functionName) {
-    this.functionName = functionName;
+  public void setName(QualifiedName name) {
+    this.name = name;
   }
 
-  public String getFunctionName() {
-    return functionName;
+  public QualifiedName getName() {
+    return name;
   }
 
   public void setArgs(List<AstExpression> args) {
-    this.args = args;
+    this.args = ImmutableList.copyOf(args);
   }
 
   public List<AstExpression> getArgs() {
-    return List.copyOf(args);
+    return ImmutableList.copyOf(args);
   }
 
   public void setFunction(AstFunction function) {

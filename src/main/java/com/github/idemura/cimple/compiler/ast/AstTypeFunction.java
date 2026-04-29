@@ -8,21 +8,20 @@ public final class AstTypeFunction extends AstType {
     return visitor.visit(this);
   }
 
+  @Override
+  public QualifiedName getName() {
+    return header.getName();
+  }
+
+  public void setName(QualifiedName name) {
+    header.setName(name);
+  }
+
   public void setHeader(AstFunctionHeader header) {
     this.header = header;
   }
 
   public AstFunctionHeader getHeader() {
     return header;
-  }
-
-  @Override
-  public void setName(String name) {
-    header.setName(name);
-  }
-
-  @Override
-  public String getName() {
-    return header.getName();
   }
 }

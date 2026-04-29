@@ -12,7 +12,6 @@ import com.github.idemura.cimple.compiler.ast.AstNameRef;
 import com.github.idemura.cimple.compiler.ast.AstVariable;
 import com.github.idemura.cimple.compiler.ast.AstVisitor;
 import com.github.idemura.cimple.compiler.ast.TypeRef;
-import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -27,9 +26,8 @@ class TypeChecker extends AstVisitor {
     // Collect all functions. Then, we can collect variables - their init expressions may
     // reference functions.
     Map<String, List<AstFunction>> overloads = new HashMap<>();
-    for (var f : node.getFunctions()) {
+    for (var f : node.functions()) {
       assignParameterTypes(f);
-      overloads.computeIfAbsent(f.getHeader().getName(), (k) -> new ArrayList<>()).add(f);
     }
 
     // Variables collected as children visit pass. There relative order is preserved as

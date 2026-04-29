@@ -34,7 +34,7 @@ class PreprocessRewriteVisitorTest {
     var module = new Parser(new Tokenizer(code).split()).parse();
     module.accept(new PreprocessRewriteVisitor());
 
-    var statements = module.getFunctions().get(0).getBlock().getStatements();
+    var statements = module.functions().get(0).getBlock().statements();
     int i = 0;
     assertSame(AstLiteral.TRUE, ((AstIf) statements.get(i++)).getConditions().get(0));
     assertSame(AstLiteral.NULL, ((AstDefer) statements.get(i++)).getExpression());

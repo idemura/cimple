@@ -7,7 +7,7 @@ public final class AstVariable extends AstStatement {
   public static final long PARAM = 0x2L; // Whether it is a function parameter.
   public static final long FIELD = 0x4L; // Whether it is a field.
 
-  private String name;
+  private QualifiedName name;
   private TypeRef typeRef;
   private AstExpression expression;
   private long flags;
@@ -42,10 +42,14 @@ public final class AstVariable extends AstStatement {
   }
 
   public void setName(String name) {
+    this.name = new QualifiedName(name);
+  }
+
+  public void setName(QualifiedName name) {
     this.name = name;
   }
 
-  public String getName() {
+  public QualifiedName getName() {
     return name;
   }
 

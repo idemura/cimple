@@ -1,21 +1,31 @@
 package com.github.idemura.cimple.compiler.ast;
 
-import java.util.ArrayList;
+import com.google.common.collect.ImmutableList;
 import java.util.List;
 
 public final class AstTypeUnion extends AstType {
-  private List<UnionVariant> variants = new ArrayList<>();
+  private QualifiedName name;
+  private List<UnionVariant> variants;
 
   @Override
   public Object accept(AstVisitor visitor) {
     return visitor.visit(this);
   }
 
-  public void addVariant(UnionVariant variant) {
-    variants.add(variant);
+  @Override
+  public QualifiedName getName() {
+    return name;
+  }
+
+  public void setName(QualifiedName name) {
+    this.name = name;
+  }
+
+  public void setVariants(List<UnionVariant> variants) {
+    this.variants = ImmutableList.copyOf(variants);
   }
 
   public List<UnionVariant> getVariants() {
-    return List.copyOf(variants);
+    return ImmutableList.copyOf(variants);
   }
 }

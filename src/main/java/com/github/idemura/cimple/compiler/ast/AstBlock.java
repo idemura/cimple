@@ -13,11 +13,7 @@ public final class AstBlock extends AstNode {
     return visitor.visit(this);
   }
 
-  public void add(AstStatement s) {
-    statements.add(s);
-  }
-
-  public List<AstStatement> getStatements() {
-    return List.copyOf(statements);
+  public List<AstStatement> statements() {
+    return statements;
   }
 }

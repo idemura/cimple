@@ -14,13 +14,19 @@ public final class AstTypeBuiltin extends AstType {
   public static final AstTypeBuiltin CHAR = new AstTypeBuiltin("char");
   public static final AstTypeBuiltin STRING = new AstTypeBuiltin("string");
 
+  private QualifiedName name;
+
   private AstTypeBuiltin(String name) {
-    setModuleName("");
-    setName(name);
+    this.name = new QualifiedName("builtin", name);
   }
 
   @Override
   public Object accept(AstVisitor visitor) {
     return visitor.visit(this);
+  }
+
+  @Override
+  public QualifiedName getName() {
+    return name;
   }
 }

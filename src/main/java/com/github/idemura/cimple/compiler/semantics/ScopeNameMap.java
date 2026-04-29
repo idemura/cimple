@@ -2,15 +2,16 @@ package com.github.idemura.cimple.compiler.semantics;
 
 import static com.google.common.base.Preconditions.checkNotNull;
 
+import com.github.idemura.cimple.compiler.ast.QualifiedName;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
 class ScopeNameMap<T> {
-  private final Map<String, T> globalNameMap = new HashMap<>();
-  private final Map<String, T> nameMap = new HashMap<>();
-  private final List<List<String>> scopeStack = new ArrayList<>();
+  private final Map<QualifiedName, T> globalNameMap = new HashMap<>();
+  private final Map<QualifiedName, T> nameMap = new HashMap<>();
+  private final List<List<QualifiedName>> scopeStack = new ArrayList<>();
 
   void pushScope() {
     scopeStack.add(new ArrayList<>());
@@ -28,7 +29,7 @@ class ScopeNameMap<T> {
   }
 
   // Returns conflicting entity if found.
-  T putGlobal(String name, T entity) {
+  T putGlobal(QualifiedName name, T entity) {
     checkNotNull(name);
 
     var e = globalNameMap.get(name);
@@ -44,7 +45,7 @@ class ScopeNameMap<T> {
   }
 
   // Returns conflicting entity if found.
-  T put(String name, T entity) {
+  T put(QualifiedName name, T entity) {
     checkNotNull(name);
 
     var e = nameMap.get(name);
@@ -59,7 +60,7 @@ class ScopeNameMap<T> {
     return null;
   }
 
-  T get(String name) {
+  T get(QualifiedName name) {
     return nameMap.get(name);
   }
 }

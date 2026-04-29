@@ -3,12 +3,11 @@ package com.github.idemura.cimple.compiler.ast;
 import java.util.Objects;
 
 public final class AstNameRef extends AstExpression {
-  private String name;
-  // Variable definition that it refers to.
+  private QualifiedName name;
   private AstVariable variable;
 
   public AstNameRef(String name) {
-    this.name = name;
+    this.name = new QualifiedName(name);
   }
 
   @Override
@@ -37,8 +36,12 @@ public final class AstNameRef extends AstExpression {
     return variable.getTypeRef().getType();
   }
 
-  public String getName() {
+  public QualifiedName getName() {
     return name;
+  }
+
+  public void setName(QualifiedName name) {
+    this.name = name;
   }
 
   public void setVariable(AstVariable variable) {

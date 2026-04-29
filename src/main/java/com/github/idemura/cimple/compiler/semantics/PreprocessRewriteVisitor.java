@@ -9,7 +9,7 @@ class PreprocessRewriteVisitor extends AstRewriteExpressionVisitor {
 
   @Override
   protected Object visit(AstNameRef node) {
-    return switch (node.getName()) {
+    return switch (node.getName().name()) {
       case "true" -> AstLiteral.TRUE;
       case "false" -> AstLiteral.FALSE;
       case "null" -> AstLiteral.NULL;
