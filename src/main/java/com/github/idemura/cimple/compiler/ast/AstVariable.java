@@ -15,11 +15,6 @@ public final class AstVariable extends AstStatement {
 
   public AstVariable() {}
 
-  public AstVariable(String name, TypeRef typeRef) {
-    this.name = name;
-    this.typeRef = typeRef;
-  }
-
   @Override
   public Object accept(AstVisitor visitor) {
     return visitor.visit(this);

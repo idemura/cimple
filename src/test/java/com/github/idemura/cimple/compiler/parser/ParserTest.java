@@ -261,7 +261,9 @@ class ParserTest {
   }
 
   private static AstVariable parameter(String name, String typeName) {
-    var parameter = new AstVariable(name, new TypeRef(typeName));
+    var parameter = new AstVariable();
+    parameter.setName(name);
+    parameter.setTypeRef(new TypeRef(typeName));
     parameter.setBit(AstVariable.PARAM);
     return parameter;
   }
