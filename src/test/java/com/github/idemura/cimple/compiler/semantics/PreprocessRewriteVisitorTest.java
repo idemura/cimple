@@ -31,7 +31,7 @@ class PreprocessRewriteVisitorTest {
         }
         """;
 
-    var module = new Parser(new Tokenizer(null, code).split()).parse();
+    var module = new Parser(new Tokenizer(code).split()).parse();
     module.accept(new PreprocessRewriteVisitor());
 
     var statements = module.getFunctions().get(0).getBlock().getStatements();

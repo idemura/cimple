@@ -22,7 +22,7 @@ import org.junit.jupiter.api.Test;
 
 class ParserTest {
   private AstModule parseCode(String code) {
-    return new Parser(new Tokenizer(null, code).split()).parse();
+    return new Parser(new Tokenizer(code).split()).parse();
   }
 
   private AstModule parseFile(String fileName) {

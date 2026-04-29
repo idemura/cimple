@@ -19,7 +19,7 @@ public class Compiler {
   }
 
   public void compile(String fileName, String code) {
-    var tokens = new Tokenizer(fileName, code).split();
+    var tokens = new Tokenizer(code, fileName).split();
     if (params.printTokens()) {
       debugOutput.writeLine(tokens.toString());
       debugOutput.writeLine("\n");

@@ -17,9 +17,13 @@ public class Tokenizer {
   private int line = 1;
   private int column = 1;
 
-  public Tokenizer(String fileName, String code) {
+  public Tokenizer(String code, String fileName) {
     this.fileName = fileName;
     this.code = code;
+  }
+
+  public Tokenizer(String code) {
+    this(code, null);
   }
 
   public TokenStream split() {
