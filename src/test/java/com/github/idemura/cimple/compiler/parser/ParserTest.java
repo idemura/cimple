@@ -14,8 +14,10 @@ import com.github.idemura.cimple.compiler.ast.AstNameRef;
 import com.github.idemura.cimple.compiler.ast.AstTypeAlias;
 import com.github.idemura.cimple.compiler.ast.AstTypeFunction;
 import com.github.idemura.cimple.compiler.ast.AstTypeStruct;
+import com.github.idemura.cimple.compiler.ast.AstTypeUnion;
 import com.github.idemura.cimple.compiler.ast.AstVariable;
 import com.github.idemura.cimple.compiler.ast.TypeRef;
+import com.github.idemura.cimple.compiler.ast.UnionVariant;
 import com.github.idemura.cimple.compiler.tokens.Tokenizer;
 import java.util.List;
 import org.junit.jupiter.api.Test;
@@ -89,7 +91,7 @@ class ParserTest {
     var module = parseFile("/parser/types.ci");
     assertEquals("type_test", module.getName());
     var types = module.getTypes();
-    assertEquals(6, types.size());
+    assertEquals(7, types.size());
     int i = 0;
     {
       var type = (AstTypeStruct) types.get(i++);
@@ -125,6 +127,13 @@ class ParserTest {
       var type = (AstTypeAlias) types.get(i++);
       assertEquals("Uri", type.getName());
       assertEquals(new TypeRef("string"), type.getBaseTypeRef());
+    }
+    {
+      var type = (AstTypeUnion) types.get(i++);
+      assertEquals("Option", type.getName());
+      assertEquals(
+          List.of(unionVariant("None", null), unionVariant("Some", "string")),
+          type.getVariants());
     }
     {
       var type = (AstTypeFunction) types.get(i++);
@@ -276,5 +285,14 @@ class ParserTest {
     parameter.setTypeRef(new TypeRef(typeName));
     parameter.setBit(AstVariable.PARAM);
     return parameter;
+  }
+
+  private static UnionVariant unionVariant(String name, String typeName) {
+    var unionVariant = new UnionVariant();
+    unionVariant.setName(name);
+    if (typeName != null) {
+      unionVariant.setValueType(new TypeRef(typeName));
+    }
+    return unionVariant;
   }
 }

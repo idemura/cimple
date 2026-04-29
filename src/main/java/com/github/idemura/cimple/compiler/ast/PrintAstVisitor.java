@@ -72,6 +72,22 @@ public class PrintAstVisitor extends AstVisitor {
   }
 
   @Override
+  protected Object visit(AstTypeUnion node) {
+    output.writeLine("TYPE UNION %s".formatted(node.getName()));
+    output.indent();
+    for (var variant : node.getVariants()) {
+      if (variant.getValueType() == null) {
+        output.writeLine("VARIANT %s".formatted(variant.getName()));
+      } else {
+        output.writeLine("VARIANT %s(%s)".formatted(variant.getName(), variant.getValueType()));
+      }
+    }
+    output.unindent();
+    output.writeLine("END");
+    return null;
+  }
+
+  @Override
   protected Object visit(AstTypeBuiltin node) {
     output.writeLine("TYPE BUILTIN %s".formatted(node.getName()));
     return null;

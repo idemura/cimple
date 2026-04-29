@@ -25,8 +25,10 @@ import com.github.idemura.cimple.compiler.ast.AstTypeAlias;
 import com.github.idemura.cimple.compiler.ast.AstTypeBuiltin;
 import com.github.idemura.cimple.compiler.ast.AstTypeFunction;
 import com.github.idemura.cimple.compiler.ast.AstTypeStruct;
+import com.github.idemura.cimple.compiler.ast.AstTypeUnion;
 import com.github.idemura.cimple.compiler.ast.AstVariable;
 import com.github.idemura.cimple.compiler.ast.TypeRef;
+import com.github.idemura.cimple.compiler.ast.UnionVariant;
 import com.github.idemura.cimple.compiler.tokens.TokenStream;
 import java.util.ArrayList;
 import java.util.List;
@@ -79,7 +81,7 @@ public class Parser {
     return switch (tokens.current().keyword()) {
       case FUNCTION -> parseTypeFunction();
       case STRUCT -> parseTypeStruct();
-      case UNION -> throw new UnsupportedOperationException();
+      case UNION -> parseTypeUnion();
       case ALIAS -> parseTypeAlias();
       default ->
           throw CompilerException.builder()
@@ -100,6 +102,30 @@ public class Parser {
       type.addField(parseVariable(tokens.current().keyword() != CONST));
     }
     return type;
+  }
+
+  private AstTypeUnion parseTypeUnion() {
+    var type = new AstTypeUnion();
+    tokens.takeKeyword(UNION);
+    var name = tokens.take(IDENTIFIER);
+    type.setLocation(name.location());
+    type.setName(name.value());
+    tokens.take(LCURLY);
+    while (!tokens.takeIf(RCURLY)) {
+      type.addVariant(parseTypeUnionVariant());
+      tokens.take(SEMICOLON);
+    }
+    return type;
+  }
+
+  private UnionVariant parseTypeUnionVariant() {
+    var variant = new UnionVariant();
+    variant.setName(tokens.take(IDENTIFIER).value());
+    if (tokens.takeIf(LPAREN)) {
+      variant.setValueType(parseTypeRef());
+      tokens.take(RPAREN);
+    }
+    return variant;
   }
 
   private AstTypeAlias parseTypeAlias() {

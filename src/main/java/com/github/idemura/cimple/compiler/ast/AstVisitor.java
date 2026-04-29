@@ -32,6 +32,10 @@ public abstract class AstVisitor {
     return null;
   }
 
+  protected Object visit(AstTypeUnion node) {
+    return null;
+  }
+
   protected Object visit(AstTypeStruct node) {
     visitChildren(node);
     return null;
