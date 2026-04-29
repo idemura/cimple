@@ -45,6 +45,8 @@ public class Tokenizer {
           case '#' -> skipComment();
           case '(' -> tokens.add(take1CharToken(LPAREN));
           case ')' -> tokens.add(take1CharToken(RPAREN));
+          case '[' -> tokens.add(take1CharToken(LBRACKET));
+          case ']' -> tokens.add(take1CharToken(RBRACKET));
           case '{' -> tokens.add(take1CharToken(LCURLY));
           case '}' -> tokens.add(take1CharToken(RCURLY));
           case ':' -> tokens.add(take1CharToken(COLON));

@@ -23,6 +23,7 @@ import com.github.idemura.cimple.compiler.ast.AstStatement;
 import com.github.idemura.cimple.compiler.ast.AstType;
 import com.github.idemura.cimple.compiler.ast.AstTypeAlias;
 import com.github.idemura.cimple.compiler.ast.AstTypeBuiltin;
+import com.github.idemura.cimple.compiler.ast.AstTypeCast;
 import com.github.idemura.cimple.compiler.ast.AstTypeFunction;
 import com.github.idemura.cimple.compiler.ast.AstTypeStruct;
 import com.github.idemura.cimple.compiler.ast.AstTypeUnion;
@@ -30,6 +31,7 @@ import com.github.idemura.cimple.compiler.ast.AstVariable;
 import com.github.idemura.cimple.compiler.ast.QualifiedName;
 import com.github.idemura.cimple.compiler.ast.TypeRef;
 import com.github.idemura.cimple.compiler.ast.UnionVariant;
+import com.github.idemura.cimple.compiler.tokens.Token;
 import com.github.idemura.cimple.compiler.tokens.TokenStream;
 import com.google.common.collect.ImmutableList;
 import java.util.ArrayList;
@@ -307,7 +309,7 @@ public class Parser {
             .build();
       }
       var apply = new AstApplyFunction();
-      apply.setName(new QualifiedName(operator.type().printableName()));
+      apply.setFunction(operatorFunction(operator));
       apply.setArgs(ImmutableList.of(expr, m));
       apply.setLocation(operator.location());
       expr = apply;
@@ -330,7 +332,7 @@ public class Parser {
             .build();
       }
       var apply = new AstApplyFunction();
-      apply.setName(new QualifiedName(operator.type().printableName()));
+      apply.setFunction(operatorFunction(operator));
       apply.setArgs(ImmutableList.of(expr, m));
       apply.setLocation(operator.location());
       expr = apply;
@@ -353,7 +355,7 @@ public class Parser {
             .build();
       }
       var apply = new AstApplyFunction();
-      apply.setName(new QualifiedName(operator.type().printableName()));
+      apply.setFunction(operatorFunction(operator));
       apply.setArgs(ImmutableList.of(expr, m));
       apply.setLocation(operator.location());
       expr = apply;
@@ -364,16 +366,10 @@ public class Parser {
   private AstExpression parseExpressionPostfix() {
     var expr = parseExpressionPrimary();
     while (tokens.current().is(LPAREN)) {
-      if (!(expr instanceof AstNameRef nameRef)) {
-        throw CompilerException.builder()
-            .formatMessage("Invalid function call")
-            .setLocation(tokens.current().location())
-            .build();
-      }
       var apply = new AstApplyFunction();
-      apply.setName(nameRef.getName());
+      apply.setFunction(expr);
+      apply.setLocation(tokens.current().location());
       apply.setArgs(parseExpressionList());
-      apply.setLocation(nameRef.getLocation());
       expr = apply;
     }
     return expr;
@@ -381,9 +377,17 @@ public class Parser {
 
   private AstExpression parseExpressionPrimary() {
     if (tokens.takeIf(LPAREN)) {
-      var subExpr = parseExpression();
+      var expr = parseExpression();
       tokens.take(RPAREN);
-      return subExpr;
+      return expr;
+    }
+    if (tokens.takeIf(LBRACKET)) {
+      var expr = new AstTypeCast();
+      expr.setExpression(parseExpression());
+      expr.setLocation(tokens.takeKeyword(TYPE).location());
+      expr.setTypeRef(parseTypeRef());
+      tokens.take(RBRACKET);
+      return expr;
     }
     var token = tokens.take();
     switch (token.type()) {
@@ -491,5 +495,11 @@ public class Parser {
 
   private TypeRef parseTypeRef() {
     return TypeRef.ofName(tokens.take(IDENTIFIER).value());
+  }
+
+  private AstNameRef operatorFunction(Token operator) {
+    var node = new AstNameRef(operator.type().symbolName());
+    node.setLocation(operator.location());
+    return node;
   }
 }

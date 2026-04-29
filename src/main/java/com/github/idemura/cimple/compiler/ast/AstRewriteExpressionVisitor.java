@@ -19,6 +19,17 @@ public class AstRewriteExpressionVisitor extends AstVisitor {
   }
 
   @Override
+  protected Object visit(AstTypeCast node) {
+    visitChildren(node);
+    return node;
+  }
+
+  @Override
+  protected void visitChildren(AstTypeCast node) {
+    node.setExpression(rewrite(node.getExpression()));
+  }
+
+  @Override
   protected Object visit(AstNameRef node) {
     return node;
   }

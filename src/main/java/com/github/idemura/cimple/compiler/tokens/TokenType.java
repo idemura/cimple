@@ -8,6 +8,8 @@ public enum TokenType {
   CHAR("<char>"),
   LPAREN("("),
   RPAREN(")"),
+  LBRACKET("["),
+  RBRACKET("]"),
   LCURLY("{"),
   RCURLY("}"),
   SEMICOLON(";"),
@@ -81,7 +83,7 @@ public enum TokenType {
     this.symbolName = symbolName;
   }
 
-  public String printableName() {
+  public String symbolName() {
     return symbolName;
   }
 }

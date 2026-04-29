@@ -4,9 +4,8 @@ import com.google.common.collect.ImmutableList;
 import java.util.List;
 
 public final class AstApplyFunction extends AstExpression {
-  private QualifiedName name;
+  private AstExpression function;
   private List<AstExpression> args;
-  private AstFunction function;
 
   public AstApplyFunction() {}
 
@@ -17,15 +16,15 @@ public final class AstApplyFunction extends AstExpression {
 
   @Override
   public AstType getType() {
-    return function.getHeader().getResultType().getType();
+    return function.getType();
   }
 
-  public QualifiedName getName() {
-    return name;
+  public AstExpression getFunction() {
+    return function;
   }
 
-  public void setName(QualifiedName name) {
-    this.name = name;
+  public void setFunction(AstExpression function) {
+    this.function = function;
   }
 
   public List<AstExpression> getArgs() {
@@ -34,13 +33,5 @@ public final class AstApplyFunction extends AstExpression {
 
   public void setArgs(List<AstExpression> args) {
     this.args = ImmutableList.copyOf(args);
-  }
-
-  public AstFunction getFunction() {
-    return function;
-  }
-
-  public void setFunction(AstFunction function) {
-    this.function = function;
   }
 }

@@ -119,6 +119,15 @@ public class PrintAstVisitor extends AstVisitor {
   }
 
   @Override
+  protected Object visit(AstTypeCast node) {
+    output.writeLine("CAST %s".formatted(node.getTypeRef()));
+    output.indent();
+    node.getExpression().accept(this);
+    output.unindent();
+    return null;
+  }
+
+  @Override
   protected Object visit(AstNameRef node) {
     output.writeLine("IDENTIFIER %s".formatted(node.getName()));
     return null;
@@ -126,7 +135,7 @@ public class PrintAstVisitor extends AstVisitor {
 
   @Override
   protected Object visit(AstApplyFunction node) {
-    output.writeLine("APPLY %s".formatted(node.getName()));
+    output.writeLine("APPLY");
     output.indent();
     visitChildren(node);
     output.unindent();

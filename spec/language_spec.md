@@ -139,7 +139,8 @@ From highest to lowest
 
 | Operators            | Associativity |
 |----------------------|---------------|
-| `.` `->` `[]` `()`   | Left-to-right |
+| `(e)` `[e type t]`   | Left-to-right |
+| `.` `->` `[]` `f(x)` | Left-to-right |
 | `x++` `x--`          | Left-to-right |
 | `++x` `--x` `~` `!`  | Right-to-left |
 | `*` `/` `%`          | Left-to-right |
@@ -157,6 +158,16 @@ From highest to lowest
 Only one assignment per expression is allowed. Thus, it doesn't matter if it is left-to-right or
 right-to-left. For simplicity, parser parses it left-to-right order. Later, semantic analyzer
 produces an error in such case.
+
+## Type Casting
+
+When you need to cast type, use this expression:
+
+```
+<cast-expr> := "[" <expression> "type" <type_ref> "]"
+```
+
+It's precedence is same as surrounding expression in parentheses.
 
 ## Code Style
 

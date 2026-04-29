@@ -91,6 +91,15 @@ public abstract class AstVisitor {
     return null;
   }
 
+  protected Object visit(AstTypeCast node) {
+    visitChildren(node);
+    return null;
+  }
+
+  protected void visitChildren(AstTypeCast node) {
+    node.getExpression().accept(this);
+  }
+
   protected Object visit(AstNameRef node) {
     return null;
   }
@@ -101,6 +110,7 @@ public abstract class AstVisitor {
   }
 
   protected void visitChildren(AstApplyFunction node) {
+    node.getFunction().accept(this);
     for (var a : node.getArgs()) {
       a.accept(this);
     }
