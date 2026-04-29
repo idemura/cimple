@@ -36,11 +36,11 @@ public final class AstTypeFunction extends AstType {
     return header.getBoundTypeName();
   }
 
-  public void setResultType(com.github.idemura.cimple.compiler.TypeRef resultType) {
+  public void setResultType(TypeRef resultType) {
     header.setResultType(resultType);
   }
 
-  public com.github.idemura.cimple.compiler.TypeRef getResultType() {
+  public TypeRef getResultType() {
     return header.getResultType();
   }
 

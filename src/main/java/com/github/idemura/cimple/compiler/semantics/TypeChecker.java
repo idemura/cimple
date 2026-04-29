@@ -1,7 +1,6 @@
 package com.github.idemura.cimple.compiler.semantics;
 
 import com.github.idemura.cimple.compiler.CompilerException;
-import com.github.idemura.cimple.compiler.TypeRef;
 import com.github.idemura.cimple.compiler.ast.AstBlock;
 import com.github.idemura.cimple.compiler.ast.AstFor;
 import com.github.idemura.cimple.compiler.ast.AstFunction;
@@ -12,6 +11,7 @@ import com.github.idemura.cimple.compiler.ast.AstModule;
 import com.github.idemura.cimple.compiler.ast.AstNameRef;
 import com.github.idemura.cimple.compiler.ast.AstVariable;
 import com.github.idemura.cimple.compiler.ast.AstVisitor;
+import com.github.idemura.cimple.compiler.ast.TypeRef;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -30,7 +30,7 @@ class TypeChecker extends AstVisitor {
     Map<String, List<AstFunction>> overloads = new HashMap<>();
     for (var f : node.getFunctions()) {
       assignParameterTypes(f);
-      overloads.computeIfAbsent(f.getName(), (k) -> new ArrayList<>()).add(f);
+      overloads.computeIfAbsent(f.getHeader().getName(), (k) -> new ArrayList<>()).add(f);
     }
 
     // Variables collected as children visit pass. There relative order is preserved as
@@ -91,7 +91,7 @@ class TypeChecker extends AstVisitor {
   @Override
   protected Object visit(AstFunction node) {
     variables.pushScope();
-    for (var p : node.getParameters()) {
+    for (var p : node.getHeader().getParameters()) {
       if (variables.put(p.getName(), p) != null) {
         throw CompilerException.builder()
             .formatMessage("Duplicate parameter %s", p.getName())
@@ -192,9 +192,10 @@ class TypeChecker extends AstVisitor {
     // Resolve types right to left, if type is missing use the last one.
 
     TypeRef prevTypeRef = null;
-    int n = func.getParameters().size();
+    var parameters = func.getHeader().getParameters();
+    int n = parameters.size();
     for (int i = 1; i <= n; i++) {
-      var p = func.getParameters().get(n - i);
+      var p = parameters.get(n - i);
       if (p.getTypeRef() == null) {
         if (prevTypeRef == null) {
           throw CompilerException.builder()

@@ -11,8 +11,7 @@ import org.junit.jupiter.api.Test;
 class TokenizerTest {
   @Test
   void testSplit() {
-    var tokens =
-        new Tokenizer(readResource(getClass(), "/tokenizer/tokens.ci")).split().tokens();
+    var tokens = new Tokenizer(readResource(getClass(), "/tokenizer/tokens.ci")).split().tokens();
     assertEquals(
         List.of(
             new Token(IDENTIFIER, "function", new Location(1, 1)),

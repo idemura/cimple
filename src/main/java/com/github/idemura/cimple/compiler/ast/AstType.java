@@ -1,14 +1,11 @@
 package com.github.idemura.cimple.compiler.ast;
 
-import com.github.idemura.cimple.compiler.Type;
-
-public abstract class AstType extends AstNode implements Type {
+public abstract class AstType extends AstNode {
   private String moduleName;
   private String name;
 
   protected AstType() {}
 
-  @Override
   public String getModuleName() {
     return moduleName;
   }
@@ -17,7 +14,6 @@ public abstract class AstType extends AstNode implements Type {
     this.moduleName = moduleName;
   }
 
-  @Override
   public String getName() {
     return name;
   }

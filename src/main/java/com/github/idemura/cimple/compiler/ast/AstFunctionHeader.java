@@ -1,7 +1,6 @@
 package com.github.idemura.cimple.compiler.ast;
 
 import com.github.idemura.cimple.compiler.Location;
-import com.github.idemura.cimple.compiler.TypeRef;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;

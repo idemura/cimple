@@ -1,7 +1,6 @@
 package com.github.idemura.cimple.compiler.ast;
 
 import com.github.idemura.cimple.common.IndentWriter;
-import com.github.idemura.cimple.compiler.Type;
 
 public class PrintAstVisitor extends AstVisitor {
   private final IndentWriter output;
@@ -26,12 +25,13 @@ public class PrintAstVisitor extends AstVisitor {
 
   @Override
   protected Object visit(AstFunction node) {
+    var header = node.getHeader();
     printEntity(
         "FUNCTION",
-        node.getName(),
-        node.getResultType() == null ? null : node.getResultType().getType());
+        header.getName(),
+        header.getResultType() == null ? null : header.getResultType().getType());
     output.indent();
-    for (var p : node.getParameters()) {
+    for (var p : header.getParameters()) {
       printEntity("ARG", p.getName(), p.getTypeRef().getType());
     }
     node.getBlock().accept(this);
@@ -67,6 +67,12 @@ public class PrintAstVisitor extends AstVisitor {
       printEntity("ARG", p.getName(), p.getTypeRef().getType());
     }
     output.unindent();
+    return null;
+  }
+
+  @Override
+  protected Object visit(AstBuiltinType node) {
+    output.writeLine("TYPE BUILTIN %s".formatted(node.getName()));
     return null;
   }
 
@@ -197,7 +203,7 @@ public class PrintAstVisitor extends AstVisitor {
     return null;
   }
 
-  private void printEntity(String clazz, Object value, Type type) {
+  private void printEntity(String clazz, Object value, AstType type) {
     if (type == null) {
       output.writeLine("%s %s".formatted(clazz, value));
     } else {

@@ -1,6 +1,5 @@
 package com.github.idemura.cimple.compiler.ast;
 
-import com.github.idemura.cimple.compiler.TypeRef;
 import java.util.Objects;
 
 public final class AstVariable extends AstStatement {

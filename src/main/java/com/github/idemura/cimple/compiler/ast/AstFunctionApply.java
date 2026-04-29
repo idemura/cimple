@@ -1,6 +1,5 @@
 package com.github.idemura.cimple.compiler.ast;
 
-import com.github.idemura.cimple.compiler.Type;
 import java.util.List;
 
 public final class AstFunctionApply extends AstExpression {
@@ -16,8 +15,8 @@ public final class AstFunctionApply extends AstExpression {
   }
 
   @Override
-  public Type getType() {
-    return function.getResultType().getType();
+  public AstType getType() {
+    return function.getHeader().getResultType().getType();
   }
 
   public void setFunctionName(String functionName) {

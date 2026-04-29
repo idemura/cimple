@@ -1,6 +1,5 @@
 package com.github.idemura.cimple.compiler.ast;
 
-import com.github.idemura.cimple.compiler.Type;
 import java.util.Objects;
 
 public final class AstNameRef extends AstExpression {
@@ -34,7 +33,7 @@ public final class AstNameRef extends AstExpression {
   }
 
   @Override
-  public Type getType() {
+  public AstType getType() {
     return variable.getTypeRef().getType();
   }
 

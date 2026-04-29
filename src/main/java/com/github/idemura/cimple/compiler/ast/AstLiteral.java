@@ -1,23 +1,21 @@
 package com.github.idemura.cimple.compiler.ast;
 
-import com.github.idemura.cimple.compiler.BuiltinType;
-import com.github.idemura.cimple.compiler.Type;
 import java.util.Objects;
 
 public final class AstLiteral extends AstExpression {
   // String literal stores values as String.
   // Number(integer/float) literal - as (long/double), but actual type is defined by @type.
   private Object value;
-  private Type type;
+  private AstType type;
 
-  public static final AstLiteral TRUE = ofConst(BuiltinType.BOOL, true);
-  public static final AstLiteral FALSE = ofConst(BuiltinType.BOOL, false);
-  public static final AstLiteral NULL = ofConst(BuiltinType.NULL, null);
+  public static final AstLiteral TRUE = ofConst(AstBuiltinType.BOOL, true);
+  public static final AstLiteral FALSE = ofConst(AstBuiltinType.BOOL, false);
+  public static final AstLiteral NULL = ofConst(AstBuiltinType.NULL, null);
 
   public static AstLiteral ofInt(long value) {
     var literal = new AstLiteral();
     literal.setValue(value);
-    literal.setType(BuiltinType.INT64);
+    literal.setType(AstBuiltinType.INT64);
     return literal;
   }
 
@@ -57,15 +55,15 @@ public final class AstLiteral extends AstExpression {
     this.value = value;
   }
 
-  public Type getType() {
+  public AstType getType() {
     return type;
   }
 
-  public void setType(Type type) {
+  public void setType(AstType type) {
     this.type = type;
   }
 
-  public static AstLiteral ofConst(Type type, Object value) {
+  public static AstLiteral ofConst(AstType type, Object value) {
     var literal = new AstLiteral();
     literal.setValue(value);
     literal.setType(type);

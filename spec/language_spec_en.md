@@ -60,6 +60,17 @@ openConnection
 action
 ```
 
+### Types
+
+There are several type kinds in Cimple:
+
+* Builtin
+* Struct
+* Interface
+* Function
+* Alias
+* Union
+
 ### Builtin Types
 
 Cimple has following basic types:

@@ -8,7 +8,7 @@ public final class AstFunction extends AstNode {
 
   @Override
   public int hashCode() {
-    return getName().hashCode();
+    return header.getName().hashCode();
   }
 
   @Override
@@ -16,12 +16,14 @@ public final class AstFunction extends AstNode {
     if (this == object) {
       return true;
     }
-    return (object instanceof AstFunction other) && getName().equals(other.getName());
+    return (object instanceof AstFunction other)
+        && header.getName().equals(other.getHeader().getName());
   }
 
   @Override
   public String toString() {
-    return "FUNCTION %s(%s): %s".formatted(getName(), getParameters(), getResultType());
+    return "FUNCTION %s(%s): %s"
+        .formatted(header.getName(), header.getParameters(), header.getResultType());
   }
 
   @Override
@@ -36,39 +38,7 @@ public final class AstFunction extends AstNode {
   public AstFunctionHeader getHeader() {
     return header;
   }
-
-  public void setName(String name) {
-    header.setName(name);
-  }
-
-  public String getName() {
-    return header.getName();
-  }
-
-  public void setBoundTypeName(String boundTypeName) {
-    header.setBoundTypeName(boundTypeName);
-  }
-
-  public String getBoundTypeName() {
-    return header.getBoundTypeName();
-  }
-
-  public void setResultType(com.github.idemura.cimple.compiler.TypeRef resultType) {
-    header.setResultType(resultType);
-  }
-
-  public com.github.idemura.cimple.compiler.TypeRef getResultType() {
-    return header.getResultType();
-  }
-
-  public void addParameter(AstVariable parameter) {
-    header.addParameter(parameter);
-  }
-
-  public List<AstVariable> getParameters() {
-    return header.getParameters();
-  }
-
+  
   public void setBlock(AstBlock block) {
     this.block = block;
   }

@@ -4,10 +4,9 @@ import static com.github.idemura.cimple.compiler.tokens.TokenType.*;
 import static java.lang.Double.parseDouble;
 import static java.lang.Long.parseLong;
 
-import com.github.idemura.cimple.compiler.BuiltinType;
 import com.github.idemura.cimple.compiler.CompilerException;
-import com.github.idemura.cimple.compiler.TypeRef;
 import com.github.idemura.cimple.compiler.ast.AstBlock;
+import com.github.idemura.cimple.compiler.ast.AstBuiltinType;
 import com.github.idemura.cimple.compiler.ast.AstDefer;
 import com.github.idemura.cimple.compiler.ast.AstExpression;
 import com.github.idemura.cimple.compiler.ast.AstExpressionStatement;
@@ -27,6 +26,7 @@ import com.github.idemura.cimple.compiler.ast.AstTypeAlias;
 import com.github.idemura.cimple.compiler.ast.AstTypeFunction;
 import com.github.idemura.cimple.compiler.ast.AstTypeStruct;
 import com.github.idemura.cimple.compiler.ast.AstVariable;
+import com.github.idemura.cimple.compiler.ast.TypeRef;
 import com.github.idemura.cimple.compiler.tokens.TokenStream;
 import java.util.ArrayList;
 import java.util.List;
@@ -336,10 +336,10 @@ public class Parser {
         var l = new AstLiteral();
         if (t.value().contains(".")) {
           l.setValue(parseDouble(t.value()));
-          l.setType(BuiltinType.FLOAT64);
+          l.setType(AstBuiltinType.FLOAT64);
         } else {
           l.setValue(parseLong(t.value()));
-          l.setType(BuiltinType.INT64);
+          l.setType(AstBuiltinType.INT64);
         }
         l.setLocation(t.location());
         return l;
@@ -347,7 +347,7 @@ public class Parser {
       case STRING -> {
         var l = new AstLiteral();
         l.setValue(t.value());
-        l.setType(BuiltinType.STRING);
+        l.setType(AstBuiltinType.STRING);
         l.setLocation(t.location());
         return l;
       }

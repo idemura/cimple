@@ -2,7 +2,7 @@ package com.github.idemura.cimple.compiler.semantics;
 
 import static org.junit.jupiter.api.Assertions.*;
 
-import com.github.idemura.cimple.compiler.BuiltinType;
+import com.github.idemura.cimple.compiler.ast.AstBuiltinType;
 import com.github.idemura.cimple.compiler.ast.AstDefer;
 import com.github.idemura.cimple.compiler.ast.AstFor;
 import com.github.idemura.cimple.compiler.ast.AstIf;
@@ -46,6 +46,6 @@ class PreprocessRewriteVisitorTest {
       assertSame(AstLiteral.FALSE, stmtFor.getIncrement());
     }
     assertSame(AstLiteral.TRUE, ((AstReturn) statements.get(i++)).getExpression());
-    assertEquals(BuiltinType.NULL, AstLiteral.NULL.getType());
+    assertEquals(AstBuiltinType.NULL, AstLiteral.NULL.getType());
   }
 }

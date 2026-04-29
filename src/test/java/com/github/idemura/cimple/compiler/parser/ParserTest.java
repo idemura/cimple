@@ -4,7 +4,6 @@ import static com.github.idemura.cimple.common.Resources.readResource;
 import static org.junit.jupiter.api.Assertions.*;
 
 import com.github.idemura.cimple.compiler.CompilerException;
-import com.github.idemura.cimple.compiler.TypeRef;
 import com.github.idemura.cimple.compiler.ast.AstDefer;
 import com.github.idemura.cimple.compiler.ast.AstFor;
 import com.github.idemura.cimple.compiler.ast.AstGoto;
@@ -16,6 +15,7 @@ import com.github.idemura.cimple.compiler.ast.AstTypeAlias;
 import com.github.idemura.cimple.compiler.ast.AstTypeFunction;
 import com.github.idemura.cimple.compiler.ast.AstTypeStruct;
 import com.github.idemura.cimple.compiler.ast.AstVariable;
+import com.github.idemura.cimple.compiler.ast.TypeRef;
 import com.github.idemura.cimple.compiler.tokens.Tokenizer;
 import java.util.List;
 import org.junit.jupiter.api.Test;
@@ -38,32 +38,32 @@ class ParserTest {
     assertEquals(4, functions.size());
     {
       var f = functions.get(0);
-      assertEquals("f0", f.getName());
-      assertNull(f.getResultType());
-      assertEquals(List.of(), f.getParameters());
+      assertEquals("f0", f.getHeader().getName());
+      assertNull(f.getHeader().getResultType());
+      assertEquals(List.of(), f.getHeader().getParameters());
     }
     {
       var f = functions.get(1);
-      assertEquals("f1", f.getName());
-      assertNull(f.getResultType());
-      var params = f.getParameters();
+      assertEquals("f1", f.getHeader().getName());
+      assertNull(f.getHeader().getResultType());
+      var params = f.getHeader().getParameters();
       assertEquals(1, params.size());
       assertEquals(parameter("x", "int"), params.get(0));
     }
     {
       var f = functions.get(2);
-      assertEquals("f2", f.getName());
-      assertNull(f.getResultType());
-      var params = f.getParameters();
+      assertEquals("f2", f.getHeader().getName());
+      assertNull(f.getHeader().getResultType());
+      var params = f.getHeader().getParameters();
       assertEquals(2, params.size());
       assertEquals(parameter("x", "int"), params.get(0));
       assertEquals(parameter("y", "int"), params.get(1));
     }
     {
       var f = functions.get(3);
-      assertEquals("r", f.getName());
-      assertEquals(new TypeRef("int"), f.getResultType());
-      assertEquals(List.of(), f.getParameters());
+      assertEquals("r", f.getHeader().getName());
+      assertEquals(new TypeRef("int"), f.getHeader().getResultType());
+      assertEquals(List.of(), f.getHeader().getParameters());
     }
     var variables = module.getVariables();
     assertEquals(3, variables.size());
@@ -153,7 +153,7 @@ class ParserTest {
   void testIfStatement() {
     var module = parseFile("/parser/statements.ci");
     var function = module.getFunctions().get(0);
-    assertEquals("f", function.getName());
+    assertEquals("f", function.getHeader().getName());
     var statements = function.getBlock().getStatements();
     assertEquals(3, statements.size());
     int i = 0;
@@ -185,7 +185,7 @@ class ParserTest {
   void testForStatement() {
     var module = parseFile("/parser/statements.ci");
     var function = module.getFunctions().get(1);
-    assertEquals("g", function.getName());
+    assertEquals("g", function.getHeader().getName());
     var statements = function.getBlock().getStatements();
     assertEquals(3, statements.size());
     int i = 0;
@@ -261,7 +261,7 @@ class ParserTest {
   void testDeferStatement() {
     var module = parseFile("/parser/statements.ci");
     var function = module.getFunctions().get(2);
-    assertEquals("d", function.getName());
+    assertEquals("d", function.getHeader().getName());
     var statements = function.getBlock().getStatements();
     assertEquals(1, statements.size());
     {

@@ -1,10 +1,10 @@
-package com.github.idemura.cimple.compiler;
+package com.github.idemura.cimple.compiler.ast;
 
 import java.util.Objects;
 
 public class TypeRef {
   private String name;
-  private Type type;
+  private AstType type;
 
   public TypeRef(String name) {
     this.name = name;
@@ -33,11 +33,11 @@ public class TypeRef {
     this.name = name;
   }
 
-  public Type getType() {
+  public AstType getType() {
     return type;
   }
 
-  public void setType(Type type) {
+  public void setType(AstType type) {
     this.type = type;
   }
 }
