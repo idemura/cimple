@@ -1,6 +1,5 @@
 package com.github.idemura.cimple.compiler.parser;
 
-import static com.github.idemura.cimple.common.Resources.readResource;
 import static org.junit.jupiter.api.Assertions.*;
 
 import com.github.idemura.cimple.compiler.CompilerException;
@@ -28,15 +27,26 @@ class ParserTest {
     return new Parser(new Tokenizer(code).split()).parse();
   }
 
-  private AstModule parseFile(String fileName) {
-    var code = readResource(getClass(), fileName);
-    return parseCode(code);
-  }
-
   @Test
   void testModule() {
-    var module = parseFile("/parser/global_defs.ci");
-    assertEquals("base_test", module.getName());
+    var code =
+        """
+        module test;
+
+        var v0 int = 5;
+        var v1 int;
+        var v2 = 5;
+
+        function f0() {}
+        function f1(x int) {}
+        function f2(x int, y int) {}
+
+        function rv() int {
+          return 1;
+        }
+        """;
+    var module = parseCode(code);
+    assertEquals("test", module.getName());
     var functions = module.functions();
     assertEquals(4, functions.size());
     {
@@ -64,7 +74,7 @@ class ParserTest {
     }
     {
       var f = functions.get(3);
-      assertEquals(new QualifiedName("r"), f.getHeader().getName());
+      assertEquals(new QualifiedName("rv"), f.getHeader().getName());
       assertEquals(TypeRef.ofName("int"), f.getHeader().getResultType());
       assertEquals(ImmutableList.of(), f.getHeader().getParameters());
     }
@@ -89,8 +99,31 @@ class ParserTest {
 
   @Test
   void testTypes() {
-    var module = parseFile("/parser/types.ci");
-    assertEquals("type_test", module.getName());
+    var code =
+        """
+        module test;
+
+        type struct Empty {}
+
+        type struct Point {
+          var x int;
+          var y int;
+          const name string;
+        }
+
+        type alias Uri = string;
+
+        type union Option {
+          None;
+          Some(string);
+        }
+
+        type function Compare(a int, b int) bool;
+        type function Supplier() string;
+        type function Consumer(v string);
+        """;
+    var module = parseCode(code);
+    assertEquals("test", module.getName());
     var types = module.types();
     assertEquals(7, types.size());
     int i = 0;
@@ -161,7 +194,23 @@ class ParserTest {
 
   @Test
   void testIfStatement() {
-    var module = parseFile("/parser/statements.ci");
+    var code =
+        """
+        module test;
+
+        function f(a bool, b bool) {
+          if a {
+          }
+          if a {
+          } else {
+          }
+          if a {
+          } else if b {
+          } else {
+          }
+        }
+        """;
+    var module = parseCode(code);
     var function = module.functions().get(0);
     assertEquals(new QualifiedName("f"), function.getHeader().getName());
     var statements = function.getBlock().statements();
@@ -193,9 +242,23 @@ class ParserTest {
 
   @Test
   void testForStatement() {
-    var module = parseFile("/parser/statements.ci");
-    var function = module.functions().get(1);
-    assertEquals(new QualifiedName("g"), function.getHeader().getName());
+    var code =
+        """
+        module test;
+
+        function f() {
+          for true {
+            goto end;
+          }
+          for var i = 0; true {
+          }
+          for var i = 0; true; i {
+          }
+        }
+        """;
+    var module = parseCode(code);
+    var function = module.functions().get(0);
+    assertEquals(new QualifiedName("f"), function.getHeader().getName());
     var statements = function.getBlock().statements();
     assertEquals(3, statements.size());
     int i = 0;
@@ -235,7 +298,7 @@ class ParserTest {
     {
       var code =
           """
-          module test_statements;
+          module test;
           function f() {
             for var i = 0; {
             }
@@ -246,7 +309,7 @@ class ParserTest {
     {
       var code =
           """
-          module test_statements;
+          module test;
           function f() {
             for var i = 0; true; {
             }
@@ -257,7 +320,7 @@ class ParserTest {
     {
       var code =
           """
-          module test_statements;
+          module test;
           function f() {
             for var i = 0; true; i; {
             }
@@ -269,9 +332,16 @@ class ParserTest {
 
   @Test
   void testDeferStatement() {
-    var module = parseFile("/parser/statements.ci");
-    var function = module.functions().get(2);
-    assertEquals(new QualifiedName("d"), function.getHeader().getName());
+    var code =
+        """
+        module test;
+        function f() {
+          defer value;
+        }
+        """;
+    var module = parseCode(code);
+    var function = module.functions().get(0);
+    assertEquals(new QualifiedName("f"), function.getHeader().getName());
     var statements = function.getBlock().statements();
     {
       var stmtDefer = (AstDefer) statements.get(0);

@@ -293,7 +293,7 @@ public class Parser {
   }
 
   private AstExpression parseExpressionComparison() {
-    AstExpression expr = parseExpressionAdditive();
+    var expr = parseExpressionAdditive();
     if (expr == null) {
       return null;
     }
@@ -312,13 +312,13 @@ public class Parser {
   }
 
   private AstExpression parseExpressionAdditive() {
-    AstExpression expr = parseExpressionMultiple();
+    var expr = parseExpressionMultiplicative();
     if (expr == null) {
       return null;
     }
     while (tokens.current().is(PLUS) || tokens.current().is(MINUS)) {
       var operator = tokens.take();
-      var m = parseExpressionMultiple();
+      var m = parseExpressionMultiplicative();
       if (m == null) {
         throw CompilerException.builder()
             .formatMessage("Expected expression after %s", operator)
@@ -330,8 +330,8 @@ public class Parser {
     return expr;
   }
 
-  private AstExpression parseExpressionMultiple() {
-    AstExpression expr = parseExpressionPrimary();
+  private AstExpression parseExpressionMultiplicative() {
+    var expr = parseExpressionPrimary();
     if (expr == null) {
       return null;
     }
@@ -351,58 +351,58 @@ public class Parser {
 
   private AstExpression parseExpressionPrimary() {
     if (tokens.takeIf(LPAREN)) {
-      var e = parseExpression();
+      var subExpr = parseExpression();
       tokens.take(RPAREN);
-      return e;
+      return subExpr;
     }
-    var t = tokens.take();
-    switch (t.type()) {
+    var token = tokens.take();
+    switch (token.type()) {
       case IDENTIFIER -> {
         if (tokens.current().is(LPAREN)) {
-          var a = new AstApplyFunction();
-          return a;
+          var expr = new AstApplyFunction();
+          return expr;
         } else {
-          var n = new AstNameRef(t.value());
-          n.setLocation(t.location());
-          return n;
+          var expr = new AstNameRef(token.value());
+          expr.setLocation(token.location());
+          return expr;
         }
       }
       case NUMBER -> {
-        var l = new AstLiteral();
-        if (t.value().contains(".")) {
-          l.setValue(parseDouble(t.value()));
-          l.setType(AstTypeBuiltin.FLOAT64);
+        var expr = new AstLiteral();
+        if (token.value().contains(".")) {
+          expr.setValue(parseDouble(token.value()));
+          expr.setType(AstTypeBuiltin.FLOAT64);
         } else {
-          l.setValue(parseLong(t.value()));
-          l.setType(AstTypeBuiltin.INT64);
+          expr.setValue(parseLong(token.value()));
+          expr.setType(AstTypeBuiltin.INT64);
         }
-        l.setLocation(t.location());
-        return l;
+        expr.setLocation(token.location());
+        return expr;
       }
       case STRING -> {
-        var l = new AstLiteral();
-        l.setValue(t.value());
-        l.setType(AstTypeBuiltin.STRING);
-        l.setLocation(t.location());
-        return l;
+        var expr = new AstLiteral();
+        expr.setValue(token.value());
+        expr.setType(AstTypeBuiltin.STRING);
+        expr.setLocation(token.location());
+        return expr;
       }
       default ->
           throw CompilerException.builder()
               .formatMessage("Primary expression expected")
-              .setLocation(t.location())
+              .setLocation(token.location())
               .build();
     }
   }
 
   private List<AstExpression> parseExpressionList() {
-    List<AstExpression> result = new ArrayList<>();
+    var result = new ImmutableList.Builder<AstExpression>();
     tokens.take(LPAREN);
     if (!tokens.takeIf(RPAREN)) {
       do {
         result.add(parseExpression());
       } while (expressionListHasNext());
     }
-    return result;
+    return result.build();
   }
 
   private boolean expressionListHasNext() {

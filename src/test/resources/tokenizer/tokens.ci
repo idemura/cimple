@@ -1,6 +1,0 @@
-function foo() {
-  # comment
-  var bar = 1;
-  var x = true;
-  var y = null;
-}

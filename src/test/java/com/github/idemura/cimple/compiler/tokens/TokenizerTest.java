@@ -1,6 +1,5 @@
 package com.github.idemura.cimple.compiler.tokens;
 
-import static com.github.idemura.cimple.common.Resources.readResource;
 import static com.github.idemura.cimple.compiler.tokens.TokenType.*;
 import static org.junit.jupiter.api.Assertions.*;
 
@@ -11,7 +10,16 @@ import org.junit.jupiter.api.Test;
 class TokenizerTest {
   @Test
   void testSplit() {
-    var tokens = new Tokenizer(readResource(getClass(), "/tokenizer/tokens.ci")).split().tokens();
+    var code =
+        """
+        function foo() {
+          # comment
+          var bar = 1;
+          var x = true;
+          var y = null;
+        }
+        """;
+    var tokens = new Tokenizer(code).split().tokens();
     assertEquals(
         ImmutableList.of(
             new Token(IDENTIFIER, "function", new Location(1, 1)),
