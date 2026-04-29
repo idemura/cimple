@@ -3,6 +3,7 @@ package com.github.idemura.cimple.compiler.parser;
 import static org.junit.jupiter.api.Assertions.*;
 
 import com.github.idemura.cimple.compiler.CompilerException;
+import com.github.idemura.cimple.compiler.ast.AstApplyFunction;
 import com.github.idemura.cimple.compiler.ast.AstDefer;
 import com.github.idemura.cimple.compiler.ast.AstFor;
 import com.github.idemura.cimple.compiler.ast.AstGoto;
@@ -153,7 +154,6 @@ class ParserTest {
     var code =
         """
         module test;
-
         type alias Uri = string;
         """;
     var module = parseCode(code);
@@ -170,7 +170,6 @@ class ParserTest {
     var code =
         """
         module test;
-
         type union Option {
           None;
           Some(string);
@@ -192,7 +191,6 @@ class ParserTest {
     var code =
         """
         module test;
-
         type function Compare(a int, b int) bool;
         type function Supplier() string;
         type function Consumer(v string);
@@ -225,11 +223,36 @@ class ParserTest {
   }
 
   @Test
+  void testExpressions() {
+    var code =
+        """
+        module test;
+        function f() {
+          var x = 1;
+          var x = 1 + 2 * 3;
+        }
+        """;
+    var module = parseCode(code);
+    var statements = module.functions().get(0).getBlock().statements();
+    assertEquals(2, statements.size());
+    int i = 0;
+    {
+      var stmt = (AstVariable) statements.get(i++);
+      assertEquals(new QualifiedName("x"), stmt.getName());
+      assertEquals(AstLiteral.ofInt(1), stmt.getExpression());
+    }
+    {
+      var stmt = (AstVariable) statements.get(i++);
+      assertEquals(new QualifiedName("x"), stmt.getName());
+      assertInstanceOf(AstApplyFunction.class, stmt.getExpression());
+    }
+  }
+
+  @Test
   void testIfStatement() {
     var code =
         """
         module test;
-
         function f(a bool, b bool) {
           if a {
           }
@@ -243,9 +266,7 @@ class ParserTest {
         }
         """;
     var module = parseCode(code);
-    var function = module.functions().get(0);
-    assertEquals(new QualifiedName("f"), function.getHeader().getName());
-    var statements = function.getBlock().statements();
+    var statements = module.functions().get(0).getBlock().statements();
     assertEquals(3, statements.size());
     int i = 0;
     {
@@ -277,7 +298,6 @@ class ParserTest {
     var code =
         """
         module test;
-
         function f() {
           for true {
             goto end;
@@ -289,9 +309,7 @@ class ParserTest {
         }
         """;
     var module = parseCode(code);
-    var function = module.functions().get(0);
-    assertEquals(new QualifiedName("f"), function.getHeader().getName());
-    var statements = function.getBlock().statements();
+    var statements = module.functions().get(0).getBlock().statements();
     assertEquals(3, statements.size());
     int i = 0;
     {
@@ -372,9 +390,8 @@ class ParserTest {
         }
         """;
     var module = parseCode(code);
-    var function = module.functions().get(0);
-    assertEquals(new QualifiedName("f"), function.getHeader().getName());
-    var statements = function.getBlock().statements();
+    var statements = module.functions().get(0).getBlock().statements();
+    assertEquals(1, statements.size());
     {
       var stmt = (AstReturn) statements.get(0);
       assertEquals(new AstNameRef("value"), stmt.getExpression());
@@ -391,9 +408,8 @@ class ParserTest {
         }
         """;
     var module = parseCode(code);
-    var function = module.functions().get(0);
-    assertEquals(new QualifiedName("f"), function.getHeader().getName());
-    var statements = function.getBlock().statements();
+    var statements = module.functions().get(0).getBlock().statements();
+    assertEquals(1, statements.size());
     {
       var stmt = (AstDefer) statements.get(0);
       assertEquals(new AstNameRef("value"), stmt.getExpression());
