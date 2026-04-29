@@ -1,9 +1,7 @@
 package com.github.idemura.cimple.compiler.ast;
 
-import java.util.List;
-
 public final class AstTypeFunction extends AstType {
-  private AstFunctionHeader header = new AstFunctionHeader();
+  private AstFunctionHeader header;
 
   @Override
   public Object accept(AstVisitor visitor) {
@@ -26,29 +24,5 @@ public final class AstTypeFunction extends AstType {
   @Override
   public String getName() {
     return header.getName();
-  }
-
-  public void setBoundTypeName(String boundTypeName) {
-    header.setBoundTypeName(boundTypeName);
-  }
-
-  public String getBoundTypeName() {
-    return header.getBoundTypeName();
-  }
-
-  public void setResultType(TypeRef resultType) {
-    header.setResultType(resultType);
-  }
-
-  public TypeRef getResultType() {
-    return header.getResultType();
-  }
-
-  public void addParameter(AstVariable parameter) {
-    header.addParameter(parameter);
-  }
-
-  public List<AstVariable> getParameters() {
-    return header.getParameters();
   }
 }

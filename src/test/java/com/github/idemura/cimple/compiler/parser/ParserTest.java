@@ -129,8 +129,8 @@ class ParserTest {
     {
       var type = (AstTypeFunction) types.get(i++);
       assertEquals("Compare", type.getName());
-      assertEquals(new TypeRef("bool"), type.getResultType());
-      var params = type.getParameters();
+      assertEquals(new TypeRef("bool"), type.getHeader().getResultType());
+      var params = type.getHeader().getParameters();
       assertEquals(2, params.size());
       assertEquals(parameter("a", "int"), params.get(0));
       assertEquals(parameter("b", "int"), params.get(1));
@@ -138,14 +138,14 @@ class ParserTest {
     {
       var type = (AstTypeFunction) types.get(i++);
       assertEquals("Supplier", type.getName());
-      assertEquals(new TypeRef("string"), type.getResultType());
-      assertEquals(List.of(), type.getParameters());
+      assertEquals(new TypeRef("string"), type.getHeader().getResultType());
+      assertEquals(List.of(), type.getHeader().getParameters());
     }
     {
       var type = (AstTypeFunction) types.get(i++);
       assertEquals("Consumer", type.getName());
-      assertNull(type.getResultType());
-      assertEquals(List.of(parameter("v", "string")), type.getParameters());
+      assertNull(type.getHeader().getResultType());
+      assertEquals(List.of(parameter("v", "string")), type.getHeader().getParameters());
     }
   }
 

@@ -58,12 +58,13 @@ public class PrintAstVisitor extends AstVisitor {
 
   @Override
   protected Object visit(AstTypeFunction node) {
+    var header = node.getHeader();
     printEntity(
         "TYPE FUNCTION",
         node.getName(),
-        node.getResultType() == null ? null : node.getResultType().getType());
+        header.getResultType() == null ? null : header.getResultType().getType());
     output.indent();
-    for (var p : node.getParameters()) {
+    for (var p : header.getParameters()) {
       printEntity("ARG", p.getName(), p.getTypeRef().getType());
     }
     output.unindent();
