@@ -306,7 +306,11 @@ public class Parser {
             .setLocation(operator.location())
             .build();
       }
-      expr = new AstApplyFunction();
+      var apply = new AstApplyFunction();
+      apply.setName(new QualifiedName(operator.type().printableName()));
+      apply.setArgs(ImmutableList.of(expr, m));
+      apply.setLocation(operator.location());
+      expr = apply;
     }
     return expr;
   }
@@ -325,7 +329,11 @@ public class Parser {
             .setLocation(operator.location())
             .build();
       }
-      expr = new AstApplyFunction();
+      var apply = new AstApplyFunction();
+      apply.setName(new QualifiedName(operator.type().printableName()));
+      apply.setArgs(ImmutableList.of(expr, m));
+      apply.setLocation(operator.location());
+      expr = apply;
     }
     return expr;
   }
@@ -344,7 +352,11 @@ public class Parser {
             .setLocation(operator.location())
             .build();
       }
-      expr = new AstApplyFunction();
+      var apply = new AstApplyFunction();
+      apply.setName(new QualifiedName(operator.type().printableName()));
+      apply.setArgs(ImmutableList.of(expr, m));
+      apply.setLocation(operator.location());
+      expr = apply;
     }
     return expr;
   }
@@ -369,12 +381,19 @@ public class Parser {
       }
       case NUMBER -> {
         var expr = new AstLiteral();
-        if (token.value().contains(".")) {
-          expr.setValue(parseDouble(token.value()));
-          expr.setType(AstTypeBuiltin.FLOAT64);
-        } else {
-          expr.setValue(parseLong(token.value()));
-          expr.setType(AstTypeBuiltin.INT64);
+        try {
+          if (token.value().contains(".")) {
+            expr.setValue(parseDouble(token.value()));
+            expr.setType(AstTypeBuiltin.FLOAT64);
+          } else {
+            expr.setValue(parseLong(token.value()));
+            expr.setType(AstTypeBuiltin.INT64);
+          }
+        } catch (NumberFormatException e) {
+          throw CompilerException.builder()
+              .formatMessage("Invalid numeric literal: %s", token.value())
+              .setLocation(token.location())
+              .build();
         }
         expr.setLocation(token.location());
         return expr;

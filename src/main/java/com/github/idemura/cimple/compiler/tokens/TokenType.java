@@ -45,7 +45,7 @@ public enum TokenType {
   TYPE,
   VAR;
 
-  private final String printableName;
+  private final String symbolName;
 
   public static TokenType ofKeyword(String value) {
     return switch (value) {
@@ -74,14 +74,14 @@ public enum TokenType {
   }
 
   TokenType() {
-    this.printableName = name();
+    this.symbolName = name();
   }
 
-  TokenType(String printableName) {
-    this.printableName = printableName;
+  TokenType(String symbolName) {
+    this.symbolName = symbolName;
   }
 
   public String printableName() {
-    return printableName;
+    return symbolName;
   }
 }
