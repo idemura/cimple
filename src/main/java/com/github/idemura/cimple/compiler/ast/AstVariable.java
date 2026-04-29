@@ -3,9 +3,9 @@ package com.github.idemura.cimple.compiler.ast;
 import com.github.idemura.cimple.compiler.TypeRef;
 
 public final class AstVariable extends AstStatement {
-  public static final long BIT_MUTABLE = 0x1L;
-  public static final long BIT_ARGUMENT = 0x2L;
-  public static final long BIT_FIELD = 0x2L;
+  public static final long MUTABLE = 0x1L; // const/var
+  public static final long PARAM = 0x2L; // Whether it is a function parameter.
+  public static final long FIELD = 0x2L; // Whether it is a field.
 
   private String name;
   private TypeRef typeRef;
@@ -19,12 +19,12 @@ public final class AstVariable extends AstStatement {
     return visitor.visit(this);
   }
 
-  public boolean isMutable() {
-    return checkFlag(BIT_MUTABLE);
+  public boolean getBit(long mask) {
+    return (flags & mask) != 0;
   }
 
-  public void setMutable(boolean mutable) {
-    setFlag(BIT_MUTABLE, mutable);
+  public void setBit(long mask) {
+    flags |= mask;
   }
 
   public void setName(String name) {
@@ -49,13 +49,5 @@ public final class AstVariable extends AstStatement {
 
   public AstExpression getExpression() {
     return expression;
-  }
-
-  private boolean checkFlag(long mask) {
-    return (flags & mask) != 0;
-  }
-
-  private void setFlag(long mask, boolean toSet) {
-    flags = (flags & ~mask) | (toSet ? mask : 0);
   }
 }

@@ -112,7 +112,10 @@ public class PrintAstVisitor extends AstVisitor {
 
   @Override
   protected Object visit(AstVariable node) {
-    printEntity(node.isMutable() ? "VAR" : "CONST", node.getName(), node.getTypeRef().getType());
+    printEntity(
+        node.getBit(AstVariable.MUTABLE) ? "VAR" : "CONST",
+        node.getName(),
+        node.getTypeRef().getType());
     output.indent();
     if (node.getExpression() != null) {
       node.getExpression().accept(this);

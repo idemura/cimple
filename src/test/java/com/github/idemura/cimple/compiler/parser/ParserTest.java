@@ -97,19 +97,19 @@ class ParserTest {
         var f = fields.get(j++);
         assertEquals("x", f.getName());
         assertEquals(new TypeRef("int"), f.getTypeRef());
-        assertTrue(f.isMutable());
+        assertTrue(f.getBit(AstVariable.MUTABLE));
       }
       {
         var f = fields.get(j++);
         assertEquals("y", f.getName());
         assertEquals(new TypeRef("int"), f.getTypeRef());
-        assertTrue(f.isMutable());
+        assertTrue(f.getBit(AstVariable.MUTABLE));
       }
       {
         var f = fields.get(j++);
         assertEquals("name", f.getName());
         assertEquals(new TypeRef("string"), f.getTypeRef());
-        assertFalse(f.isMutable());
+        assertFalse(f.getBit(AstVariable.MUTABLE));
       }
     }
     {

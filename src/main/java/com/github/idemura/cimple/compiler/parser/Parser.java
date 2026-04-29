@@ -6,7 +6,6 @@ import static java.lang.Long.parseLong;
 
 import com.github.idemura.cimple.compiler.BuiltinType;
 import com.github.idemura.cimple.compiler.CompilerException;
-import com.github.idemura.cimple.compiler.Location;
 import com.github.idemura.cimple.compiler.TypeRef;
 import com.github.idemura.cimple.compiler.VariableDef;
 import com.github.idemura.cimple.compiler.ast.*;
@@ -126,7 +125,9 @@ public class Parser {
   private AstVariable parseVariable(boolean mutable) {
     tokens.takeKeyword(mutable ? VAR : CONST);
     var variable = new AstVariable();
-    variable.setMutable(mutable);
+    if (mutable) {
+      variable.setBit(AstVariable.MUTABLE);
+    }
     var name = tokens.take(IDENTIFIER);
     variable.setLocation(name.location());
     variable.setName(name.value());
