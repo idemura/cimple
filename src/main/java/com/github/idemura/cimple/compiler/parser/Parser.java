@@ -339,13 +339,13 @@ public class Parser {
   }
 
   private AstExpression parseExpressionMultiplicative() {
-    var expr = parseExpressionPrimary();
+    var expr = parseExpressionPostfix();
     if (expr == null) {
       return null;
     }
     while (tokens.current().is(ASTERISK) || tokens.current().is(SLASH)) {
       var operator = tokens.take();
-      var m = parseExpressionPrimary();
+      var m = parseExpressionPostfix();
       if (m == null) {
         throw CompilerException.builder()
             .formatMessage("Expected expression after %s", operator)
@@ -361,6 +361,24 @@ public class Parser {
     return expr;
   }
 
+  private AstExpression parseExpressionPostfix() {
+    var expr = parseExpressionPrimary();
+    while (tokens.current().is(LPAREN)) {
+      if (!(expr instanceof AstNameRef nameRef)) {
+        throw CompilerException.builder()
+            .formatMessage("Invalid function call")
+            .setLocation(tokens.current().location())
+            .build();
+      }
+      var apply = new AstApplyFunction();
+      apply.setName(nameRef.getName());
+      apply.setArgs(parseExpressionList());
+      apply.setLocation(nameRef.getLocation());
+      expr = apply;
+    }
+    return expr;
+  }
+
   private AstExpression parseExpressionPrimary() {
     if (tokens.takeIf(LPAREN)) {
       var subExpr = parseExpression();
@@ -370,14 +388,9 @@ public class Parser {
     var token = tokens.take();
     switch (token.type()) {
       case IDENTIFIER -> {
-        if (tokens.current().is(LPAREN)) {
-          var expr = new AstApplyFunction();
-          return expr;
-        } else {
-          var expr = new AstNameRef(token.value());
-          expr.setLocation(token.location());
-          return expr;
-        }
+        var expr = new AstNameRef(token.value());
+        expr.setLocation(token.location());
+        return expr;
       }
       case NUMBER -> {
         var expr = new AstLiteral();

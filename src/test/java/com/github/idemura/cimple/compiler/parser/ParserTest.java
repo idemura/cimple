@@ -342,6 +342,44 @@ class ParserTest {
   }
 
   @Test
+  void testInvokeExpression() {
+    var code =
+        """
+        module test;
+        function f() {
+          var x = foo();
+          # Allowed, because we case with different expression:
+          var x = (foo)();
+          var x = foo(1, 2);
+        }
+        """;
+    var module = parseCode(code);
+    var statements = module.functions().get(0).getBlock().statements();
+    assertEquals(3, statements.size());
+    int i = 0;
+    {
+      var expr = ((AstVariable) statements.get(i++)).getExpression();
+      var apply = (AstApplyFunction) expr;
+      assertEquals(new QualifiedName("foo"), apply.getName());
+      assertEquals(ImmutableList.of(), apply.getArgs());
+    }
+    {
+      var expr = ((AstVariable) statements.get(i++)).getExpression();
+      var apply = (AstApplyFunction) expr;
+      assertEquals(new QualifiedName("foo"), apply.getName());
+      assertEquals(ImmutableList.of(), apply.getArgs());
+    }
+    {
+      var expr = ((AstVariable) statements.get(i++)).getExpression();
+      var apply = (AstApplyFunction) expr;
+      assertEquals(new QualifiedName("foo"), apply.getName());
+      assertEquals(2, apply.getArgs().size());
+      assertEquals(AstLiteral.ofInt(1), apply.getArgs().get(0));
+      assertEquals(AstLiteral.ofInt(2), apply.getArgs().get(1));
+    }
+  }
+
+  @Test
   void testIfStatement() {
     var code =
         """
