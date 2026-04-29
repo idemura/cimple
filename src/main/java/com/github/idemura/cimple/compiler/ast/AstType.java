@@ -1,6 +1,7 @@
 package com.github.idemura.cimple.compiler.ast;
 
-public abstract class AstType extends AstNode {
+public abstract sealed class AstType extends AstNode
+    permits AstTypeAlias, AstTypeBuiltin, AstTypeFunction, AstTypeStruct, AstTypeUnion {
   private String moduleName;
   private String name;
 
