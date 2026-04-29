@@ -5,7 +5,17 @@ import static org.junit.jupiter.api.Assertions.*;
 
 import com.github.idemura.cimple.compiler.CompilerException;
 import com.github.idemura.cimple.compiler.TypeRef;
-import com.github.idemura.cimple.compiler.ast.*;
+import com.github.idemura.cimple.compiler.ast.AstDefer;
+import com.github.idemura.cimple.compiler.ast.AstFor;
+import com.github.idemura.cimple.compiler.ast.AstGoto;
+import com.github.idemura.cimple.compiler.ast.AstIf;
+import com.github.idemura.cimple.compiler.ast.AstLiteral;
+import com.github.idemura.cimple.compiler.ast.AstModule;
+import com.github.idemura.cimple.compiler.ast.AstNameRef;
+import com.github.idemura.cimple.compiler.ast.AstTypeAlias;
+import com.github.idemura.cimple.compiler.ast.AstTypeFunction;
+import com.github.idemura.cimple.compiler.ast.AstTypeStruct;
+import com.github.idemura.cimple.compiler.ast.AstVariable;
 import com.github.idemura.cimple.compiler.tokens.Tokenizer;
 import java.util.List;
 import org.junit.jupiter.api.Test;

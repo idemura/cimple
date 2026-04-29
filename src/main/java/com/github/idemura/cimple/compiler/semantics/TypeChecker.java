@@ -2,7 +2,16 @@ package com.github.idemura.cimple.compiler.semantics;
 
 import com.github.idemura.cimple.compiler.CompilerException;
 import com.github.idemura.cimple.compiler.TypeRef;
-import com.github.idemura.cimple.compiler.ast.*;
+import com.github.idemura.cimple.compiler.ast.AstBlock;
+import com.github.idemura.cimple.compiler.ast.AstFor;
+import com.github.idemura.cimple.compiler.ast.AstFunction;
+import com.github.idemura.cimple.compiler.ast.AstFunctionApply;
+import com.github.idemura.cimple.compiler.ast.AstIf;
+import com.github.idemura.cimple.compiler.ast.AstLiteral;
+import com.github.idemura.cimple.compiler.ast.AstModule;
+import com.github.idemura.cimple.compiler.ast.AstNameRef;
+import com.github.idemura.cimple.compiler.ast.AstVariable;
+import com.github.idemura.cimple.compiler.ast.AstVisitor;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;

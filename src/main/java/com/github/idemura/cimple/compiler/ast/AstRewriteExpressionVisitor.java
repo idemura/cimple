@@ -56,6 +56,7 @@ public class AstRewriteExpressionVisitor extends AstVisitor {
       node.getInit().accept(this);
     }
     node.setCondition(rewrite(node.getCondition()));
+    node.setIncrement(rewrite(node.getIncrement()));
     node.getBlock().accept(this);
   }
 
