@@ -15,10 +15,10 @@ public final class AstLiteral extends AstExpression {
   public static final AstLiteral NULL = ofConst(BuiltinType.NULL, null);
 
   public static AstLiteral ofInt(long value) {
-    var l = new AstLiteral();
-    l.setValue(value);
-    l.setType(BuiltinType.INT64);
-    return l;
+    var literal = new AstLiteral();
+    literal.setValue(value);
+    literal.setType(BuiltinType.INT64);
+    return literal;
   }
 
   public static AstLiteral ofBool(boolean value) {
@@ -66,9 +66,9 @@ public final class AstLiteral extends AstExpression {
   }
 
   public static AstLiteral ofConst(Type type, Object value) {
-    var l = new AstLiteral();
-    l.setValue(value);
-    l.setType(type);
-    return l;
+    var literal = new AstLiteral();
+    literal.setValue(value);
+    literal.setType(type);
+    return literal;
   }
 }
