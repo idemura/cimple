@@ -449,6 +449,6 @@ public class Parser {
   }
 
   private TypeRef parseTypeRef() {
-    return new TypeRef(tokens.take(IDENTIFIER).value());
+    return TypeRef.ofName(tokens.take(IDENTIFIER).value());
   }
 }

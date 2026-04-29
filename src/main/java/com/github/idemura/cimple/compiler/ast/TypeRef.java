@@ -2,12 +2,21 @@ package com.github.idemura.cimple.compiler.ast;
 
 import java.util.Objects;
 
-public class TypeRef {
+public final class TypeRef {
   private String name;
   private AstType type;
 
-  public TypeRef(String name) {
+  public static TypeRef ofName(String name) {
+    return new TypeRef(name, null);
+  }
+
+  public static TypeRef of(AstType type) {
+    return new TypeRef(type.getName(), type);
+  }
+
+  private TypeRef(String name, AstType type) {
     this.name = name;
+    this.type = type;
   }
 
   @Override
