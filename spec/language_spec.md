@@ -133,6 +133,31 @@ Modules can't be nested.
 There are two types of functions: free and bound.
 Free is a normal
 
+## Operator Precedence
+
+From highest to lowest
+
+| Operators            | Associativity |
+|----------------------|---------------|
+| `.` `->` `[]` `()`   | Left-to-right |
+| `x++` `x--`          | Left-to-right |
+| `++x` `--x` `~` `!`  | Right-to-left |
+| `*` `/` `%`          | Left-to-right |
+| `+` `-`              | Left-to-right |
+| `<<` `>>` `>>>`      | Left-to-right |
+| `&`                  | Left-to-right |
+| `^`                  | Left-to-right |
+| `\|`                 | Left-to-right |
+| `<` `>` `>=` `<=`    | Left-to-right |
+| `==` `!=`            | Left-to-right |
+| `&&`                 | Left-to-right |
+| `\|\|`               | Left-to-right |
+| `=` and op-shorthand | None          |
+
+Only one assignment per expression is allowed. Thus, it doesn't matter if it is left-to-right or
+right-to-left. For simplicity, parser parses it left-to-right order. Later, semantic analyzer
+produces an error in such case.
+
 ## Code Style
 
 ### Modules
