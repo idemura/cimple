@@ -38,6 +38,7 @@ class ParserTest {
         var v0 int = 5;
         var v1 int;
         var v2 = 5;
+        const c0 int = 7;
 
         function f0() {}
         function f1(x int) {}
@@ -81,21 +82,30 @@ class ParserTest {
       assertEquals(ImmutableList.of(), f.getHeader().getParameters());
     }
     var variables = module.variables();
-    assertEquals(3, variables.size());
+    assertEquals(4, variables.size());
     {
       var v = variables.get(0);
       assertEquals(new QualifiedName("v0"), v.getName());
       assertEquals(TypeRef.ofName("int"), v.getTypeRef());
+      assertTrue(v.getBit(AstVariable.MUTABLE));
     }
     {
       var v = variables.get(1);
       assertEquals(new QualifiedName("v1"), v.getName());
       assertEquals(TypeRef.ofName("int"), v.getTypeRef());
+      assertTrue(v.getBit(AstVariable.MUTABLE));
     }
     {
       var v = variables.get(2);
       assertEquals(new QualifiedName("v2"), v.getName());
       assertNull(v.getTypeRef());
+      assertTrue(v.getBit(AstVariable.MUTABLE));
+    }
+    {
+      var v = variables.get(3);
+      assertEquals(new QualifiedName("c0"), v.getName());
+      assertEquals(TypeRef.ofName("int"), v.getTypeRef());
+      assertFalse(v.getBit(AstVariable.MUTABLE));
     }
   }
 
