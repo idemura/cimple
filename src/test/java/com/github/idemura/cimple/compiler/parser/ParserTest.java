@@ -80,14 +80,15 @@ class ParserTest {
     var module = parseFile("/parser/types.ci");
     assertEquals("type_test", module.getName());
     var types = module.getTypes();
-    assertEquals(3, types.size());
+    assertEquals(6, types.size());
+    int i = 0;
     {
-      var type = (AstTypeStruct) types.get(0);
+      var type = (AstTypeStruct) types.get(i++);
       assertEquals("Empty", type.getName());
       assertEquals(List.of(), type.getFields());
     }
     {
-      var type = (AstTypeStruct) types.get(1);
+      var type = (AstTypeStruct) types.get(i++);
       assertEquals("Point", type.getName());
       var fields = type.getFields();
       assertEquals(2, fields.size());
@@ -97,9 +98,30 @@ class ParserTest {
       assertEquals(new TypeRef("int"), fields.get(1).getTypeRef());
     }
     {
-      var type = (AstTypeAlias) types.get(2);
+      var type = (AstTypeAlias) types.get(i++);
       assertEquals("Uri", type.getName());
       assertEquals(new TypeRef("string"), type.getBaseTypeRef());
+    }
+    {
+      var type = (AstTypeFunction) types.get(i++);
+      assertEquals("Compare", type.getName());
+      assertEquals(new TypeRef("bool"), type.getResultType());
+      var params = type.getParameters();
+      assertEquals(2, params.size());
+      assertEquals(new VariableDef("a", new TypeRef("int")), params.get(0));
+      assertEquals(new VariableDef("b", new TypeRef("int")), params.get(1));
+    }
+    {
+      var type = (AstTypeFunction) types.get(i++);
+      assertEquals("Supplier", type.getName());
+      assertEquals(new TypeRef("string"), type.getResultType());
+      assertEquals(List.of(), type.getParameters());
+    }
+    {
+      var type = (AstTypeFunction) types.get(i++);
+      assertEquals("Consumer", type.getName());
+      assertNull(type.getResultType());
+      assertEquals(List.of(new VariableDef("v", new TypeRef("string"))), type.getParameters());
     }
   }
 
@@ -110,22 +132,23 @@ class ParserTest {
     assertEquals("f", function.getName());
     var statements = function.getBlock().getStatements();
     assertEquals(3, statements.size());
+    int i = 0;
     {
-      var stmtIf = (AstIf) statements.get(0);
+      var stmtIf = (AstIf) statements.get(i++);
       assertEquals(1, stmtIf.getConditions().size());
       assertEquals(1, stmtIf.getThenBlocks().size());
       assertEquals(new AstNameRef("a"), stmtIf.getConditions().get(0));
       assertNull(stmtIf.getElseBlock());
     }
     {
-      var stmtIf = (AstIf) statements.get(1);
+      var stmtIf = (AstIf) statements.get(i++);
       assertEquals(1, stmtIf.getConditions().size());
       assertEquals(1, stmtIf.getThenBlocks().size());
       assertEquals(new AstNameRef("a"), stmtIf.getConditions().get(0));
       assertNotNull(stmtIf.getElseBlock());
     }
     {
-      var stmtIf = (AstIf) statements.get(2);
+      var stmtIf = (AstIf) statements.get(i++);
       assertEquals(2, stmtIf.getConditions().size());
       assertEquals(2, stmtIf.getThenBlocks().size());
       assertEquals(new AstNameRef("a"), stmtIf.getConditions().get(0));
@@ -141,8 +164,9 @@ class ParserTest {
     assertEquals("g", function.getName());
     var statements = function.getBlock().getStatements();
     assertEquals(3, statements.size());
+    int i = 0;
     {
-      var stmtFor = (AstFor) statements.get(0);
+      var stmtFor = (AstFor) statements.get(i++);
       assertNull(stmtFor.getInit());
       assertEquals(new AstNameRef("true"), stmtFor.getCondition());
       assertNull(stmtFor.getIncrement());
@@ -151,7 +175,7 @@ class ParserTest {
       assertEquals(new AstGoto("end"), bodyStatements.get(0));
     }
     {
-      var stmtFor = (AstFor) statements.get(1);
+      var stmtFor = (AstFor) statements.get(i++);
       var init = stmtFor.getInit();
       assertEquals("i", init.getName());
       assertNull(init.getTypeRef());
@@ -161,7 +185,7 @@ class ParserTest {
       assertEquals(List.of(), stmtFor.getBlock().getStatements());
     }
     {
-      var stmtFor = (AstFor) statements.get(2);
+      var stmtFor = (AstFor) statements.get(i++);
       var init = stmtFor.getInit();
       assertEquals("i", init.getName());
       assertNull(init.getTypeRef());

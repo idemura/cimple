@@ -3,6 +3,10 @@ package com.github.idemura.cimple.compiler.ast;
 import com.github.idemura.cimple.compiler.TypeRef;
 
 public final class AstVariable extends AstStatement {
+  public static final long BIT_MUTABLE = 0x1L;
+  public static final long BIT_ARGUMENT = 0x2L;
+  public static final long BIT_FIELD = 0x2L;
+
   private boolean mutable;
   private String name;
   private TypeRef typeRef;

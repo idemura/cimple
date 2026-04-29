@@ -57,6 +57,20 @@ public class PrintAstVisitor extends AstVisitor {
   }
 
   @Override
+  protected Object visit(AstTypeFunction node) {
+    printEntity(
+        "TYPE FUNCTION",
+        node.getName(),
+        node.getResultType() == null ? null : node.getResultType().getType());
+    output.indent();
+    for (var p : node.getParameters()) {
+      printEntity("ARG", p.getName(), p.getTypeRef().getType());
+    }
+    output.unindent();
+    return null;
+  }
+
+  @Override
   protected Object visit(AstBlock node) {
     output.writeLine("BLOCK");
     output.indent();

@@ -6,6 +6,7 @@ import static java.lang.Long.parseLong;
 
 import com.github.idemura.cimple.compiler.BuiltinType;
 import com.github.idemura.cimple.compiler.CompilerException;
+import com.github.idemura.cimple.compiler.Location;
 import com.github.idemura.cimple.compiler.TypeRef;
 import com.github.idemura.cimple.compiler.VariableDef;
 import com.github.idemura.cimple.compiler.ast.*;
@@ -59,6 +60,7 @@ public class Parser {
   private AstType parseType() {
     tokens.takeKeyword(TYPE);
     return switch (tokens.current().keyword()) {
+      case FUNCTION -> parseTypeFunction();
       case STRUCT -> parseTypeStruct();
       case UNION -> throw new UnsupportedOperationException();
       case ALIAS -> parseTypeAlias();
@@ -95,6 +97,15 @@ public class Parser {
     return type;
   }
 
+  private AstTypeFunction parseTypeFunction() {
+    var type = new AstTypeFunction();
+    var header = parseFunctionHeader();
+    type.setHeader(header);
+    type.setLocation(header.getLocation());
+    tokens.take(SEMICOLON);
+    return type;
+  }
+
   private void parseModuleName(AstModule module) {
     tokens.takeKeyword(MODULE);
     var tokenName = tokens.take(IDENTIFIER);
@@ -104,13 +115,10 @@ public class Parser {
   }
 
   private AstFunction parseFunction() {
-    tokens.takeKeyword(FUNCTION);
     var function = new AstFunction();
-    parseFunctionQualifiedName(function);
-    parseParameters(function);
-    if (!tokens.current().is(LCURLY)) {
-      function.setResultType(parseTypeRef());
-    }
+    var header = parseFunctionHeader();
+    function.setHeader(header);
+    function.setLocation(header.getLocation());
     function.setBlock(parseBlock());
     return function;
   }
@@ -356,16 +364,27 @@ public class Parser {
     }
   }
 
-  private void parseFunctionQualifiedName(AstFunction function) {
-    function.setLocation(tokens.current().location());
+  private AstFunctionHeader parseFunctionHeader() {
+    tokens.takeKeyword(FUNCTION);
+    var header = new AstFunctionHeader();
+    header.setLocation(tokens.current().location());
+    String boundTypeName = null;
     if (tokens.next() == PERIOD) {
-      function.setBoundTypeName(tokens.take(IDENTIFIER).value());
+      boundTypeName = tokens.take(IDENTIFIER).value();
       tokens.take(PERIOD);
     }
-    function.setName(tokens.take(IDENTIFIER).value());
+    header.setBoundTypeName(boundTypeName);
+    header.setName(tokens.take(IDENTIFIER).value());
+    var parameters = parseParameters();
+    header.setParameters(parameters);
+    if (!tokens.current().is(LCURLY) && !tokens.current().is(SEMICOLON)) {
+      header.setResultType(parseTypeRef());
+    }
+    return header;
   }
 
-  private void parseParameters(AstFunction function) {
+  private List<VariableDef> parseParameters() {
+    var parameters = new ArrayList<VariableDef>();
     tokens.take(LPAREN);
     if (!tokens.current().is(RPAREN)) {
       do {
@@ -376,10 +395,11 @@ public class Parser {
         if (tokens.current().is(IDENTIFIER)) {
           variable.setTypeRef(parseTypeRef());
         }
-        function.addParameter(variable);
+        parameters.add(variable);
       } while (tokens.takeIf(COMMA));
     }
     tokens.take(RPAREN);
+    return parameters;
   }
 
   private TypeRef parseTypeRef() {

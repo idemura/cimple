@@ -8,3 +8,7 @@ type struct Point {
 }
 
 type alias Uri = string;
+
+type function Compare(a int, b int) bool;
+type function Supplier() string;
+type function Consumer(v string);
