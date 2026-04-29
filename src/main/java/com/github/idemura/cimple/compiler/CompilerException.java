@@ -19,13 +19,13 @@ public class CompilerException extends CimpleException {
       return this;
     }
 
-    public Builder setLocation(Location location) {
-      this.location = location;
+    public Builder addDetail(String message, Object... args) {
+      details.add(message.formatted(args));
       return this;
     }
 
-    public Builder addDetail(String message, Object... args) {
-      details.add(message.formatted(args));
+    public Builder setLocation(Location location) {
+      this.location = location;
       return this;
     }
 

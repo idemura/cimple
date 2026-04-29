@@ -23,11 +23,11 @@ public final class AstTypeStruct extends AstType {
     this.name = name;
   }
 
-  public void setFields(List<AstVariable> fields) {
-    this.fields = ImmutableList.copyOf(fields);
-  }
-
   public List<AstVariable> getFields() {
     return ImmutableList.copyOf(fields);
+  }
+
+  public void setFields(List<AstVariable> fields) {
+    this.fields = ImmutableList.copyOf(fields);
   }
 }

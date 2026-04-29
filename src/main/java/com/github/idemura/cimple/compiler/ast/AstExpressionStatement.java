@@ -10,11 +10,11 @@ public final class AstExpressionStatement extends AstStatement {
     return visitor.visit(this);
   }
 
-  public void setExpression(AstExpression expression) {
-    this.expression = expression;
-  }
-
   public AstExpression getExpression() {
     return expression;
+  }
+
+  public void setExpression(AstExpression expression) {
+    this.expression = expression;
   }
 }

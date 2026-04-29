@@ -31,11 +31,11 @@ public final class AstIf extends AstStatement {
     this.thenBlocks = ImmutableList.copyOf(thenBlocks);
   }
 
-  public void setElseBlock(AstBlock elseBlock) {
-    this.elseBlock = elseBlock;
-  }
-
   public AstBlock getElseBlock() {
     return elseBlock;
+  }
+
+  public void setElseBlock(AstBlock elseBlock) {
+    this.elseBlock = elseBlock;
   }
 }

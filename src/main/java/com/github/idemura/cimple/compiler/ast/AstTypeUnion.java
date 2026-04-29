@@ -21,11 +21,11 @@ public final class AstTypeUnion extends AstType {
     this.name = name;
   }
 
-  public void setVariants(List<UnionVariant> variants) {
-    this.variants = ImmutableList.copyOf(variants);
-  }
-
   public List<UnionVariant> getVariants() {
     return ImmutableList.copyOf(variants);
+  }
+
+  public void setVariants(List<UnionVariant> variants) {
+    this.variants = ImmutableList.copyOf(variants);
   }
 }

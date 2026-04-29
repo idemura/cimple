@@ -17,11 +17,11 @@ public final class AstTypeFunction extends AstType {
     header.setName(name);
   }
 
-  public void setHeader(AstFunctionHeader header) {
-    this.header = header;
-  }
-
   public AstFunctionHeader getHeader() {
     return header;
+  }
+
+  public void setHeader(AstFunctionHeader header) {
+    this.header = header;
   }
 }

@@ -41,6 +41,10 @@ public final class AstVariable extends AstStatement {
     flags |= mask;
   }
 
+  public QualifiedName getName() {
+    return name;
+  }
+
   public void setName(String name) {
     this.name = new QualifiedName(name);
   }
@@ -49,23 +53,19 @@ public final class AstVariable extends AstStatement {
     this.name = name;
   }
 
-  public QualifiedName getName() {
-    return name;
+  public TypeRef getTypeRef() {
+    return typeRef;
   }
 
   public void setTypeRef(TypeRef typeRef) {
     this.typeRef = typeRef;
   }
 
-  public TypeRef getTypeRef() {
-    return typeRef;
+  public AstExpression getExpression() {
+    return expression;
   }
 
   public void setExpression(AstExpression expression) {
     this.expression = expression;
-  }
-
-  public AstExpression getExpression() {
-    return expression;
   }
 }

@@ -20,27 +20,27 @@ public final class AstApplyFunction extends AstExpression {
     return function.getHeader().getResultType().getType();
   }
 
-  public void setName(QualifiedName name) {
-    this.name = name;
-  }
-
   public QualifiedName getName() {
     return name;
   }
 
-  public void setArgs(List<AstExpression> args) {
-    this.args = ImmutableList.copyOf(args);
+  public void setName(QualifiedName name) {
+    this.name = name;
   }
 
   public List<AstExpression> getArgs() {
     return ImmutableList.copyOf(args);
   }
 
-  public void setFunction(AstFunction function) {
-    this.function = function;
+  public void setArgs(List<AstExpression> args) {
+    this.args = ImmutableList.copyOf(args);
   }
 
   public AstFunction getFunction() {
     return function;
+  }
+
+  public void setFunction(AstFunction function) {
+    this.function = function;
   }
 }

@@ -29,19 +29,19 @@ public final class AstFunction extends AstNode {
     return visitor.visit(this);
   }
 
-  public void setHeader(AstFunctionHeader header) {
-    this.header = header;
-  }
-
   public AstFunctionHeader getHeader() {
     return header;
   }
 
-  public void setBlock(AstBlock block) {
-    this.block = block;
+  public void setHeader(AstFunctionHeader header) {
+    this.header = header;
   }
 
   public AstBlock getBlock() {
     return block;
+  }
+
+  public void setBlock(AstBlock block) {
+    this.block = block;
   }
 }

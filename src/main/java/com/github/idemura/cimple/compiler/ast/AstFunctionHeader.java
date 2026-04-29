@@ -60,11 +60,11 @@ public final class AstFunctionHeader {
     this.resultType = resultType;
   }
 
-  public void setParameters(List<AstVariable> parameters) {
-    this.parameters = ImmutableList.copyOf(parameters);
-  }
-
   public List<AstVariable> getParameters() {
     return ImmutableList.copyOf(parameters);
+  }
+
+  public void setParameters(List<AstVariable> parameters) {
+    this.parameters = ImmutableList.copyOf(parameters);
   }
 }

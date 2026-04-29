@@ -30,12 +30,12 @@ public final class AstFor extends AstStatement {
             && Objects.equals(block, other.block));
   }
 
-  public void setInit(AstVariable init) {
-    this.init = init;
-  }
-
   public AstVariable getInit() {
     return init;
+  }
+
+  public void setInit(AstVariable init) {
+    this.init = init;
   }
 
   public AstExpression getCondition() {
