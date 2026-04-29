@@ -2,7 +2,6 @@ package com.github.idemura.cimple.compiler.ast;
 
 import com.github.idemura.cimple.compiler.Location;
 import com.github.idemura.cimple.compiler.TypeRef;
-import com.github.idemura.cimple.compiler.VariableDef;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
@@ -12,7 +11,7 @@ public final class AstFunctionHeader {
   private String boundTypeName;
   private String name;
   private TypeRef resultType;
-  private List<VariableDef> parameters = new ArrayList<>();
+  private List<AstVariable> parameters = new ArrayList<>();
 
   public AstFunctionHeader() {}
 
@@ -62,15 +61,15 @@ public final class AstFunctionHeader {
     this.resultType = resultType;
   }
 
-  public void addParameter(VariableDef parameter) {
+  public void addParameter(AstVariable parameter) {
     parameters.add(parameter);
   }
 
-  public void setParameters(List<VariableDef> parameters) {
+  public void setParameters(List<AstVariable> parameters) {
     this.parameters = new ArrayList<>(parameters);
   }
 
-  public List<VariableDef> getParameters() {
+  public List<AstVariable> getParameters() {
     return List.copyOf(parameters);
   }
 }

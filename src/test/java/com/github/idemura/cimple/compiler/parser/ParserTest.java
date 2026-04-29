@@ -5,7 +5,6 @@ import static org.junit.jupiter.api.Assertions.*;
 
 import com.github.idemura.cimple.compiler.CompilerException;
 import com.github.idemura.cimple.compiler.TypeRef;
-import com.github.idemura.cimple.compiler.VariableDef;
 import com.github.idemura.cimple.compiler.ast.*;
 import com.github.idemura.cimple.compiler.tokens.Tokenizer;
 import java.util.List;
@@ -39,7 +38,7 @@ class ParserTest {
       assertNull(f.getResultType());
       var params = f.getParameters();
       assertEquals(1, params.size());
-      assertEquals(new VariableDef("x", new TypeRef("int")), params.get(0));
+      assertEquals(parameter("x", "int"), params.get(0));
     }
     {
       var f = functions.get(2);
@@ -47,8 +46,8 @@ class ParserTest {
       assertNull(f.getResultType());
       var params = f.getParameters();
       assertEquals(2, params.size());
-      assertEquals(new VariableDef("x", new TypeRef("int")), params.get(0));
-      assertEquals(new VariableDef("y", new TypeRef("int")), params.get(1));
+      assertEquals(parameter("x", "int"), params.get(0));
+      assertEquals(parameter("y", "int"), params.get(1));
     }
     {
       var f = functions.get(3);
@@ -123,8 +122,8 @@ class ParserTest {
       assertEquals(new TypeRef("bool"), type.getResultType());
       var params = type.getParameters();
       assertEquals(2, params.size());
-      assertEquals(new VariableDef("a", new TypeRef("int")), params.get(0));
-      assertEquals(new VariableDef("b", new TypeRef("int")), params.get(1));
+      assertEquals(parameter("a", "int"), params.get(0));
+      assertEquals(parameter("b", "int"), params.get(1));
     }
     {
       var type = (AstTypeFunction) types.get(i++);
@@ -136,7 +135,7 @@ class ParserTest {
       var type = (AstTypeFunction) types.get(i++);
       assertEquals("Consumer", type.getName());
       assertNull(type.getResultType());
-      assertEquals(List.of(new VariableDef("v", new TypeRef("string"))), type.getParameters());
+      assertEquals(List.of(parameter("v", "string")), type.getParameters());
     }
   }
 
@@ -259,5 +258,11 @@ class ParserTest {
       var stmtDefer = (AstDefer) statements.get(0);
       assertEquals(new AstNameRef("value"), stmtDefer.getExpression());
     }
+  }
+
+  private static AstVariable parameter(String name, String typeName) {
+    var parameter = new AstVariable(name, new TypeRef(typeName));
+    parameter.setBit(AstVariable.PARAM);
+    return parameter;
   }
 }

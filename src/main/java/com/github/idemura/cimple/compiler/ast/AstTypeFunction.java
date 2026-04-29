@@ -44,11 +44,11 @@ public final class AstTypeFunction extends AstType {
     return header.getResultType();
   }
 
-  public void addParameter(com.github.idemura.cimple.compiler.VariableDef parameter) {
+  public void addParameter(AstVariable parameter) {
     header.addParameter(parameter);
   }
 
-  public List<com.github.idemura.cimple.compiler.VariableDef> getParameters() {
+  public List<AstVariable> getParameters() {
     return header.getParameters();
   }
 }

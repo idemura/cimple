@@ -1,13 +1,12 @@
 package com.github.idemura.cimple.compiler.ast;
 
 import com.github.idemura.cimple.compiler.Type;
-import com.github.idemura.cimple.compiler.VariableDef;
 import java.util.Objects;
 
 public final class AstNameRef extends AstExpression {
   private String name;
   // Variable definition that it refers to.
-  private VariableDef variable;
+  private AstVariable variable;
 
   public AstNameRef(String name) {
     this.name = name;
@@ -43,11 +42,11 @@ public final class AstNameRef extends AstExpression {
     return name;
   }
 
-  public void setVariable(VariableDef variable) {
+  public void setVariable(AstVariable variable) {
     this.variable = variable;
   }
 
-  public VariableDef getVariable() {
+  public AstVariable getVariable() {
     return variable;
   }
 }

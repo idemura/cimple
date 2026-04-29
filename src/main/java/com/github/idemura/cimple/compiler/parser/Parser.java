@@ -7,7 +7,6 @@ import static java.lang.Long.parseLong;
 import com.github.idemura.cimple.compiler.BuiltinType;
 import com.github.idemura.cimple.compiler.CompilerException;
 import com.github.idemura.cimple.compiler.TypeRef;
-import com.github.idemura.cimple.compiler.VariableDef;
 import com.github.idemura.cimple.compiler.ast.*;
 import com.github.idemura.cimple.compiler.tokens.TokenStream;
 import java.util.ArrayList;
@@ -384,12 +383,13 @@ public class Parser {
     return header;
   }
 
-  private List<VariableDef> parseParameters() {
-    var parameters = new ArrayList<VariableDef>();
+  private List<AstVariable> parseParameters() {
+    var parameters = new ArrayList<AstVariable>();
     tokens.take(LPAREN);
     if (!tokens.current().is(RPAREN)) {
       do {
-        var variable = new VariableDef();
+        var variable = new AstVariable();
+        variable.setBit(AstVariable.PARAM);
         var tokenName = tokens.take(IDENTIFIER);
         variable.setName(tokenName.value());
         variable.setLocation(tokenName.location());

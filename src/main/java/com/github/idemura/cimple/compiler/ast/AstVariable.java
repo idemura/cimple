@@ -1,11 +1,12 @@
 package com.github.idemura.cimple.compiler.ast;
 
 import com.github.idemura.cimple.compiler.TypeRef;
+import java.util.Objects;
 
 public final class AstVariable extends AstStatement {
   public static final long MUTABLE = 0x1L; // const/var
   public static final long PARAM = 0x2L; // Whether it is a function parameter.
-  public static final long FIELD = 0x2L; // Whether it is a field.
+  public static final long FIELD = 0x4L; // Whether it is a field.
 
   private String name;
   private TypeRef typeRef;
@@ -14,9 +15,28 @@ public final class AstVariable extends AstStatement {
 
   public AstVariable() {}
 
+  public AstVariable(String name, TypeRef typeRef) {
+    this.name = name;
+    this.typeRef = typeRef;
+  }
+
   @Override
   public Object accept(AstVisitor visitor) {
     return visitor.visit(this);
+  }
+
+  @Override
+  public int hashCode() {
+    return name.hashCode();
+  }
+
+  @Override
+  public boolean equals(Object object) {
+    return this == object
+        || (object instanceof AstVariable other
+            && Objects.equals(name, other.name)
+            && Objects.equals(typeRef, other.typeRef)
+            && flags == other.flags);
   }
 
   public boolean getBit(long mask) {

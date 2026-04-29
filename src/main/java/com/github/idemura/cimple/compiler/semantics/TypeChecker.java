@@ -2,7 +2,6 @@ package com.github.idemura.cimple.compiler.semantics;
 
 import com.github.idemura.cimple.compiler.CompilerException;
 import com.github.idemura.cimple.compiler.TypeRef;
-import com.github.idemura.cimple.compiler.VariableDef;
 import com.github.idemura.cimple.compiler.ast.*;
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -10,7 +9,7 @@ import java.util.List;
 import java.util.Map;
 
 class TypeChecker extends AstVisitor {
-  private final ScopeNameMap<VariableDef> variables = new ScopeNameMap<>();
+  private final ScopeNameMap<AstVariable> variables = new ScopeNameMap<>();
 
   TypeChecker() {}
 
