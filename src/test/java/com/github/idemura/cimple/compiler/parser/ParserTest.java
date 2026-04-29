@@ -98,7 +98,7 @@ class ParserTest {
   }
 
   @Test
-  void testTypes() {
+  void testStructType() {
     var code =
         """
         module test;
@@ -110,30 +110,18 @@ class ParserTest {
           var y int;
           const name string;
         }
-
-        type alias Uri = string;
-
-        type union Option {
-          None;
-          Some(string);
-        }
-
-        type function Compare(a int, b int) bool;
-        type function Supplier() string;
-        type function Consumer(v string);
         """;
     var module = parseCode(code);
     assertEquals("test", module.getName());
     var types = module.types();
-    assertEquals(7, types.size());
-    int i = 0;
+    assertEquals(2, types.size());
     {
-      var type = (AstTypeStruct) types.get(i++);
+      var type = (AstTypeStruct) types.get(0);
       assertEquals(new QualifiedName("Empty"), type.getName());
       assertEquals(ImmutableList.of(), type.getFields());
     }
     {
-      var type = (AstTypeStruct) types.get(i++);
+      var type = (AstTypeStruct) types.get(1);
       assertEquals(new QualifiedName("Point"), type.getName());
       var fields = type.getFields();
       assertEquals(3, fields.size());
@@ -157,20 +145,63 @@ class ParserTest {
         assertFalse(f.getBit(AstVariable.MUTABLE));
       }
     }
+  }
+
+  @Test
+  void testAliasType() {
+    var code =
+        """
+        module test;
+
+        type alias Uri = string;
+        """;
+    var module = parseCode(code);
+    assertEquals("test", module.getName());
+    var types = module.types();
+    assertEquals(1, types.size());
+    var type = (AstTypeAlias) types.get(0);
+    assertEquals(new QualifiedName("Uri"), type.getName());
+    assertEquals(TypeRef.ofName("string"), type.getBaseTypeRef());
+  }
+
+  @Test
+  void testUnionType() {
+    var code =
+        """
+        module test;
+
+        type union Option {
+          None;
+          Some(string);
+        }
+        """;
+    var module = parseCode(code);
+    assertEquals("test", module.getName());
+    var types = module.types();
+    assertEquals(1, types.size());
+    var type = (AstTypeUnion) types.get(0);
+    assertEquals(new QualifiedName("Option"), type.getName());
+    assertEquals(
+        ImmutableList.of(unionVariant("None", null), unionVariant("Some", "string")),
+        type.getVariants());
+  }
+
+  @Test
+  void testFunctionType() {
+    var code =
+        """
+        module test;
+
+        type function Compare(a int, b int) bool;
+        type function Supplier() string;
+        type function Consumer(v string);
+        """;
+    var module = parseCode(code);
+    assertEquals("test", module.getName());
+    var types = module.types();
+    assertEquals(3, types.size());
     {
-      var type = (AstTypeAlias) types.get(i++);
-      assertEquals(new QualifiedName("Uri"), type.getName());
-      assertEquals(TypeRef.ofName("string"), type.getBaseTypeRef());
-    }
-    {
-      var type = (AstTypeUnion) types.get(i++);
-      assertEquals(new QualifiedName("Option"), type.getName());
-      assertEquals(
-          ImmutableList.of(unionVariant("None", null), unionVariant("Some", "string")),
-          type.getVariants());
-    }
-    {
-      var type = (AstTypeFunction) types.get(i++);
+      var type = (AstTypeFunction) types.get(0);
       assertEquals(new QualifiedName("Compare"), type.getName());
       assertEquals(TypeRef.ofName("bool"), type.getHeader().getResultType());
       var params = type.getHeader().getParameters();
@@ -179,13 +210,13 @@ class ParserTest {
       assertEquals(parameter("b", "int"), params.get(1));
     }
     {
-      var type = (AstTypeFunction) types.get(i++);
+      var type = (AstTypeFunction) types.get(1);
       assertEquals(new QualifiedName("Supplier"), type.getName());
       assertEquals(TypeRef.ofName("string"), type.getHeader().getResultType());
       assertEquals(ImmutableList.of(), type.getHeader().getParameters());
     }
     {
-      var type = (AstTypeFunction) types.get(i++);
+      var type = (AstTypeFunction) types.get(2);
       assertEquals(new QualifiedName("Consumer"), type.getName());
       assertNull(type.getHeader().getResultType());
       assertEquals(ImmutableList.of(parameter("v", "string")), type.getHeader().getParameters());
