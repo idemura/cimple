@@ -2,12 +2,12 @@ package com.github.idemura.cimple.compiler.semantics;
 
 import static org.junit.jupiter.api.Assertions.*;
 
-import com.github.idemura.cimple.compiler.ast.AstBuiltinType;
 import com.github.idemura.cimple.compiler.ast.AstDefer;
 import com.github.idemura.cimple.compiler.ast.AstFor;
 import com.github.idemura.cimple.compiler.ast.AstIf;
 import com.github.idemura.cimple.compiler.ast.AstLiteral;
 import com.github.idemura.cimple.compiler.ast.AstReturn;
+import com.github.idemura.cimple.compiler.ast.AstTypeBuiltin;
 import com.github.idemura.cimple.compiler.ast.AstVariable;
 import com.github.idemura.cimple.compiler.parser.Parser;
 import com.github.idemura.cimple.compiler.tokens.Tokenizer;
@@ -46,6 +46,6 @@ class PreprocessRewriteVisitorTest {
       assertSame(AstLiteral.FALSE, stmtFor.getIncrement());
     }
     assertSame(AstLiteral.TRUE, ((AstReturn) statements.get(i++)).getExpression());
-    assertEquals(AstBuiltinType.NULL, AstLiteral.NULL.getType());
+    assertEquals(AstTypeBuiltin.NULL, AstLiteral.NULL.getType());
   }
 }

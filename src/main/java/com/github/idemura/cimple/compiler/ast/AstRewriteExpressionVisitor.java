@@ -24,13 +24,13 @@ public class AstRewriteExpressionVisitor extends AstVisitor {
   }
 
   @Override
-  protected Object visit(AstFunctionApply node) {
+  protected Object visit(AstApplyFunction node) {
     visitChildren(node);
     return node;
   }
 
   @Override
-  protected void visitChildren(AstFunctionApply node) {
+  protected void visitChildren(AstApplyFunction node) {
     node.setArgs(node.getArgs().stream().map(this::rewrite).toList());
   }
 

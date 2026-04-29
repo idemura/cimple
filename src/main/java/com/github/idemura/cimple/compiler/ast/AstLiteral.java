@@ -8,14 +8,14 @@ public final class AstLiteral extends AstExpression {
   private Object value;
   private AstType type;
 
-  public static final AstLiteral TRUE = ofConst(AstBuiltinType.BOOL, true);
-  public static final AstLiteral FALSE = ofConst(AstBuiltinType.BOOL, false);
-  public static final AstLiteral NULL = ofConst(AstBuiltinType.NULL, null);
+  public static final AstLiteral TRUE = ofConst(AstTypeBuiltin.BOOL, true);
+  public static final AstLiteral FALSE = ofConst(AstTypeBuiltin.BOOL, false);
+  public static final AstLiteral NULL = ofConst(AstTypeBuiltin.NULL, null);
 
   public static AstLiteral ofInt(long value) {
     var literal = new AstLiteral();
     literal.setValue(value);
-    literal.setType(AstBuiltinType.INT64);
+    literal.setType(AstTypeBuiltin.INT64);
     return literal;
   }
 

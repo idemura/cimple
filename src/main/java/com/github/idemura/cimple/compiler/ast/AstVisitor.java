@@ -28,7 +28,7 @@ public abstract class AstVisitor {
     return null;
   }
 
-  protected Object visit(AstBuiltinType node) {
+  protected Object visit(AstTypeBuiltin node) {
     return null;
   }
 
@@ -91,12 +91,12 @@ public abstract class AstVisitor {
     return null;
   }
 
-  protected Object visit(AstFunctionApply node) {
+  protected Object visit(AstApplyFunction node) {
     visitChildren(node);
     return null;
   }
 
-  protected void visitChildren(AstFunctionApply node) {
+  protected void visitChildren(AstApplyFunction node) {
     for (var a : node.getArgs()) {
       a.accept(this);
     }

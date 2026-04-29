@@ -1,7 +1,5 @@
 package com.github.idemura.cimple.compiler.ast;
 
-import java.util.List;
-
 public final class AstFunction extends AstNode {
   private AstFunctionHeader header = new AstFunctionHeader();
   private AstBlock block;
@@ -38,7 +36,7 @@ public final class AstFunction extends AstNode {
   public AstFunctionHeader getHeader() {
     return header;
   }
-  
+
   public void setBlock(AstBlock block) {
     this.block = block;
   }

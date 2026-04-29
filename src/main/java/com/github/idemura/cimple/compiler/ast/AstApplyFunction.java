@@ -2,12 +2,12 @@ package com.github.idemura.cimple.compiler.ast;
 
 import java.util.List;
 
-public final class AstFunctionApply extends AstExpression {
+public final class AstApplyFunction extends AstExpression {
   private String functionName;
   private List<AstExpression> args;
   private AstFunction function;
 
-  public AstFunctionApply() {}
+  public AstApplyFunction() {}
 
   @Override
   public Object accept(AstVisitor visitor) {

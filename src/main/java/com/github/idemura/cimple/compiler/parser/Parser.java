@@ -5,14 +5,13 @@ import static java.lang.Double.parseDouble;
 import static java.lang.Long.parseLong;
 
 import com.github.idemura.cimple.compiler.CompilerException;
+import com.github.idemura.cimple.compiler.ast.AstApplyFunction;
 import com.github.idemura.cimple.compiler.ast.AstBlock;
-import com.github.idemura.cimple.compiler.ast.AstBuiltinType;
 import com.github.idemura.cimple.compiler.ast.AstDefer;
 import com.github.idemura.cimple.compiler.ast.AstExpression;
 import com.github.idemura.cimple.compiler.ast.AstExpressionStatement;
 import com.github.idemura.cimple.compiler.ast.AstFor;
 import com.github.idemura.cimple.compiler.ast.AstFunction;
-import com.github.idemura.cimple.compiler.ast.AstFunctionApply;
 import com.github.idemura.cimple.compiler.ast.AstFunctionHeader;
 import com.github.idemura.cimple.compiler.ast.AstGoto;
 import com.github.idemura.cimple.compiler.ast.AstIf;
@@ -23,6 +22,7 @@ import com.github.idemura.cimple.compiler.ast.AstReturn;
 import com.github.idemura.cimple.compiler.ast.AstStatement;
 import com.github.idemura.cimple.compiler.ast.AstType;
 import com.github.idemura.cimple.compiler.ast.AstTypeAlias;
+import com.github.idemura.cimple.compiler.ast.AstTypeBuiltin;
 import com.github.idemura.cimple.compiler.ast.AstTypeFunction;
 import com.github.idemura.cimple.compiler.ast.AstTypeStruct;
 import com.github.idemura.cimple.compiler.ast.AstVariable;
@@ -269,7 +269,7 @@ public class Parser {
             .build();
       }
       // expr = new AstFunctionApply(operator.location(), operator.toString(), List.of(expr, m));
-      expr = new AstFunctionApply();
+      expr = new AstApplyFunction();
     }
     return expr;
   }
@@ -289,7 +289,7 @@ public class Parser {
             .build();
       }
       // expr = new AstFunctionApply(operator.location(), operator.toString(), List.of(expr, m));
-      expr = new AstFunctionApply();
+      expr = new AstApplyFunction();
     }
     return expr;
   }
@@ -309,7 +309,7 @@ public class Parser {
             .build();
       }
       // expr = new AstFunctionApply(operator.location(), operator.toString(), List.of(expr, m));
-      expr = new AstFunctionApply();
+      expr = new AstApplyFunction();
     }
     return expr;
   }
@@ -324,7 +324,7 @@ public class Parser {
     switch (t.type()) {
       case IDENTIFIER -> {
         if (tokens.current().is(LPAREN)) {
-          var a = new AstFunctionApply();
+          var a = new AstApplyFunction();
           return a;
         } else {
           var n = new AstNameRef(t.value());
@@ -336,10 +336,10 @@ public class Parser {
         var l = new AstLiteral();
         if (t.value().contains(".")) {
           l.setValue(parseDouble(t.value()));
-          l.setType(AstBuiltinType.FLOAT64);
+          l.setType(AstTypeBuiltin.FLOAT64);
         } else {
           l.setValue(parseLong(t.value()));
-          l.setType(AstBuiltinType.INT64);
+          l.setType(AstTypeBuiltin.INT64);
         }
         l.setLocation(t.location());
         return l;
@@ -347,7 +347,7 @@ public class Parser {
       case STRING -> {
         var l = new AstLiteral();
         l.setValue(t.value());
-        l.setType(AstBuiltinType.STRING);
+        l.setType(AstTypeBuiltin.STRING);
         l.setLocation(t.location());
         return l;
       }

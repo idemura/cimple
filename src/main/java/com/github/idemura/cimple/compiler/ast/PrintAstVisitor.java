@@ -71,7 +71,7 @@ public class PrintAstVisitor extends AstVisitor {
   }
 
   @Override
-  protected Object visit(AstBuiltinType node) {
+  protected Object visit(AstTypeBuiltin node) {
     output.writeLine("TYPE BUILTIN %s".formatted(node.getName()));
     return null;
   }
@@ -108,7 +108,7 @@ public class PrintAstVisitor extends AstVisitor {
   }
 
   @Override
-  protected Object visit(AstFunctionApply node) {
+  protected Object visit(AstApplyFunction node) {
     output.writeLine("APPLY %s".formatted(node.getFunctionName()));
     output.indent();
     visitChildren(node);
