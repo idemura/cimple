@@ -1,14 +1,14 @@
 package com.github.idemura.cimple.compiler.semantics;
 
 import com.github.idemura.cimple.compiler.CompilerException;
-import com.github.idemura.cimple.compiler.ast.AstApplyFunction;
+import com.github.idemura.cimple.compiler.ast.AstCall;
 import com.github.idemura.cimple.compiler.ast.AstBlock;
 import com.github.idemura.cimple.compiler.ast.AstFor;
 import com.github.idemura.cimple.compiler.ast.AstFunction;
 import com.github.idemura.cimple.compiler.ast.AstIf;
 import com.github.idemura.cimple.compiler.ast.AstLiteral;
 import com.github.idemura.cimple.compiler.ast.AstModule;
-import com.github.idemura.cimple.compiler.ast.AstNameRef;
+import com.github.idemura.cimple.compiler.ast.AstName;
 import com.github.idemura.cimple.compiler.ast.AstVariable;
 import com.github.idemura.cimple.compiler.ast.AstVisitor;
 import com.github.idemura.cimple.compiler.ast.TypeRef;
@@ -73,7 +73,7 @@ class TypeChecker extends AstVisitor {
   }
 
   @Override
-  protected Object visit(AstNameRef node) {
+  protected Object visit(AstName node) {
     var v = variables.get(node.getName());
     if (v == null) {
       throw CompilerException.builder()
@@ -86,7 +86,7 @@ class TypeChecker extends AstVisitor {
   }
 
   @Override
-  protected Object visit(AstApplyFunction node) {
+  protected Object visit(AstCall node) {
     visitChildren(node);
     return null;
   }

@@ -2,11 +2,11 @@ package com.github.idemura.cimple.compiler.ast;
 
 import java.util.Objects;
 
-public final class AstNameRef extends AstExpression {
+public final class AstName extends AstExpression {
   private QualifiedName name;
   private AstVariable variable;
 
-  public AstNameRef(String name) {
+  public AstName(String name) {
     this.name = new QualifiedName(name);
   }
 
@@ -22,13 +22,12 @@ public final class AstNameRef extends AstExpression {
 
   @Override
   public boolean equals(Object object) {
-    return this == object
-        || (object instanceof AstNameRef other && Objects.equals(name, other.name));
+    return this == object || (object instanceof AstName other && Objects.equals(name, other.name));
   }
 
   @Override
   public String toString() {
-    return "AstNameRef(%s)".formatted(name);
+    return "AstName(%s)".formatted(name);
   }
 
   @Override
@@ -44,11 +43,11 @@ public final class AstNameRef extends AstExpression {
     this.name = name;
   }
 
-  public void setVariable(AstVariable variable) {
-    this.variable = variable;
-  }
-
   public AstVariable getVariable() {
     return variable;
+  }
+
+  public void setVariable(AstVariable variable) {
+    this.variable = variable;
   }
 }

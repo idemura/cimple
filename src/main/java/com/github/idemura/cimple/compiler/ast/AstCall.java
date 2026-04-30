@@ -3,11 +3,11 @@ package com.github.idemura.cimple.compiler.ast;
 import com.google.common.collect.ImmutableList;
 import java.util.List;
 
-public final class AstApplyFunction extends AstExpression {
+public final class AstCall extends AstExpression {
   private AstExpression function;
   private List<AstExpression> args;
 
-  public AstApplyFunction() {}
+  public AstCall() {}
 
   @Override
   public Object accept(AstVisitor visitor) {
@@ -28,7 +28,7 @@ public final class AstApplyFunction extends AstExpression {
   }
 
   public List<AstExpression> getArgs() {
-    return ImmutableList.copyOf(args);
+    return args;
   }
 
   public void setArgs(List<AstExpression> args) {

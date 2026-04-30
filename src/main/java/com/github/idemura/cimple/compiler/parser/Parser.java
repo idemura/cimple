@@ -5,10 +5,10 @@ import static java.lang.Double.parseDouble;
 import static java.lang.Long.parseLong;
 
 import com.github.idemura.cimple.compiler.CompilerException;
-import com.github.idemura.cimple.compiler.ast.AstApplyFunction;
 import com.github.idemura.cimple.compiler.ast.AstArrayAccess;
 import com.github.idemura.cimple.compiler.ast.AstBind;
 import com.github.idemura.cimple.compiler.ast.AstBlock;
+import com.github.idemura.cimple.compiler.ast.AstCall;
 import com.github.idemura.cimple.compiler.ast.AstDefer;
 import com.github.idemura.cimple.compiler.ast.AstExpression;
 import com.github.idemura.cimple.compiler.ast.AstExpressionStatement;
@@ -20,13 +20,13 @@ import com.github.idemura.cimple.compiler.ast.AstGoto;
 import com.github.idemura.cimple.compiler.ast.AstIf;
 import com.github.idemura.cimple.compiler.ast.AstLiteral;
 import com.github.idemura.cimple.compiler.ast.AstModule;
-import com.github.idemura.cimple.compiler.ast.AstNameRef;
+import com.github.idemura.cimple.compiler.ast.AstName;
 import com.github.idemura.cimple.compiler.ast.AstReturn;
 import com.github.idemura.cimple.compiler.ast.AstStatement;
 import com.github.idemura.cimple.compiler.ast.AstType;
 import com.github.idemura.cimple.compiler.ast.AstTypeAlias;
 import com.github.idemura.cimple.compiler.ast.AstTypeBuiltin;
-import com.github.idemura.cimple.compiler.ast.AstTypeCast;
+import com.github.idemura.cimple.compiler.ast.AstCast;
 import com.github.idemura.cimple.compiler.ast.AstTypeFunction;
 import com.github.idemura.cimple.compiler.ast.AstTypeStruct;
 import com.github.idemura.cimple.compiler.ast.AstTypeUnion;
@@ -320,11 +320,11 @@ public class Parser {
             .setLocation(operator.location())
             .build();
       }
-      var apply = new AstApplyFunction();
-      apply.setFunction(operatorFunction(operator));
-      apply.setArgs(ImmutableList.of(expr, m));
-      apply.setLocation(operator.location());
-      expr = apply;
+      var call = new AstCall();
+      call.setFunction(operatorFunction(operator));
+      call.setArgs(ImmutableList.of(expr, m));
+      call.setLocation(operator.location());
+      expr = call;
     }
     return expr;
   }
@@ -343,11 +343,11 @@ public class Parser {
             .setLocation(operator.location())
             .build();
       }
-      var apply = new AstApplyFunction();
-      apply.setFunction(operatorFunction(operator));
-      apply.setArgs(ImmutableList.of(expr, m));
-      apply.setLocation(operator.location());
-      expr = apply;
+      var call = new AstCall();
+      call.setFunction(operatorFunction(operator));
+      call.setArgs(ImmutableList.of(expr, m));
+      call.setLocation(operator.location());
+      expr = call;
     }
     return expr;
   }
@@ -366,11 +366,11 @@ public class Parser {
             .setLocation(operator.location())
             .build();
       }
-      var apply = new AstApplyFunction();
-      apply.setFunction(operatorFunction(operator));
-      apply.setArgs(ImmutableList.of(expr, m));
-      apply.setLocation(operator.location());
-      expr = apply;
+      var call = new AstCall();
+      call.setFunction(operatorFunction(operator));
+      call.setArgs(ImmutableList.of(expr, m));
+      call.setLocation(operator.location());
+      expr = call;
     }
     return expr;
   }
@@ -396,10 +396,10 @@ public class Parser {
         tokens.take(RBRACKET);
         expr = arrayAccess;
       } else if (tokens.current().is(LPAREN)) {
-        var apply = new AstApplyFunction();
-        apply.setFunction(expr);
-        apply.setArgs(parseExpressionList());
-        expr = apply;
+        var call = new AstCall();
+        call.setFunction(expr);
+        call.setArgs(parseExpressionList());
+        expr = call;
       } else {
         break;
       }
@@ -419,7 +419,7 @@ public class Parser {
       return expr;
     }
     if (tokens.takeIf(LBRACKET)) {
-      var expr = new AstTypeCast();
+      var expr = new AstCast();
       expr.setExpression(parseExpression());
       expr.setLocation(tokens.takeKeyword(TYPE).location());
       expr.setTypeRef(parseTypeRef());
@@ -429,7 +429,7 @@ public class Parser {
     var token = tokens.take();
     switch (token.type()) {
       case IDENTIFIER -> {
-        var expr = new AstNameRef(token.value());
+        var expr = new AstName(token.value());
         expr.setLocation(token.location());
         return expr;
       }
@@ -534,8 +534,8 @@ public class Parser {
     return TypeRef.ofName(tokens.take(IDENTIFIER).value());
   }
 
-  private AstNameRef operatorFunction(Token operator) {
-    var node = new AstNameRef(operator.type().symbolName());
+  private AstName operatorFunction(Token operator) {
+    var node = new AstName(operator.type().symbolName());
     node.setLocation(operator.location());
     return node;
   }

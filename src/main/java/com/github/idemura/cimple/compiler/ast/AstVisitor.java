@@ -119,25 +119,25 @@ public abstract class AstVisitor {
     node.getIndex().accept(this);
   }
 
-  protected Object visit(AstTypeCast node) {
+  protected Object visit(AstCast node) {
     visitChildren(node);
     return null;
   }
 
-  protected void visitChildren(AstTypeCast node) {
+  protected void visitChildren(AstCast node) {
     node.getExpression().accept(this);
   }
 
-  protected Object visit(AstNameRef node) {
+  protected Object visit(AstName node) {
     return null;
   }
 
-  protected Object visit(AstApplyFunction node) {
+  protected Object visit(AstCall node) {
     visitChildren(node);
     return null;
   }
 
-  protected void visitChildren(AstApplyFunction node) {
+  protected void visitChildren(AstCall node) {
     node.getFunction().accept(this);
     for (var a : node.getArgs()) {
       a.accept(this);

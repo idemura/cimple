@@ -53,29 +53,29 @@ public class AstRewriteExpressionVisitor extends AstVisitor {
   }
 
   @Override
-  protected Object visit(AstTypeCast node) {
+  protected Object visit(AstCast node) {
     visitChildren(node);
     return node;
   }
 
   @Override
-  protected void visitChildren(AstTypeCast node) {
+  protected void visitChildren(AstCast node) {
     node.setExpression(rewrite(node.getExpression()));
   }
 
   @Override
-  protected Object visit(AstNameRef node) {
+  protected Object visit(AstName node) {
     return node;
   }
 
   @Override
-  protected Object visit(AstApplyFunction node) {
+  protected Object visit(AstCall node) {
     visitChildren(node);
     return node;
   }
 
   @Override
-  protected void visitChildren(AstApplyFunction node) {
+  protected void visitChildren(AstCall node) {
     node.setFunction(rewrite(node.getFunction()));
     node.setArgs(node.getArgs().stream().map(this::rewrite).toList());
   }

@@ -1,6 +1,6 @@
 package com.github.idemura.cimple.compiler.ast;
 
-public final class AstTypeCast extends AstExpression {
+public final class AstCast extends AstExpression {
   private AstExpression expression;
   private TypeRef typeRef;
 
