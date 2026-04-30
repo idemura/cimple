@@ -42,7 +42,7 @@ public enum TokenType {
   MATCH,
   MODULE,
   RETURN,
-  STRUCT,
+  RECORD,
   TEMPLATE,
   TYPE,
   VAR;
@@ -68,7 +68,7 @@ public enum TokenType {
       case "match" -> MATCH;
       case "module" -> MODULE;
       case "return" -> RETURN;
-      case "struct" -> STRUCT;
+      case "record" -> RECORD;
       case "type" -> TYPE;
       case "var" -> VAR;
       default -> null;

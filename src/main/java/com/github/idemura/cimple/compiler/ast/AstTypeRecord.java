@@ -3,11 +3,11 @@ package com.github.idemura.cimple.compiler.ast;
 import com.google.common.collect.ImmutableList;
 import java.util.List;
 
-public final class AstTypeStruct extends AstType {
+public final class AstTypeRecord extends AstType {
   private QualifiedName name;
   private List<AstVariable> fields;
 
-  public AstTypeStruct() {}
+  public AstTypeRecord() {}
 
   @Override
   public Object accept(AstVisitor visitor) {

@@ -19,7 +19,7 @@ import com.github.idemura.cimple.compiler.ast.AstExpressionStatement;
 import com.github.idemura.cimple.compiler.ast.AstTypeAlias;
 import com.github.idemura.cimple.compiler.ast.AstCast;
 import com.github.idemura.cimple.compiler.ast.AstTypeFunction;
-import com.github.idemura.cimple.compiler.ast.AstTypeStruct;
+import com.github.idemura.cimple.compiler.ast.AstTypeRecord;
 import com.github.idemura.cimple.compiler.ast.AstTypeUnion;
 import com.github.idemura.cimple.compiler.ast.AstVariable;
 import com.github.idemura.cimple.compiler.ast.QualifiedName;
@@ -115,14 +115,14 @@ class ParserTest {
   }
 
   @Test
-  void testStructType() {
+  void testRecordType() {
     var code =
         """
         module test;
 
-        type struct Empty {}
+        type record Empty {}
 
-        type struct Point {
+        type record Point {
           var x int;
           var y int;
           const name string;
@@ -133,12 +133,12 @@ class ParserTest {
     var types = module.types();
     assertEquals(2, types.size());
     {
-      var type = (AstTypeStruct) types.get(0);
+      var type = (AstTypeRecord) types.get(0);
       assertEquals(new QualifiedName("Empty"), type.getName());
       assertEquals(ImmutableList.of(), type.getFields());
     }
     {
-      var type = (AstTypeStruct) types.get(1);
+      var type = (AstTypeRecord) types.get(1);
       assertEquals(new QualifiedName("Point"), type.getName());
       var fields = type.getFields();
       assertEquals(3, fields.size());

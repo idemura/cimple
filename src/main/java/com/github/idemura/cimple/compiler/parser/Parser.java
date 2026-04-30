@@ -28,7 +28,7 @@ import com.github.idemura.cimple.compiler.ast.AstTypeAlias;
 import com.github.idemura.cimple.compiler.ast.AstTypeBuiltin;
 import com.github.idemura.cimple.compiler.ast.AstCast;
 import com.github.idemura.cimple.compiler.ast.AstTypeFunction;
-import com.github.idemura.cimple.compiler.ast.AstTypeStruct;
+import com.github.idemura.cimple.compiler.ast.AstTypeRecord;
 import com.github.idemura.cimple.compiler.ast.AstTypeUnion;
 import com.github.idemura.cimple.compiler.ast.AstVariable;
 import com.github.idemura.cimple.compiler.ast.QualifiedName;
@@ -87,7 +87,7 @@ public class Parser {
     tokens.takeKeyword(TYPE);
     return switch (tokens.current().keyword()) {
       case FUNCTION -> parseTypeFunction();
-      case STRUCT -> parseTypeStruct();
+      case RECORD -> parseTypeRecord();
       case UNION -> parseTypeUnion();
       case ALIAS -> parseTypeAlias();
       default ->
@@ -98,9 +98,9 @@ public class Parser {
     };
   }
 
-  private AstTypeStruct parseTypeStruct() {
-    var type = new AstTypeStruct();
-    tokens.takeKeyword(STRUCT);
+  private AstTypeRecord parseTypeRecord() {
+    var type = new AstTypeRecord();
+    tokens.takeKeyword(RECORD);
     var name = tokens.take(IDENTIFIER);
     type.setLocation(name.location());
     type.setName(new QualifiedName(name.value()));

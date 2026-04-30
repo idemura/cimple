@@ -36,12 +36,12 @@ public abstract class AstVisitor {
     return null;
   }
 
-  protected Object visit(AstTypeStruct node) {
+  protected Object visit(AstTypeRecord node) {
     visitChildren(node);
     return null;
   }
 
-  protected void visitChildren(AstTypeStruct node) {
+  protected void visitChildren(AstTypeRecord node) {
     for (var field : node.getFields()) {
       field.accept(this);
     }
