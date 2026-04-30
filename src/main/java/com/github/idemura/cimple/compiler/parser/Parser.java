@@ -1,8 +1,6 @@
 package com.github.idemura.cimple.compiler.parser;
 
 import static com.github.idemura.cimple.compiler.tokens.TokenType.*;
-import static java.lang.Double.parseDouble;
-import static java.lang.Long.parseLong;
 
 import com.github.idemura.cimple.compiler.CompilerException;
 import com.github.idemura.cimple.compiler.ast.AstArrayAccess;
@@ -19,14 +17,14 @@ import com.github.idemura.cimple.compiler.ast.AstFunction;
 import com.github.idemura.cimple.compiler.ast.AstFunctionHeader;
 import com.github.idemura.cimple.compiler.ast.AstGoto;
 import com.github.idemura.cimple.compiler.ast.AstIf;
-import com.github.idemura.cimple.compiler.ast.AstLiteral;
 import com.github.idemura.cimple.compiler.ast.AstModule;
 import com.github.idemura.cimple.compiler.ast.AstName;
+import com.github.idemura.cimple.compiler.ast.AstNumberLiteral;
 import com.github.idemura.cimple.compiler.ast.AstReturn;
 import com.github.idemura.cimple.compiler.ast.AstStatement;
+import com.github.idemura.cimple.compiler.ast.AstStringLiteral;
 import com.github.idemura.cimple.compiler.ast.AstType;
 import com.github.idemura.cimple.compiler.ast.AstTypeAlias;
-import com.github.idemura.cimple.compiler.ast.AstTypeBuiltin;
 import com.github.idemura.cimple.compiler.ast.AstTypeFunction;
 import com.github.idemura.cimple.compiler.ast.AstTypeRecord;
 import com.github.idemura.cimple.compiler.ast.AstTypeUnion;
@@ -434,28 +432,12 @@ public class Parser {
         return expr;
       }
       case NUMBER -> {
-        var expr = new AstLiteral();
-        try {
-          if (token.value().contains(".")) {
-            expr.setValue(parseDouble(token.value()));
-            expr.setType(TypeRef.of(AstTypeBuiltin.FLOAT64));
-          } else {
-            expr.setValue(parseLong(token.value()));
-            expr.setType(TypeRef.of(AstTypeBuiltin.INT64));
-          }
-        } catch (NumberFormatException e) {
-          throw CompilerException.builder()
-              .formatMessage("Invalid numeric literal: %s", token.value())
-              .setLocation(token.location())
-              .build();
-        }
+        var expr = new AstNumberLiteral(token.value());
         expr.setLocation(token.location());
         return expr;
       }
       case STRING -> {
-        var expr = new AstLiteral();
-        expr.setValue(token.value());
-        expr.setType(TypeRef.of(AstTypeBuiltin.STRING));
+        var expr = new AstStringLiteral(token.value());
         expr.setLocation(token.location());
         return expr;
       }

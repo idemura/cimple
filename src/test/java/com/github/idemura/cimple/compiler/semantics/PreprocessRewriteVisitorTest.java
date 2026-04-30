@@ -2,15 +2,14 @@ package com.github.idemura.cimple.compiler.semantics;
 
 import static org.junit.jupiter.api.Assertions.*;
 
+import com.github.idemura.cimple.compiler.ast.AstBoolLiteral;
 import com.github.idemura.cimple.compiler.ast.AstDefer;
 import com.github.idemura.cimple.compiler.ast.AstExpressionStatement;
 import com.github.idemura.cimple.compiler.ast.AstFor;
 import com.github.idemura.cimple.compiler.ast.AstIf;
-import com.github.idemura.cimple.compiler.ast.AstLiteral;
+import com.github.idemura.cimple.compiler.ast.AstNullLiteral;
 import com.github.idemura.cimple.compiler.ast.AstReturn;
-import com.github.idemura.cimple.compiler.ast.AstTypeBuiltin;
 import com.github.idemura.cimple.compiler.ast.AstVariable;
-import com.github.idemura.cimple.compiler.ast.TypeRef;
 import com.github.idemura.cimple.compiler.parser.Parser;
 import com.github.idemura.cimple.compiler.tokens.Tokenizer;
 import org.junit.jupiter.api.Test;
@@ -20,14 +19,14 @@ class PreprocessRewriteVisitorTest {
   void testRewriteTrueFalseNullLiterals() {
     var code =
         """
-        module test_semantics;
+        module test;
 
         function f() {
           if true {
           }
           defer null;
           var x = false;
-          for var i = null; true; false {
+          for var i = null; true; true {
           }
           return true;
         }
@@ -38,21 +37,21 @@ class PreprocessRewriteVisitorTest {
 
     var statements = module.functions().get(0).getBlock().statements();
     int i = 0;
-    assertSame(AstLiteral.TRUE, ((AstIf) statements.get(i++)).getConditions().get(0));
+    assertEquals(new AstBoolLiteral(true), ((AstIf) statements.get(i++)).getConditions().get(0));
     {
       var stmt = (AstDefer) statements.get(i++);
       var statements1 = stmt.getBlock().statements();
       assertEquals(1, statements1.size());
-      assertSame(AstLiteral.NULL, ((AstExpressionStatement) statements1.get(0)).getExpression());
+      assertEquals(
+          new AstNullLiteral(), ((AstExpressionStatement) statements1.get(0)).getExpression());
     }
-    assertSame(AstLiteral.FALSE, ((AstVariable) statements.get(i++)).getExpression());
+    assertEquals(new AstBoolLiteral(false), ((AstVariable) statements.get(i++)).getExpression());
     {
       var stmt = (AstFor) statements.get(i++);
-      assertSame(AstLiteral.NULL, stmt.getInit().getExpression());
-      assertSame(AstLiteral.TRUE, stmt.getCondition());
-      assertSame(AstLiteral.FALSE, stmt.getIncrement());
+      assertEquals(new AstNullLiteral(), stmt.getInit().getExpression());
+      assertEquals(new AstBoolLiteral(true), stmt.getCondition());
+      assertEquals(new AstBoolLiteral(true), stmt.getIncrement());
     }
-    assertSame(AstLiteral.TRUE, ((AstReturn) statements.get(i++)).getExpression());
-    assertEquals(TypeRef.of(AstTypeBuiltin.NULL), AstLiteral.NULL.getType());
+    assertEquals(new AstBoolLiteral(true), ((AstReturn) statements.get(i++)).getExpression());
   }
 }

@@ -2,32 +2,14 @@ package com.github.idemura.cimple.compiler.ast;
 
 import java.util.Objects;
 
-public final class AstLiteral extends AstExpression {
-  // String literal stores values as String.
-  // Number(integer/float) literal - as (long/double), but actual type is defined by @type.
-  private Object value;
+public abstract sealed class AstLiteral extends AstExpression
+    permits AstBoolLiteral, AstNullLiteral, AstNumberLiteral, AstStringLiteral {
+  private final Object value;
   private TypeRef type;
 
-  public static final AstLiteral TRUE = ofConst(AstTypeBuiltin.BOOL, true);
-  public static final AstLiteral FALSE = ofConst(AstTypeBuiltin.BOOL, false);
-  public static final AstLiteral NULL = ofConst(AstTypeBuiltin.NULL, null);
-
-  public static AstLiteral ofInt(long value) {
-    var literal = new AstLiteral();
-    literal.setValue(value);
-    literal.setType(TypeRef.of(AstTypeBuiltin.INT64));
-    return literal;
+  protected AstLiteral(Object value) {
+    this.value = value;
   }
-
-  public static AstLiteral ofBool(boolean value) {
-    return value ? TRUE : FALSE;
-  }
-
-  public static AstLiteral ofNull() {
-    return NULL;
-  }
-
-  public AstLiteral() {}
 
   @Override
   public Object accept(AstVisitor visitor) {
@@ -47,12 +29,8 @@ public final class AstLiteral extends AstExpression {
             && Objects.equals(type, other.type));
   }
 
-  public Object getValue() {
+  public Object value() {
     return value;
-  }
-
-  public void setValue(Object value) {
-    this.value = value;
   }
 
   public TypeRef getType() {
@@ -61,12 +39,5 @@ public final class AstLiteral extends AstExpression {
 
   public void setType(TypeRef type) {
     this.type = type;
-  }
-
-  public static AstLiteral ofConst(AstType type, Object value) {
-    var literal = new AstLiteral();
-    literal.setValue(value);
-    literal.setType(TypeRef.of(type));
-    return literal;
   }
 }

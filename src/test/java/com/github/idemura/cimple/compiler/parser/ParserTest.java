@@ -13,9 +13,9 @@ import com.github.idemura.cimple.compiler.ast.AstFieldAccess;
 import com.github.idemura.cimple.compiler.ast.AstFor;
 import com.github.idemura.cimple.compiler.ast.AstGoto;
 import com.github.idemura.cimple.compiler.ast.AstIf;
-import com.github.idemura.cimple.compiler.ast.AstLiteral;
 import com.github.idemura.cimple.compiler.ast.AstModule;
 import com.github.idemura.cimple.compiler.ast.AstName;
+import com.github.idemura.cimple.compiler.ast.AstNumberLiteral;
 import com.github.idemura.cimple.compiler.ast.AstReturn;
 import com.github.idemura.cimple.compiler.ast.AstTypeAlias;
 import com.github.idemura.cimple.compiler.ast.AstTypeFunction;
@@ -260,7 +260,7 @@ class ParserTest {
     int i = 0;
     {
       var expr = ((AstVariable) statements.get(i++)).getExpression();
-      assertEquals(AstLiteral.ofInt(1), expr);
+      assertEquals(AstNumberLiteral.of(1), expr);
     }
     {
       var expr = ((AstVariable) statements.get(i++)).getExpression();
@@ -268,8 +268,8 @@ class ParserTest {
         var call = (AstCall) expr;
         assertEquals(new AstName("+"), call.getFunction());
         assertEquals(2, call.getArgs().size());
-        assertEquals(AstLiteral.ofInt(1), call.getArgs().get(0));
-        assertEquals(AstLiteral.ofInt(2), call.getArgs().get(1));
+        assertEquals(AstNumberLiteral.of(1), call.getArgs().get(0));
+        assertEquals(AstNumberLiteral.of(2), call.getArgs().get(1));
       }
     }
     {
@@ -282,10 +282,10 @@ class ParserTest {
           var callAdd = (AstCall) callSub.getArgs().get(0);
           assertEquals(new AstName("+"), callAdd.getFunction());
           assertEquals(2, callAdd.getArgs().size());
-          assertEquals(AstLiteral.ofInt(1), callAdd.getArgs().get(0));
-          assertEquals(AstLiteral.ofInt(2), callAdd.getArgs().get(1));
+          assertEquals(AstNumberLiteral.of(1), callAdd.getArgs().get(0));
+          assertEquals(AstNumberLiteral.of(2), callAdd.getArgs().get(1));
         }
-        assertEquals(AstLiteral.ofInt(3), callSub.getArgs().get(1));
+        assertEquals(AstNumberLiteral.of(3), callSub.getArgs().get(1));
       }
     }
     {
@@ -294,8 +294,8 @@ class ParserTest {
         var callMul = (AstCall) expr;
         assertEquals(new AstName("*"), callMul.getFunction());
         assertEquals(2, callMul.getArgs().size());
-        assertEquals(AstLiteral.ofInt(1), callMul.getArgs().get(0));
-        assertEquals(AstLiteral.ofInt(2), callMul.getArgs().get(1));
+        assertEquals(AstNumberLiteral.of(1), callMul.getArgs().get(0));
+        assertEquals(AstNumberLiteral.of(2), callMul.getArgs().get(1));
       }
     }
     {
@@ -308,10 +308,10 @@ class ParserTest {
           var nestedCallMul = (AstCall) callMul.getArgs().get(0);
           assertEquals(new AstName("*"), nestedCallMul.getFunction());
           assertEquals(2, nestedCallMul.getArgs().size());
-          assertEquals(AstLiteral.ofInt(1), nestedCallMul.getArgs().get(0));
-          assertEquals(AstLiteral.ofInt(2), nestedCallMul.getArgs().get(1));
+          assertEquals(AstNumberLiteral.of(1), nestedCallMul.getArgs().get(0));
+          assertEquals(AstNumberLiteral.of(2), nestedCallMul.getArgs().get(1));
         }
-        assertEquals(AstLiteral.ofInt(3), callMul.getArgs().get(1));
+        assertEquals(AstNumberLiteral.of(3), callMul.getArgs().get(1));
       }
     }
     {
@@ -320,13 +320,13 @@ class ParserTest {
         var callAdd = (AstCall) expr;
         assertEquals(new AstName("+"), callAdd.getFunction());
         assertEquals(2, callAdd.getArgs().size());
-        assertEquals(AstLiteral.ofInt(1), callAdd.getArgs().get(0));
+        assertEquals(AstNumberLiteral.of(1), callAdd.getArgs().get(0));
         {
           var callMul = (AstCall) callAdd.getArgs().get(1);
           assertEquals(new AstName("*"), callMul.getFunction());
           assertEquals(2, callMul.getArgs().size());
-          assertEquals(AstLiteral.ofInt(2), callMul.getArgs().get(0));
-          assertEquals(AstLiteral.ofInt(3), callMul.getArgs().get(1));
+          assertEquals(AstNumberLiteral.of(2), callMul.getArgs().get(0));
+          assertEquals(AstNumberLiteral.of(3), callMul.getArgs().get(1));
         }
       }
     }
@@ -340,10 +340,10 @@ class ParserTest {
           var callMul = (AstCall) callAdd.getArgs().get(0);
           assertEquals(new AstName("*"), callMul.getFunction());
           assertEquals(2, callMul.getArgs().size());
-          assertEquals(AstLiteral.ofInt(1), callMul.getArgs().get(0));
-          assertEquals(AstLiteral.ofInt(2), callMul.getArgs().get(1));
+          assertEquals(AstNumberLiteral.of(1), callMul.getArgs().get(0));
+          assertEquals(AstNumberLiteral.of(2), callMul.getArgs().get(1));
         }
-        assertEquals(AstLiteral.ofInt(3), callAdd.getArgs().get(1));
+        assertEquals(AstNumberLiteral.of(3), callAdd.getArgs().get(1));
       }
     }
     {
@@ -352,8 +352,8 @@ class ParserTest {
         var call = (AstCall) expr;
         assertEquals(new AstName("+"), call.getFunction());
         assertEquals(2, call.getArgs().size());
-        assertEquals(AstLiteral.ofInt(1), call.getArgs().get(0));
-        assertEquals(AstLiteral.ofInt(2), call.getArgs().get(1));
+        assertEquals(AstNumberLiteral.of(1), call.getArgs().get(0));
+        assertEquals(AstNumberLiteral.of(2), call.getArgs().get(1));
       }
     }
     {
@@ -364,8 +364,8 @@ class ParserTest {
         var callAdd = (AstCall) cast.getExpression();
         assertEquals(new AstName("+"), callAdd.getFunction());
         assertEquals(2, callAdd.getArgs().size());
-        assertEquals(AstLiteral.ofInt(1), callAdd.getArgs().get(0));
-        assertEquals(AstLiteral.ofInt(2), callAdd.getArgs().get(1));
+        assertEquals(AstNumberLiteral.of(1), callAdd.getArgs().get(0));
+        assertEquals(AstNumberLiteral.of(2), callAdd.getArgs().get(1));
       }
     }
   }
@@ -403,8 +403,8 @@ class ParserTest {
       var call = (AstCall) expr;
       assertEquals(new AstName("foo"), call.getFunction());
       assertEquals(2, call.getArgs().size());
-      assertEquals(AstLiteral.ofInt(1), call.getArgs().get(0));
-      assertEquals(AstLiteral.ofInt(2), call.getArgs().get(1));
+      assertEquals(AstNumberLiteral.of(1), call.getArgs().get(0));
+      assertEquals(AstNumberLiteral.of(2), call.getArgs().get(1));
     }
   }
 
@@ -440,7 +440,7 @@ class ParserTest {
       var expr = ((AstVariable) statements.get(i++)).getExpression();
       var index = (AstArrayAccess) expr;
       assertEquals(new AstName("foo"), index.getArray());
-      assertEquals(AstLiteral.ofInt(1), index.getIndex());
+      assertEquals(AstNumberLiteral.of(1), index.getIndex());
     }
     {
       var expr = ((AstVariable) statements.get(i++)).getExpression();
@@ -448,7 +448,7 @@ class ParserTest {
       assertEquals("baz", bind.getFunctionName());
       {
         var index = (AstArrayAccess) bind.getObject();
-        assertEquals(AstLiteral.ofInt(3), index.getIndex());
+        assertEquals(AstNumberLiteral.of(3), index.getIndex());
         {
           var call = (AstCall) index.getArray();
           {
@@ -457,8 +457,8 @@ class ParserTest {
             assertEquals("bar", field.getFieldName());
           }
           assertEquals(2, call.getArgs().size());
-          assertEquals(AstLiteral.ofInt(1), call.getArgs().get(0));
-          assertEquals(AstLiteral.ofInt(2), call.getArgs().get(1));
+          assertEquals(AstNumberLiteral.of(1), call.getArgs().get(0));
+          assertEquals(AstNumberLiteral.of(2), call.getArgs().get(1));
         }
       }
     }
@@ -542,7 +542,7 @@ class ParserTest {
       var init = stmt.getInit();
       assertEquals(new QualifiedName("i"), init.getName());
       assertNull(init.getTypeRef());
-      assertEquals(AstLiteral.ofInt(0), init.getExpression());
+      assertEquals(AstNumberLiteral.of(0), init.getExpression());
       assertEquals(new AstName("true"), stmt.getCondition());
       assertNull(stmt.getIncrement());
       assertEquals(ImmutableList.of(), stmt.getBlock().statements());
@@ -552,7 +552,7 @@ class ParserTest {
       var init = stmt.getInit();
       assertEquals(new QualifiedName("i"), init.getName());
       assertNull(init.getTypeRef());
-      assertEquals(AstLiteral.ofInt(0), init.getExpression());
+      assertEquals(AstNumberLiteral.of(0), init.getExpression());
       assertEquals(new AstName("true"), stmt.getCondition());
       assertEquals(new AstName("i"), stmt.getIncrement());
       assertEquals(ImmutableList.of(), stmt.getBlock().statements());

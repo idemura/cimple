@@ -108,7 +108,7 @@ public class PrintAstVisitor extends AstVisitor {
 
   @Override
   protected Object visit(AstLiteral node) {
-    printEntity("LITERAL", node.getValue(), node.getType());
+    printEntity("LITERAL", node.value(), node.getType());
     return null;
   }
 
