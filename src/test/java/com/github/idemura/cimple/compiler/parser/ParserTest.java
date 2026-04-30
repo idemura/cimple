@@ -169,7 +169,7 @@ class ParserTest {
     var code =
         """
         module test;
-        type alias Uri = string;
+        type alias Uri string;
         """;
     var module = parseCode(code);
     assertEquals("test", module.getName());

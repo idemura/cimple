@@ -49,7 +49,7 @@ public class PrintAstVisitor extends AstVisitor {
 
   @Override
   protected Object visit(AstTypeAlias node) {
-    output.writeLine("TYPE ALIAS %s = %s".formatted(node.getName(), node.getBaseTypeRef()));
+    output.writeLine("TYPE ALIAS %s %s".formatted(node.getName(), node.getBaseTypeRef()));
     return null;
   }
 

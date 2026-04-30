@@ -143,7 +143,6 @@ public class Parser {
     var name = tokens.take(IDENTIFIER);
     type.setLocation(name.location());
     type.setName(new QualifiedName(name.value()));
-    tokens.take(ASSIGN);
     type.setBaseTypeRef(parseTypeRef());
     tokens.take(SEMICOLON);
     return type;
