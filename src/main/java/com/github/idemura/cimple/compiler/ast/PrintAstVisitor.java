@@ -119,6 +119,34 @@ public class PrintAstVisitor extends AstVisitor {
   }
 
   @Override
+  protected Object visit(AstFieldAccess node) {
+    output.writeLine("FIELD %s".formatted(node.getFieldName()));
+    output.indent();
+    node.getObject().accept(this);
+    output.unindent();
+    return null;
+  }
+
+  @Override
+  protected Object visit(AstBind node) {
+    output.writeLine("BIND %s".formatted(node.getFunctionName()));
+    output.indent();
+    node.getObject().accept(this);
+    output.unindent();
+    return null;
+  }
+
+  @Override
+  protected Object visit(AstArrayAccess node) {
+    output.writeLine("INDEX");
+    output.indent();
+    node.getArray().accept(this);
+    node.getIndex().accept(this);
+    output.unindent();
+    return null;
+  }
+
+  @Override
   protected Object visit(AstTypeCast node) {
     output.writeLine("CAST %s".formatted(node.getTypeRef()));
     output.indent();

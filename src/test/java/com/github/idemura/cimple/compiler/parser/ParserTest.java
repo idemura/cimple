@@ -4,7 +4,10 @@ import static org.junit.jupiter.api.Assertions.*;
 
 import com.github.idemura.cimple.compiler.CompilerException;
 import com.github.idemura.cimple.compiler.ast.AstApplyFunction;
+import com.github.idemura.cimple.compiler.ast.AstArrayAccess;
+import com.github.idemura.cimple.compiler.ast.AstBind;
 import com.github.idemura.cimple.compiler.ast.AstDefer;
+import com.github.idemura.cimple.compiler.ast.AstFieldAccess;
 import com.github.idemura.cimple.compiler.ast.AstFor;
 import com.github.idemura.cimple.compiler.ast.AstGoto;
 import com.github.idemura.cimple.compiler.ast.AstIf;
@@ -402,6 +405,62 @@ class ParserTest {
       assertEquals(2, apply.getArgs().size());
       assertEquals(AstLiteral.ofInt(1), apply.getArgs().get(0));
       assertEquals(AstLiteral.ofInt(2), apply.getArgs().get(1));
+    }
+  }
+
+  @Test
+  void testFieldArrayCallChain() {
+    var code =
+        """
+        module test;
+        function f() {
+          var x = foo.bar;
+          var x = foo:bar;
+          var x = foo[1];
+          var x = foo.bar(1, 2)[3]:baz;
+        }
+        """;
+    var module = parseCode(code);
+    var statements = module.functions().get(0).getBlock().statements();
+    assertEquals(4, statements.size());
+    int i = 0;
+    {
+      var expr = ((AstVariable) statements.get(i++)).getExpression();
+      var field = (AstFieldAccess) expr;
+      assertEquals(new AstNameRef("foo"), field.getObject());
+      assertEquals("bar", field.getFieldName());
+    }
+    {
+      var expr = ((AstVariable) statements.get(i++)).getExpression();
+      var bind = (AstBind) expr;
+      assertEquals(new AstNameRef("foo"), bind.getObject());
+      assertEquals("bar", bind.getFunctionName());
+    }
+    {
+      var expr = ((AstVariable) statements.get(i++)).getExpression();
+      var index = (AstArrayAccess) expr;
+      assertEquals(new AstNameRef("foo"), index.getArray());
+      assertEquals(AstLiteral.ofInt(1), index.getIndex());
+    }
+    {
+      var expr = ((AstVariable) statements.get(i++)).getExpression();
+      var bind = (AstBind) expr;
+      assertEquals("baz", bind.getFunctionName());
+      {
+        var index = (AstArrayAccess) bind.getObject();
+        assertEquals(AstLiteral.ofInt(3), index.getIndex());
+        {
+          var apply = (AstApplyFunction) index.getArray();
+          {
+            var field = (AstFieldAccess) apply.getFunction();
+            assertEquals(new AstNameRef("foo"), field.getObject());
+            assertEquals("bar", field.getFieldName());
+          }
+          assertEquals(2, apply.getArgs().size());
+          assertEquals(AstLiteral.ofInt(1), apply.getArgs().get(0));
+          assertEquals(AstLiteral.ofInt(2), apply.getArgs().get(1));
+        }
+      }
     }
   }
 

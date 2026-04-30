@@ -6,10 +6,13 @@ import static java.lang.Long.parseLong;
 
 import com.github.idemura.cimple.compiler.CompilerException;
 import com.github.idemura.cimple.compiler.ast.AstApplyFunction;
+import com.github.idemura.cimple.compiler.ast.AstArrayAccess;
+import com.github.idemura.cimple.compiler.ast.AstBind;
 import com.github.idemura.cimple.compiler.ast.AstBlock;
 import com.github.idemura.cimple.compiler.ast.AstDefer;
 import com.github.idemura.cimple.compiler.ast.AstExpression;
 import com.github.idemura.cimple.compiler.ast.AstExpressionStatement;
+import com.github.idemura.cimple.compiler.ast.AstFieldAccess;
 import com.github.idemura.cimple.compiler.ast.AstFor;
 import com.github.idemura.cimple.compiler.ast.AstFunction;
 import com.github.idemura.cimple.compiler.ast.AstFunctionHeader;
@@ -374,12 +377,33 @@ public class Parser {
 
   private AstExpression parseFieldArrayCallChain() {
     var expr = parsePrimary();
-    while (tokens.current().is(LPAREN)) {
-      var apply = new AstApplyFunction();
-      apply.setFunction(expr);
-      apply.setLocation(tokens.current().location());
-      apply.setArgs(parseExpressionList());
-      expr = apply;
+    while (true) {
+      var location = tokens.current().location();
+      if (tokens.takeIf(PERIOD)) {
+        var fieldAccess = new AstFieldAccess();
+        fieldAccess.setObject(expr);
+        fieldAccess.setFieldName(tokens.take(IDENTIFIER).value());
+        expr = fieldAccess;
+      } else if (tokens.takeIf(COLON)) {
+        var bind = new AstBind();
+        bind.setObject(expr);
+        bind.setFunctionName(tokens.take(IDENTIFIER).value());
+        expr = bind;
+      } else if (tokens.takeIf(LBRACKET)) {
+        var arrayAccess = new AstArrayAccess();
+        arrayAccess.setArray(expr);
+        arrayAccess.setIndex(parseExpression());
+        tokens.take(RBRACKET);
+        expr = arrayAccess;
+      } else if (tokens.current().is(LPAREN)) {
+        var apply = new AstApplyFunction();
+        apply.setFunction(expr);
+        apply.setArgs(parseExpressionList());
+        expr = apply;
+      } else {
+        break;
+      }
+      expr.setLocation(location);
     }
     return expr;
   }

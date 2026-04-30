@@ -19,6 +19,40 @@ public class AstRewriteExpressionVisitor extends AstVisitor {
   }
 
   @Override
+  protected Object visit(AstFieldAccess node) {
+    visitChildren(node);
+    return node;
+  }
+
+  @Override
+  protected void visitChildren(AstFieldAccess node) {
+    node.setObject(rewrite(node.getObject()));
+  }
+
+  @Override
+  protected Object visit(AstBind node) {
+    visitChildren(node);
+    return node;
+  }
+
+  @Override
+  protected void visitChildren(AstBind node) {
+    node.setObject(rewrite(node.getObject()));
+  }
+
+  @Override
+  protected Object visit(AstArrayAccess node) {
+    visitChildren(node);
+    return node;
+  }
+
+  @Override
+  protected void visitChildren(AstArrayAccess node) {
+    node.setArray(rewrite(node.getArray()));
+    node.setIndex(rewrite(node.getIndex()));
+  }
+
+  @Override
   protected Object visit(AstTypeCast node) {
     visitChildren(node);
     return node;
@@ -42,6 +76,7 @@ public class AstRewriteExpressionVisitor extends AstVisitor {
 
   @Override
   protected void visitChildren(AstApplyFunction node) {
+    node.setFunction(rewrite(node.getFunction()));
     node.setArgs(node.getArgs().stream().map(this::rewrite).toList());
   }
 

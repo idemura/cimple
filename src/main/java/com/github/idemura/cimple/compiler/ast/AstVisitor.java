@@ -91,6 +91,34 @@ public abstract class AstVisitor {
     return null;
   }
 
+  protected Object visit(AstFieldAccess node) {
+    visitChildren(node);
+    return null;
+  }
+
+  protected void visitChildren(AstFieldAccess node) {
+    node.getObject().accept(this);
+  }
+
+  protected Object visit(AstBind node) {
+    visitChildren(node);
+    return null;
+  }
+
+  protected void visitChildren(AstBind node) {
+    node.getObject().accept(this);
+  }
+
+  protected Object visit(AstArrayAccess node) {
+    visitChildren(node);
+    return null;
+  }
+
+  protected void visitChildren(AstArrayAccess node) {
+    node.getArray().accept(this);
+    node.getIndex().accept(this);
+  }
+
   protected Object visit(AstTypeCast node) {
     visitChildren(node);
     return null;

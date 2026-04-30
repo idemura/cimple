@@ -1,7 +1,8 @@
 package com.github.idemura.cimple.compiler.ast;
 
 public abstract sealed class AstExpression extends AstNode
-    permits AstApplyFunction, AstLiteral, AstNameRef, AstTypeCast {
+    permits AstApplyFunction,
+    AstArrayAccess, AstBind, AstFieldAccess, AstLiteral, AstNameRef, AstTypeCast {
   protected AstExpression() {}
 
   public abstract AstType getType();

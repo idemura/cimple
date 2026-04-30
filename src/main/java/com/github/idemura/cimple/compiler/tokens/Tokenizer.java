@@ -51,6 +51,7 @@ public class Tokenizer {
           case '}' -> tokens.add(take1CharToken(RCURLY));
           case ':' -> tokens.add(take1CharToken(COLON));
           case ',' -> tokens.add(take1CharToken(COMMA));
+          case '.' -> tokens.add(take1CharToken(PERIOD));
           case '=' -> tokens.add(take1CharToken(ASSIGN));
           case ';' -> tokens.add(take1CharToken(SEMICOLON));
           case '+' -> tokens.add(take1CharToken(PLUS));
