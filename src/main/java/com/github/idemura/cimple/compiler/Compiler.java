@@ -1,5 +1,6 @@
 package com.github.idemura.cimple.compiler;
 
+import com.github.idemura.cimple.common.ErrorConsumer;
 import com.github.idemura.cimple.common.IndentWriter;
 import com.github.idemura.cimple.compiler.ast.PrintAstVisitor;
 import com.github.idemura.cimple.compiler.codegen.CodeGenerator;
@@ -10,11 +11,17 @@ import com.github.idemura.cimple.compiler.tokens.Tokenizer;
 public class Compiler {
   private final CompilerParams params;
   private final IndentWriter debugOutput;
+  private final ErrorConsumer errorConsumer;
   private final CodeGenerator codeGenerator;
 
-  public Compiler(CompilerParams params, IndentWriter debugOutput, CodeGenerator codeGenerator) {
+  public Compiler(
+      CompilerParams params,
+      IndentWriter debugOutput,
+      ErrorConsumer errorConsumer,
+      CodeGenerator codeGenerator) {
     this.params = params;
     this.debugOutput = debugOutput;
+    this.errorConsumer = errorConsumer;
     this.codeGenerator = codeGenerator;
   }
 
@@ -29,7 +36,7 @@ public class Compiler {
       debugOutput.writeLine("Parse tree\n");
       new PrintAstVisitor(debugOutput).print(module);
     }
-    var analyzer = new SemanticAnalyzer();
+    var analyzer = new SemanticAnalyzer(errorConsumer);
     analyzer.analyze(module);
     if (params.printAst()) {
       debugOutput.writeLine("Analyzed\n");

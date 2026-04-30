@@ -2,6 +2,7 @@ package com.github.idemura.cimple.compiler.semantics;
 
 import static org.junit.jupiter.api.Assertions.*;
 
+import com.github.idemura.cimple.common.InMemoryErrorConsumer;
 import com.github.idemura.cimple.compiler.ast.AstBoolLiteral;
 import com.github.idemura.cimple.compiler.ast.AstDefer;
 import com.github.idemura.cimple.compiler.ast.AstExpressionStatement;
@@ -15,6 +16,8 @@ import com.github.idemura.cimple.compiler.tokens.Tokenizer;
 import org.junit.jupiter.api.Test;
 
 class PreprocessRewriteVisitorTest {
+  private final InMemoryErrorConsumer errorConsumer = new InMemoryErrorConsumer();
+
   @Test
   void testRewriteTrueFalseNullLiterals() {
     var code =
@@ -33,7 +36,7 @@ class PreprocessRewriteVisitorTest {
         """;
 
     var module = new Parser(new Tokenizer(code).split()).parse();
-    module.accept(new PreprocessRewriteVisitor());
+    module.accept(new PreprocessRewriteVisitor(errorConsumer));
 
     var statements = module.functions().get(0).getBlock().statements();
     int i = 0;

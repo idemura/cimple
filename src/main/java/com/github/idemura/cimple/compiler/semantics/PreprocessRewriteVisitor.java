@@ -3,6 +3,7 @@ package com.github.idemura.cimple.compiler.semantics;
 import static java.lang.Double.parseDouble;
 import static java.lang.Long.parseLong;
 
+import com.github.idemura.cimple.common.ErrorConsumer;
 import com.github.idemura.cimple.compiler.ast.AstBoolLiteral;
 import com.github.idemura.cimple.compiler.ast.AstLiteral;
 import com.github.idemura.cimple.compiler.ast.AstName;
@@ -14,7 +15,11 @@ import com.github.idemura.cimple.compiler.ast.AstTypeBuiltin;
 import com.github.idemura.cimple.compiler.ast.TypeRef;
 
 class PreprocessRewriteVisitor extends AstRewriteExpressionVisitor {
-  PreprocessRewriteVisitor() {}
+  private final ErrorConsumer errorConsumer;
+
+  PreprocessRewriteVisitor(ErrorConsumer errorConsumer) {
+    this.errorConsumer = errorConsumer;
+  }
 
   @Override
   protected Object visit(AstLiteral node) {
