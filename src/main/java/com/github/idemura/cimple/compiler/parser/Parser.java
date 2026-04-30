@@ -300,17 +300,17 @@ public class Parser {
   }
 
   private AstExpression parseExpression() {
-    return parseExpressionComparison();
+    return parseComparisonChain();
   }
 
-  private AstExpression parseExpressionComparison() {
-    var expr = parseExpressionAdditive();
+  private AstExpression parseComparisonChain() {
+    var expr = parseAdditiveChain();
     if (expr == null) {
       return null;
     }
     while (tokens.current().is(CMP_LT) || tokens.current().is(CMP_GT)) {
       var operator = tokens.take();
-      var m = parseExpressionAdditive();
+      var m = parseAdditiveChain();
       if (m == null) {
         throw CompilerException.builder()
             .formatMessage("Expected expression after %s", operator)
@@ -326,14 +326,14 @@ public class Parser {
     return expr;
   }
 
-  private AstExpression parseExpressionAdditive() {
-    var expr = parseExpressionMultiplicative();
+  private AstExpression parseAdditiveChain() {
+    var expr = parseMultiplicativeChain();
     if (expr == null) {
       return null;
     }
     while (tokens.current().is(PLUS) || tokens.current().is(MINUS)) {
       var operator = tokens.take();
-      var m = parseExpressionMultiplicative();
+      var m = parseMultiplicativeChain();
       if (m == null) {
         throw CompilerException.builder()
             .formatMessage("Expected expression after %s", operator)
@@ -349,14 +349,14 @@ public class Parser {
     return expr;
   }
 
-  private AstExpression parseExpressionMultiplicative() {
-    var expr = parseExpressionPostfix();
+  private AstExpression parseMultiplicativeChain() {
+    var expr = parseFieldArrayCallChain();
     if (expr == null) {
       return null;
     }
     while (tokens.current().is(ASTERISK) || tokens.current().is(SLASH)) {
       var operator = tokens.take();
-      var m = parseExpressionPostfix();
+      var m = parseFieldArrayCallChain();
       if (m == null) {
         throw CompilerException.builder()
             .formatMessage("Expected expression after %s", operator)
@@ -372,8 +372,8 @@ public class Parser {
     return expr;
   }
 
-  private AstExpression parseExpressionPostfix() {
-    var expr = parseExpressionPrimary();
+  private AstExpression parseFieldArrayCallChain() {
+    var expr = parsePrimary();
     while (tokens.current().is(LPAREN)) {
       var apply = new AstApplyFunction();
       apply.setFunction(expr);
@@ -384,7 +384,11 @@ public class Parser {
     return expr;
   }
 
-  private AstExpression parseExpressionPrimary() {
+  // Parses:
+  //  - (<expression>)
+  //  - [<expression> type <type_ref>]
+  //  - <name_ref> | <literal>
+  private AstExpression parsePrimary() {
     if (tokens.takeIf(LPAREN)) {
       var expr = parseExpression();
       tokens.take(RPAREN);
