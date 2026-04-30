@@ -10,8 +10,8 @@ public final class AstCast extends AstExpression {
   }
 
   @Override
-  public AstType getType() {
-    return typeRef.getType();
+  public TypeRef getType() {
+    return typeRef;
   }
 
   public AstExpression getExpression() {

@@ -31,8 +31,8 @@ public final class AstName extends AstExpression {
   }
 
   @Override
-  public AstType getType() {
-    return variable.getTypeRef().getType();
+  public TypeRef getType() {
+    return variable.getTypeRef();
   }
 
   public QualifiedName getName() {

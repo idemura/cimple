@@ -9,6 +9,7 @@ import com.github.idemura.cimple.compiler.ast.AstArrayAccess;
 import com.github.idemura.cimple.compiler.ast.AstBind;
 import com.github.idemura.cimple.compiler.ast.AstBlock;
 import com.github.idemura.cimple.compiler.ast.AstCall;
+import com.github.idemura.cimple.compiler.ast.AstCast;
 import com.github.idemura.cimple.compiler.ast.AstDefer;
 import com.github.idemura.cimple.compiler.ast.AstExpression;
 import com.github.idemura.cimple.compiler.ast.AstExpressionStatement;
@@ -26,7 +27,6 @@ import com.github.idemura.cimple.compiler.ast.AstStatement;
 import com.github.idemura.cimple.compiler.ast.AstType;
 import com.github.idemura.cimple.compiler.ast.AstTypeAlias;
 import com.github.idemura.cimple.compiler.ast.AstTypeBuiltin;
-import com.github.idemura.cimple.compiler.ast.AstCast;
 import com.github.idemura.cimple.compiler.ast.AstTypeFunction;
 import com.github.idemura.cimple.compiler.ast.AstTypeRecord;
 import com.github.idemura.cimple.compiler.ast.AstTypeUnion;
@@ -438,10 +438,10 @@ public class Parser {
         try {
           if (token.value().contains(".")) {
             expr.setValue(parseDouble(token.value()));
-            expr.setType(AstTypeBuiltin.FLOAT64);
+            expr.setType(TypeRef.of(AstTypeBuiltin.FLOAT64));
           } else {
             expr.setValue(parseLong(token.value()));
-            expr.setType(AstTypeBuiltin.INT64);
+            expr.setType(TypeRef.of(AstTypeBuiltin.INT64));
           }
         } catch (NumberFormatException e) {
           throw CompilerException.builder()
@@ -455,7 +455,7 @@ public class Parser {
       case STRING -> {
         var expr = new AstLiteral();
         expr.setValue(token.value());
-        expr.setType(AstTypeBuiltin.STRING);
+        expr.setType(TypeRef.of(AstTypeBuiltin.STRING));
         expr.setLocation(token.location());
         return expr;
       }
@@ -531,7 +531,7 @@ public class Parser {
   }
 
   private TypeRef parseTypeRef() {
-    return TypeRef.ofName(tokens.take(IDENTIFIER).value());
+    return TypeRef.of(tokens.take(IDENTIFIER).value());
   }
 
   private AstName operatorFunction(Token operator) {

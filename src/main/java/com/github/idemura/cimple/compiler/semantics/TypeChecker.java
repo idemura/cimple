@@ -1,8 +1,8 @@
 package com.github.idemura.cimple.compiler.semantics;
 
 import com.github.idemura.cimple.compiler.CompilerException;
-import com.github.idemura.cimple.compiler.ast.AstCall;
 import com.github.idemura.cimple.compiler.ast.AstBlock;
+import com.github.idemura.cimple.compiler.ast.AstCall;
 import com.github.idemura.cimple.compiler.ast.AstFor;
 import com.github.idemura.cimple.compiler.ast.AstFunction;
 import com.github.idemura.cimple.compiler.ast.AstIf;

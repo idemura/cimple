@@ -26,13 +26,10 @@ public class PrintAstVisitor extends AstVisitor {
   @Override
   protected Object visit(AstFunction node) {
     var header = node.getHeader();
-    printEntity(
-        "FUNCTION",
-        header.getName(),
-        header.getResultType() == null ? null : header.getResultType().getType());
+    printEntity("FUNCTION", header.getName(), header.getResultType());
     output.indent();
     for (var p : header.getParameters()) {
-      printEntity("ARG", p.getName(), p.getTypeRef().getType());
+      printEntity("ARG", p.getName(), p.getTypeRef());
     }
     node.getBlock().accept(this);
     output.unindent();
@@ -59,13 +56,10 @@ public class PrintAstVisitor extends AstVisitor {
   @Override
   protected Object visit(AstTypeFunction node) {
     var header = node.getHeader();
-    printEntity(
-        "TYPE FUNCTION",
-        node.getName(),
-        header.getResultType() == null ? null : header.getResultType().getType());
+    printEntity("TYPE FUNCTION", node.getName(), header.getResultType());
     output.indent();
     for (var p : header.getParameters()) {
-      printEntity("ARG", p.getName(), p.getTypeRef().getType());
+      printEntity("ARG", p.getName(), p.getTypeRef());
     }
     output.unindent();
     return null;
@@ -173,9 +167,7 @@ public class PrintAstVisitor extends AstVisitor {
   @Override
   protected Object visit(AstVariable node) {
     printEntity(
-        node.getBit(AstVariable.MUTABLE) ? "VAR" : "CONST",
-        node.getName(),
-        node.getTypeRef().getType());
+        node.getBit(AstVariable.MUTABLE) ? "VAR" : "CONST", node.getName(), node.getTypeRef());
     output.indent();
     if (node.getExpression() != null) {
       node.getExpression().accept(this);
@@ -257,7 +249,7 @@ public class PrintAstVisitor extends AstVisitor {
     return null;
   }
 
-  private void printEntity(String clazz, Object value, AstType type) {
+  private void printEntity(String clazz, Object value, TypeRef type) {
     if (type == null) {
       output.writeLine("%s %s".formatted(clazz, value));
     } else {

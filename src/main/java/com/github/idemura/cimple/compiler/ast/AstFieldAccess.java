@@ -10,7 +10,7 @@ public final class AstFieldAccess extends AstExpression {
   }
 
   @Override
-  public AstType getType() {
+  public TypeRef getType() {
     return null;
   }
 

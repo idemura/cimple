@@ -3,24 +3,21 @@ package com.github.idemura.cimple.compiler.ast;
 import java.util.Objects;
 
 public final class TypeRef {
-  private QualifiedName name;
+  private final QualifiedName name;
   private AstType type;
 
-  public static TypeRef ofName(String name) {
-    return new TypeRef(new QualifiedName(name), null);
-  }
-
-  public static TypeRef ofName(QualifiedName name) {
-    return new TypeRef(name, null);
+  public static TypeRef of(String name) {
+    return new TypeRef(new QualifiedName(name));
   }
 
   public static TypeRef of(AstType type) {
-    return new TypeRef(type.getName(), type);
+    var typeRef = new TypeRef(type.getName());
+    typeRef.setType(type);
+    return typeRef;
   }
 
-  private TypeRef(QualifiedName name, AstType type) {
+  public TypeRef(QualifiedName name) {
     this.name = name;
-    this.type = type;
   }
 
   @Override
@@ -38,16 +35,8 @@ public final class TypeRef {
     return "TYPE_REF(%s)".formatted(name);
   }
 
-  public QualifiedName getName() {
+  public QualifiedName name() {
     return name;
-  }
-
-  public void setName(String name) {
-    this.name = new QualifiedName(name);
-  }
-
-  public void setName(QualifiedName name) {
-    this.name = name;
   }
 
   public AstType getType() {

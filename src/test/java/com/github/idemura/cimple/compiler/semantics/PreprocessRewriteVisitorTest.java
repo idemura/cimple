@@ -10,6 +10,7 @@ import com.github.idemura.cimple.compiler.ast.AstLiteral;
 import com.github.idemura.cimple.compiler.ast.AstReturn;
 import com.github.idemura.cimple.compiler.ast.AstTypeBuiltin;
 import com.github.idemura.cimple.compiler.ast.AstVariable;
+import com.github.idemura.cimple.compiler.ast.TypeRef;
 import com.github.idemura.cimple.compiler.parser.Parser;
 import com.github.idemura.cimple.compiler.tokens.Tokenizer;
 import org.junit.jupiter.api.Test;
@@ -52,6 +53,6 @@ class PreprocessRewriteVisitorTest {
       assertSame(AstLiteral.FALSE, stmt.getIncrement());
     }
     assertSame(AstLiteral.TRUE, ((AstReturn) statements.get(i++)).getExpression());
-    assertEquals(AstTypeBuiltin.NULL, AstLiteral.NULL.getType());
+    assertEquals(TypeRef.of(AstTypeBuiltin.NULL), AstLiteral.NULL.getType());
   }
 }
