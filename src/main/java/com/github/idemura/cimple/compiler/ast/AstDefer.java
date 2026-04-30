@@ -1,7 +1,7 @@
 package com.github.idemura.cimple.compiler.ast;
 
 public final class AstDefer extends AstStatement {
-  private AstExpression expression;
+  private AstBlock block;
 
   public AstDefer() {}
 
@@ -10,11 +10,11 @@ public final class AstDefer extends AstStatement {
     return visitor.visit(this);
   }
 
-  public AstExpression getExpression() {
-    return expression;
+  public AstBlock getBlock() {
+    return block;
   }
 
-  public void setExpression(AstExpression expression) {
-    this.expression = expression;
+  public void setBlock(AstBlock block) {
+    this.block = block;
   }
 }

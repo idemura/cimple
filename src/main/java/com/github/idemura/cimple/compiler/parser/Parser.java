@@ -277,8 +277,17 @@ public class Parser {
     var stmt = new AstDefer();
     var keyword = tokens.takeKeyword(DEFER);
     stmt.setLocation(keyword.location());
-    stmt.setExpression(parseExpression());
-    tokens.take(SEMICOLON);
+    if (tokens.current().is(LCURLY)) {
+      stmt.setBlock(parseBlock());
+    } else {
+      var block = new AstBlock();
+      var exprStmt = new AstExpressionStatement();
+      exprStmt.setLocation(tokens.current().location());
+      exprStmt.setExpression(parseExpression());
+      tokens.take(SEMICOLON);
+      block.statements().add(exprStmt);
+      stmt.setBlock(block);
+    }
     return stmt;
   }
 

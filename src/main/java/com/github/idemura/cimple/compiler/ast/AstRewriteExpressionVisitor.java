@@ -73,7 +73,7 @@ public class AstRewriteExpressionVisitor extends AstVisitor {
 
   @Override
   protected void visitChildren(AstDefer node) {
-    node.setExpression(rewrite(node.getExpression()));
+    node.getBlock().accept(this);
   }
 
   private AstExpression rewrite(AstExpression expr) {

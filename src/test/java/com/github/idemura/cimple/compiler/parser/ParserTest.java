@@ -12,6 +12,7 @@ import com.github.idemura.cimple.compiler.ast.AstLiteral;
 import com.github.idemura.cimple.compiler.ast.AstModule;
 import com.github.idemura.cimple.compiler.ast.AstNameRef;
 import com.github.idemura.cimple.compiler.ast.AstReturn;
+import com.github.idemura.cimple.compiler.ast.AstExpressionStatement;
 import com.github.idemura.cimple.compiler.ast.AstTypeAlias;
 import com.github.idemura.cimple.compiler.ast.AstTypeCast;
 import com.github.idemura.cimple.compiler.ast.AstTypeFunction;
@@ -561,14 +562,25 @@ class ParserTest {
         module test;
         function f() {
           defer value;
+          defer {
+            value;
+          }
         }
         """;
     var module = parseCode(code);
     var statements = module.functions().get(0).getBlock().statements();
-    assertEquals(1, statements.size());
+    assertEquals(2, statements.size());
     {
       var stmt = (AstDefer) statements.get(0);
-      assertEquals(new AstNameRef("value"), stmt.getExpression());
+      assertEquals(1, stmt.getBlock().statements().size());
+      var exprStmt = (AstExpressionStatement) stmt.getBlock().statements().get(0);
+      assertEquals(new AstNameRef("value"), exprStmt.getExpression());
+    }
+    {
+      var stmt = (AstDefer) statements.get(1);
+      assertEquals(1, stmt.getBlock().statements().size());
+      var exprStmt = (AstExpressionStatement) stmt.getBlock().statements().get(0);
+      assertEquals(new AstNameRef("value"), exprStmt.getExpression());
     }
   }
 

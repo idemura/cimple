@@ -172,6 +172,6 @@ public abstract class AstVisitor {
   }
 
   protected void visitChildren(AstDefer node) {
-    node.getExpression().accept(this);
+    node.getBlock().accept(this);
   }
 }

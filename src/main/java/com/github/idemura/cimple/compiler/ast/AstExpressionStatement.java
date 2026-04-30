@@ -3,6 +3,12 @@ package com.github.idemura.cimple.compiler.ast;
 public final class AstExpressionStatement extends AstStatement {
   private AstExpression expression;
 
+  public static AstExpressionStatement of(AstExpression expression) {
+    var stmt = new AstExpressionStatement();
+    stmt.setExpression(expression);
+    return stmt;
+  }
+
   public AstExpressionStatement() {}
 
   @Override

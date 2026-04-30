@@ -215,7 +215,7 @@ public class PrintAstVisitor extends AstVisitor {
   protected Object visit(AstDefer node) {
     output.writeLine("DEFER");
     output.indent();
-    node.getExpression().accept(this);
+    node.getBlock().accept(this);
     output.unindent();
     return null;
   }
