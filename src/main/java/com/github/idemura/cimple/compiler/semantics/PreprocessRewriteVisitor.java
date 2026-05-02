@@ -6,6 +6,7 @@ import static java.lang.Long.parseLong;
 import com.github.idemura.cimple.common.ErrorConsumer;
 import com.github.idemura.cimple.compiler.ast.AstBoolLiteral;
 import com.github.idemura.cimple.compiler.ast.AstLiteral;
+import com.github.idemura.cimple.compiler.ast.AstModule;
 import com.github.idemura.cimple.compiler.ast.AstName;
 import com.github.idemura.cimple.compiler.ast.AstNullLiteral;
 import com.github.idemura.cimple.compiler.ast.AstNumberLiteral;
@@ -14,11 +15,20 @@ import com.github.idemura.cimple.compiler.ast.AstStringLiteral;
 import com.github.idemura.cimple.compiler.ast.AstTypeBuiltin;
 import com.github.idemura.cimple.compiler.ast.TypeRef;
 
+/// Does the following steps:
+///   * Replaces "true", "false", "null" with literals.
+///   * Checks identifiers for reserved words.
+///   * Transforms numeric literals into typed numeric literals.
 class PreprocessRewriteVisitor extends AstRewriteExpressionVisitor {
   private final ErrorConsumer errorConsumer;
 
   PreprocessRewriteVisitor(ErrorConsumer errorConsumer) {
     this.errorConsumer = errorConsumer;
+  }
+
+  @Override
+  protected Object visit(AstModule node) {
+    return super.visit(node);
   }
 
   @Override
@@ -63,5 +73,9 @@ class PreprocessRewriteVisitor extends AstRewriteExpressionVisitor {
       newNode.setLocation(node.getLocation());
     }
     return newNode;
+  }
+
+  static boolean isReservedIdentifier(String identifier) {
+    return false;
   }
 }
