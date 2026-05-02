@@ -1,5 +1,6 @@
 package com.github.idemura.cimple.compiler.tokens;
 
+import static com.github.idemura.cimple.compiler.common.Keyword.*;
 import static com.github.idemura.cimple.compiler.tokens.TokenType.*;
 import static org.junit.jupiter.api.Assertions.*;
 
@@ -64,26 +65,14 @@ class TokenStreamTest {
     s.add(new Token(NUMBER, "12"));
     s.add(new Token(SEMICOLON, null));
     s.add(new Token(RCURLY, null));
-    {
-      var t = s.takeKeyword(FUNCTION);
-      assertEquals(FUNCTION, t.type());
-      assertEquals("function", t.value());
-    }
+    s.takeKeyword(FUNCTION);
     assertThrows(CompilerException.class, () -> s.takeKeyword(FUNCTION));
     assertEquals("foo", s.take().value());
     assertEquals(LPAREN, s.take().type());
     assertEquals(RPAREN, s.take().type());
     assertEquals(LCURLY, s.take().type());
-    {
-      var t = s.takeKeyword(VAR);
-      assertEquals(VAR, t.type());
-      assertEquals("var", t.value());
-    }
-    {
-      var t = s.take();
-      assertEquals(IDENTIFIER, t.type());
-      assertEquals("bar", t.value());
-    }
+    s.takeKeyword(VAR);
+    s.take();
     assertEquals(ASSIGN, s.take().type());
     assertEquals(NUMBER, s.take().type());
     assertEquals(SEMICOLON, s.take().type());

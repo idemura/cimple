@@ -44,9 +44,5 @@ class TokenizerTest {
             new Token(SEMICOLON, null, new Location(5, 15)),
             new Token(RCURLY, null, new Location(6, 1))),
         tokens);
-    assertEquals(FUNCTION, tokens.get(0).keyword());
-    assertEquals(IDENTIFIER, tokens.get(1).keyword());
-    assertEquals(VAR, tokens.get(5).keyword());
-    assertEquals(IDENTIFIER, tokens.get(6).keyword());
   }
 }

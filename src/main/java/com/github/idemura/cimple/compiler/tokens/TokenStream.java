@@ -1,6 +1,8 @@
 package com.github.idemura.cimple.compiler.tokens;
 
 import com.github.idemura.cimple.compiler.CompilerException;
+import com.github.idemura.cimple.compiler.Location;
+import com.github.idemura.cimple.compiler.common.Keyword;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -47,23 +49,23 @@ public class TokenStream {
     return true;
   }
 
-  public Token takeKeyword(TokenType type) {
+  public Location takeKeyword(Keyword keyword) {
     var token = tokens.get(pos);
     var kw = token.keyword();
-    if (kw != type) {
+    if (kw != keyword) {
       throw CompilerException.builder()
-          .formatMessage("Expected token %s, got %s", type, token)
+          .formatMessage("Expected '%s', got %s", keyword.symbolName(), token)
           .setLocation(token.location())
           .build();
     }
     pos++;
-    return new Token(type, token.value(), token.location());
+    return token.location();
   }
 
-  public boolean takeKeywordIf(TokenType type) {
+  public boolean takeKeywordIf(Keyword keyword) {
     var token = tokens.get(pos);
-    var kw = token.keyword();
-    if (kw != type) {
+    var kw = token.keywordOrNull();
+    if (kw != keyword) {
       return false;
     }
     pos++;

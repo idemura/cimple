@@ -1,5 +1,6 @@
 package com.github.idemura.cimple.compiler.parser;
 
+import static com.github.idemura.cimple.compiler.common.Keyword.*;
 import static com.github.idemura.cimple.compiler.tokens.TokenType.*;
 
 import com.github.idemura.cimple.compiler.CompilerException;
@@ -203,8 +204,11 @@ public class Parser {
   }
 
   private AstStatement parseStatement() {
-    var current = tokens.current();
-    return switch (current.keyword()) {
+    var keyword = tokens.current().keywordOrNull();
+    if (keyword == null) {
+      return parseExpressionStatement();
+    }
+    return switch (keyword) {
       case VAR -> parseVariable(true);
       case CONST -> parseVariable(false);
       case RETURN -> parseReturn();
@@ -213,14 +217,18 @@ public class Parser {
       case DEFER -> parseDefer();
       case MATCH -> throw new UnsupportedOperationException();
       case GOTO -> parseGoto();
-      default -> parseExpressionStatement();
+      default ->
+          throw CompilerException.builder()
+              .formatMessage("Statement starts with unexpected keyword '%s'", keyword.symbolName())
+              .setLocation(tokens.current().location())
+              .build();
     };
   }
 
   private AstStatement parseReturn() {
     var stmt = new AstReturn();
-    var keyword = tokens.takeKeyword(RETURN);
-    stmt.setLocation(keyword.location());
+    var location = tokens.takeKeyword(RETURN);
+    stmt.setLocation(location);
     stmt.setExpression(parseExpression());
     tokens.take(SEMICOLON);
     return stmt;
@@ -228,8 +236,8 @@ public class Parser {
 
   private AstStatement parseIf() {
     var stmt = new AstIf();
-    var keyword = tokens.takeKeyword(IF);
-    stmt.setLocation(keyword.location());
+    var location = tokens.takeKeyword(IF);
+    stmt.setLocation(location);
     var conditions = new ImmutableList.Builder<AstExpression>();
     var thenBlocks = new ImmutableList.Builder<AstBlock>();
     conditions.add(parseExpression());
@@ -250,9 +258,9 @@ public class Parser {
 
   private AstStatement parseFor() {
     var stmt = new AstFor();
-    var keyword = tokens.takeKeyword(FOR);
-    stmt.setLocation(keyword.location());
-    if (tokens.current().keyword() == VAR) {
+    var location = tokens.takeKeyword(FOR);
+    stmt.setLocation(location);
+    if (tokens.current().keywordOrNull() == VAR) {
       stmt.setInit(parseVariable(true));
     }
     // Condition must be present, even if simple "true".
@@ -266,8 +274,8 @@ public class Parser {
 
   private AstStatement parseGoto() {
     var stmt = new AstGoto();
-    var keyword = tokens.takeKeyword(GOTO);
-    stmt.setLocation(keyword.location());
+    var location = tokens.takeKeyword(GOTO);
+    stmt.setLocation(location);
     stmt.setLabel(tokens.take(IDENTIFIER).value());
     tokens.take(SEMICOLON);
     return stmt;
@@ -275,16 +283,16 @@ public class Parser {
 
   private AstStatement parseDefer() {
     var stmt = new AstDefer();
-    var keyword = tokens.takeKeyword(DEFER);
-    stmt.setLocation(keyword.location());
+    var location = tokens.takeKeyword(DEFER);
+    stmt.setLocation(location);
     if (tokens.current().is(LCURLY)) {
       stmt.setBlock(parseBlock());
     } else {
-      var block = new AstBlock();
       var exprStmt = new AstExpressionStatement();
       exprStmt.setLocation(tokens.current().location());
       exprStmt.setExpression(parseExpression());
       tokens.take(SEMICOLON);
+      var block = new AstBlock();
       block.statements().add(exprStmt);
       stmt.setBlock(block);
     }
@@ -418,7 +426,7 @@ public class Parser {
     if (tokens.takeIf(LBRACKET)) {
       var expr = new AstCast();
       expr.setExpression(parseExpression());
-      expr.setLocation(tokens.takeKeyword(TYPE).location());
+      expr.setLocation(tokens.takeKeyword(TYPE));
       expr.setTypeRef(parseTypeRef());
       tokens.take(RBRACKET);
       return expr;

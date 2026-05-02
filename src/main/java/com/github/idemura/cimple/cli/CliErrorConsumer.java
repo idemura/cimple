@@ -1,11 +1,12 @@
-package com.github.idemura.cimple.common;
+package com.github.idemura.cimple.cli;
 
 import com.github.idemura.cimple.compiler.Location;
+import com.github.idemura.cimple.compiler.common.ErrorConsumer;
 
-public class StdErrConsumer implements ErrorConsumer {
+public class CliErrorConsumer implements ErrorConsumer {
   private int errorCount;
 
-  public StdErrConsumer() {}
+  public CliErrorConsumer() {}
 
   @Override
   public void error(Location location, String message, Object... args) {

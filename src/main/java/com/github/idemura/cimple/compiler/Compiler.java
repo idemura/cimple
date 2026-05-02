@@ -1,9 +1,9 @@
 package com.github.idemura.cimple.compiler;
 
-import com.github.idemura.cimple.common.ErrorConsumer;
 import com.github.idemura.cimple.common.IndentWriter;
 import com.github.idemura.cimple.compiler.ast.PrintAstVisitor;
 import com.github.idemura.cimple.compiler.codegen.CodeGenerator;
+import com.github.idemura.cimple.compiler.common.ErrorConsumer;
 import com.github.idemura.cimple.compiler.parser.Parser;
 import com.github.idemura.cimple.compiler.semantics.SemanticAnalyzer;
 import com.github.idemura.cimple.compiler.tokens.Tokenizer;

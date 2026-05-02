@@ -4,7 +4,6 @@ import com.beust.jcommander.JCommander;
 import com.beust.jcommander.Parameter;
 import com.github.idemura.cimple.common.CimpleException;
 import com.github.idemura.cimple.common.IndentWriter;
-import com.github.idemura.cimple.common.StdErrConsumer;
 import com.github.idemura.cimple.compiler.Compiler;
 import com.github.idemura.cimple.compiler.CompilerException;
 import com.github.idemura.cimple.compiler.CompilerParams;
@@ -108,7 +107,7 @@ public class CimpleCli implements CompilerParams {
 
   boolean compile(String fileName, String code) {
     try {
-      new Compiler(this, getDebugOutput(), new StdErrConsumer(), new NoopCodeGenerator())
+      new Compiler(this, getDebugOutput(), new CliErrorConsumer(), new NoopCodeGenerator())
           .compile(fileName, code);
     } catch (CompilerException e) {
       getErrorOutput().writeLine(e.getMessage());

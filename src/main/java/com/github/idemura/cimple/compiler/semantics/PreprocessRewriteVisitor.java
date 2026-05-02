@@ -3,7 +3,6 @@ package com.github.idemura.cimple.compiler.semantics;
 import static java.lang.Double.parseDouble;
 import static java.lang.Long.parseLong;
 
-import com.github.idemura.cimple.common.ErrorConsumer;
 import com.github.idemura.cimple.compiler.ast.AstBoolLiteral;
 import com.github.idemura.cimple.compiler.ast.AstLiteral;
 import com.github.idemura.cimple.compiler.ast.AstModule;
@@ -14,6 +13,7 @@ import com.github.idemura.cimple.compiler.ast.AstRewriteExpressionVisitor;
 import com.github.idemura.cimple.compiler.ast.AstStringLiteral;
 import com.github.idemura.cimple.compiler.ast.AstTypeBuiltin;
 import com.github.idemura.cimple.compiler.ast.TypeRef;
+import com.github.idemura.cimple.compiler.common.ErrorConsumer;
 
 /// Does the following steps:
 ///   * Replaces "true", "false", "null" with literals.

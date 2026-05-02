@@ -1,6 +1,7 @@
 package com.github.idemura.cimple.common;
 
 import com.github.idemura.cimple.compiler.Location;
+import com.github.idemura.cimple.compiler.common.ErrorConsumer;
 import java.util.ArrayList;
 import java.util.List;
 
