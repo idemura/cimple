@@ -42,15 +42,13 @@ class PreprocessVisitor extends AstRewriteExpressionVisitor {
     checkName(node.getName(), node.getLocation());
     var moduleName = node.getName();
     for (var definition : node.definitions()) {
-      if (definition instanceof AstType type) {
-        type.getName().setModuleName(moduleName);
-      } else if (definition instanceof AstFunction function) {
-        function.getHeader().getName().setModuleName(moduleName);
-      } else if (definition instanceof AstVariable variable) {
-        variable.getName().setModuleName(moduleName);
-      } else {
-        throw new IllegalArgumentException(
-            "Unsupported module definition: %s".formatted(definition));
+      switch (definition) {
+        case AstType type -> type.getName().setModuleName(moduleName);
+        case AstFunction function -> function.getHeader().getName().setModuleName(moduleName);
+        case AstVariable variable -> variable.getName().setModuleName(moduleName);
+        default ->
+            throw new IllegalArgumentException(
+                "Unsupported module definition: %s".formatted(definition));
       }
     }
     return super.visit(node);
