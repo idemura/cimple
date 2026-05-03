@@ -9,14 +9,8 @@ public abstract class AstVisitor {
   }
 
   protected void visitChildren(AstModule node) {
-    for (var t : node.types()) {
-      t.accept(this);
-    }
-    for (var v : node.variables()) {
-      v.accept(this);
-    }
-    for (var f : node.functions()) {
-      f.accept(this);
+    for (var definition : node.definitions()) {
+      definition.accept(this);
     }
   }
 

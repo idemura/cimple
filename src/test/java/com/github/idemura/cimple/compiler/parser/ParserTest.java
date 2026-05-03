@@ -11,12 +11,15 @@ import com.github.idemura.cimple.compiler.ast.AstDefer;
 import com.github.idemura.cimple.compiler.ast.AstExpressionStatement;
 import com.github.idemura.cimple.compiler.ast.AstFieldAccess;
 import com.github.idemura.cimple.compiler.ast.AstFor;
+import com.github.idemura.cimple.compiler.ast.AstFunction;
 import com.github.idemura.cimple.compiler.ast.AstGoto;
 import com.github.idemura.cimple.compiler.ast.AstIf;
 import com.github.idemura.cimple.compiler.ast.AstModule;
 import com.github.idemura.cimple.compiler.ast.AstName;
+import com.github.idemura.cimple.compiler.ast.AstNode;
 import com.github.idemura.cimple.compiler.ast.AstNumberLiteral;
 import com.github.idemura.cimple.compiler.ast.AstReturn;
+import com.github.idemura.cimple.compiler.ast.AstType;
 import com.github.idemura.cimple.compiler.ast.AstTypeAlias;
 import com.github.idemura.cimple.compiler.ast.AstTypeFunction;
 import com.github.idemura.cimple.compiler.ast.AstTypeRecord;
@@ -27,11 +30,33 @@ import com.github.idemura.cimple.compiler.ast.TypeRef;
 import com.github.idemura.cimple.compiler.ast.UnionVariant;
 import com.github.idemura.cimple.compiler.tokens.Tokenizer;
 import com.google.common.collect.ImmutableList;
+import java.util.List;
 import org.junit.jupiter.api.Test;
 
 class ParserTest {
   private AstModule parseCode(String code) {
     return new Parser(new Tokenizer(code).split()).parse();
+  }
+
+  private static List<AstFunction> functions(AstModule module) {
+    return module.definitions().stream()
+        .filter(AstFunction.class::isInstance)
+        .map(AstFunction.class::cast)
+        .toList();
+  }
+
+  private static List<AstType> types(AstModule module) {
+    return module.definitions().stream()
+        .filter(AstType.class::isInstance)
+        .map(AstType.class::cast)
+        .toList();
+  }
+
+  private static List<AstVariable> variables(AstModule module) {
+    return module.definitions().stream()
+        .filter(AstVariable.class::isInstance)
+        .map(AstVariable.class::cast)
+        .toList();
   }
 
   @Test
@@ -55,7 +80,7 @@ class ParserTest {
         """;
     var module = parseCode(code);
     assertEquals("test", module.getName());
-    var functions = module.functions();
+    var functions = functions(module);
     assertEquals(4, functions.size());
     {
       var f = functions.get(0);
@@ -86,7 +111,7 @@ class ParserTest {
       assertEquals(TypeRef.of("int"), f.getHeader().getResultType());
       assertEquals(ImmutableList.of(), f.getHeader().getParameters());
     }
-    var variables = module.variables();
+    var variables = variables(module);
     assertEquals(4, variables.size());
     {
       var v = variables.get(0);
@@ -130,7 +155,7 @@ class ParserTest {
         """;
     var module = parseCode(code);
     assertEquals("test", module.getName());
-    var types = module.types();
+    var types = types(module);
     assertEquals(2, types.size());
     {
       var type = (AstTypeRecord) types.get(0);
@@ -173,7 +198,7 @@ class ParserTest {
         """;
     var module = parseCode(code);
     assertEquals("test", module.getName());
-    var types = module.types();
+    var types = types(module);
     assertEquals(1, types.size());
     var type = (AstTypeAlias) types.get(0);
     assertEquals(new QualifiedName("Uri"), type.getName());
@@ -192,7 +217,7 @@ class ParserTest {
         """;
     var module = parseCode(code);
     assertEquals("test", module.getName());
-    var types = module.types();
+    var types = types(module);
     assertEquals(1, types.size());
     var type = (AstTypeUnion) types.get(0);
     assertEquals(new QualifiedName("Option"), type.getName());
@@ -212,7 +237,7 @@ class ParserTest {
         """;
     var module = parseCode(code);
     assertEquals("test", module.getName());
-    var types = module.types();
+    var types = types(module);
     assertEquals(3, types.size());
     {
       var type = (AstTypeFunction) types.get(0);
@@ -255,7 +280,7 @@ class ParserTest {
         }
         """;
     var module = parseCode(code);
-    var statements = module.functions().get(0).getBlock().statements();
+    var statements = functions(module).get(0).getBlock().statements();
     assertEquals(9, statements.size());
     int i = 0;
     {
@@ -383,7 +408,7 @@ class ParserTest {
         }
         """;
     var module = parseCode(code);
-    var statements = module.functions().get(0).getBlock().statements();
+    var statements = functions(module).get(0).getBlock().statements();
     assertEquals(3, statements.size());
     int i = 0;
     {
@@ -421,7 +446,7 @@ class ParserTest {
         }
         """;
     var module = parseCode(code);
-    var statements = module.functions().get(0).getBlock().statements();
+    var statements = functions(module).get(0).getBlock().statements();
     assertEquals(4, statements.size());
     int i = 0;
     {
@@ -482,7 +507,7 @@ class ParserTest {
         }
         """;
     var module = parseCode(code);
-    var statements = module.functions().get(0).getBlock().statements();
+    var statements = functions(module).get(0).getBlock().statements();
     assertEquals(3, statements.size());
     int i = 0;
     {
@@ -525,7 +550,7 @@ class ParserTest {
         }
         """;
     var module = parseCode(code);
-    var statements = module.functions().get(0).getBlock().statements();
+    var statements = functions(module).get(0).getBlock().statements();
     assertEquals(3, statements.size());
     int i = 0;
     {
@@ -606,7 +631,7 @@ class ParserTest {
         }
         """;
     var module = parseCode(code);
-    var statements = module.functions().get(0).getBlock().statements();
+    var statements = functions(module).get(0).getBlock().statements();
     assertEquals(1, statements.size());
     {
       var stmt = (AstReturn) statements.get(0);
@@ -627,7 +652,7 @@ class ParserTest {
         }
         """;
     var module = parseCode(code);
-    var statements = module.functions().get(0).getBlock().statements();
+    var statements = functions(module).get(0).getBlock().statements();
     assertEquals(2, statements.size());
     {
       var stmt = (AstDefer) statements.get(0);

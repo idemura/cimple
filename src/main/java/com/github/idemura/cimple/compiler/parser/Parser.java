@@ -61,16 +61,16 @@ public class Parser {
       var token = tokens.current();
       switch (token.keyword()) {
         case FUNCTION:
-          module.functions().add(parseFunction());
+          module.definitions().add(parseFunction());
           break;
         case TYPE:
-          module.types().add(parseType());
+          module.definitions().add(parseType());
           break;
         case VAR:
-          module.variables().add(parseVariable(true));
+          module.definitions().add(parseVariable(true));
           break;
         case CONST:
-          module.variables().add(parseVariable(false));
+          module.definitions().add(parseVariable(false));
           break;
         default:
           throw CompilerException.builder()

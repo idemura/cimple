@@ -7,7 +7,9 @@ import com.github.idemura.cimple.compiler.ast.AstBoolLiteral;
 import com.github.idemura.cimple.compiler.ast.AstDefer;
 import com.github.idemura.cimple.compiler.ast.AstExpressionStatement;
 import com.github.idemura.cimple.compiler.ast.AstFor;
+import com.github.idemura.cimple.compiler.ast.AstFunction;
 import com.github.idemura.cimple.compiler.ast.AstIf;
+import com.github.idemura.cimple.compiler.ast.AstModule;
 import com.github.idemura.cimple.compiler.ast.AstNullLiteral;
 import com.github.idemura.cimple.compiler.ast.AstReturn;
 import com.github.idemura.cimple.compiler.ast.AstVariable;
@@ -15,9 +17,17 @@ import com.github.idemura.cimple.compiler.common.ErrorConsumer;
 import com.github.idemura.cimple.compiler.parser.Parser;
 import com.github.idemura.cimple.compiler.tokens.Tokenizer;
 import com.google.common.collect.ImmutableList;
+import java.util.List;
 import org.junit.jupiter.api.Test;
 
 class PreprocessRewriteVisitorTest {
+  private static List<AstFunction> functions(AstModule module) {
+    return module.definitions().stream()
+        .filter(AstFunction.class::isInstance)
+        .map(AstFunction.class::cast)
+        .toList();
+  }
+
   @Test
   void testRewriteTrueFalseNullLiterals() {
     var errorConsumer = new InMemoryErrorConsumer();
@@ -39,7 +49,7 @@ class PreprocessRewriteVisitorTest {
     var module = new Parser(new Tokenizer(code).split()).parse();
     module.accept(new PreprocessRewriteVisitor(errorConsumer));
 
-    var statements = module.functions().get(0).getBlock().statements();
+    var statements = functions(module).get(0).getBlock().statements();
     int i = 0;
     assertEquals(new AstBoolLiteral(true), ((AstIf) statements.get(i++)).getConditions().get(0));
     {
@@ -84,12 +94,12 @@ class PreprocessRewriteVisitorTest {
     assertEquals(
         ImmutableList.of(
             "Reserved word cannot be used as a name: if",
-            "Reserved type name cannot be used as a type name: int",
-            "Reserved type name cannot be used as a type name: byte",
-            "Reserved type name cannot be used as a type name: string",
             "Reserved word cannot be used as a name: return",
             "Reserved word cannot be used as a name: else",
-            "Reserved word cannot be used as a name: true"),
+            "Reserved word cannot be used as a name: true",
+            "Reserved type name cannot be used as a type name: int",
+            "Reserved type name cannot be used as a type name: byte",
+            "Reserved type name cannot be used as a type name: string"),
         errorConsumer.getErrors().stream().map(ErrorConsumer.Error::message).toList());
   }
 }

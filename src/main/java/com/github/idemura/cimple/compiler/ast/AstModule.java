@@ -4,10 +4,8 @@ import java.util.ArrayList;
 import java.util.List;
 
 public final class AstModule extends AstNode {
+  private final List<AstNode> definitions = new ArrayList<>();
   private String name;
-  private final List<AstFunction> functions = new ArrayList<>();
-  private final List<AstType> types = new ArrayList<>();
-  private final List<AstVariable> variables = new ArrayList<>();
 
   public AstModule() {
     super();
@@ -26,15 +24,7 @@ public final class AstModule extends AstNode {
     return visitor.visit(this);
   }
 
-  public List<AstFunction> functions() {
-    return functions;
-  }
-
-  public List<AstType> types() {
-    return types;
-  }
-
-  public List<AstVariable> variables() {
-    return variables;
+  public List<AstNode> definitions() {
+    return definitions;
   }
 }
