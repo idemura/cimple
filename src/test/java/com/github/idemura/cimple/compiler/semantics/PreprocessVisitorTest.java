@@ -20,7 +20,7 @@ import com.google.common.collect.ImmutableList;
 import java.util.List;
 import org.junit.jupiter.api.Test;
 
-class PreprocessRewriteVisitorTest {
+class PreprocessVisitorTest {
   private static List<AstFunction> functions(AstModule module) {
     return module.definitions().stream()
         .filter(AstFunction.class::isInstance)
@@ -47,7 +47,7 @@ class PreprocessRewriteVisitorTest {
         """;
 
     var module = new Parser(new Tokenizer(code).split()).parse();
-    module.accept(new PreprocessRewriteVisitor(errorConsumer));
+    module.accept(new PreprocessVisitor(errorConsumer));
 
     var statements = functions(module).get(0).getBlock().statements();
     int i = 0;
@@ -89,7 +89,7 @@ class PreprocessRewriteVisitorTest {
         """;
 
     var module = new Parser(new Tokenizer(code).split()).parse();
-    module.accept(new PreprocessRewriteVisitor(errorConsumer));
+    module.accept(new PreprocessVisitor(errorConsumer));
 
     assertEquals(
         ImmutableList.of(

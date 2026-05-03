@@ -14,17 +14,8 @@ public final class ReservedWords {
           .addAll(RESERVED_WORDS)
           .addAll(TYPE_DECLARATION_NAMES)
           .add(
-              "bool",
-              "byte",
-              "char",
-              "float",
-              "float32",
-              "float64",
-              "int",
-              "int32",
-              "int64",
-              "string",
-              "void")
+              "bool", "byte", "char", "float", "float32", "float64", "int", "int32", "int64",
+              "string", "void")
           .build();
 
   private ReservedWords() {}

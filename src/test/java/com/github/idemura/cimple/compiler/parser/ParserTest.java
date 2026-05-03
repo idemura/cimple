@@ -16,7 +16,6 @@ import com.github.idemura.cimple.compiler.ast.AstGoto;
 import com.github.idemura.cimple.compiler.ast.AstIf;
 import com.github.idemura.cimple.compiler.ast.AstModule;
 import com.github.idemura.cimple.compiler.ast.AstName;
-import com.github.idemura.cimple.compiler.ast.AstNode;
 import com.github.idemura.cimple.compiler.ast.AstNumberLiteral;
 import com.github.idemura.cimple.compiler.ast.AstReturn;
 import com.github.idemura.cimple.compiler.ast.AstType;

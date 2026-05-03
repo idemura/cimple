@@ -15,6 +15,7 @@ import com.github.idemura.cimple.compiler.ast.AstNullLiteral;
 import com.github.idemura.cimple.compiler.ast.AstNumberLiteral;
 import com.github.idemura.cimple.compiler.ast.AstRewriteExpressionVisitor;
 import com.github.idemura.cimple.compiler.ast.AstStringLiteral;
+import com.github.idemura.cimple.compiler.ast.AstType;
 import com.github.idemura.cimple.compiler.ast.AstTypeAlias;
 import com.github.idemura.cimple.compiler.ast.AstTypeBuiltin;
 import com.github.idemura.cimple.compiler.ast.AstTypeFunction;
@@ -29,16 +30,29 @@ import com.github.idemura.cimple.compiler.common.ErrorConsumer;
 ///   * Replaces "true", "false", "null" with literals.
 ///   * Checks identifiers for reserved words.
 ///   * Transforms numeric literals into typed numeric literals.
-class PreprocessRewriteVisitor extends AstRewriteExpressionVisitor {
+class PreprocessVisitor extends AstRewriteExpressionVisitor {
   private final ErrorConsumer errorConsumer;
 
-  PreprocessRewriteVisitor(ErrorConsumer errorConsumer) {
+  PreprocessVisitor(ErrorConsumer errorConsumer) {
     this.errorConsumer = errorConsumer;
   }
 
   @Override
   protected Object visit(AstModule node) {
     checkName(node.getName(), node.getLocation());
+    var moduleName = node.getName();
+    for (var definition : node.definitions()) {
+      if (definition instanceof AstType type) {
+        type.getName().setModuleName(moduleName);
+      } else if (definition instanceof AstFunction function) {
+        function.getHeader().getName().setModuleName(moduleName);
+      } else if (definition instanceof AstVariable variable) {
+        variable.getName().setModuleName(moduleName);
+      } else {
+        throw new IllegalArgumentException(
+            "Unsupported module definition: %s".formatted(definition));
+      }
+    }
     return super.visit(node);
   }
 
@@ -136,7 +150,6 @@ class PreprocessRewriteVisitor extends AstRewriteExpressionVisitor {
   }
 
   private void checkName(QualifiedName name, Location location) {
-    checkName(name.getModuleName(), location);
     checkName(name.name(), location);
   }
 

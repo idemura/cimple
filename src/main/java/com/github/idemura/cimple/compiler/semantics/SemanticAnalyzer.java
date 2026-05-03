@@ -11,7 +11,7 @@ public class SemanticAnalyzer {
   }
 
   public void analyze(AstModule module) {
-    module.accept(new PreprocessRewriteVisitor(errorConsumer));
+    module.accept(new PreprocessVisitor(errorConsumer));
     module.accept(new TypeChecker());
   }
 }
