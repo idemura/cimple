@@ -11,7 +11,8 @@ public class SemanticAnalyzer {
   }
 
   public void analyze(AstModule module) {
-    module.accept(new PreprocessVisitor(errorConsumer));
+    var nameMap = new NameMap();
+    module.accept(new PreprocessVisitor(nameMap, errorConsumer));
     module.accept(new TypeChecker());
   }
 }

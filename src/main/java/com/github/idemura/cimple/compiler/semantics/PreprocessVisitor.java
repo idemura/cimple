@@ -31,9 +31,11 @@ import com.github.idemura.cimple.compiler.common.ErrorConsumer;
 ///   * Checks identifiers for reserved words.
 ///   * Transforms numeric literals into typed numeric literals.
 class PreprocessVisitor extends AstRewriteExpressionVisitor {
+  private final NameMap nameMap;
   private final ErrorConsumer errorConsumer;
 
-  PreprocessVisitor(ErrorConsumer errorConsumer) {
+  PreprocessVisitor(NameMap nameMap, ErrorConsumer errorConsumer) {
+    this.nameMap = nameMap;
     this.errorConsumer = errorConsumer;
   }
 
@@ -43,9 +45,18 @@ class PreprocessVisitor extends AstRewriteExpressionVisitor {
     var moduleName = node.getName();
     for (var definition : node.definitions()) {
       switch (definition) {
-        case AstType type -> type.getName().setModuleName(moduleName);
-        case AstFunction function -> function.getHeader().getName().setModuleName(moduleName);
-        case AstVariable variable -> variable.getName().setModuleName(moduleName);
+        case AstType type -> {
+          type.getName().setModuleName(moduleName);
+          nameMap.addType(type);
+        }
+        case AstFunction function -> {
+          function.getHeader().getName().setModuleName(moduleName);
+          nameMap.addFunction(function);
+        }
+        case AstVariable variable -> {
+          variable.getName().setModuleName(moduleName);
+          nameMap.addVariable(variable);
+        }
         default ->
             throw new IllegalArgumentException(
                 "Unsupported module definition: %s".formatted(definition));

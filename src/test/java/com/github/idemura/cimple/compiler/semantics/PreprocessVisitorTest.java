@@ -47,7 +47,8 @@ class PreprocessVisitorTest {
         """;
 
     var module = new Parser(new Tokenizer(code).split()).parse();
-    module.accept(new PreprocessVisitor(errorConsumer));
+    var nameMap = new NameMap();
+    module.accept(new PreprocessVisitor(nameMap, errorConsumer));
 
     var statements = functions(module).get(0).getBlock().statements();
     int i = 0;
@@ -75,21 +76,17 @@ class PreprocessVisitorTest {
     var code =
         """
         module if;
-
         var return int;
         const else int = 1;
-
         function true() {}
-
         type record int {}
-
         type union byte {}
-
         type opaque string string;
         """;
 
     var module = new Parser(new Tokenizer(code).split()).parse();
-    module.accept(new PreprocessVisitor(errorConsumer));
+    var nameMap = new NameMap();
+    module.accept(new PreprocessVisitor(nameMap, errorConsumer));
 
     assertEquals(
         ImmutableList.of(
