@@ -6,8 +6,6 @@ import java.util.ArrayList;
 import java.util.List;
 
 public class InMemoryErrorConsumer implements ErrorConsumer {
-  public record Error(Location location, String message) {}
-
   private final List<Error> errors = new ArrayList<>();
 
   public InMemoryErrorConsumer() {}
@@ -17,6 +15,7 @@ public class InMemoryErrorConsumer implements ErrorConsumer {
     errors.add(new Error(location, message.formatted(args)));
   }
 
+  @Override
   public List<Error> getErrors() {
     return errors;
   }

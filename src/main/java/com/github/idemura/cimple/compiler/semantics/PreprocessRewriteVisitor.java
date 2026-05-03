@@ -38,6 +38,7 @@ class PreprocessRewriteVisitor extends AstRewriteExpressionVisitor {
 
   @Override
   protected Object visit(AstModule node) {
+    checkName(node.getName(), node.getLocation());
     return super.visit(node);
   }
 

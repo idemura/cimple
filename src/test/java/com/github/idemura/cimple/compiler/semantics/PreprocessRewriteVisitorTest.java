@@ -11,15 +11,16 @@ import com.github.idemura.cimple.compiler.ast.AstIf;
 import com.github.idemura.cimple.compiler.ast.AstNullLiteral;
 import com.github.idemura.cimple.compiler.ast.AstReturn;
 import com.github.idemura.cimple.compiler.ast.AstVariable;
+import com.github.idemura.cimple.compiler.common.ErrorConsumer;
 import com.github.idemura.cimple.compiler.parser.Parser;
 import com.github.idemura.cimple.compiler.tokens.Tokenizer;
+import com.google.common.collect.ImmutableList;
 import org.junit.jupiter.api.Test;
 
 class PreprocessRewriteVisitorTest {
-  private final InMemoryErrorConsumer errorConsumer = new InMemoryErrorConsumer();
-
   @Test
   void testRewriteTrueFalseNullLiterals() {
+    var errorConsumer = new InMemoryErrorConsumer();
     var code =
         """
         module test;
@@ -56,5 +57,39 @@ class PreprocessRewriteVisitorTest {
       assertEquals(new AstBoolLiteral(true), stmt.getIncrement());
     }
     assertEquals(new AstBoolLiteral(true), ((AstReturn) statements.get(i++)).getExpression());
+  }
+
+  @Test
+  void testReservedNameFailures() {
+    var errorConsumer = new InMemoryErrorConsumer();
+    var code =
+        """
+        module if;
+
+        var return int;
+        const else int = 1;
+
+        function true() {}
+
+        type record int {}
+
+        type union byte {}
+
+        type opaque string string;
+        """;
+
+    var module = new Parser(new Tokenizer(code).split()).parse();
+    module.accept(new PreprocessRewriteVisitor(errorConsumer));
+
+    assertEquals(
+        ImmutableList.of(
+            "Reserved word cannot be used as a name: if",
+            "Reserved type name cannot be used as a type name: int",
+            "Reserved type name cannot be used as a type name: byte",
+            "Reserved type name cannot be used as a type name: string",
+            "Reserved word cannot be used as a name: return",
+            "Reserved word cannot be used as a name: else",
+            "Reserved word cannot be used as a name: true"),
+        errorConsumer.getErrors().stream().map(ErrorConsumer.Error::message).toList());
   }
 }

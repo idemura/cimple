@@ -2,6 +2,7 @@ package com.github.idemura.cimple.cli;
 
 import com.github.idemura.cimple.compiler.Location;
 import com.github.idemura.cimple.compiler.common.ErrorConsumer;
+import java.util.List;
 
 public class CliErrorConsumer implements ErrorConsumer {
   private int errorCount;
@@ -13,6 +14,11 @@ public class CliErrorConsumer implements ErrorConsumer {
     var formattedMessage = message.formatted(args);
     System.err.printf("%s: %s%n", location == null ? "unknown" : location, formattedMessage);
     errorCount++;
+  }
+
+  @Override
+  public List<Error> getErrors() {
+    throw new UnsupportedOperationException();
   }
 
   public int getErrorCount() {
