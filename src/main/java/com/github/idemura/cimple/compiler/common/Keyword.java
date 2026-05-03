@@ -4,26 +4,26 @@ import com.google.common.collect.ImmutableMap;
 import java.util.Map;
 
 public enum Keyword {
-  ALIAS("alias"),
   CASE("case"),
   CLASS("class"),
   CONST("const"),
   DEFER("defer"),
-  IF("if"),
-  UNION("union"),
   ELSE("else"),
   FOR("for"),
   FUNCTION("function"),
   GOTO("goto"),
+  IF("if"),
   IMPLEMENT("implement"),
   IMPORT("import"),
   INTERFACE("interface"),
   MATCH("match"),
   MODULE("module"),
+  OPAQUE("opaque"),
   RETURN("return"),
   RECORD("record"),
   TEMPLATE("template"),
   TYPE("type"),
+  UNION("union"),
   VAR("var");
 
   private static final ImmutableMap<String, Keyword> SYMBOL_NAME_MAP = createSymbolNameMap();

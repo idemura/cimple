@@ -165,11 +165,11 @@ class ParserTest {
   }
 
   @Test
-  void testAliasType() {
+  void testOpaqueType() {
     var code =
         """
         module test;
-        type alias Uri string;
+        type opaque Uri string;
         """;
     var module = parseCode(code);
     assertEquals("test", module.getName());

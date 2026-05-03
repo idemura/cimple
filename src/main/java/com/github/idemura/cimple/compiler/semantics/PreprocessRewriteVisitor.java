@@ -1,9 +1,13 @@
 package com.github.idemura.cimple.compiler.semantics;
 
+import static com.github.idemura.cimple.compiler.semantics.ReservedWords.isReservedTypeName;
+import static com.github.idemura.cimple.compiler.semantics.ReservedWords.isReservedWord;
 import static java.lang.Double.parseDouble;
 import static java.lang.Long.parseLong;
 
+import com.github.idemura.cimple.compiler.Location;
 import com.github.idemura.cimple.compiler.ast.AstBoolLiteral;
+import com.github.idemura.cimple.compiler.ast.AstFunction;
 import com.github.idemura.cimple.compiler.ast.AstLiteral;
 import com.github.idemura.cimple.compiler.ast.AstModule;
 import com.github.idemura.cimple.compiler.ast.AstName;
@@ -11,7 +15,13 @@ import com.github.idemura.cimple.compiler.ast.AstNullLiteral;
 import com.github.idemura.cimple.compiler.ast.AstNumberLiteral;
 import com.github.idemura.cimple.compiler.ast.AstRewriteExpressionVisitor;
 import com.github.idemura.cimple.compiler.ast.AstStringLiteral;
+import com.github.idemura.cimple.compiler.ast.AstTypeAlias;
 import com.github.idemura.cimple.compiler.ast.AstTypeBuiltin;
+import com.github.idemura.cimple.compiler.ast.AstTypeFunction;
+import com.github.idemura.cimple.compiler.ast.AstTypeRecord;
+import com.github.idemura.cimple.compiler.ast.AstTypeUnion;
+import com.github.idemura.cimple.compiler.ast.AstVariable;
+import com.github.idemura.cimple.compiler.ast.QualifiedName;
 import com.github.idemura.cimple.compiler.ast.TypeRef;
 import com.github.idemura.cimple.compiler.common.ErrorConsumer;
 
@@ -28,6 +38,47 @@ class PreprocessRewriteVisitor extends AstRewriteExpressionVisitor {
 
   @Override
   protected Object visit(AstModule node) {
+    return super.visit(node);
+  }
+
+  @Override
+  protected Object visit(AstFunction node) {
+    var header = node.getHeader();
+    checkName(header.getName(), header.getLocation());
+    checkTypeName(header.getBoundTypeName(), header.getLocation());
+    return super.visit(node);
+  }
+
+  @Override
+  protected Object visit(AstVariable node) {
+    checkName(node.getName(), node.getLocation());
+    return super.visit(node);
+  }
+
+  @Override
+  protected Object visit(AstTypeAlias node) {
+    checkTypeName(node.getName(), node.getLocation());
+    return super.visit(node);
+  }
+
+  @Override
+  protected Object visit(AstTypeFunction node) {
+    checkTypeName(node.getName(), node.getLocation());
+    return super.visit(node);
+  }
+
+  @Override
+  protected Object visit(AstTypeRecord node) {
+    checkTypeName(node.getName(), node.getLocation());
+    return super.visit(node);
+  }
+
+  @Override
+  protected Object visit(AstTypeUnion node) {
+    checkTypeName(node.getName(), node.getLocation());
+    for (var variant : node.getVariants()) {
+      checkName(variant.getName(), variant.getLocation());
+    }
     return super.visit(node);
   }
 
@@ -71,11 +122,33 @@ class PreprocessRewriteVisitor extends AstRewriteExpressionVisitor {
         };
     if (newNode != node) {
       newNode.setLocation(node.getLocation());
+    } else {
+      checkName(node.getName(), node.getLocation());
     }
     return newNode;
   }
 
-  static boolean isReservedIdentifier(String identifier) {
-    return false;
+  private void checkName(String name, Location location) {
+    if (name != null && isReservedWord(name)) {
+      errorConsumer.error(location, "Reserved word cannot be used as a name: %s", name);
+    }
+  }
+
+  private void checkName(QualifiedName name, Location location) {
+    checkName(name.getModuleName(), location);
+    checkName(name.name(), location);
+  }
+
+  private void checkTypeName(QualifiedName name, Location location) {
+    if (name != null && isReservedTypeName(name.name())) {
+      errorConsumer.error(
+          location, "Reserved type name cannot be used as a type name: %s", name.name());
+    }
+  }
+
+  private void checkTypeName(String name, Location location) {
+    if (name != null && isReservedTypeName(name)) {
+      errorConsumer.error(location, "Reserved type name cannot be used as a type name: %s", name);
+    }
   }
 }

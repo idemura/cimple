@@ -165,10 +165,10 @@ type interface FileSystem {
 }
 ```
 
-### Alias
+### Opaque
 
 ```
-type alias Uri string;
+type opaque Uri string;
 ```
 
 ## Operator Precedence

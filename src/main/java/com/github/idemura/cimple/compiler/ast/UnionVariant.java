@@ -1,8 +1,10 @@
 package com.github.idemura.cimple.compiler.ast;
 
+import com.github.idemura.cimple.compiler.Location;
 import java.util.Objects;
 
 public final class UnionVariant {
+  private Location location;
   private QualifiedName name;
   private TypeRef valueType;
 
@@ -17,6 +19,14 @@ public final class UnionVariant {
         || (object instanceof UnionVariant other
             && Objects.equals(name, other.name)
             && Objects.equals(valueType, other.valueType));
+  }
+
+  public Location getLocation() {
+    return location;
+  }
+
+  public void setLocation(Location location) {
+    this.location = location;
   }
 
   public QualifiedName getName() {

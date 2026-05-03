@@ -88,7 +88,7 @@ public class Parser {
       case FUNCTION -> parseTypeFunction();
       case RECORD -> parseTypeRecord();
       case UNION -> parseTypeUnion();
-      case ALIAS -> parseTypeAlias();
+      case OPAQUE -> parseTypeAlias();
       default ->
           throw CompilerException.builder()
               .formatMessage("Expected type declaration kind after type")
@@ -130,7 +130,9 @@ public class Parser {
 
   private UnionVariant parseTypeUnionVariant() {
     var variant = new UnionVariant();
-    variant.setName(tokens.take(IDENTIFIER).value());
+    var name = tokens.take(IDENTIFIER);
+    variant.setLocation(name.location());
+    variant.setName(name.value());
     if (tokens.takeIf(LPAREN)) {
       variant.setValueType(parseTypeRef());
       tokens.take(RPAREN);
@@ -140,7 +142,7 @@ public class Parser {
 
   private AstTypeAlias parseTypeAlias() {
     var type = new AstTypeAlias();
-    tokens.takeKeyword(ALIAS);
+    tokens.takeKeyword(OPAQUE);
     var name = tokens.take(IDENTIFIER);
     type.setLocation(name.location());
     type.setName(new QualifiedName(name.value()));
