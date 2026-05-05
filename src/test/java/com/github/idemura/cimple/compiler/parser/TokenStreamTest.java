@@ -1,7 +1,7 @@
-package com.github.idemura.cimple.compiler.tokens;
+package com.github.idemura.cimple.compiler.parser;
 
-import static com.github.idemura.cimple.compiler.common.Keyword.*;
-import static com.github.idemura.cimple.compiler.tokens.TokenType.*;
+import static com.github.idemura.cimple.compiler.parser.Keyword.*;
+import static com.github.idemura.cimple.compiler.parser.TokenType.*;
 import static org.junit.jupiter.api.Assertions.*;
 
 import com.github.idemura.cimple.compiler.CompilerException;
@@ -49,33 +49,5 @@ class TokenStreamTest {
     assertTrue(s.takeIf(NUMBER));
     assertTrue(s.takeIf(RPAREN));
     assertTrue(s.done());
-  }
-
-  @Test
-  void testTakeKeyword() {
-    var s = new TokenStream();
-    s.add(new Token(IDENTIFIER, "function"));
-    s.add(new Token(IDENTIFIER, "foo"));
-    s.add(new Token(LPAREN, null));
-    s.add(new Token(RPAREN, null));
-    s.add(new Token(LCURLY, null));
-    s.add(new Token(IDENTIFIER, "var"));
-    s.add(new Token(IDENTIFIER, "bar"));
-    s.add(new Token(ASSIGN, null));
-    s.add(new Token(NUMBER, "12"));
-    s.add(new Token(SEMICOLON, null));
-    s.add(new Token(RCURLY, null));
-    s.takeKeyword(FUNCTION);
-    assertThrows(CompilerException.class, () -> s.takeKeyword(FUNCTION));
-    assertEquals("foo", s.take().value());
-    assertEquals(LPAREN, s.take().type());
-    assertEquals(RPAREN, s.take().type());
-    assertEquals(LCURLY, s.take().type());
-    s.takeKeyword(VAR);
-    s.take();
-    assertEquals(ASSIGN, s.take().type());
-    assertEquals(NUMBER, s.take().type());
-    assertEquals(SEMICOLON, s.take().type());
-    assertEquals(RCURLY, s.take().type());
   }
 }

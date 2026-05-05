@@ -1,20 +1,25 @@
 package com.github.idemura.cimple.compiler.semantics;
 
+import com.github.idemura.cimple.compiler.ErrorConsumer;
 import com.github.idemura.cimple.compiler.ast.AstBlock;
 import com.github.idemura.cimple.compiler.ast.AstCall;
+import com.github.idemura.cimple.compiler.ast.AstEntityRef;
 import com.github.idemura.cimple.compiler.ast.AstFor;
 import com.github.idemura.cimple.compiler.ast.AstFunction;
 import com.github.idemura.cimple.compiler.ast.AstIf;
 import com.github.idemura.cimple.compiler.ast.AstLiteral;
 import com.github.idemura.cimple.compiler.ast.AstModule;
-import com.github.idemura.cimple.compiler.ast.AstName;
 import com.github.idemura.cimple.compiler.ast.AstVariable;
+import com.github.idemura.cimple.compiler.ast.AstVariableStatement;
 import com.github.idemura.cimple.compiler.ast.AstVisitor;
 
-class TypeChecker extends AstVisitor {
-  private final ScopeNameMap<AstVariable> variables = new ScopeNameMap<>();
+class TypeCheckVisitor extends AstVisitor {
+  private final ErrorConsumer errorConsumer;
+  private final ScopeNameMap variables = new ScopeNameMap();
 
-  TypeChecker() {}
+  public TypeCheckVisitor(ErrorConsumer errorConsumer) {
+    this.errorConsumer = errorConsumer;
+  }
 
   @Override
   protected Object visit(AstModule node) {
@@ -23,6 +28,11 @@ class TypeChecker extends AstVisitor {
 
   @Override
   protected Object visit(AstVariable node) {
+    return super.visit(node);
+  }
+
+  @Override
+  protected Object visit(AstVariableStatement node) {
     return super.visit(node);
   }
 
@@ -48,7 +58,7 @@ class TypeChecker extends AstVisitor {
   }
 
   @Override
-  protected Object visit(AstName node) {
+  protected Object visit(AstEntityRef node) {
     return super.visit(node);
   }
 

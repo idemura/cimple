@@ -1,7 +1,7 @@
 package com.github.idemura.cimple.cli;
 
+import com.github.idemura.cimple.compiler.ErrorConsumer;
 import com.github.idemura.cimple.compiler.Location;
-import com.github.idemura.cimple.compiler.common.ErrorConsumer;
 import java.util.List;
 
 public class CliErrorConsumer implements ErrorConsumer {

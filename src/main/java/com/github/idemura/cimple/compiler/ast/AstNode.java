@@ -3,7 +3,7 @@ package com.github.idemura.cimple.compiler.ast;
 import com.github.idemura.cimple.compiler.Location;
 
 public abstract class AstNode {
-  protected Location location;
+  private Location location;
 
   public abstract Object accept(AstVisitor visitor);
 

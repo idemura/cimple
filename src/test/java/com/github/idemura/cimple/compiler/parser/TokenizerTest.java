@@ -1,6 +1,6 @@
-package com.github.idemura.cimple.compiler.tokens;
+package com.github.idemura.cimple.compiler.parser;
 
-import static com.github.idemura.cimple.compiler.tokens.TokenType.*;
+import static com.github.idemura.cimple.compiler.parser.TokenType.*;
 import static org.junit.jupiter.api.Assertions.*;
 
 import com.github.idemura.cimple.compiler.Location;
@@ -19,7 +19,7 @@ class TokenizerTest {
           var y = null;
         }
         """;
-    var tokens = new Tokenizer(code).split().tokens();
+    var tokens = new Tokenizer(code, null).split().tokens();
     assertEquals(
         ImmutableList.of(
             new Token(IDENTIFIER, "function", new Location(1, 1)),

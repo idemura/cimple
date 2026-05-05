@@ -1,66 +1,61 @@
 package com.github.idemura.cimple.compiler.semantics;
 
-import static com.google.common.base.Preconditions.checkNotNull;
-
-import com.github.idemura.cimple.compiler.ast.QualifiedName;
+import com.github.idemura.cimple.compiler.QualifiedName;
+import com.github.idemura.cimple.compiler.ast.AstEntity;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-class ScopeNameMap<T> {
-  private final Map<QualifiedName, T> globalNameMap = new HashMap<>();
-  private final Map<QualifiedName, T> nameMap = new HashMap<>();
-  private final List<List<QualifiedName>> scopeStack = new ArrayList<>();
+class ScopeNameMap {
+  private final Map<String, AstEntity> globalNameMap = new HashMap<>();
+  private final Map<String, AstEntity> nameMap = new HashMap<>();
+  private final List<List<AstEntity>> scopeStack = new ArrayList<>();
 
   void pushScope() {
     scopeStack.add(new ArrayList<>());
   }
 
   void popScope() {
-    for (var name : scopeStack.removeLast()) {
-      var globalDef = globalNameMap.get(name);
+    for (var entity : scopeStack.removeLast()) {
+      var globalDef = globalNameMap.get(entity);
       if (globalDef == null) {
-        nameMap.remove(name);
+        nameMap.remove(entity.getName().name());
       } else {
-        nameMap.put(name, globalDef);
+        nameMap.put(entity.getName().name(), globalDef);
       }
     }
   }
 
   // Returns conflicting entity if found.
-  T putGlobal(QualifiedName name, T entity) {
-    checkNotNull(name);
-
-    var e = globalNameMap.get(name);
+  AstEntity putGlobal(AstEntity entity) {
+    var baseName = entity.getName().name();
+    var e = globalNameMap.get(baseName);
     if (e != null) {
       // Error - same name in the scope.
       return e;
     }
-
-    globalNameMap.put(name, entity);
-    nameMap.put(name, entity);
-
+    globalNameMap.put(baseName, entity);
+    nameMap.put(baseName, entity);
     return null;
   }
 
   // Returns conflicting entity if found.
-  T put(QualifiedName name, T entity) {
-    checkNotNull(name);
-
-    var e = nameMap.get(name);
+  AstEntity put(AstEntity entity) {
+    var baseName = entity.getName().name();
+    var e = nameMap.get(baseName);
     if (e != null) {
       // We allow override module level entities
-      if (!globalNameMap.containsKey(name)) {
+      if (!globalNameMap.containsKey(baseName)) {
         return e;
       }
     }
-    nameMap.put(name, entity);
-    scopeStack.getLast().add(name);
+    nameMap.put(baseName, entity);
+    scopeStack.getLast().add(entity);
     return null;
   }
 
-  T get(QualifiedName name) {
+  AstEntity get(QualifiedName name) {
     return nameMap.get(name);
   }
 }

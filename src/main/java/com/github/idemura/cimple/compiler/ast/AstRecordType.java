@@ -1,13 +1,14 @@
 package com.github.idemura.cimple.compiler.ast;
 
+import com.github.idemura.cimple.compiler.QualifiedName;
 import com.google.common.collect.ImmutableList;
 import java.util.List;
 
-public final class AstTypeRecord extends AstType {
+public final class AstRecordType extends AstType {
   private QualifiedName name;
   private List<AstVariable> fields;
 
-  public AstTypeRecord() {}
+  public AstRecordType() {}
 
   @Override
   public Object accept(AstVisitor visitor) {
@@ -19,6 +20,7 @@ public final class AstTypeRecord extends AstType {
     return name;
   }
 
+  @Override
   public void setName(QualifiedName name) {
     this.name = name;
   }

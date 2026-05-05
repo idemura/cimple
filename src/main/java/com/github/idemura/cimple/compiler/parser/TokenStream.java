@@ -1,8 +1,6 @@
-package com.github.idemura.cimple.compiler.tokens;
+package com.github.idemura.cimple.compiler.parser;
 
 import com.github.idemura.cimple.compiler.CompilerException;
-import com.github.idemura.cimple.compiler.Location;
-import com.github.idemura.cimple.compiler.common.Keyword;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -25,10 +23,12 @@ public class TokenStream {
   }
 
   public Token take() {
+    checkPosition();
     return tokens.get(pos++);
   }
 
   public Token take(TokenType type) {
+    checkPosition();
     var token = tokens.get(pos);
     if (token.type() != type) {
       throw CompilerException.builder()
@@ -49,43 +49,26 @@ public class TokenStream {
     return true;
   }
 
-  public Location takeKeyword(Keyword keyword) {
-    var token = tokens.get(pos);
-    var kw = token.keyword();
-    if (kw != keyword) {
-      throw CompilerException.builder()
-          .formatMessage("Expected '%s', got %s", keyword.symbolName(), token)
-          .setLocation(token.location())
-          .build();
-    }
-    pos++;
-    return token.location();
-  }
-
-  public boolean takeKeywordIf(Keyword keyword) {
-    var token = tokens.get(pos);
-    var kw = token.keywordOrNull();
-    if (kw != keyword) {
-      return false;
-    }
-    pos++;
-    return true;
-  }
-
-  public Token current() {
+  Token current() {
     return tokens.get(pos);
   }
 
-  public TokenType next() {
+  Token next() {
     if (pos + 1 < tokens.size()) {
-      return tokens.get(pos + 1).type();
+      return tokens.get(pos + 1);
     } else {
-      return TokenType.EOF;
+      throw new CompilerException("Reached unexpected EOF", null);
     }
   }
 
   @Override
   public String toString() {
     return tokens.toString();
+  }
+
+  private void checkPosition() {
+    if (pos == tokens.size()) {
+      throw CompilerException.builder().formatMessage("Reached token stream end").build();
+    }
   }
 }

@@ -1,9 +1,10 @@
 package com.github.idemura.cimple.compiler.ast;
 
+import com.github.idemura.cimple.compiler.QualifiedName;
 import com.google.common.collect.ImmutableList;
 import java.util.List;
 
-public final class AstTypeUnion extends AstType {
+public final class AstUnionType extends AstType {
   private QualifiedName name;
   private List<UnionVariant> variants;
 
@@ -17,6 +18,7 @@ public final class AstTypeUnion extends AstType {
     return name;
   }
 
+  @Override
   public void setName(QualifiedName name) {
     this.name = name;
   }

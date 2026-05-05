@@ -1,6 +1,8 @@
 package com.github.idemura.cimple.compiler.ast;
 
-public final class AstTypeFunction extends AstType {
+import com.github.idemura.cimple.compiler.QualifiedName;
+
+public final class AstFunctionType extends AstType {
   private AstFunctionHeader header;
 
   @Override

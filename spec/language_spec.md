@@ -108,7 +108,6 @@ There are several kinds of types in Cimple:
 * Record
 * Union
 * Function
-* Alias
 * Interface
 
 User type definitions start with the keyword `type`.
@@ -163,12 +162,6 @@ type interface FileSystem {
     function open(name string) File*;
     function close(f File*);
 }
-```
-
-### Opaque
-
-```
-type opaque Uri string;
 ```
 
 ## Operator Precedence

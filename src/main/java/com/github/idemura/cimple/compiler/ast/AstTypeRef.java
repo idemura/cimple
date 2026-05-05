@@ -1,22 +1,24 @@
 package com.github.idemura.cimple.compiler.ast;
 
+import com.github.idemura.cimple.compiler.QualifiedName;
 import java.util.Objects;
 
-public final class TypeRef {
+public final class AstTypeRef {
   private final QualifiedName name;
   private AstType type;
 
-  public static TypeRef of(String name) {
-    return new TypeRef(new QualifiedName(name));
+  // For testing
+  public static AstTypeRef ofString(String name) {
+    return new AstTypeRef(new QualifiedName(name));
   }
 
-  public static TypeRef of(AstType type) {
-    var typeRef = new TypeRef(type.getName());
+  public static AstTypeRef of(AstType type) {
+    var typeRef = new AstTypeRef(type.getName());
     typeRef.setType(type);
     return typeRef;
   }
 
-  public TypeRef(QualifiedName name) {
+  public AstTypeRef(QualifiedName name) {
     this.name = name;
   }
 
@@ -27,7 +29,8 @@ public final class TypeRef {
 
   @Override
   public boolean equals(Object object) {
-    return this == object || (object instanceof TypeRef other && Objects.equals(name, other.name));
+    return this == object
+        || (object instanceof AstTypeRef other && Objects.equals(name, other.name));
   }
 
   @Override

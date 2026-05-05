@@ -2,7 +2,7 @@ package com.github.idemura.cimple.compiler.ast;
 
 public final class AstCast extends AstExpression {
   private AstExpression expression;
-  private TypeRef typeRef;
+  private AstTypeRef typeRef;
 
   @Override
   public Object accept(AstVisitor visitor) {
@@ -10,7 +10,7 @@ public final class AstCast extends AstExpression {
   }
 
   @Override
-  public TypeRef getType() {
+  public AstTypeRef getType() {
     return typeRef;
   }
 
@@ -22,11 +22,11 @@ public final class AstCast extends AstExpression {
     this.expression = expression;
   }
 
-  public TypeRef getTypeRef() {
+  public AstTypeRef getTypeRef() {
     return typeRef;
   }
 
-  public void setTypeRef(TypeRef typeRef) {
+  public void setTypeRef(AstTypeRef typeRef) {
     this.typeRef = typeRef;
   }
 }

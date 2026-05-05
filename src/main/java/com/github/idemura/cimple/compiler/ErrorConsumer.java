@@ -1,6 +1,5 @@
-package com.github.idemura.cimple.compiler.common;
+package com.github.idemura.cimple.compiler;
 
-import com.github.idemura.cimple.compiler.Location;
 import java.util.List;
 
 public interface ErrorConsumer {

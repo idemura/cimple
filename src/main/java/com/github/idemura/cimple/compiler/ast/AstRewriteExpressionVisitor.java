@@ -9,6 +9,11 @@ public class AstRewriteExpressionVisitor extends AstVisitor {
   }
 
   @Override
+  protected void visitChildren(AstVariableStatement node) {
+    super.visitChildren(node);
+  }
+
+  @Override
   protected void visitChildren(AstExpressionStatement node) {
     node.setExpression(rewrite(node.getExpression()));
   }
@@ -64,7 +69,7 @@ public class AstRewriteExpressionVisitor extends AstVisitor {
   }
 
   @Override
-  protected Object visit(AstName node) {
+  protected Object visit(AstEntityRef node) {
     return node;
   }
 

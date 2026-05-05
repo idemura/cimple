@@ -1,8 +1,18 @@
 package com.github.idemura.cimple.compiler.ast;
 
-public final class AstFunction extends AstNode {
-  private AstFunctionHeader header = new AstFunctionHeader();
+import com.github.idemura.cimple.compiler.QualifiedName;
+
+public final class AstFunction extends AstEntity {
+  private AstFunctionHeader header;
   private AstBlock block;
+
+  public QualifiedName getName() {
+    return header.getName();
+  }
+
+  public void setName(QualifiedName name) {
+    header.setName(name);
+  }
 
   @Override
   public int hashCode() {

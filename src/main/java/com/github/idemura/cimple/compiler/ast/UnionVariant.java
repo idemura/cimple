@@ -5,20 +5,18 @@ import java.util.Objects;
 
 public final class UnionVariant {
   private Location location;
-  private QualifiedName name;
-  private TypeRef valueType;
+  private String tag;
+  private AstTypeRef valueType;
 
   @Override
   public int hashCode() {
-    return name.hashCode();
+    return tag.hashCode();
   }
 
   @Override
   public boolean equals(Object object) {
     return this == object
-        || (object instanceof UnionVariant other
-            && Objects.equals(name, other.name)
-            && Objects.equals(valueType, other.valueType));
+        || (object instanceof UnionVariant other && Objects.equals(tag, other.tag));
   }
 
   public Location getLocation() {
@@ -29,23 +27,19 @@ public final class UnionVariant {
     this.location = location;
   }
 
-  public QualifiedName getName() {
-    return name;
+  public String getTag() {
+    return tag;
   }
 
-  public void setName(String name) {
-    this.name = new QualifiedName(name);
+  public void setTag(String name) {
+    this.tag = tag;
   }
 
-  public void setName(QualifiedName name) {
-    this.name = name;
-  }
-
-  public TypeRef getValueType() {
+  public AstTypeRef getValueType() {
     return valueType;
   }
 
-  public void setValueType(TypeRef valueType) {
+  public void setValueType(AstTypeRef valueType) {
     this.valueType = valueType;
   }
 }

@@ -1,8 +1,10 @@
 package com.github.idemura.cimple.compiler.semantics;
 
+import static com.github.idemura.cimple.compiler.parser.Parser.parseCode;
 import static org.junit.jupiter.api.Assertions.*;
 
 import com.github.idemura.cimple.common.InMemoryErrorConsumer;
+import com.github.idemura.cimple.compiler.ErrorConsumer;
 import com.github.idemura.cimple.compiler.ast.AstBoolLiteral;
 import com.github.idemura.cimple.compiler.ast.AstDefer;
 import com.github.idemura.cimple.compiler.ast.AstExpressionStatement;
@@ -12,10 +14,8 @@ import com.github.idemura.cimple.compiler.ast.AstIf;
 import com.github.idemura.cimple.compiler.ast.AstModule;
 import com.github.idemura.cimple.compiler.ast.AstNullLiteral;
 import com.github.idemura.cimple.compiler.ast.AstReturn;
-import com.github.idemura.cimple.compiler.ast.AstVariable;
-import com.github.idemura.cimple.compiler.common.ErrorConsumer;
-import com.github.idemura.cimple.compiler.parser.Parser;
-import com.github.idemura.cimple.compiler.tokens.Tokenizer;
+import com.github.idemura.cimple.compiler.ast.AstVariableStatement;
+import com.github.idemura.cimple.compiler.parser.Keyword;
 import com.google.common.collect.ImmutableList;
 import java.util.List;
 import org.junit.jupiter.api.Test;
@@ -46,9 +46,9 @@ class PreprocessVisitorTest {
         }
         """;
 
-    var module = new Parser(new Tokenizer(code).split()).parse();
+    var module = parseCode(code);
     var nameMap = new NameMap();
-    module.accept(new PreprocessVisitor(nameMap, errorConsumer));
+    module.accept(new PreprocessVisitor(nameMap, Keyword.valueList(), errorConsumer));
 
     var statements = functions(module).get(0).getBlock().statements();
     int i = 0;
@@ -60,7 +60,9 @@ class PreprocessVisitorTest {
       assertEquals(
           new AstNullLiteral(), ((AstExpressionStatement) statements1.get(0)).getExpression());
     }
-    assertEquals(new AstBoolLiteral(false), ((AstVariable) statements.get(i++)).getExpression());
+    assertEquals(
+        new AstBoolLiteral(false),
+        ((AstVariableStatement) statements.get(i++)).getVariable().getExpression());
     {
       var stmt = (AstFor) statements.get(i++);
       assertEquals(new AstNullLiteral(), stmt.getInit().getExpression());
@@ -81,12 +83,11 @@ class PreprocessVisitorTest {
         function true() {}
         type record int {}
         type union byte {}
-        type opaque string string;
         """;
 
-    var module = new Parser(new Tokenizer(code).split()).parse();
+    var module = parseCode(code);
     var nameMap = new NameMap();
-    module.accept(new PreprocessVisitor(nameMap, errorConsumer));
+    module.accept(new PreprocessVisitor(nameMap, Keyword.valueList(), errorConsumer));
 
     assertEquals(
         ImmutableList.of(
@@ -95,8 +96,7 @@ class PreprocessVisitorTest {
             "Reserved word cannot be used as a name: else",
             "Reserved word cannot be used as a name: true",
             "Reserved type name cannot be used as a type name: int",
-            "Reserved type name cannot be used as a type name: byte",
-            "Reserved type name cannot be used as a type name: string"),
+            "Reserved type name cannot be used as a type name: byte"),
         errorConsumer.getErrors().stream().map(ErrorConsumer.Error::message).toList());
   }
 }

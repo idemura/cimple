@@ -1,30 +1,27 @@
 package com.github.idemura.cimple.compiler.semantics;
 
-import static com.github.idemura.cimple.compiler.semantics.ReservedWords.isReservedTypeName;
-import static com.github.idemura.cimple.compiler.semantics.ReservedWords.isReservedWord;
 import static java.lang.Double.parseDouble;
 import static java.lang.Long.parseLong;
 
+import com.github.idemura.cimple.compiler.ErrorConsumer;
 import com.github.idemura.cimple.compiler.Location;
 import com.github.idemura.cimple.compiler.ast.AstBoolLiteral;
+import com.github.idemura.cimple.compiler.ast.AstBuiltinType;
+import com.github.idemura.cimple.compiler.ast.AstEntityRef;
 import com.github.idemura.cimple.compiler.ast.AstFunction;
+import com.github.idemura.cimple.compiler.ast.AstFunctionType;
 import com.github.idemura.cimple.compiler.ast.AstLiteral;
 import com.github.idemura.cimple.compiler.ast.AstModule;
-import com.github.idemura.cimple.compiler.ast.AstName;
 import com.github.idemura.cimple.compiler.ast.AstNullLiteral;
 import com.github.idemura.cimple.compiler.ast.AstNumberLiteral;
+import com.github.idemura.cimple.compiler.ast.AstRecordType;
 import com.github.idemura.cimple.compiler.ast.AstRewriteExpressionVisitor;
 import com.github.idemura.cimple.compiler.ast.AstStringLiteral;
 import com.github.idemura.cimple.compiler.ast.AstType;
-import com.github.idemura.cimple.compiler.ast.AstTypeAlias;
-import com.github.idemura.cimple.compiler.ast.AstTypeBuiltin;
-import com.github.idemura.cimple.compiler.ast.AstTypeFunction;
-import com.github.idemura.cimple.compiler.ast.AstTypeRecord;
-import com.github.idemura.cimple.compiler.ast.AstTypeUnion;
+import com.github.idemura.cimple.compiler.ast.AstTypeRef;
+import com.github.idemura.cimple.compiler.ast.AstUnionType;
 import com.github.idemura.cimple.compiler.ast.AstVariable;
-import com.github.idemura.cimple.compiler.ast.QualifiedName;
-import com.github.idemura.cimple.compiler.ast.TypeRef;
-import com.github.idemura.cimple.compiler.common.ErrorConsumer;
+import java.util.List;
 
 /// Does the following steps:
 ///   * Replaces "true", "false", "null" with literals.
@@ -32,10 +29,12 @@ import com.github.idemura.cimple.compiler.common.ErrorConsumer;
 ///   * Transforms numeric literals into typed numeric literals.
 class PreprocessVisitor extends AstRewriteExpressionVisitor {
   private final NameMap nameMap;
+  private final ReservedWords reservedWords;
   private final ErrorConsumer errorConsumer;
 
-  PreprocessVisitor(NameMap nameMap, ErrorConsumer errorConsumer) {
+  PreprocessVisitor(NameMap nameMap, List<String> reservedWords, ErrorConsumer errorConsumer) {
     this.nameMap = nameMap;
+    this.reservedWords = new ReservedWords(reservedWords);
     this.errorConsumer = errorConsumer;
   }
 
@@ -46,16 +45,17 @@ class PreprocessVisitor extends AstRewriteExpressionVisitor {
     for (var definition : node.definitions()) {
       switch (definition) {
         case AstType type -> {
-          type.getName().setModuleName(moduleName);
+          type.setName(type.getName().withModuleName(moduleName));
           nameMap.addType(type);
         }
         case AstFunction function -> {
-          function.getHeader().getName().setModuleName(moduleName);
-          nameMap.addFunction(function);
+          var header = function.getHeader();
+          header.setName(header.getName().withModuleName(moduleName));
+          nameMap.addEntity(function);
         }
         case AstVariable variable -> {
-          variable.getName().setModuleName(moduleName);
-          nameMap.addVariable(variable);
+          variable.setName(variable.getName().withModuleName(moduleName));
+          nameMap.addEntity(variable);
         }
         default ->
             throw new IllegalArgumentException(
@@ -67,41 +67,33 @@ class PreprocessVisitor extends AstRewriteExpressionVisitor {
 
   @Override
   protected Object visit(AstFunction node) {
-    var header = node.getHeader();
-    checkName(header.getName(), header.getLocation());
-    checkTypeName(header.getBoundTypeName(), header.getLocation());
+    checkName(node.getName().name(), node.getLocation());
     return super.visit(node);
   }
 
   @Override
   protected Object visit(AstVariable node) {
-    checkName(node.getName(), node.getLocation());
+    checkName(node.getName().name(), node.getLocation());
     return super.visit(node);
   }
 
   @Override
-  protected Object visit(AstTypeAlias node) {
-    checkTypeName(node.getName(), node.getLocation());
+  protected Object visit(AstFunctionType node) {
+    checkName(node.getName().name(), node.getLocation());
     return super.visit(node);
   }
 
   @Override
-  protected Object visit(AstTypeFunction node) {
-    checkTypeName(node.getName(), node.getLocation());
+  protected Object visit(AstRecordType node) {
+    checkTypeName(node.getName().name(), node.getLocation());
     return super.visit(node);
   }
 
   @Override
-  protected Object visit(AstTypeRecord node) {
-    checkTypeName(node.getName(), node.getLocation());
-    return super.visit(node);
-  }
-
-  @Override
-  protected Object visit(AstTypeUnion node) {
-    checkTypeName(node.getName(), node.getLocation());
+  protected Object visit(AstUnionType node) {
+    checkTypeName(node.getName().name(), node.getLocation());
     for (var variant : node.getVariants()) {
-      checkName(variant.getName(), variant.getLocation());
+      checkName(variant.getTag(), variant.getLocation());
     }
     return super.visit(node);
   }
@@ -115,10 +107,10 @@ class PreprocessVisitor extends AstRewriteExpressionVisitor {
         try {
           if (value.contains(".")) {
             number = new AstNumberLiteral(parseDouble(value));
-            number.setType(TypeRef.of(AstTypeBuiltin.FLOAT64));
+            number.setType(AstTypeRef.of(AstBuiltinType.FLOAT64));
           } else {
             number = new AstNumberLiteral(parseLong(value));
-            number.setType(TypeRef.of(AstTypeBuiltin.INT64));
+            number.setType(AstTypeRef.of(AstBuiltinType.INT64));
           }
           number.setLocation(node.getLocation());
         } catch (NumberFormatException e) {
@@ -129,14 +121,14 @@ class PreprocessVisitor extends AstRewriteExpressionVisitor {
           //     .build();
         }
       } else if (node instanceof AstStringLiteral) {
-        node.setType(TypeRef.of(AstTypeBuiltin.STRING));
+        node.setType(AstTypeRef.of(AstBuiltinType.STRING));
       }
     }
     return node;
   }
 
   @Override
-  protected Object visit(AstName node) {
+  protected Object visit(AstEntityRef node) {
     var newNode =
         switch (node.getName().name()) {
           case "true" -> new AstBoolLiteral(true);
@@ -147,30 +139,19 @@ class PreprocessVisitor extends AstRewriteExpressionVisitor {
     if (newNode != node) {
       newNode.setLocation(node.getLocation());
     } else {
-      checkName(node.getName(), node.getLocation());
+      checkName(node.getName().name(), node.getLocation());
     }
     return newNode;
   }
 
   private void checkName(String name, Location location) {
-    if (name != null && isReservedWord(name)) {
+    if (reservedWords.isReservedName(name)) {
       errorConsumer.error(location, "Reserved word cannot be used as a name: %s", name);
     }
   }
 
-  private void checkName(QualifiedName name, Location location) {
-    checkName(name.name(), location);
-  }
-
-  private void checkTypeName(QualifiedName name, Location location) {
-    if (name != null && isReservedTypeName(name.name())) {
-      errorConsumer.error(
-          location, "Reserved type name cannot be used as a type name: %s", name.name());
-    }
-  }
-
   private void checkTypeName(String name, Location location) {
-    if (name != null && isReservedTypeName(name)) {
+    if (reservedWords.isReservedTypeName(name)) {
       errorConsumer.error(location, "Reserved type name cannot be used as a type name: %s", name);
     }
   }

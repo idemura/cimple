@@ -1,7 +1,8 @@
-package com.github.idemura.cimple.compiler.common;
+package com.github.idemura.cimple.compiler.parser;
 
 import com.google.common.collect.ImmutableMap;
-import java.util.Map;
+import java.util.Arrays;
+import java.util.List;
 
 public enum Keyword {
   CASE("case"),
@@ -18,7 +19,6 @@ public enum Keyword {
   INTERFACE("interface"),
   MATCH("match"),
   MODULE("module"),
-  OPAQUE("opaque"),
   RETURN("return"),
   RECORD("record"),
   TEMPLATE("template"),
@@ -34,16 +34,12 @@ public enum Keyword {
     this.symbolName = symbolName;
   }
 
-  public static Map<String, Keyword> symbolNameMap() {
-    return SYMBOL_NAME_MAP;
+  public static Keyword find(String ident) {
+    return SYMBOL_NAME_MAP.get(ident);
   }
 
-  public static Keyword of(String symbolName) {
-    var keyword = SYMBOL_NAME_MAP.get(symbolName);
-    if (keyword != null) {
-      return keyword;
-    }
-    throw new IllegalArgumentException("Unknown keyword: %s".formatted(symbolName));
+  public String symbolName() {
+    return symbolName;
   }
 
   public static ImmutableMap<String, Keyword> createSymbolNameMap() {
@@ -54,7 +50,7 @@ public enum Keyword {
     return builder.build();
   }
 
-  public String symbolName() {
-    return symbolName;
+  public static List<String> valueList() {
+    return Arrays.stream(Keyword.values()).map(Keyword::symbolName).toList();
   }
 }

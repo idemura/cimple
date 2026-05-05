@@ -1,14 +1,15 @@
 package com.github.idemura.cimple.compiler.ast;
 
+import com.github.idemura.cimple.compiler.QualifiedName;
 import java.util.Objects;
 
-public final class AstVariable extends AstStatement {
+public final class AstVariable extends AstEntity {
   public static final long MUTABLE = 0x1L; // const/var
   public static final long PARAM = 0x2L; // Whether it is a function parameter.
   public static final long FIELD = 0x4L; // Whether it is a field.
 
   private QualifiedName name;
-  private TypeRef typeRef;
+  private AstTypeRef type;
   private AstExpression expression;
   private long flags;
 
@@ -29,7 +30,7 @@ public final class AstVariable extends AstStatement {
     return this == object
         || (object instanceof AstVariable other
             && Objects.equals(name, other.name)
-            && Objects.equals(typeRef, other.typeRef)
+            && Objects.equals(type, other.type)
             && flags == other.flags);
   }
 
@@ -45,20 +46,16 @@ public final class AstVariable extends AstStatement {
     return name;
   }
 
-  public void setName(String name) {
-    this.name = new QualifiedName(name);
-  }
-
   public void setName(QualifiedName name) {
     this.name = name;
   }
 
-  public TypeRef getTypeRef() {
-    return typeRef;
+  public AstTypeRef getType() {
+    return type;
   }
 
-  public void setTypeRef(TypeRef typeRef) {
-    this.typeRef = typeRef;
+  public void setType(AstTypeRef type) {
+    this.type = type;
   }
 
   public AstExpression getExpression() {

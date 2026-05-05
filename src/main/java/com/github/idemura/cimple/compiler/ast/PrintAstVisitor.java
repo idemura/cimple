@@ -29,7 +29,7 @@ public class PrintAstVisitor extends AstVisitor {
     printEntity("FUNCTION", header.getName(), header.getResultType());
     output.indent();
     for (var p : header.getParameters()) {
-      printEntity("ARG", p.getName(), p.getTypeRef());
+      printEntity("ARG", p.getName(), p.getType());
     }
     node.getBlock().accept(this);
     output.unindent();
@@ -38,7 +38,7 @@ public class PrintAstVisitor extends AstVisitor {
   }
 
   @Override
-  protected Object visit(AstTypeRecord node) {
+  protected Object visit(AstRecordType node) {
     output.writeLine("TYPE RECORD %s".formatted(node.getName()));
     output.indent();
     visitChildren(node);
@@ -48,32 +48,26 @@ public class PrintAstVisitor extends AstVisitor {
   }
 
   @Override
-  protected Object visit(AstTypeAlias node) {
-    output.writeLine("TYPE OPAQUE %s %s".formatted(node.getName(), node.getBaseTypeRef()));
-    return null;
-  }
-
-  @Override
-  protected Object visit(AstTypeFunction node) {
+  protected Object visit(AstFunctionType node) {
     var header = node.getHeader();
     printEntity("TYPE FUNCTION", node.getName(), header.getResultType());
     output.indent();
     for (var p : header.getParameters()) {
-      printEntity("ARG", p.getName(), p.getTypeRef());
+      printEntity("ARG", p.getName(), p.getType());
     }
     output.unindent();
     return null;
   }
 
   @Override
-  protected Object visit(AstTypeUnion node) {
+  protected Object visit(AstUnionType node) {
     output.writeLine("TYPE UNION %s".formatted(node.getName()));
     output.indent();
     for (var variant : node.getVariants()) {
       if (variant.getValueType() == null) {
-        output.writeLine("VARIANT %s".formatted(variant.getName()));
+        output.writeLine("VARIANT %s".formatted(variant.getTag()));
       } else {
-        output.writeLine("VARIANT %s(%s)".formatted(variant.getName(), variant.getValueType()));
+        output.writeLine("VARIANT %s(%s)".formatted(variant.getTag(), variant.getValueType()));
       }
     }
     output.unindent();
@@ -82,7 +76,7 @@ public class PrintAstVisitor extends AstVisitor {
   }
 
   @Override
-  protected Object visit(AstTypeBuiltin node) {
+  protected Object visit(AstBuiltinType node) {
     output.writeLine("TYPE BUILTIN %s".formatted(node.getName()));
     return null;
   }
@@ -150,7 +144,7 @@ public class PrintAstVisitor extends AstVisitor {
   }
 
   @Override
-  protected Object visit(AstName node) {
+  protected Object visit(AstEntityRef node) {
     output.writeLine("IDENTIFIER %s".formatted(node.getName()));
     return null;
   }
@@ -166,8 +160,7 @@ public class PrintAstVisitor extends AstVisitor {
 
   @Override
   protected Object visit(AstVariable node) {
-    printEntity(
-        node.getBit(AstVariable.MUTABLE) ? "VAR" : "CONST", node.getName(), node.getTypeRef());
+    printEntity(node.getBit(AstVariable.MUTABLE) ? "VAR" : "CONST", node.getName(), node.getType());
     output.indent();
     if (node.getExpression() != null) {
       node.getExpression().accept(this);
@@ -249,7 +242,7 @@ public class PrintAstVisitor extends AstVisitor {
     return null;
   }
 
-  private void printEntity(String clazz, Object value, TypeRef type) {
+  private void printEntity(String clazz, Object value, AstTypeRef type) {
     if (type == null) {
       output.writeLine("%s %s".formatted(clazz, value));
     } else {

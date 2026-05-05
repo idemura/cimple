@@ -1,6 +1,6 @@
-package com.github.idemura.cimple.compiler.tokens;
+package com.github.idemura.cimple.compiler.parser;
 
-import static com.github.idemura.cimple.compiler.tokens.TokenType.*;
+import static com.github.idemura.cimple.compiler.parser.TokenType.*;
 import static java.lang.Character.isDigit;
 import static java.lang.Character.isJavaIdentifierPart;
 import static java.lang.Character.isJavaIdentifierStart;
@@ -20,10 +20,6 @@ public class Tokenizer {
   public Tokenizer(String code, String fileName) {
     this.fileName = fileName;
     this.code = code;
-  }
-
-  public Tokenizer(String code) {
-    this(code, null);
   }
 
   public TokenStream split() {

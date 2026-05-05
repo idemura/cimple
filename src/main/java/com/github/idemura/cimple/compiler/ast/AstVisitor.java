@@ -14,28 +14,24 @@ public abstract class AstVisitor {
     }
   }
 
-  protected Object visit(AstTypeAlias node) {
+  protected Object visit(AstFunctionType node) {
     return null;
   }
 
-  protected Object visit(AstTypeFunction node) {
+  protected Object visit(AstBuiltinType node) {
     return null;
   }
 
-  protected Object visit(AstTypeBuiltin node) {
+  protected Object visit(AstUnionType node) {
     return null;
   }
 
-  protected Object visit(AstTypeUnion node) {
-    return null;
-  }
-
-  protected Object visit(AstTypeRecord node) {
+  protected Object visit(AstRecordType node) {
     visitChildren(node);
     return null;
   }
 
-  protected void visitChildren(AstTypeRecord node) {
+  protected void visitChildren(AstRecordType node) {
     for (var field : node.getFields()) {
       field.accept(this);
     }
@@ -49,6 +45,17 @@ public abstract class AstVisitor {
   protected void visitChildren(AstVariable node) {
     if (node.getExpression() != null) {
       node.getExpression().accept(this);
+    }
+  }
+
+  protected Object visit(AstVariableStatement node) {
+    visitChildren(node);
+    return null;
+  }
+
+  protected void visitChildren(AstVariableStatement node) {
+    if (node.getVariable() != null) {
+      node.getVariable().accept(this);
     }
   }
 
@@ -122,7 +129,7 @@ public abstract class AstVisitor {
     node.getExpression().accept(this);
   }
 
-  protected Object visit(AstName node) {
+  protected Object visit(AstEntityRef node) {
     return null;
   }
 

@@ -1,16 +1,15 @@
 package com.github.idemura.cimple.compiler.ast;
 
-import com.github.idemura.cimple.compiler.Location;
+import com.github.idemura.cimple.compiler.QualifiedName;
 import com.google.common.collect.ImmutableList;
 import java.util.List;
 import java.util.Objects;
 
 public final class AstFunctionHeader {
-  private Location location;
-  private String boundTypeName;
   private QualifiedName name;
-  private TypeRef resultType;
+  private AstTypeRef objectType;
   private List<AstVariable> parameters;
+  private AstTypeRef resultType;
 
   public AstFunctionHeader() {}
 
@@ -25,23 +24,8 @@ public final class AstFunctionHeader {
         || (object instanceof AstFunctionHeader other
             && Objects.equals(name, other.name)
             && Objects.equals(parameters, other.parameters)
-            && Objects.equals(resultType, other.resultType));
-  }
-
-  public Location getLocation() {
-    return location;
-  }
-
-  public void setLocation(Location location) {
-    this.location = location;
-  }
-
-  public String getBoundTypeName() {
-    return boundTypeName;
-  }
-
-  public void setBoundTypeName(String boundTypeName) {
-    this.boundTypeName = boundTypeName;
+            && Objects.equals(resultType, other.resultType)
+            && Objects.equals(objectType, other.objectType));
   }
 
   public QualifiedName getName() {
@@ -52,12 +36,12 @@ public final class AstFunctionHeader {
     this.name = name;
   }
 
-  public TypeRef getResultType() {
-    return resultType;
+  public AstTypeRef getObjectType() {
+    return objectType;
   }
 
-  public void setResultType(TypeRef resultType) {
-    this.resultType = resultType;
+  public void setObjectType(AstTypeRef objectType) {
+    this.objectType = objectType;
   }
 
   public List<AstVariable> getParameters() {
@@ -66,5 +50,13 @@ public final class AstFunctionHeader {
 
   public void setParameters(List<AstVariable> parameters) {
     this.parameters = ImmutableList.copyOf(parameters);
+  }
+
+  public AstTypeRef getResultType() {
+    return resultType;
+  }
+
+  public void setResultType(AstTypeRef resultType) {
+    this.resultType = resultType;
   }
 }

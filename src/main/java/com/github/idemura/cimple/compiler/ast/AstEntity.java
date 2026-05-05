@@ -2,9 +2,8 @@ package com.github.idemura.cimple.compiler.ast;
 
 import com.github.idemura.cimple.compiler.QualifiedName;
 
-public abstract sealed class AstType extends AstNode
-    permits AstBuiltinType, AstFunctionType, AstRecordType, AstUnionType {
-  protected AstType() {}
+public abstract sealed class AstEntity extends AstNode permits AstFunction, AstVariable {
+  public AstEntity() {}
 
   public abstract QualifiedName getName();
 
