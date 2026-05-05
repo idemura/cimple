@@ -27,7 +27,6 @@ import com.github.idemura.cimple.compiler.ast.AstTypeRef;
 import com.github.idemura.cimple.compiler.ast.AstUnionType;
 import com.github.idemura.cimple.compiler.ast.AstVariable;
 import com.github.idemura.cimple.compiler.ast.AstVariableStatement;
-import com.github.idemura.cimple.compiler.ast.UnionVariant;
 import com.google.common.collect.ImmutableList;
 import java.util.List;
 import org.junit.jupiter.api.Test;
@@ -601,6 +600,16 @@ class ParserTest {
   }
 
   @Test
+  void testFunctionParameterListEndingComma() {
+    var code =
+        """
+        module test;
+        function f(a int,) {}
+        """;
+    assertThrows(CompilerException.class, () -> parseCode(code));
+  }
+
+  @Test
   void testReturnStatement() {
     var code =
         """
@@ -655,8 +664,8 @@ class ParserTest {
     return parameter;
   }
 
-  private static UnionVariant unionVariant(String name, String typeName) {
-    var unionVariant = new UnionVariant();
+  private static AstUnionType.Variant unionVariant(String name, String typeName) {
+    var unionVariant = new AstUnionType.Variant();
     unionVariant.setTag(name);
     if (typeName != null) {
       unionVariant.setValueType(AstTypeRef.ofString(typeName));
