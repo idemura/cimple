@@ -3,7 +3,7 @@ package com.github.idemura.cimple.compiler.ast;
 import com.github.idemura.cimple.compiler.QualifiedName;
 import java.util.Objects;
 
-public final class AstTypeRef {
+public final class AstTypeRef extends AstNode {
   private final QualifiedName name;
   private AstType type;
 
@@ -20,6 +20,11 @@ public final class AstTypeRef {
 
   public AstTypeRef(QualifiedName name) {
     this.name = name;
+  }
+
+  @Override
+  public Object accept(AstVisitor visitor) {
+    return visitor.visit(this);
   }
 
   @Override

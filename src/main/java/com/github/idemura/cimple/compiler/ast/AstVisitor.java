@@ -14,8 +14,30 @@ public abstract class AstVisitor {
     }
   }
 
-  protected Object visit(AstFunctionType node) {
+  protected Object visit(AstTypeRef node) {
     return null;
+  }
+
+  protected Object visit(AstFunctionHeader node) {
+    visitChildren(node);
+    return null;
+  }
+
+  protected void visitChildren(AstFunctionHeader node) {
+    acceptSafe(node.getObjectType());
+    for (var parameter : node.getParameters()) {
+      parameter.accept(this);
+    }
+    acceptSafe(node.getResultType());
+  }
+
+  protected Object visit(AstFunctionType node) {
+    visitChildren(node);
+    return null;
+  }
+
+  protected void visitChildren(AstFunctionType node) {
+    node.getHeader().accept(this);
   }
 
   protected Object visit(AstBuiltinType node) {
@@ -43,9 +65,8 @@ public abstract class AstVisitor {
   }
 
   protected void visitChildren(AstVariable node) {
-    if (node.getExpression() != null) {
-      node.getExpression().accept(this);
-    }
+    acceptSafe(node.getType());
+    acceptSafe(node.getExpression());
   }
 
   protected Object visit(AstVariableStatement node) {
@@ -54,9 +75,7 @@ public abstract class AstVisitor {
   }
 
   protected void visitChildren(AstVariableStatement node) {
-    if (node.getVariable() != null) {
-      node.getVariable().accept(this);
-    }
+    node.getVariable().accept(this);
   }
 
   protected Object visit(AstFunction node) {
@@ -65,6 +84,7 @@ public abstract class AstVisitor {
   }
 
   protected void visitChildren(AstFunction node) {
+    node.getHeader().accept(this);
     node.getBlock().accept(this);
   }
 
@@ -151,9 +171,7 @@ public abstract class AstVisitor {
   }
 
   protected void visitChildren(AstReturn node) {
-    if (node.getExpression() != null) {
-      node.getExpression().accept(this);
-    }
+    acceptSafe(node.getExpression());
   }
 
   protected Object visit(AstIf node) {
@@ -168,9 +186,7 @@ public abstract class AstVisitor {
     for (var thenBlock : node.getThenBlocks()) {
       thenBlock.accept(this);
     }
-    if (node.getElseBlock() != null) {
-      node.getElseBlock().accept(this);
-    }
+    acceptSafe(node.getElseBlock());
   }
 
   protected Object visit(AstFor node) {
@@ -179,15 +195,9 @@ public abstract class AstVisitor {
   }
 
   protected void visitChildren(AstFor node) {
-    if (node.getInit() != null) {
-      node.getInit().accept(this);
-    }
-    if (node.getCondition() != null) {
-      node.getCondition().accept(this);
-    }
-    if (node.getIncrement() != null) {
-      node.getIncrement().accept(this);
-    }
+    acceptSafe(node.getInit());
+    acceptSafe(node.getCondition());
+    acceptSafe(node.getIncrement());
     node.getBlock().accept(this);
   }
 
@@ -202,5 +212,11 @@ public abstract class AstVisitor {
 
   protected void visitChildren(AstDefer node) {
     node.getBlock().accept(this);
+  }
+
+  protected void acceptSafe(AstNode node) {
+    if (node != null) {
+      node.accept(this);
+    }
   }
 }

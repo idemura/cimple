@@ -26,7 +26,7 @@ public final class AstRecordType extends AstType {
   }
 
   public List<AstVariable> getFields() {
-    return ImmutableList.copyOf(fields);
+    return fields;
   }
 
   public void setFields(List<AstVariable> fields) {

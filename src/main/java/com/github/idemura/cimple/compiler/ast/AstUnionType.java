@@ -24,7 +24,7 @@ public final class AstUnionType extends AstType {
   }
 
   public List<UnionVariant> getVariants() {
-    return ImmutableList.copyOf(variants);
+    return variants;
   }
 
   public void setVariants(List<UnionVariant> variants) {

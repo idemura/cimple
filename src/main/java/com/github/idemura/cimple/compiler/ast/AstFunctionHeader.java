@@ -5,13 +5,18 @@ import com.google.common.collect.ImmutableList;
 import java.util.List;
 import java.util.Objects;
 
-public final class AstFunctionHeader {
+public final class AstFunctionHeader extends AstNode {
   private QualifiedName name;
   private AstTypeRef objectType;
   private List<AstVariable> parameters;
   private AstTypeRef resultType;
 
   public AstFunctionHeader() {}
+
+  @Override
+  public Object accept(AstVisitor visitor) {
+    return visitor.visit(this);
+  }
 
   @Override
   public int hashCode() {
@@ -45,7 +50,7 @@ public final class AstFunctionHeader {
   }
 
   public List<AstVariable> getParameters() {
-    return ImmutableList.copyOf(parameters);
+    return parameters;
   }
 
   public void setParameters(List<AstVariable> parameters) {
