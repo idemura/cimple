@@ -7,7 +7,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-class ScopeNameMap {
+class AstEntityNameMap {
   private final Map<String, AstEntity> globalNameMap = new HashMap<>();
   private final Map<String, AstEntity> nameMap = new HashMap<>();
   private final List<List<AstEntity>> scopeStack = new ArrayList<>();

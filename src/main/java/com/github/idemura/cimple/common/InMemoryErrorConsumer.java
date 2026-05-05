@@ -5,18 +5,23 @@ import com.github.idemura.cimple.compiler.Location;
 import java.util.ArrayList;
 import java.util.List;
 
-public class InMemoryErrorConsumer implements ErrorConsumer {
-  private final List<Error> errors = new ArrayList<>();
+public class InMemoryErrorConsumer extends ErrorConsumer {
+  private final List<String> errors = new ArrayList<>();
 
   public InMemoryErrorConsumer() {}
 
   @Override
-  public void error(Location location, String message, Object... args) {
-    errors.add(new Error(location, message.formatted(args)));
+  public void outputError(String message) {
+    errors.add(message);
   }
 
   @Override
-  public List<Error> getErrors() {
+  public void errorAt(Location location, String pattern, Object... args) {
+    errors.add(formatError(ERROR, location, pattern, args));
+  }
+
+  @Override
+  public List<String> getErrors() {
     return errors;
   }
 }

@@ -4,7 +4,6 @@ import static com.github.idemura.cimple.compiler.parser.Parser.parseCode;
 import static org.junit.jupiter.api.Assertions.*;
 
 import com.github.idemura.cimple.common.InMemoryErrorConsumer;
-import com.github.idemura.cimple.compiler.ErrorConsumer;
 import com.github.idemura.cimple.compiler.ast.AstBoolLiteral;
 import com.github.idemura.cimple.compiler.ast.AstDefer;
 import com.github.idemura.cimple.compiler.ast.AstExpressionStatement;
@@ -97,6 +96,6 @@ class PreprocessVisitorTest {
             "Reserved word cannot be used as a name: true",
             "Reserved type name cannot be used as a type name: int",
             "Reserved type name cannot be used as a type name: byte"),
-        errorConsumer.getErrors().stream().map(ErrorConsumer.Error::message).toList());
+        errorConsumer.getErrors());
   }
 }

@@ -15,7 +15,7 @@ import com.github.idemura.cimple.compiler.ast.AstVisitor;
 
 class TypeCheckVisitor extends AstVisitor {
   private final ErrorConsumer errorConsumer;
-  private final ScopeNameMap variables = new ScopeNameMap();
+  private final AstEntityNameMap variables = new AstEntityNameMap();
 
   public TypeCheckVisitor(ErrorConsumer errorConsumer) {
     this.errorConsumer = errorConsumer;

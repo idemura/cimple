@@ -20,7 +20,7 @@ import com.github.idemura.cimple.compiler.ast.AstVisitor;
 public class NameResolutionVisitor extends AstVisitor {
   private final NameMap nameMap;
   private final ErrorConsumer errorConsumer;
-  private final ScopeNameMap entities = new ScopeNameMap();
+  private final AstEntityNameMap entities = new AstEntityNameMap();
   private String moduleName;
 
   public NameResolutionVisitor(NameMap nameMap, ErrorConsumer errorConsumer) {
@@ -105,7 +105,7 @@ public class NameResolutionVisitor extends AstVisitor {
       entity = nameMap.getEntity(name.getName());
     }
     if (entity == null) {
-      errorConsumer.error(name.getLocation(), "Undefined name: %s", name.getName());
+      errorConsumer.errorAt(name.getLocation(), "Undefined name: %s", name.getName());
       return null;
     }
     name.setEntity(entity);
