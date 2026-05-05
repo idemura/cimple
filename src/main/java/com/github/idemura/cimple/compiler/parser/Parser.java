@@ -33,7 +33,6 @@ import com.github.idemura.cimple.compiler.ast.AstTypeRef;
 import com.github.idemura.cimple.compiler.ast.AstUnionType;
 import com.github.idemura.cimple.compiler.ast.AstVariable;
 import com.github.idemura.cimple.compiler.ast.AstVariableStatement;
-import com.github.idemura.cimple.compiler.ast.UnionVariant;
 import com.google.common.collect.ImmutableList;
 import java.util.ArrayList;
 import java.util.List;
@@ -117,20 +116,20 @@ public class Parser {
     takeKeyword(UNION);
     type.setName(takeIdentifier());
     tokens.take(LCURLY);
-    var variants = new ImmutableList.Builder<UnionVariant>();
+    var variants = new ImmutableList.Builder<AstUnionType.Variant>();
     while (!tokens.takeIf(RCURLY)) {
-      variants.add(parseTypeUnionVariant());
+      variants.add(parseUnionVariant());
       tokens.take(SEMICOLON);
     }
     type.setVariants(variants.build());
     return type;
   }
 
-  private UnionVariant parseTypeUnionVariant() {
-    var variant = new UnionVariant();
+  private AstUnionType.Variant parseUnionVariant() {
+    var variant = new AstUnionType.Variant();
     var name = tokens.take(IDENTIFIER);
-    variant.setLocation(name.location());
     variant.setTag(name.value());
+    variant.setLocation(name.location());
     if (tokens.takeIf(LPAREN)) {
       variant.setValueType(parseTypeRef());
       tokens.take(RPAREN);

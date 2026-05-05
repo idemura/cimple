@@ -15,7 +15,6 @@ import com.github.idemura.cimple.compiler.ast.AstTypeRef;
 import com.github.idemura.cimple.compiler.ast.AstUnionType;
 import com.github.idemura.cimple.compiler.ast.AstVariable;
 import com.github.idemura.cimple.compiler.ast.AstVisitor;
-import com.github.idemura.cimple.compiler.ast.UnionVariant;
 
 /// Resolves names.
 public class NameResolutionVisitor extends AstVisitor {
@@ -125,7 +124,7 @@ public class NameResolutionVisitor extends AstVisitor {
     resolveTypeRef(header.getResultType());
   }
 
-  private void resolveVariant(UnionVariant variant) {
+  private void resolveVariant(AstUnionType.Variant variant) {
     resolveTypeRef(variant.getValueType());
   }
 
