@@ -4,6 +4,8 @@ import static com.github.idemura.cimple.compiler.parser.Parser.parseCode;
 import static org.junit.jupiter.api.Assertions.*;
 
 import com.github.idemura.cimple.compiler.CompilerException;
+import com.github.idemura.cimple.compiler.ErrorConsumer;
+import com.github.idemura.cimple.compiler.InMemoryErrorConsumer;
 import com.github.idemura.cimple.compiler.QualifiedName;
 import com.github.idemura.cimple.compiler.ast.AstArrayAccess;
 import com.github.idemura.cimple.compiler.ast.AstBind;
@@ -53,6 +55,31 @@ class ParserTest {
         .toList();
   }
 
+  private static ErrorConsumer makeErrorConsumer() {
+    var errorConsumer = new InMemoryErrorConsumer();
+    errorConsumer.enable(ErrorConsumer.Mode.THROW_ON_ERROR);
+    return errorConsumer;
+  }
+
+  private static AstVariable parameter(String name, String typeName) {
+    var parameter = new AstVariable();
+    parameter.setName(new QualifiedName(name));
+    var type = new AstTypeRef();
+    type.setName(new QualifiedName(typeName));
+    parameter.setType(type);
+    parameter.setBit(AstVariable.PARAM);
+    return parameter;
+  }
+
+  private static AstUnionType.Variant unionVariant(String name, String typeName) {
+    var unionVariant = new AstUnionType.Variant();
+    unionVariant.setTag(name);
+    if (typeName != null) {
+      unionVariant.setValueType(AstTypeRef.ofString(typeName));
+    }
+    return unionVariant;
+  }
+
   @Test
   void testModule() {
     var code =
@@ -72,7 +99,7 @@ class ParserTest {
           return 1;
         }
         """;
-    var module = parseCode(code);
+    var module = parseCode(code, makeErrorConsumer());
     assertEquals("test", module.getName());
     var functions = functions(module);
     assertEquals(4, functions.size());
@@ -147,7 +174,7 @@ class ParserTest {
           const name string;
         }
         """;
-    var module = parseCode(code);
+    var module = parseCode(code, makeErrorConsumer());
     assertEquals("test", module.getName());
     var types = types(module);
     assertEquals(2, types.size());
@@ -193,7 +220,7 @@ class ParserTest {
           Some(string);
         }
         """;
-    var module = parseCode(code);
+    var module = parseCode(code, makeErrorConsumer());
     assertEquals("test", module.getName());
     var types = types(module);
     assertEquals(1, types.size());
@@ -213,7 +240,7 @@ class ParserTest {
         type function Supplier() string;
         type function Consumer(v string);
         """;
-    var module = parseCode(code);
+    var module = parseCode(code, makeErrorConsumer());
     assertEquals("test", module.getName());
     var types = types(module);
     assertEquals(3, types.size());
@@ -257,7 +284,7 @@ class ParserTest {
           var x = [1 + 2 type int];
         }
         """;
-    var module = parseCode(code);
+    var module = parseCode(code, makeErrorConsumer());
     var statements = functions(module).get(0).getBlock().statements();
     assertEquals(9, statements.size());
     int i = 0;
@@ -385,7 +412,7 @@ class ParserTest {
           var x = foo(1, 2);
         }
         """;
-    var module = parseCode(code);
+    var module = parseCode(code, makeErrorConsumer());
     var statements = functions(module).get(0).getBlock().statements();
     assertEquals(3, statements.size());
     int i = 0;
@@ -423,7 +450,7 @@ class ParserTest {
           var x = foo.bar(1, 2)[3]:baz;
         }
         """;
-    var module = parseCode(code);
+    var module = parseCode(code, makeErrorConsumer());
     var statements = functions(module).get(0).getBlock().statements();
     assertEquals(4, statements.size());
     int i = 0;
@@ -484,7 +511,7 @@ class ParserTest {
           }
         }
         """;
-    var module = parseCode(code);
+    var module = parseCode(code, makeErrorConsumer());
     var statements = functions(module).get(0).getBlock().statements();
     assertEquals(3, statements.size());
     int i = 0;
@@ -527,7 +554,7 @@ class ParserTest {
           }
         }
         """;
-    var module = parseCode(code);
+    var module = parseCode(code, makeErrorConsumer());
     var statements = functions(module).get(0).getBlock().statements();
     assertEquals(3, statements.size());
     int i = 0;
@@ -573,7 +600,7 @@ class ParserTest {
             }
           }
           """;
-      assertThrows(CompilerException.class, () -> parseCode(code));
+      assertThrows(CompilerException.class, () -> parseCode(code, makeErrorConsumer()));
     }
     {
       var code =
@@ -584,7 +611,7 @@ class ParserTest {
             }
           }
           """;
-      assertThrows(CompilerException.class, () -> parseCode(code));
+      assertThrows(CompilerException.class, () -> parseCode(code, makeErrorConsumer()));
     }
     {
       var code =
@@ -595,7 +622,7 @@ class ParserTest {
             }
           }
           """;
-      assertThrows(CompilerException.class, () -> parseCode(code));
+      assertThrows(CompilerException.class, () -> parseCode(code, makeErrorConsumer()));
     }
   }
 
@@ -606,7 +633,7 @@ class ParserTest {
         module test;
         function f(a int,) {}
         """;
-    assertThrows(CompilerException.class, () -> parseCode(code));
+    assertThrows(CompilerException.class, () -> parseCode(code, makeErrorConsumer()));
   }
 
   @Test
@@ -618,7 +645,7 @@ class ParserTest {
           return value;
         }
         """;
-    var module = parseCode(code);
+    var module = parseCode(code, makeErrorConsumer());
     var statements = functions(module).get(0).getBlock().statements();
     assertEquals(1, statements.size());
     {
@@ -639,7 +666,7 @@ class ParserTest {
           }
         }
         """;
-    var module = parseCode(code);
+    var module = parseCode(code, makeErrorConsumer());
     var statements = functions(module).get(0).getBlock().statements();
     assertEquals(2, statements.size());
     {
@@ -654,22 +681,5 @@ class ParserTest {
       var exprStmt = (AstExpressionStatement) stmt.getBlock().statements().get(0);
       assertEquals(AstEntityRef.ofString("value"), exprStmt.getExpression());
     }
-  }
-
-  private static AstVariable parameter(String name, String typeName) {
-    var parameter = new AstVariable();
-    parameter.setName(new QualifiedName(name));
-    parameter.setType(new AstTypeRef(new QualifiedName(typeName)));
-    parameter.setBit(AstVariable.PARAM);
-    return parameter;
-  }
-
-  private static AstUnionType.Variant unionVariant(String name, String typeName) {
-    var unionVariant = new AstUnionType.Variant();
-    unionVariant.setTag(name);
-    if (typeName != null) {
-      unionVariant.setValueType(AstTypeRef.ofString(typeName));
-    }
-    return unionVariant;
   }
 }

@@ -6,140 +6,207 @@ import static java.lang.Character.isJavaIdentifierPart;
 import static java.lang.Character.isJavaIdentifierStart;
 import static java.lang.Character.isWhitespace;
 
-import com.github.idemura.cimple.compiler.CompilerException;
+import com.github.idemura.cimple.compiler.ErrorConsumer;
 import com.github.idemura.cimple.compiler.Location;
+import java.util.ArrayList;
+import java.util.List;
 
 // Transforms input code into a token stream.
 public class Tokenizer {
-  private final String fileName;
-  private final String code;
-  private int index;
-  private int line = 1;
-  private int column = 1;
+  private static final class SplitContext {
+    private final String code;
+    private final String fileName;
+    private int index;
+    private int line = 1;
+    private int column = 1;
 
-  public Tokenizer(String code, String fileName) {
-    this.fileName = fileName;
-    this.code = code;
+    private SplitContext(String code, String fileName) {
+      this.code = code;
+      this.fileName = fileName;
+    }
   }
 
-  public TokenStream split() {
-    final int n = code.length();
-    if (n > 0 && code.charAt(n - 1) != '\n') {
-      throw CompilerException.builder().formatMessage("File must end with new line").build();
+  private final ErrorConsumer errorConsumer;
+  private final List<Token> tokens = new ArrayList<>();
+  private int pos;
+
+  public Tokenizer(ErrorConsumer errorConsumer) {
+    this.errorConsumer = errorConsumer;
+  }
+
+  @Override
+  public String toString() {
+    if (pos >= tokens.size()) {
+      return "Tokenizer: EOF";
+    } else {
+      return "Tokenizer: pos=%d/%d '%s' location %s"
+          .formatted(pos, tokens.size(), tokens.get(pos), tokens.get(pos).location());
     }
-    var tokens = new TokenStream();
-    while (index < n) {
-      char c = code.charAt(index);
+  }
+
+  public void split(String code, String fileName) {
+    var context = new SplitContext(code, fileName);
+    final int n = context.code.length();
+    if (n > 0 && context.code.charAt(n - 1) != '\n') {
+      throw errorConsumer.fatal("File must end with new line");
+    }
+    while (context.index < n) {
+      char c = context.code.charAt(context.index);
       if (isWhitespace(c)) {
-        skipWhitespace();
+        skipWhitespace(context);
       } else if (isJavaIdentifierStart(c)) {
-        tokens.add(takeIdentifier());
+        tokens.add(takeIdentifier(context));
       } else if (isDigit(c)) {
-        tokens.add(takeNumber());
+        tokens.add(takeNumber(context));
       } else {
         switch (c) {
-          case '#' -> skipComment();
-          case '(' -> tokens.add(take1CharToken(LPAREN));
-          case ')' -> tokens.add(take1CharToken(RPAREN));
-          case '[' -> tokens.add(take1CharToken(LBRACKET));
-          case ']' -> tokens.add(take1CharToken(RBRACKET));
-          case '{' -> tokens.add(take1CharToken(LCURLY));
-          case '}' -> tokens.add(take1CharToken(RCURLY));
-          case ':' -> tokens.add(take1CharToken(COLON));
-          case ',' -> tokens.add(take1CharToken(COMMA));
-          case '.' -> tokens.add(take1CharToken(PERIOD));
-          case '=' -> tokens.add(take1CharToken(ASSIGN));
-          case ';' -> tokens.add(take1CharToken(SEMICOLON));
-          case '+' -> tokens.add(take1CharToken(PLUS));
-          case '-' -> tokens.add(take1CharToken(MINUS));
-          case '*' -> tokens.add(take1CharToken(ASTERISK));
-          case '/' -> tokens.add(take1CharToken(SLASH));
-          case '<' -> tokens.add(take1CharToken(CMP_GT));
-          case '>' -> tokens.add(take1CharToken(CMP_LT));
-          case '"' -> tokens.add(takeString());
+          case '#' -> skipComment(context);
+          case '(' -> tokens.add(take1CharToken(context, LPAREN));
+          case ')' -> tokens.add(take1CharToken(context, RPAREN));
+          case '[' -> tokens.add(take1CharToken(context, LBRACKET));
+          case ']' -> tokens.add(take1CharToken(context, RBRACKET));
+          case '{' -> tokens.add(take1CharToken(context, LCURLY));
+          case '}' -> tokens.add(take1CharToken(context, RCURLY));
+          case ':' -> tokens.add(take1CharToken(context, COLON));
+          case ',' -> tokens.add(take1CharToken(context, COMMA));
+          case '.' -> tokens.add(take1CharToken(context, PERIOD));
+          case '=' -> tokens.add(take1CharToken(context, ASSIGN));
+          case ';' -> tokens.add(take1CharToken(context, SEMICOLON));
+          case '+' -> tokens.add(take1CharToken(context, PLUS));
+          case '-' -> tokens.add(take1CharToken(context, MINUS));
+          case '*' -> tokens.add(take1CharToken(context, ASTERISK));
+          case '/' -> tokens.add(take1CharToken(context, SLASH));
+          case '<' -> tokens.add(take1CharToken(context, CMP_GT));
+          case '>' -> tokens.add(take1CharToken(context, CMP_LT));
+          case '"' -> tokens.add(takeString(context));
           default ->
-              throw CompilerException.builder()
-                  .formatMessage("Invalid character: %s", c)
-                  .setLocation(currentLocation())
-                  .build();
+              throw errorConsumer.fatalAt(currentLocation(context), "Invalid character: %s", c);
         }
       }
     }
-    return tokens;
   }
 
-  private void skipWhitespace() {
-    while (index < code.length() && isWhitespace(code.charAt(index))) {
-      next();
+  public List<Token> tokenList() {
+    return List.copyOf(tokens);
+  }
+
+  // public void add(Token token) {
+  //   tokens.add(token);
+  // }
+
+  public boolean done() {
+    return pos == tokens.size();
+  }
+
+  public void step() {
+    checkPosition();
+    pos++;
+  }
+
+  public Token take() {
+    checkPosition();
+    return tokens.get(pos++);
+  }
+
+  public boolean takeIf(TokenType type) {
+    checkPosition();
+    var current = tokens.get(pos);
+    if (current.type() != type) {
+      return false;
+    }
+    pos++;
+    return true;
+  }
+
+  Token current() {
+    checkPosition();
+    return tokens.get(pos);
+  }
+
+  Token next() {
+    if (pos + 1 < tokens.size()) {
+      return tokens.get(pos + 1);
+    } else {
+      return null;
     }
   }
 
-  private void skipComment() {
-    while (index < code.length() && code.charAt(index) != '\n') {
-      next();
+  private void skipWhitespace(SplitContext context) {
+    while (context.index < context.code.length()
+        && isWhitespace(context.code.charAt(context.index))) {
+      next(context);
     }
   }
 
-  private Token takeIdentifier() {
-    var location = currentLocation();
-    int first = index;
-    while (index < code.length()) {
-      if (!isJavaIdentifierPart(code.charAt(index))) {
+  private void skipComment(SplitContext context) {
+    while (context.index < context.code.length() && context.code.charAt(context.index) != '\n') {
+      next(context);
+    }
+  }
+
+  private Token takeIdentifier(SplitContext context) {
+    var location = currentLocation(context);
+    int first = context.index;
+    while (context.index < context.code.length()) {
+      if (!isJavaIdentifierPart(context.code.charAt(context.index))) {
         break;
       }
-      column++;
-      index++;
+      context.column++;
+      context.index++;
     }
-    return new Token(IDENTIFIER, code.substring(first, index), location);
+    return new Token(IDENTIFIER, context.code.substring(first, context.index), location);
   }
 
-  private Token takeNumber() {
-    var location = currentLocation();
-    int first = index;
-    while (index < code.length()) {
-      if (!isDigit(code.charAt(index))) {
+  private Token takeNumber(SplitContext context) {
+    var location = currentLocation(context);
+    int first = context.index;
+    while (context.index < context.code.length()) {
+      if (!isDigit(context.code.charAt(context.index))) {
         break;
       }
-      column++;
-      index++;
+      context.column++;
+      context.index++;
     }
-    return new Token(NUMBER, code.substring(first, index), location);
+    return new Token(NUMBER, context.code.substring(first, context.index), location);
   }
 
-  private Token takeString() {
+  private Token takeString(SplitContext context) {
     // TODO: Escape sequences
-    var location = currentLocation();
-    int first = index++;
-    while (code.charAt(index) != '"') {
-      if (code.charAt(index) == '\n') {
-        throw CompilerException.builder()
-            .formatMessage("Unterminated string literal")
-            .setLocation(new Location(fileName, line, first))
-            .build();
+    var location = currentLocation(context);
+    int first = context.index++;
+    while (context.code.charAt(context.index) != '"') {
+      if (context.code.charAt(context.index) == '\n') {
+        throw errorConsumer.fatalAt(location, "Unterminated string literal");
       }
-      next();
+      next(context);
     }
-    next();
-    return new Token(STRING, code.substring(first + 1, index - 1), location);
+    next(context);
+    return new Token(STRING, context.code.substring(first + 1, context.index - 1), location);
   }
 
-  private Token take1CharToken(TokenType tokenType) {
-    var location = currentLocation();
-    next();
+  private Token take1CharToken(SplitContext context, TokenType tokenType) {
+    var location = currentLocation(context);
+    next(context);
     return new Token(tokenType, null, location);
   }
 
-  private Location currentLocation() {
-    return new Location(fileName, line, column);
+  private Location currentLocation(SplitContext context) {
+    return new Location(context.fileName, context.line, context.column);
   }
 
-  private void next() {
-    if (code.charAt(index) == '\n') {
-      column = 1;
-      line++;
+  private void next(SplitContext context) {
+    if (context.code.charAt(context.index) == '\n') {
+      context.column = 1;
+      context.line++;
     } else {
-      column++;
+      context.column++;
     }
-    index++;
+    context.index++;
+  }
+
+  private void checkPosition() {
+    if (pos == tokens.size()) {
+      throw new IllegalStateException("Reached token stream end");
+    }
   }
 }

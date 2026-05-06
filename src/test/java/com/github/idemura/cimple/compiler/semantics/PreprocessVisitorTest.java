@@ -3,7 +3,7 @@ package com.github.idemura.cimple.compiler.semantics;
 import static com.github.idemura.cimple.compiler.parser.Parser.parseCode;
 import static org.junit.jupiter.api.Assertions.*;
 
-import com.github.idemura.cimple.common.InMemoryErrorConsumer;
+import com.github.idemura.cimple.compiler.InMemoryErrorConsumer;
 import com.github.idemura.cimple.compiler.ast.AstBoolLiteral;
 import com.github.idemura.cimple.compiler.ast.AstDefer;
 import com.github.idemura.cimple.compiler.ast.AstExpressionStatement;
@@ -29,7 +29,6 @@ class PreprocessVisitorTest {
 
   @Test
   void testRewriteTrueFalseNullLiterals() {
-    var errorConsumer = new InMemoryErrorConsumer();
     var code =
         """
         module test;
@@ -45,7 +44,8 @@ class PreprocessVisitorTest {
         }
         """;
 
-    var module = parseCode(code);
+    var errorConsumer = new InMemoryErrorConsumer();
+    var module = parseCode(code, errorConsumer);
     var nameMap = new NameMap();
     module.accept(new PreprocessVisitor(nameMap, Keyword.valueList(), errorConsumer));
 
@@ -73,7 +73,6 @@ class PreprocessVisitorTest {
 
   @Test
   void testReservedNameFailures() {
-    var errorConsumer = new InMemoryErrorConsumer();
     var code =
         """
         module if;
@@ -84,7 +83,8 @@ class PreprocessVisitorTest {
         type union byte {}
         """;
 
-    var module = parseCode(code);
+    var errorConsumer = new InMemoryErrorConsumer();
+    var module = parseCode(code, errorConsumer);
     var nameMap = new NameMap();
     module.accept(new PreprocessVisitor(nameMap, Keyword.valueList(), errorConsumer));
 

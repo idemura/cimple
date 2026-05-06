@@ -1,6 +1,6 @@
 package com.github.idemura.cimple.compiler.codegen.c;
 
-import com.github.idemura.cimple.common.IndentWriter;
+import com.github.idemura.cimple.compiler.IndentWriter;
 import com.github.idemura.cimple.compiler.ast.AstNode;
 import com.github.idemura.cimple.compiler.codegen.CodeGenerator;
 

@@ -1,9 +1,8 @@
 package com.github.idemura.cimple.compiler.semantics;
 
 import static com.github.idemura.cimple.compiler.parser.Parser.parseCode;
-import static org.junit.jupiter.api.Assertions.*;
 
-import com.github.idemura.cimple.common.InMemoryErrorConsumer;
+import com.github.idemura.cimple.compiler.InMemoryErrorConsumer;
 import com.github.idemura.cimple.compiler.ast.AstFunction;
 import com.github.idemura.cimple.compiler.ast.AstModule;
 import com.github.idemura.cimple.compiler.ast.AstType;
@@ -54,8 +53,8 @@ class NameResolutionVisitorTest {
         }
         """;
 
-    var module = parseCode(code);
     var errorConsumer = new InMemoryErrorConsumer();
+    var module = parseCode(code, errorConsumer);
     var nameMap = new NameMap();
     module.accept(new PreprocessVisitor(nameMap, Keyword.valueList(), errorConsumer));
     module.accept(new NameResolutionVisitor(nameMap, errorConsumer));
@@ -65,13 +64,15 @@ class NameResolutionVisitorTest {
     // var variable = variables(module).get(0);
     // {
     //   var function = functions(module).get(0);
-    //   var expr = ((AstExpressionStatement) function.getBlock().statements().get(0)).getExpression();
+    //   var expr = ((AstExpressionStatement)
+    // function.getBlock().statements().get(0)).getExpression();
     //   var name = (AstEntityRef) expr;
     //   // assertSame(variable, name.getVariable());
     // }
     // {
     //   var function = functions(module).get(1);
-    //   var expr = ((AstExpressionStatement) function.getBlock().statements().get(0)).getExpression();
+    //   var expr = ((AstExpressionStatement)
+    // function.getBlock().statements().get(0)).getExpression();
     //   var call = (AstCall) expr;
     //   var name = (AstEntityRef) call.getFunction();
     //   // assertSame(functions(module).get(0), name.getFunction());

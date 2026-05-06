@@ -4,22 +4,21 @@ import com.github.idemura.cimple.compiler.QualifiedName;
 import java.util.Objects;
 
 public final class AstTypeRef extends AstNode {
-  private final QualifiedName name;
+  private QualifiedName name;
   private AstType type;
 
   // For testing
   public static AstTypeRef ofString(String name) {
-    return new AstTypeRef(new QualifiedName(name));
+    var ref = new AstTypeRef();
+    ref.setName(new QualifiedName(name));
+    return ref;
   }
 
   public static AstTypeRef of(AstType type) {
-    var typeRef = new AstTypeRef(type.getName());
-    typeRef.setType(type);
-    return typeRef;
-  }
-
-  public AstTypeRef(QualifiedName name) {
-    this.name = name;
+    var ref = new AstTypeRef();
+    ref.setName(type.getName());
+    ref.setType(type);
+    return ref;
   }
 
   @Override
@@ -43,8 +42,12 @@ public final class AstTypeRef extends AstNode {
     return "TYPE_REF(%s)".formatted(name);
   }
 
-  public QualifiedName name() {
+  public QualifiedName getName() {
     return name;
+  }
+
+  public void setName(QualifiedName name) {
+    this.name = name;
   }
 
   public AstType getType() {

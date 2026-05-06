@@ -1,4 +1,4 @@
-package com.github.idemura.cimple.common;
+package com.github.idemura.cimple.compiler;
 
 import java.io.IOException;
 import java.io.UncheckedIOException;

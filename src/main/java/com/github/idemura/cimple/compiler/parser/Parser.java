@@ -4,6 +4,7 @@ import static com.github.idemura.cimple.compiler.parser.Keyword.*;
 import static com.github.idemura.cimple.compiler.parser.TokenType.*;
 
 import com.github.idemura.cimple.compiler.CompilerException;
+import com.github.idemura.cimple.compiler.ErrorConsumer;
 import com.github.idemura.cimple.compiler.Location;
 import com.github.idemura.cimple.compiler.QualifiedName;
 import com.github.idemura.cimple.compiler.ast.AstArrayAccess;
@@ -39,15 +40,19 @@ import java.util.List;
 
 // Parses token stream, type checks and build the AST.
 public class Parser {
-  private final TokenStream tokens;
+  private final Tokenizer tokenizer;
+  private final ErrorConsumer errorConsumer;
 
   // For testing
-  public static AstModule parseCode(String code) {
-    return new Parser(new Tokenizer(code, null).split()).parse();
+  public static AstModule parseCode(String code, ErrorConsumer errorConsumer) {
+    var tokenizer = new Tokenizer(errorConsumer);
+    tokenizer.split(code, null);
+    return new Parser(tokenizer, errorConsumer).parse();
   }
 
-  public Parser(TokenStream tokens) {
-    this.tokens = tokens;
+  public Parser(Tokenizer tokenizer, ErrorConsumer errorConsumer) {
+    this.tokenizer = tokenizer;
+    this.errorConsumer = errorConsumer;
   }
 
   public AstModule parse() {
@@ -60,8 +65,8 @@ public class Parser {
 
     // TODO: Parse imports
 
-    while (!tokens.done()) {
-      switch (keyword(tokens.current())) {
+    while (!tokenizer.done()) {
+      switch (keyword(tokenizer.current())) {
         case FUNCTION:
           module.definitions().add(parseFunction());
           break;
@@ -75,10 +80,7 @@ public class Parser {
           module.definitions().add(parseVariable(false));
           break;
         default:
-          throw CompilerException.builder()
-              .formatMessage("Invalid module definition")
-              .setLocation(tokens.current().location())
-              .build();
+          throw fatalAtCurrentLocation("Invalid module definition");
       }
     }
     return module;
@@ -86,26 +88,25 @@ public class Parser {
 
   private AstType parseType() {
     takeKeyword(TYPE);
-    return switch (keyword(tokens.current())) {
+    return switch (keyword(tokenizer.current())) {
       case RECORD -> parseTypeRecord();
       case FUNCTION -> parseTypeFunction();
       case UNION -> parseTypeUnion();
       default ->
-          throw CompilerException.builder()
-              .formatMessage("Expected type declaration kind after type")
-              .setLocation(tokens.current().location())
-              .build();
+          throw fatalAtCurrentLocation(
+              "Invalid type definition: %s allowed", List.of(RECORD, FUNCTION, UNION));
     };
   }
 
   private AstRecordType parseTypeRecord() {
     var type = new AstRecordType();
     takeKeyword(RECORD);
+    type.setLocation(tokenizer.current().location());
     type.setName(takeIdentifier());
-    tokens.take(LCURLY);
+    take(LCURLY);
     var fields = new ImmutableList.Builder<AstVariable>();
-    while (!tokens.takeIf(RCURLY)) {
-      fields.add(parseVariable(keyword(tokens.current()) != CONST));
+    while (!tokenizer.takeIf(RCURLY)) {
+      fields.add(parseVariable(keyword(tokenizer.current()) != CONST));
     }
     type.setFields(fields.build());
     return type;
@@ -114,12 +115,13 @@ public class Parser {
   private AstUnionType parseTypeUnion() {
     var type = new AstUnionType();
     takeKeyword(UNION);
+    type.setLocation(tokenizer.current().location());
     type.setName(takeIdentifier());
-    tokens.take(LCURLY);
+    take(LCURLY);
     var variants = new ImmutableList.Builder<AstUnionType.Variant>();
-    while (!tokens.takeIf(RCURLY)) {
+    while (!tokenizer.takeIf(RCURLY)) {
       variants.add(parseUnionVariant());
-      tokens.take(SEMICOLON);
+      take(SEMICOLON);
     }
     type.setVariants(variants.build());
     return type;
@@ -127,12 +129,11 @@ public class Parser {
 
   private AstUnionType.Variant parseUnionVariant() {
     var variant = new AstUnionType.Variant();
-    var name = tokens.take(IDENTIFIER);
-    variant.setTag(name.value());
-    variant.setLocation(name.location());
-    if (tokens.takeIf(LPAREN)) {
+    variant.setLocation(tokenizer.current().location());
+    variant.setTag(take(IDENTIFIER).value());
+    if (tokenizer.takeIf(LPAREN)) {
       variant.setValueType(parseTypeRef());
-      tokens.take(RPAREN);
+      take(RPAREN);
     }
     return variant;
   }
@@ -140,21 +141,19 @@ public class Parser {
   private AstFunctionType parseTypeFunction() {
     var type = new AstFunctionType();
     type.setHeader(parseFunctionHeader());
-    tokens.take(SEMICOLON);
+    take(SEMICOLON);
     return type;
   }
 
   private void parseModuleName(AstModule module) {
     takeKeyword(MODULE);
-    var tokenName = tokens.take(IDENTIFIER);
-    module.setName(tokenName.value());
-    module.setLocation(tokenName.location());
-    tokens.take(SEMICOLON);
+    module.setLocation(tokenizer.current().location());
+    module.setName(take(IDENTIFIER).value());
+    take(SEMICOLON);
   }
 
   private AstFunction parseFunction() {
     var function = new AstFunction();
-    function.setLocation(tokens.current().location());
     function.setHeader(parseFunctionHeader());
     function.setBlock(parseBlock());
     return function;
@@ -166,15 +165,15 @@ public class Parser {
     if (mutable) {
       variable.setBit(AstVariable.MUTABLE);
     }
-    variable.setLocation(tokens.current().location());
+    variable.setLocation(tokenizer.current().location());
     variable.setName(takeIdentifier());
-    if (tokens.current().is(IDENTIFIER)) {
+    if (tokenizer.current().is(IDENTIFIER)) {
       variable.setType(parseTypeRef());
     }
-    if (tokens.takeIf(ASSIGN)) {
+    if (tokenizer.takeIf(ASSIGN)) {
       variable.setExpression(parseExpression());
     }
-    tokens.take(SEMICOLON);
+    take(SEMICOLON);
     return variable;
   }
 
@@ -186,15 +185,15 @@ public class Parser {
 
   private AstBlock parseBlock() {
     var block = new AstBlock();
-    tokens.take(LCURLY);
-    while (!tokens.takeIf(RCURLY)) {
+    take(LCURLY);
+    while (!tokenizer.takeIf(RCURLY)) {
       block.statements().add(parseStatement());
     }
     return block;
   }
 
   private AstStatement parseStatement() {
-    var keyword = keywordOrNull(tokens.current());
+    var keyword = keywordOrNull(tokenizer.current());
     if (keyword == null) {
       return parseExpressionStatement();
     }
@@ -208,10 +207,7 @@ public class Parser {
       case MATCH -> throw new UnsupportedOperationException();
       case GOTO -> parseGoto();
       default ->
-          throw CompilerException.builder()
-              .formatMessage("Statement starts with unexpected keyword '%s'", keyword.symbolName())
-              .setLocation(tokens.current().location())
-              .build();
+          throw fatalAtCurrentLocation("Statement starts with unexpected keyword '%s'", keyword);
     };
   }
 
@@ -219,7 +215,7 @@ public class Parser {
     var stmt = new AstReturn();
     stmt.setLocation(takeKeyword(RETURN));
     stmt.setExpression(parseExpression());
-    tokens.take(SEMICOLON);
+    take(SEMICOLON);
     return stmt;
   }
 
@@ -247,12 +243,12 @@ public class Parser {
   private AstStatement parseFor() {
     var stmt = new AstFor();
     stmt.setLocation(takeKeyword(FOR));
-    if (keywordOrNull(tokens.current()) == VAR) {
+    if (keywordOrNull(tokenizer.current()) == VAR) {
       stmt.setInit(parseVariable(true));
     }
     // Condition must be present, even if simple "true".
     stmt.setCondition(parseExpression());
-    if (tokens.takeIf(SEMICOLON)) {
+    if (tokenizer.takeIf(SEMICOLON)) {
       stmt.setIncrement(parseExpression());
     }
     stmt.setBlock(parseBlock());
@@ -262,21 +258,21 @@ public class Parser {
   private AstStatement parseGoto() {
     var stmt = new AstGoto();
     stmt.setLocation(takeKeyword(GOTO));
-    stmt.setLabel(tokens.take(IDENTIFIER).value());
-    tokens.take(SEMICOLON);
+    stmt.setLabel(take(IDENTIFIER).value());
+    take(SEMICOLON);
     return stmt;
   }
 
   private AstStatement parseDefer() {
     var stmt = new AstDefer();
     stmt.setLocation(takeKeyword(DEFER));
-    if (tokens.current().is(LCURLY)) {
+    if (tokenizer.current().is(LCURLY)) {
       stmt.setBlock(parseBlock());
     } else {
       var exprStmt = new AstExpressionStatement();
-      exprStmt.setLocation(tokens.current().location());
+      exprStmt.setLocation(tokenizer.current().location());
       exprStmt.setExpression(parseExpression());
-      tokens.take(SEMICOLON);
+      take(SEMICOLON);
       var block = new AstBlock();
       block.statements().add(exprStmt);
       stmt.setBlock(block);
@@ -286,9 +282,9 @@ public class Parser {
 
   private AstStatement parseExpressionStatement() {
     var stmt = new AstExpressionStatement();
-    stmt.setLocation(tokens.current().location());
+    stmt.setLocation(tokenizer.current().location());
     stmt.setExpression(parseExpression());
-    tokens.take(SEMICOLON);
+    take(SEMICOLON);
     return stmt;
   }
 
@@ -301,17 +297,14 @@ public class Parser {
     if (expr == null) {
       return null;
     }
-    while (tokens.current().is(CMP_LT) || tokens.current().is(CMP_GT)) {
-      var operator = tokens.take();
+    while (tokenizer.current().is(CMP_LT) || tokenizer.current().is(CMP_GT)) {
+      var operator = tokenizer.take();
       var m = parseAdditiveChain();
       if (m == null) {
-        throw CompilerException.builder()
-            .formatMessage("Expected expression after %s", operator)
-            .setLocation(operator.location())
-            .build();
+        throw errorConsumer.fatalAt(operator.location(), "Expected expression after %s", operator);
       }
       var call = new AstCall();
-      call.setFunction(operatorEntityRef(operator));
+      call.setFunction(parseOperator(operator));
       call.setArgs(ImmutableList.of(expr, m));
       call.setLocation(operator.location());
       expr = call;
@@ -324,17 +317,14 @@ public class Parser {
     if (expr == null) {
       return null;
     }
-    while (tokens.current().is(PLUS) || tokens.current().is(MINUS)) {
-      var operator = tokens.take();
+    while (tokenizer.current().is(PLUS) || tokenizer.current().is(MINUS)) {
+      var operator = tokenizer.take();
       var m = parseMultiplicativeChain();
       if (m == null) {
-        throw CompilerException.builder()
-            .formatMessage("Expected expression after %s", operator)
-            .setLocation(operator.location())
-            .build();
+        throw errorConsumer.fatalAt(operator.location(), "Expected expression after %s", operator);
       }
       var call = new AstCall();
-      call.setFunction(operatorEntityRef(operator));
+      call.setFunction(parseOperator(operator));
       call.setArgs(ImmutableList.of(expr, m));
       call.setLocation(operator.location());
       expr = call;
@@ -347,17 +337,14 @@ public class Parser {
     if (expr == null) {
       return null;
     }
-    while (tokens.current().is(ASTERISK) || tokens.current().is(SLASH)) {
-      var operator = tokens.take();
+    while (tokenizer.current().is(ASTERISK) || tokenizer.current().is(SLASH)) {
+      var operator = tokenizer.take();
       var m = parseFieldArrayCallChain();
       if (m == null) {
-        throw CompilerException.builder()
-            .formatMessage("Expected expression after %s", operator)
-            .setLocation(operator.location())
-            .build();
+        throw errorConsumer.fatalAt(operator.location(), "Expected expression after %s", operator);
       }
       var call = new AstCall();
-      call.setFunction(operatorEntityRef(operator));
+      call.setFunction(parseOperator(operator));
       call.setArgs(ImmutableList.of(expr, m));
       call.setLocation(operator.location());
       expr = call;
@@ -368,24 +355,24 @@ public class Parser {
   private AstExpression parseFieldArrayCallChain() {
     var expr = parsePrimary();
     while (true) {
-      var location = tokens.current().location();
-      if (tokens.takeIf(PERIOD)) {
+      var current = tokenizer.current();
+      if (tokenizer.takeIf(PERIOD)) {
         var fieldAccess = new AstFieldAccess();
         fieldAccess.setObject(expr);
-        fieldAccess.setFieldName(tokens.take(IDENTIFIER).value());
+        fieldAccess.setFieldName(take(IDENTIFIER).value());
         expr = fieldAccess;
-      } else if (tokens.takeIf(COLON)) {
+      } else if (tokenizer.takeIf(COLON)) {
         var bind = new AstBind();
         bind.setObject(expr);
-        bind.setFunctionName(tokens.take(IDENTIFIER).value());
+        bind.setFunctionName(take(IDENTIFIER).value());
         expr = bind;
-      } else if (tokens.takeIf(LBRACKET)) {
+      } else if (tokenizer.takeIf(LBRACKET)) {
         var arrayAccess = new AstArrayAccess();
         arrayAccess.setArray(expr);
         arrayAccess.setIndex(parseExpression());
-        tokens.take(RBRACKET);
+        take(RBRACKET);
         expr = arrayAccess;
-      } else if (tokens.current().is(LPAREN)) {
+      } else if (tokenizer.current().is(LPAREN)) {
         var call = new AstCall();
         call.setFunction(expr);
         call.setArgs(parseExpressionList());
@@ -393,7 +380,7 @@ public class Parser {
       } else {
         break;
       }
-      expr.setLocation(location);
+      expr.setLocation(current.location());
     }
     return expr;
   }
@@ -403,47 +390,47 @@ public class Parser {
   //  - [<expression> type <type_ref>]
   //  - <name_ref> | <literal>
   private AstExpression parsePrimary() {
-    if (tokens.takeIf(LPAREN)) {
+    if (tokenizer.takeIf(LPAREN)) {
       var expr = parseExpression();
-      tokens.take(RPAREN);
+      take(RPAREN);
       return expr;
     }
-    if (tokens.takeIf(LBRACKET)) {
+    if (tokenizer.takeIf(LBRACKET)) {
       var expr = new AstCast();
       expr.setExpression(parseExpression());
       takeKeyword(TYPE);
       expr.setTypeRef(parseTypeRef());
-      tokens.take(RBRACKET);
+      take(RBRACKET);
       return expr;
     }
-    switch (tokens.current().type()) {
+    switch (tokenizer.current().type()) {
       case IDENTIFIER -> {
-        return new AstEntityRef(takeIdentifier());
+        var current = tokenizer.take();
+        var expr = new AstEntityRef();
+        expr.setName(new QualifiedName(current.value()));
+        expr.setLocation(current.location());
+        return expr;
       }
       case NUMBER -> {
-        var token = tokens.take();
-        var expr = new AstNumberLiteral(token.value());
-        expr.setLocation(token.location());
+        var current = tokenizer.take();
+        var expr = new AstNumberLiteral(current.value());
+        expr.setLocation(current.location());
         return expr;
       }
       case STRING -> {
-        var token = tokens.take();
-        var expr = new AstStringLiteral(token.value());
-        expr.setLocation(token.location());
+        var current = tokenizer.take();
+        var expr = new AstStringLiteral(current.value());
+        expr.setLocation(current.location());
         return expr;
       }
-      default ->
-          throw CompilerException.builder()
-              .formatMessage("Primary expression expected")
-              .setLocation(tokens.current().location())
-              .build();
+      default -> throw fatalAtCurrentLocation("Primary expression expected");
     }
   }
 
   private List<AstExpression> parseExpressionList() {
     var result = new ImmutableList.Builder<AstExpression>();
-    tokens.take(LPAREN);
-    if (!tokens.takeIf(RPAREN)) {
+    take(LPAREN);
+    if (!tokenizer.takeIf(RPAREN)) {
       do {
         result.add(parseExpression());
       } while (expressionListHasNext());
@@ -452,29 +439,31 @@ public class Parser {
   }
 
   private boolean expressionListHasNext() {
-    if (tokens.takeIf(COMMA)) {
+    if (tokenizer.takeIf(COMMA)) {
       return true;
-    } else if (tokens.takeIf(RPAREN)) {
+    } else if (tokenizer.takeIf(RPAREN)) {
       return false;
     } else {
-      throw CompilerException.builder()
-          .formatMessage("Invalid function call: : or ) expected")
-          .setLocation(tokens.current().location())
-          .build();
+      throw errorConsumer.fatalAt(
+          tokenizer.current().location(), "Invalid function call: : or ) expected");
     }
   }
 
   private AstFunctionHeader parseFunctionHeader() {
     takeKeyword(FUNCTION);
     var header = new AstFunctionHeader();
-    if (tokens.next().is(PERIOD)) {
-      var objectType = new AstTypeRef(takeIdentifier());
+    if (tokenizer.next() != null && tokenizer.next().is(PERIOD)) {
+      var current = tokenizer.current();
+      var objectType = new AstTypeRef();
+      objectType.setName(new QualifiedName(current.value()));
+      objectType.setLocation(current.location());
       header.setObjectType(objectType);
-      tokens.take(PERIOD);
+      take(PERIOD);
     }
+    header.setLocation(tokenizer.current().location());
     header.setName(takeIdentifier());
     header.setParameters(parseParameters());
-    if (!tokens.current().is(LCURLY) && !tokens.current().is(SEMICOLON)) {
+    if (tokenizer.current().is(IDENTIFIER)) {
       header.setResultType(parseTypeRef());
     }
     return header;
@@ -482,55 +471,71 @@ public class Parser {
 
   private List<AstVariable> parseParameters() {
     var parameters = new ArrayList<AstVariable>();
-    tokens.take(LPAREN);
-    if (!tokens.current().is(RPAREN)) {
+    take(LPAREN);
+    if (!tokenizer.current().is(RPAREN)) {
       do {
         var variable = new AstVariable();
         variable.setBit(AstVariable.PARAM);
+        variable.setLocation(tokenizer.current().location());
         variable.setName(takeIdentifier());
-        if (tokens.current().is(IDENTIFIER)) {
+        if (tokenizer.current().is(IDENTIFIER)) {
           variable.setType(parseTypeRef());
         }
         parameters.add(variable);
-      } while (tokens.takeIf(COMMA));
+      } while (tokenizer.takeIf(COMMA));
     }
-    tokens.take(RPAREN);
+    take(RPAREN);
     return parameters;
   }
 
   private AstTypeRef parseTypeRef() {
-    return new AstTypeRef(takeIdentifier());
+    var current = tokenizer.current();
+    var ref = new AstTypeRef();
+    ref.setName(new QualifiedName(current.value()));
+    ref.setLocation(current.location());
+    tokenizer.step();
+    return ref;
   }
 
-  private AstEntityRef operatorEntityRef(Token token) {
-    var ref = new AstEntityRef(new QualifiedName(token.type().symbolName()));
+  private AstEntityRef parseOperator(Token token) {
+    var ref = new AstEntityRef();
+    ref.setName(new QualifiedName(token.type().symbolName()));
     ref.setLocation(token.location());
     return ref;
   }
 
+  private CompilerException fatalAtCurrentLocation(String pattern, Object... args) {
+    return errorConsumer.fatalAt(tokenizer.current().location(), pattern, args);
+  }
+
+  private Token take(TokenType type) {
+    var current = tokenizer.current();
+    if (!current.is(type)) {
+      throw fatalAtCurrentLocation("Expected '%s', found '%s'", type, current);
+    }
+    return tokenizer.take();
+  }
+
   private QualifiedName takeIdentifier() {
-    return new QualifiedName(tokens.take(IDENTIFIER).value());
+    return new QualifiedName(take(IDENTIFIER).value());
   }
 
   private Location takeKeyword(Keyword keyword) {
-    var token = tokens.take();
-    var kw = keyword(token);
+    var current = tokenizer.current();
+    var kw = keyword(current);
     if (kw != keyword) {
-      throw CompilerException.builder()
-          .formatMessage("Expected keyword '%s', found '%s'", keyword.symbolName(), kw)
-          .setLocation(token.location())
-          .build();
+      throw fatalAtCurrentLocation("Expected keyword '%s', found '%s'", keyword, kw);
     }
-    return token.location();
+    return tokenizer.take().location();
   }
 
   private boolean takeKeywordIf(Keyword keyword) {
-    var token = tokens.current();
-    if (keyword == keywordOrNull(token)) {
-      tokens.take();
-      return true;
+    var current = tokenizer.current();
+    if (keyword != keywordOrNull(current)) {
+      return false;
     }
-    return false;
+    tokenizer.step();
+    return true;
   }
 
   private static Keyword keywordOrNull(Token token) {
@@ -540,19 +545,13 @@ public class Parser {
     return Keyword.find(token.value());
   }
 
-  private static Keyword keyword(Token token) {
+  private Keyword keyword(Token token) {
     if (!token.is(IDENTIFIER)) {
-      throw CompilerException.builder()
-          .formatMessage("Expected keyword, found '%s'", token.type())
-          .setLocation(token.location())
-          .build();
+      throw errorConsumer.fatalAt(token.location(), "Expected keyword, found '%s'", token.type());
     }
     var kw = Keyword.find(token.value());
     if (kw == null) {
-      throw CompilerException.builder()
-          .formatMessage("Expected keyword, found '%s'", token.type())
-          .setLocation(token.location())
-          .build();
+      throw errorConsumer.fatalAt(token.location(), "Expected keyword, found '%s'", token.type());
     }
     return kw;
   }

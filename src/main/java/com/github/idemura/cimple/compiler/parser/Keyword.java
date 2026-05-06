@@ -38,19 +38,20 @@ public enum Keyword {
     return SYMBOL_NAME_MAP.get(ident);
   }
 
-  public String symbolName() {
+  @Override
+  public String toString() {
     return symbolName;
   }
 
   public static ImmutableMap<String, Keyword> createSymbolNameMap() {
     var builder = new ImmutableMap.Builder<String, Keyword>();
     for (var keyword : values()) {
-      builder.put(keyword.symbolName(), keyword);
+      builder.put(keyword.symbolName, keyword);
     }
     return builder.build();
   }
 
   public static List<String> valueList() {
-    return Arrays.stream(Keyword.values()).map(Keyword::symbolName).toList();
+    return Arrays.stream(Keyword.values()).map(Keyword::toString).toList();
   }
 }

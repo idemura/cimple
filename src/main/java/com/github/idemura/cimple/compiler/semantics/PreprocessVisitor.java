@@ -152,8 +152,7 @@ class PreprocessVisitor extends AstRewriteExpressionVisitor {
 
   private void checkTypeName(String name, Location location) {
     if (reservedWords.isReservedTypeName(name)) {
-      errorConsumer.errorAt(
-          location, "Reserved type name cannot be used as a type name: %s", name);
+      errorConsumer.errorAt(location, "Reserved type name cannot be used as a type name: %s", name);
     }
   }
 }

@@ -18,9 +18,9 @@ public record Token(TokenType type, String value, Location location) {
   @Override
   public String toString() {
     if (value == null) {
-      return "%s@%s".formatted(type.symbolName(), location);
+      return type.symbolName();
     } else {
-      return "%s(%s)@%s".formatted(type.symbolName(), value, location);
+      return "%s(%s)".formatted(type.symbolName(), value);
     }
   }
 }

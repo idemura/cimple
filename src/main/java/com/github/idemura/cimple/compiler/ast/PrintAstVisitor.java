@@ -1,6 +1,6 @@
 package com.github.idemura.cimple.compiler.ast;
 
-import com.github.idemura.cimple.common.IndentWriter;
+import com.github.idemura.cimple.compiler.IndentWriter;
 
 public class PrintAstVisitor extends AstVisitor {
   private final IndentWriter output;

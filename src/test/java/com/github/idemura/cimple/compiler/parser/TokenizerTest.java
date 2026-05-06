@@ -3,6 +3,7 @@ package com.github.idemura.cimple.compiler.parser;
 import static com.github.idemura.cimple.compiler.parser.TokenType.*;
 import static org.junit.jupiter.api.Assertions.*;
 
+import com.github.idemura.cimple.compiler.InMemoryErrorConsumer;
 import com.github.idemura.cimple.compiler.Location;
 import com.google.common.collect.ImmutableList;
 import org.junit.jupiter.api.Test;
@@ -19,7 +20,9 @@ class TokenizerTest {
           var y = null;
         }
         """;
-    var tokens = new Tokenizer(code, null).split().tokens();
+    var errorConsumer = new InMemoryErrorConsumer();
+    var tokenizer = new Tokenizer(errorConsumer);
+    tokenizer.split(code, null);
     assertEquals(
         ImmutableList.of(
             new Token(IDENTIFIER, "function", new Location(1, 1)),
@@ -43,6 +46,6 @@ class TokenizerTest {
             new Token(IDENTIFIER, "null", new Location(5, 11)),
             new Token(SEMICOLON, null, new Location(5, 15)),
             new Token(RCURLY, null, new Location(6, 1))),
-        tokens);
+        tokenizer.tokenList());
   }
 }

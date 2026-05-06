@@ -3,11 +3,13 @@ package com.github.idemura.cimple.compiler;
 import java.util.List;
 
 public abstract class ErrorConsumer {
+  public static final String FATAL = "fatal";
   public static final String ERROR = "error";
 
   public enum Mode {
-    LOCATION(0x1L),
-    LEVEL(0x2L);
+    PRINT_LOCATION(0x1L),
+    PRINT_LEVEL(0x2L),
+    THROW_ON_ERROR(0x4L);
 
     private final long bit;
 
@@ -17,16 +19,11 @@ public abstract class ErrorConsumer {
   }
 
   protected long mode;
+  protected int errorCount;
 
-  protected ErrorConsumer() {
-    this(0);
-  }
+  protected ErrorConsumer() {}
 
-  protected ErrorConsumer(long mode) {
-    this.mode = mode;
-  }
-
-  public abstract void outputError(String message);
+  protected abstract void outputError(String message);
 
   public void enable(Mode mode) {
     this.mode |= mode.bit;
@@ -36,20 +33,36 @@ public abstract class ErrorConsumer {
     this.mode &= ~mode.bit;
   }
 
+  public int getErrorCount() {
+    return errorCount;
+  }
+
   public void error(String pattern, Object... args) {
-    outputError(formatError(ERROR, null, pattern, args));
+    outputErrorWithCount(formatError(ERROR, null, pattern, args));
   }
 
   public void errorAt(Location location, String pattern, Object... args) {
-    outputError(formatError(ERROR, location, pattern, args));
+    outputErrorWithCount(formatError(ERROR, location, pattern, args));
+  }
+
+  public CompilerException fatal(String pattern, Object... args) {
+    var message = formatError(FATAL, null, pattern, args);
+    outputErrorWithCount(message);
+    return new CompilerException(message);
+  }
+
+  public CompilerException fatalAt(Location location, String pattern, Object... args) {
+    var message = formatError(FATAL, location, pattern, args);
+    outputErrorWithCount(message);
+    return new CompilerException(message);
   }
 
   protected String formatError(String level, Location location, String pattern, Object... args) {
     var sb = new StringBuilder();
-    if (checkMode(Mode.LEVEL) && level != null) {
+    if (checkMode(Mode.PRINT_LEVEL)) {
       sb.append(level).append(": ");
     }
-    if (checkMode(Mode.LOCATION) && location != null) {
+    if (location != null && checkMode(Mode.PRINT_LOCATION)) {
       sb.append(location).append(": ");
     }
     sb.append(pattern.formatted(args));
@@ -58,6 +71,14 @@ public abstract class ErrorConsumer {
 
   protected boolean checkMode(Mode mode) {
     return (this.mode & mode.bit) != 0;
+  }
+
+  private void outputErrorWithCount(String message) {
+    errorCount++;
+    if (checkMode(Mode.THROW_ON_ERROR)) {
+      throw new CompilerException(message);
+    }
+    outputError(message);
   }
 
   /// May throw if not supported.

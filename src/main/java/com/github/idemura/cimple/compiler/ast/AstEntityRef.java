@@ -9,12 +9,12 @@ public final class AstEntityRef extends AstExpression {
 
   // For testing
   public static AstEntityRef ofString(String name) {
-    return new AstEntityRef(new QualifiedName(name));
+    var ref = new AstEntityRef();
+    ref.setName(new QualifiedName(name));
+    return ref;
   }
 
-  public AstEntityRef(QualifiedName name) {
-    this.name = name;
-  }
+  public AstEntityRef() {}
 
   @Override
   public Object accept(AstVisitor visitor) {
