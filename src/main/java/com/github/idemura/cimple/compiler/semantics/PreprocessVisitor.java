@@ -22,6 +22,7 @@ import com.github.idemura.cimple.compiler.ast.AstType;
 import com.github.idemura.cimple.compiler.ast.AstTypeRef;
 import com.github.idemura.cimple.compiler.ast.AstUnionType;
 import com.github.idemura.cimple.compiler.ast.AstVariable;
+import java.util.HashMap;
 import java.util.List;
 
 /// Does the following steps:
@@ -114,14 +115,34 @@ class PreprocessVisitor extends AstRewriteExpressionVisitor {
   @Override
   protected Object visit(AstRecordType node) {
     checkTypeName(node.getName().name(), node.getLocation());
+    var fieldMap = new HashMap<String, AstVariable>();
+    for (var field : node.getFields()) {
+      var existing = fieldMap.putIfAbsent(field.getName().name(), field);
+      if (existing != null) {
+        errorConsumer.errorAt(
+            field.getLocation(),
+            "Duplicate record field: %s. Defined at %s.",
+            field.getName().name(),
+            existing.getLocation());
+      }
+    }
     return super.visit(node);
   }
 
   @Override
   protected Object visit(AstUnionType node) {
     checkTypeName(node.getName().name(), node.getLocation());
+    var variantMap = new HashMap<String, AstUnionType.Variant>();
     for (var variant : node.getVariants()) {
       checkName(variant.getTag(), variant.getLocation());
+      var existing = variantMap.putIfAbsent(variant.getTag(), variant);
+      if (existing != null) {
+        errorConsumer.errorAt(
+            variant.getLocation(),
+            "Duplicate union variant: %s. Defined at %s.",
+            variant.getTag(),
+            existing.getLocation());
+      }
     }
     return super.visit(node);
   }

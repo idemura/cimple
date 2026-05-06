@@ -198,4 +198,46 @@ class PreprocessVisitorTest {
 
     assertEquals(List.of("Duplicate type: test::R. Defined at 3,13."), errorConsumer.getErrors());
   }
+
+  @Test
+  void testDuplicateRecordFieldFailure() {
+    var code =
+        """
+        module test;
+
+        type record R {
+          var x int;
+          const x int;
+        }
+        """;
+
+    var errorConsumer = new InMemoryErrorConsumer();
+    var module = parseCode(code, errorConsumer);
+    var nameMap = new NameMap();
+    module.accept(new PreprocessVisitor(nameMap, Keyword.valueList(), errorConsumer));
+
+    assertEquals(
+        List.of("Duplicate record field: x. Defined at 4,7."), errorConsumer.getErrors());
+  }
+
+  @Test
+  void testDuplicateUnionVariantFailure() {
+    var code =
+        """
+        module test;
+
+        type union U {
+          A;
+          A(int);
+        }
+        """;
+
+    var errorConsumer = new InMemoryErrorConsumer();
+    var module = parseCode(code, errorConsumer);
+    var nameMap = new NameMap();
+    module.accept(new PreprocessVisitor(nameMap, Keyword.valueList(), errorConsumer));
+
+    assertEquals(
+        List.of("Duplicate union variant: A. Defined at 4,3."), errorConsumer.getErrors());
+  }
 }
