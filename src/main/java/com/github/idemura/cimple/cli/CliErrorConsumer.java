@@ -13,7 +13,7 @@ public class CliErrorConsumer extends ErrorConsumer {
     errorCount++;
   }
 
-  public int getErrorCount() {
+  public int errorCount() {
     return errorCount;
   }
 }

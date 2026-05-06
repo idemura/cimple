@@ -22,6 +22,24 @@ public final class AstBuiltinType extends AstType {
     this.name = new QualifiedName("builtin", name);
   }
 
+  public static AstBuiltinType find(String name) {
+    return switch (name) {
+      case "bool" -> BOOL;
+      case "byte" -> BYTE;
+      case "char" -> CHAR;
+      case "float32" -> FLOAT32;
+      case "float64" -> FLOAT64;
+      case "int8" -> INT8;
+      case "int16" -> INT16;
+      case "int32" -> INT32;
+      case "int64" -> INT64;
+      case "null" -> NULL;
+      case "string" -> STRING;
+      case "void" -> VOID;
+      default -> null;
+    };
+  }
+
   @Override
   public Object accept(AstVisitor visitor) {
     return visitor.visit(this);

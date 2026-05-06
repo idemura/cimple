@@ -102,7 +102,7 @@ public class NameResolutionVisitor extends AstVisitor {
   protected Object visit(AstEntityRef name) {
     var entity = entities.get(name.getName());
     if (entity == null) {
-      entity = nameMap.getEntity(name.getName());
+      entity = nameMap.getVariable(name.getName().name());
     }
     if (entity == null) {
       errorConsumer.errorAt(name.getLocation(), "Undefined name: %s", name.getName());

@@ -13,6 +13,8 @@ import com.github.idemura.cimple.compiler.ast.AstIf;
 import com.github.idemura.cimple.compiler.ast.AstModule;
 import com.github.idemura.cimple.compiler.ast.AstNullLiteral;
 import com.github.idemura.cimple.compiler.ast.AstReturn;
+import com.github.idemura.cimple.compiler.ast.AstType;
+import com.github.idemura.cimple.compiler.ast.AstVariable;
 import com.github.idemura.cimple.compiler.ast.AstVariableStatement;
 import com.github.idemura.cimple.compiler.parser.Keyword;
 import com.google.common.collect.ImmutableList;
@@ -24,6 +26,20 @@ class PreprocessVisitorTest {
     return module.definitions().stream()
         .filter(AstFunction.class::isInstance)
         .map(AstFunction.class::cast)
+        .toList();
+  }
+
+  private static List<AstType> types(AstModule module) {
+    return module.definitions().stream()
+        .filter(AstType.class::isInstance)
+        .map(AstType.class::cast)
+        .toList();
+  }
+
+  private static List<AstVariable> variables(AstModule module) {
+    return module.definitions().stream()
+        .filter(AstVariable.class::isInstance)
+        .map(AstVariable.class::cast)
         .toList();
   }
 
@@ -97,5 +113,89 @@ class PreprocessVisitorTest {
             "Reserved type name cannot be used as a type name: int",
             "Reserved type name cannot be used as a type name: byte"),
         errorConsumer.getErrors());
+  }
+
+  @Test
+  void testPopulateNameMap() {
+    var code =
+        """
+        module test;
+
+        type record R {}
+
+        var x int;
+        const y int;
+
+        function f() {}
+        function g() {}
+        """;
+
+    var errorConsumer = new InMemoryErrorConsumer();
+    var module = parseCode(code, errorConsumer);
+    var nameMap = new NameMap();
+    module.accept(new PreprocessVisitor(nameMap, Keyword.valueList(), errorConsumer));
+
+    assertEquals(List.of(), errorConsumer.getErrors());
+    assertSame(variables(module).get(0), nameMap.getVariable("x"));
+    assertSame(variables(module).get(1), nameMap.getVariable("y"));
+    assertSame(functions(module).get(0), nameMap.getFunction("f"));
+    assertSame(functions(module).get(1), nameMap.getFunction("g"));
+    assertSame(types(module).get(0), nameMap.getType("R"));
+  }
+
+  @Test
+  void testDuplicateVariableFailure() {
+    var code =
+        """
+        module test;
+
+        var x int;
+        const x int;
+        """;
+
+    var errorConsumer = new InMemoryErrorConsumer();
+    var module = parseCode(code, errorConsumer);
+    var nameMap = new NameMap();
+    module.accept(new PreprocessVisitor(nameMap, Keyword.valueList(), errorConsumer));
+
+    assertEquals(
+        List.of("Duplicate variable: test::x. Defined at 3,5."), errorConsumer.getErrors());
+  }
+
+  @Test
+  void testDuplicateFunctionFailure() {
+    var code =
+        """
+        module test;
+
+        function f() {}
+        function f() {}
+        """;
+
+    var errorConsumer = new InMemoryErrorConsumer();
+    var module = parseCode(code, errorConsumer);
+    var nameMap = new NameMap();
+    module.accept(new PreprocessVisitor(nameMap, Keyword.valueList(), errorConsumer));
+
+    assertEquals(
+        List.of("Duplicate function: test::f. Defined at 3,10."), errorConsumer.getErrors());
+  }
+
+  @Test
+  void testDuplicateTypeFailure() {
+    var code =
+        """
+        module test;
+
+        type record R {}
+        type record R {}
+        """;
+
+    var errorConsumer = new InMemoryErrorConsumer();
+    var module = parseCode(code, errorConsumer);
+    var nameMap = new NameMap();
+    module.accept(new PreprocessVisitor(nameMap, Keyword.valueList(), errorConsumer));
+
+    assertEquals(List.of("Duplicate type: test::R. Defined at 3,13."), errorConsumer.getErrors());
   }
 }

@@ -1,6 +1,5 @@
 package com.github.idemura.cimple.compiler.semantics;
 
-import com.github.idemura.cimple.compiler.QualifiedName;
 import com.github.idemura.cimple.compiler.ast.AstEntity;
 import com.github.idemura.cimple.compiler.ast.AstFunction;
 import com.github.idemura.cimple.compiler.ast.AstType;
@@ -9,28 +8,33 @@ import java.util.HashMap;
 import java.util.Map;
 
 public class NameMap {
-  private final Map<QualifiedName, AstType> types = new HashMap<>();
-  private final Map<QualifiedName, AstEntity> entities = new HashMap<>();
+  private final Map<String, AstType> typesByName = new HashMap<>();
+  private final Map<String, AstFunction> functionsByName = new HashMap<>();
+  private final Map<String, AstVariable> variablesByName = new HashMap<>();
 
   public NameMap() {}
 
-  public void addType(AstType type) {
-    types.put(type.getName(), type);
+  public AstType addType(AstType type) {
+    return typesByName.putIfAbsent(type.getName().name(), type);
   }
 
-  public AstType getType(QualifiedName name) {
-    return types.get(name);
+  public AstType getType(String name) {
+    return typesByName.get(name);
   }
 
-  public void addEntity(AstFunction function) {
-    entities.put(function.getHeader().getName(), function);
+  public AstFunction addFunction(AstFunction function) {
+    return functionsByName.putIfAbsent(function.getHeader().getName().name(), function);
   }
 
-  public void addEntity(AstVariable variable) {
-    entities.put(variable.getName(), variable);
+  public AstVariable addVariable(AstVariable variable) {
+    return variablesByName.putIfAbsent(variable.getName().name(), variable);
   }
 
-  public AstEntity getEntity(QualifiedName name) {
-    return entities.get(name);
+  public AstFunction getFunction(String name) {
+    return functionsByName.get(name);
+  }
+
+  public AstVariable getVariable(String name) {
+    return variablesByName.get(name);
   }
 }

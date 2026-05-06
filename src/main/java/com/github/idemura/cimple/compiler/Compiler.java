@@ -1,5 +1,6 @@
 package com.github.idemura.cimple.compiler;
 
+import com.github.idemura.cimple.compiler.ast.AstModule;
 import com.github.idemura.cimple.compiler.ast.PrintAstVisitor;
 import com.github.idemura.cimple.compiler.codegen.CodeGenerator;
 import com.github.idemura.cimple.compiler.parser.Parser;
@@ -23,25 +24,38 @@ public class Compiler {
     this.codeGenerator = codeGenerator;
   }
 
-  public void compile(String fileName, String code) {
-    var tokenizer = new Tokenizer(errorConsumer);
-    tokenizer.split(code, fileName);
-    if (params.printTokens()) {
-      debugOutput.writeLine(tokenizer.tokenList().toString());
-      debugOutput.writeLine("\n");
+  public boolean compile(String fileName, String code) {
+    AstModule module;
+    try {
+      var tokenizer = new Tokenizer(errorConsumer);
+      tokenizer.split(code, fileName);
+      if (params.printTokens()) {
+        debugOutput.writeLine(tokenizer.tokenList().toString());
+        debugOutput.writeLine("\n");
+      }
+      module = new Parser(tokenizer, errorConsumer).parse();
+      if (params.printAst()) {
+        debugOutput.writeLine("Parse tree\n");
+        new PrintAstVisitor(debugOutput).print(module);
+      }
+    } catch (CompilerException e) {
+      // Parser normally throws fatal error.
+      return false;
     }
-    var module = new Parser(tokenizer, errorConsumer).parse();
-    if (params.printAst()) {
-      debugOutput.writeLine("Parse tree\n");
-      new PrintAstVisitor(debugOutput).print(module);
+    // Future-proof
+    if (errorConsumer.errorCount() > 0) {
+      return false;
     }
     var analyzer = new SemanticAnalyzer(errorConsumer);
-    analyzer.analyze(module);
+    if (!analyzer.analyze(module)) {
+      return false;
+    }
     if (params.printAst()) {
       debugOutput.writeLine("Analyzed\n");
       new PrintAstVisitor(debugOutput).print(module);
     }
     // Outside of try because codegen should not generate user errors.
     codeGenerator.generateCode(module);
+    return true;
   }
 }

@@ -33,7 +33,7 @@ public abstract class ErrorConsumer {
     this.mode &= ~mode.bit;
   }
 
-  public int getErrorCount() {
+  public int errorCount() {
     return errorCount;
   }
 

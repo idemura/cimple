@@ -99,14 +99,8 @@ public class CimpleCli implements CompilerParams {
   }
 
   boolean compile(String fileName, String code) {
-    try {
-      new Compiler(this, System.out, new CliErrorConsumer(), new NoopCodeGenerator())
-          .compile(fileName, code);
-    } catch (CompilerException e) {
-      System.err.println(e.getMessage());
-      return false;
-    }
-    return true;
+    return new Compiler(this, System.out, new CliErrorConsumer(), new NoopCodeGenerator())
+        .compile(fileName, code);
   }
 
   private static void printFileError(String fileName, String message) {

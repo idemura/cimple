@@ -11,10 +11,20 @@ public class SemanticAnalyzer {
     this.errorConsumer = errorConsumer;
   }
 
-  public void analyze(AstModule module) {
+  public boolean analyze(AstModule module) {
     var nameMap = new NameMap();
     module.accept(new PreprocessVisitor(nameMap, Keyword.valueList(), errorConsumer));
+    if (errorConsumer.errorCount() > 0) {
+      return false;
+    }
     module.accept(new NameResolutionVisitor(nameMap, errorConsumer));
+    if (errorConsumer.errorCount() > 0) {
+      return false;
+    }
     module.accept(new TypeCheckVisitor(errorConsumer));
+    if (errorConsumer.errorCount() > 0) {
+      return false;
+    }
+    return true;
   }
 }

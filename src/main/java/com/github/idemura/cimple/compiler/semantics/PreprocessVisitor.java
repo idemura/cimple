@@ -7,6 +7,7 @@ import com.github.idemura.cimple.compiler.ErrorConsumer;
 import com.github.idemura.cimple.compiler.Location;
 import com.github.idemura.cimple.compiler.ast.AstBoolLiteral;
 import com.github.idemura.cimple.compiler.ast.AstBuiltinType;
+import com.github.idemura.cimple.compiler.ast.AstCall;
 import com.github.idemura.cimple.compiler.ast.AstEntityRef;
 import com.github.idemura.cimple.compiler.ast.AstFunction;
 import com.github.idemura.cimple.compiler.ast.AstFunctionType;
@@ -31,6 +32,7 @@ class PreprocessVisitor extends AstRewriteExpressionVisitor {
   private final NameMap nameMap;
   private final ReservedWords reservedWords;
   private final ErrorConsumer errorConsumer;
+  private String moduleName;
 
   PreprocessVisitor(NameMap nameMap, List<String> reservedWords, ErrorConsumer errorConsumer) {
     this.nameMap = nameMap;
@@ -41,27 +43,53 @@ class PreprocessVisitor extends AstRewriteExpressionVisitor {
   @Override
   protected Object visit(AstModule node) {
     checkName(node.getName(), node.getLocation());
-    var moduleName = node.getName();
+    moduleName = node.getName();
     for (var definition : node.definitions()) {
       switch (definition) {
         case AstType type -> {
           type.setName(type.getName().withModuleName(moduleName));
-          nameMap.addType(type);
+          var existing = nameMap.addType(type);
+          if (existing != null) {
+            errorConsumer.errorAt(
+                type.getLocation(),
+                "Duplicate type: %s. Defined at %s.",
+                type.getName(),
+                existing.getLocation());
+          }
         }
         case AstFunction function -> {
           var header = function.getHeader();
           header.setName(header.getName().withModuleName(moduleName));
-          nameMap.addEntity(function);
+          var existing = nameMap.addFunction(function);
+          if (existing != null) {
+            errorConsumer.errorAt(
+                header.getLocation(),
+                "Duplicate function: %s. Defined at %s.",
+                function.getName(),
+                existing.getHeader().getLocation());
+          }
         }
         case AstVariable variable -> {
           variable.setName(variable.getName().withModuleName(moduleName));
-          nameMap.addEntity(variable);
+          var existing = nameMap.addVariable(variable);
+          if (existing != null) {
+            errorConsumer.errorAt(
+                variable.getLocation(),
+                "Duplicate variable: %s. Defined at %s.",
+                variable.getName(),
+                existing.getLocation());
+          }
         }
         default ->
             throw new IllegalArgumentException(
                 "Unsupported module definition: %s".formatted(definition));
       }
     }
+    return super.visit(node);
+  }
+
+  @Override
+  protected Object visit(AstCall node) {
     return super.visit(node);
   }
 
@@ -100,8 +128,11 @@ class PreprocessVisitor extends AstRewriteExpressionVisitor {
 
   @Override
   protected Object visit(AstLiteral node) {
-    if (node.getType() == null) {
-      if (node instanceof AstNumberLiteral) {
+    if (node.getType() != null) {
+      return node;
+    }
+    return switch (node) {
+      case AstNumberLiteral ignored -> {
         AstNumberLiteral number;
         var value = (String) node.value();
         try {
@@ -113,16 +144,38 @@ class PreprocessVisitor extends AstRewriteExpressionVisitor {
             number.setType(AstTypeRef.of(AstBuiltinType.INT64));
           }
           number.setLocation(node.getLocation());
+          yield number;
         } catch (NumberFormatException e) {
-          // TODO: Add an error
-          // throw CompilerException.builder()
-          //     .formatMessage("Invalid numeric literal: %s", token.value())
-          //     .setLocation(token.location())
-          //     .build();
+          errorConsumer.errorAt(node.getLocation(), "Invalid number %s: %s", value, e.getMessage());
+          yield node;
         }
-      } else if (node instanceof AstStringLiteral) {
-        node.setType(AstTypeRef.of(AstBuiltinType.STRING));
       }
+      case AstStringLiteral ignored -> {
+        node.setType(AstTypeRef.of(AstBuiltinType.STRING));
+        yield node;
+      }
+      case AstBoolLiteral ignored -> {
+        node.setType(AstTypeRef.of(AstBuiltinType.BOOL));
+        yield node;
+      }
+      case AstNullLiteral ignored -> {
+        node.setType(AstTypeRef.of(AstBuiltinType.NULL));
+        yield node;
+      }
+    };
+  }
+
+  @Override
+  protected Object visit(AstTypeRef node) {
+    AstType type = AstBuiltinType.find(node.getName().name());
+    if (type == null) {
+      type = nameMap.getType(node.getName().name());
+    }
+    if (type != null) {
+      node.setName(type.getName());
+      node.setType(type);
+    } else {
+      errorConsumer.errorAt(node.getLocation(), "Undefined type: %s", node.getName());
     }
     return node;
   }
@@ -140,6 +193,11 @@ class PreprocessVisitor extends AstRewriteExpressionVisitor {
       newNode.setLocation(node.getLocation());
     } else {
       checkName(node.getName().name(), node.getLocation());
+      var variable = nameMap.getVariable(node.getName().name());
+      if (variable != null) {
+        node.setName(variable.getName());
+        node.setEntity(variable);
+      }
     }
     return newNode;
   }
