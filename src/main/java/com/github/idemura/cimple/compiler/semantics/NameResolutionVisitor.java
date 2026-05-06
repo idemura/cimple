@@ -4,7 +4,6 @@ import com.github.idemura.cimple.compiler.ErrorConsumer;
 import com.github.idemura.cimple.compiler.ast.AstBlock;
 import com.github.idemura.cimple.compiler.ast.AstCall;
 import com.github.idemura.cimple.compiler.ast.AstCast;
-import com.github.idemura.cimple.compiler.ast.AstEntity;
 import com.github.idemura.cimple.compiler.ast.AstEntityRef;
 import com.github.idemura.cimple.compiler.ast.AstFunction;
 import com.github.idemura.cimple.compiler.ast.AstFunctionHeader;
@@ -20,8 +19,6 @@ import com.github.idemura.cimple.compiler.ast.AstVisitor;
 public class NameResolutionVisitor extends AstVisitor {
   private final NameMap nameMap;
   private final ErrorConsumer errorConsumer;
-  private final AstEntityNameMap entities = new AstEntityNameMap();
-  private String moduleName;
 
   public NameResolutionVisitor(NameMap nameMap, ErrorConsumer errorConsumer) {
     this.nameMap = nameMap;
@@ -30,50 +27,30 @@ public class NameResolutionVisitor extends AstVisitor {
 
   @Override
   protected Object visit(AstModule node) {
-    moduleName = node.getName();
-    for (var definition : node.definitions()) {
-      if (definition instanceof AstEntity entity) {
-        entities.putGlobal(entity);
-      }
-    }
     return super.visit(node);
   }
 
   @Override
   protected Object visit(AstFunction node) {
     resolveHeader(node.getHeader());
-    entities.pushScope();
-    for (var parameter : node.getHeader().getParameters()) {
-      resolveTypeRef(parameter.getType());
-      entities.put(parameter);
-    }
-    visitChildren(node);
-    entities.popScope();
-    return null;
+    return super.visit(node);
   }
 
   @Override
   protected Object visit(AstBlock node) {
-    entities.pushScope();
-    visitChildren(node);
-    entities.popScope();
-    return null;
+    return super.visit(node);
   }
 
   @Override
   protected Object visit(AstVariable node) {
     resolveTypeRef(node.getType());
-    visitChildren(node);
-    if (node.getName().moduleName() == null) {
-      entities.put(node);
-    }
-    return null;
+    return super.visit(node);
   }
 
   @Override
   protected Object visit(AstFunctionType node) {
     resolveHeader(node.getHeader());
-    return null;
+    return super.visit(node);
   }
 
   @Override
@@ -81,7 +58,7 @@ public class NameResolutionVisitor extends AstVisitor {
     for (var field : node.getFields()) {
       resolveTypeRef(field.getType());
     }
-    return null;
+    return super.visit(node);
   }
 
   @Override
@@ -89,7 +66,7 @@ public class NameResolutionVisitor extends AstVisitor {
     for (var variant : node.getVariants()) {
       resolveVariant(variant);
     }
-    return null;
+    return super.visit(node);
   }
 
   @Override
@@ -100,7 +77,7 @@ public class NameResolutionVisitor extends AstVisitor {
 
   @Override
   protected Object visit(AstEntityRef name) {
-    var entity = entities.get(name.getName());
+    var entity = nameMap.getVariable(name.getName().name());
     if (entity == null) {
       entity = nameMap.getVariable(name.getName().name());
     }

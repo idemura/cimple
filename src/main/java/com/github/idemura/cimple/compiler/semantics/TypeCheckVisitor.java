@@ -15,7 +15,6 @@ import com.github.idemura.cimple.compiler.ast.AstVisitor;
 
 class TypeCheckVisitor extends AstVisitor {
   private final ErrorConsumer errorConsumer;
-  private final AstEntityNameMap variables = new AstEntityNameMap();
 
   public TypeCheckVisitor(ErrorConsumer errorConsumer) {
     this.errorConsumer = errorConsumer;
@@ -38,18 +37,12 @@ class TypeCheckVisitor extends AstVisitor {
 
   @Override
   protected Object visit(AstFunction node) {
-    variables.pushScope();
-    visitChildren(node);
-    variables.popScope();
-    return null;
+    return super.visit(node);
   }
 
   @Override
   protected Object visit(AstBlock node) {
-    variables.pushScope();
-    visitChildren(node);
-    variables.popScope();
-    return null;
+    return super.visit(node);
   }
 
   @Override
