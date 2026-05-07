@@ -169,7 +169,7 @@ class PreprocessVisitorTest {
     assertEquals(List.of(), errorConsumer.getErrors());
     {
       var header = header(module, 0);
-      var receiverType = AstTypeRef.of("test", "Duration");
+      var receiverType = AstTypeRef.ofName("test", "Duration");
       assertEquals(receiverType, header.getReceiverType());
       assertEquals(1, header.getReceiverIndex());
       assertEquals(receiverType, header.getParameters().get(1).getType());

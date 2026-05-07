@@ -10,9 +10,13 @@ public final class AstEntityRef extends AstExpression {
   private AstEntity entity;
 
   // For testing
-  public static AstEntityRef ofString(String name) {
+  public static AstEntityRef ofName(String name) {
+    return ofName(null, name);
+  }
+
+  public static AstEntityRef ofName(String moduleName, String name) {
     var ref = new AstEntityRef();
-    ref.setName(new QualifiedName(name));
+    ref.setName(new QualifiedName(moduleName, name));
     return ref;
   }
 
