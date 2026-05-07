@@ -136,10 +136,10 @@ class PreprocessVisitorTest {
     module.accept(new PreprocessVisitor(nameMap, Keyword.valueList(), errorConsumer));
 
     assertEquals(List.of(), errorConsumer.getErrors());
-    assertSame(variables(module).get(0), nameMap.lookupVariable("x"));
-    assertSame(variables(module).get(1), nameMap.lookupVariable("y"));
-    assertSame(functions(module).get(0), nameMap.lookupFunction("f"));
-    assertSame(functions(module).get(1), nameMap.lookupFunction("g"));
+    assertSame(variables(module).get(0), nameMap.lookupEntity("x"));
+    assertSame(variables(module).get(1), nameMap.lookupEntity("y"));
+    assertSame(functions(module).get(0), nameMap.lookupEntity("f"));
+    assertSame(functions(module).get(1), nameMap.lookupEntity("g"));
     assertSame(types(module).get(0), nameMap.lookupType("R"));
   }
 
@@ -159,7 +159,9 @@ class PreprocessVisitorTest {
     module.accept(new PreprocessVisitor(nameMap, Keyword.valueList(), errorConsumer));
 
     assertEquals(
-        List.of("Duplicate variable: test::x. Defined at 3,5."), errorConsumer.getErrors());
+        List.of(
+            "Definition of variable test::x has a name collision with variable defined at 3,5."),
+        errorConsumer.getErrors());
   }
 
   @Test
@@ -178,7 +180,51 @@ class PreprocessVisitorTest {
     module.accept(new PreprocessVisitor(nameMap, Keyword.valueList(), errorConsumer));
 
     assertEquals(
-        List.of("Duplicate function: test::f. Defined at 3,10."), errorConsumer.getErrors());
+        List.of(
+            "Definition of function test::f has a name collision with function defined at 3,10."),
+        errorConsumer.getErrors());
+  }
+
+  @Test
+  void testFunctionVariableCollisionFailure() {
+    var code =
+        """
+        module test;
+
+        var f int;
+        function f() {}
+        """;
+
+    var errorConsumer = new InMemoryErrorConsumer();
+    var module = parseCode(code, errorConsumer);
+    var nameMap = new NameMap();
+    module.accept(new PreprocessVisitor(nameMap, Keyword.valueList(), errorConsumer));
+
+    assertEquals(
+        List.of(
+            "Definition of function test::f has a name collision with variable defined at 3,5."),
+        errorConsumer.getErrors());
+  }
+
+  @Test
+  void testVariableFunctionCollisionFailure() {
+    var code =
+        """
+        module test;
+
+        function f() {}
+        var f int;
+        """;
+
+    var errorConsumer = new InMemoryErrorConsumer();
+    var module = parseCode(code, errorConsumer);
+    var nameMap = new NameMap();
+    module.accept(new PreprocessVisitor(nameMap, Keyword.valueList(), errorConsumer));
+
+    assertEquals(
+        List.of(
+            "Definition of variable test::f has a name collision with function defined at 3,10."),
+        errorConsumer.getErrors());
   }
 
   @Test

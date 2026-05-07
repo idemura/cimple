@@ -8,6 +8,7 @@ import com.github.idemura.cimple.compiler.Location;
 import com.github.idemura.cimple.compiler.ast.AstBoolLiteral;
 import com.github.idemura.cimple.compiler.ast.AstBuiltinType;
 import com.github.idemura.cimple.compiler.ast.AstCall;
+import com.github.idemura.cimple.compiler.ast.AstEntity;
 import com.github.idemura.cimple.compiler.ast.AstEntityRef;
 import com.github.idemura.cimple.compiler.ast.AstFunction;
 import com.github.idemura.cimple.compiler.ast.AstFunctionType;
@@ -63,22 +64,14 @@ class PreprocessVisitor extends AstRewriteExpressionVisitor {
           header.setName(header.getName().withModuleName(moduleName));
           var existing = nameMap.addFunction(function);
           if (existing != null) {
-            errorConsumer.errorAt(
-                header.getLocation(),
-                "Duplicate function: %s. Defined at %s.",
-                function.getName(),
-                existing.getHeader().getLocation());
+            errorEntityCollision(function, existing);
           }
         }
         case AstVariable variable -> {
           variable.setName(variable.getName().withModuleName(moduleName));
           var existing = nameMap.addVariable(variable);
           if (existing != null) {
-            errorConsumer.errorAt(
-                variable.getLocation(),
-                "Duplicate variable: %s. Defined at %s.",
-                variable.getName(),
-                existing.getLocation());
+            errorEntityCollision(variable, existing);
           }
         }
         default ->
@@ -214,11 +207,6 @@ class PreprocessVisitor extends AstRewriteExpressionVisitor {
       newNode.setLocation(node.getLocation());
     } else {
       checkName(node.getName().name(), node.getLocation());
-      var variable = nameMap.lookupVariable(node.getName().name());
-      if (variable != null) {
-        node.setName(variable.getName());
-        node.setEntity(variable);
-      }
     }
     return newNode;
   }
@@ -233,5 +221,22 @@ class PreprocessVisitor extends AstRewriteExpressionVisitor {
     if (reservedWords.isReservedTypeName(name)) {
       errorConsumer.errorAt(location, "Reserved type name cannot be used as a type name: %s", name);
     }
+  }
+
+  private static String entityKind(AstEntity entity) {
+    return switch (entity) {
+      case AstFunction ignored -> "function";
+      case AstVariable ignored -> "variable";
+    };
+  }
+
+  private void errorEntityCollision(AstEntity entity, AstEntity existing) {
+    errorConsumer.errorAt(
+        entity.getLocation(),
+        "Definition of %s %s has a name collision with %s defined at %s.",
+        entityKind(entity),
+        entity.getName(),
+        entityKind(existing),
+        existing.getLocation());
   }
 }

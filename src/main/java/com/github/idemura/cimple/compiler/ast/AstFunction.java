@@ -1,5 +1,6 @@
 package com.github.idemura.cimple.compiler.ast;
 
+import com.github.idemura.cimple.compiler.Location;
 import com.github.idemura.cimple.compiler.QualifiedName;
 
 public final class AstFunction extends AstEntity {
@@ -12,6 +13,16 @@ public final class AstFunction extends AstEntity {
 
   public void setName(QualifiedName name) {
     header.setName(name);
+  }
+
+  @Override
+  public Location getLocation() {
+    return header.getLocation();
+  }
+
+  @Override
+  public void setLocation(Location location) {
+    header.setLocation(location);
   }
 
   @Override
