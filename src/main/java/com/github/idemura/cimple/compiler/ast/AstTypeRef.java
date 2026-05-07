@@ -8,13 +8,19 @@ public final class AstTypeRef extends AstNode {
   private AstType type;
 
   // For testing
-  public static AstTypeRef ofString(String name) {
+  public static AstTypeRef of(String name) {
     var ref = new AstTypeRef();
     ref.setName(new QualifiedName(name));
     return ref;
   }
 
-  public static AstTypeRef of(AstType type) {
+  public static AstTypeRef of(String moduleName, String name) {
+    var ref = new AstTypeRef();
+    ref.setName(new QualifiedName(moduleName, name));
+    return ref;
+  }
+
+  public static AstTypeRef ofType(AstType type) {
     var ref = new AstTypeRef();
     ref.setName(type.getName());
     ref.setType(type);

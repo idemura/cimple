@@ -80,7 +80,54 @@ class PreprocessVisitor extends AstRewriteExpressionVisitor {
 
   @Override
   protected Object visit(AstFunctionHeader node) {
+    checkReceiverParameter(node);
+    // Default return type if missing.
+    if (node.getResultType() == null) {
+      node.setResultType(AstTypeRef.ofType(AstBuiltinType.VOID));
+    }
     return super.visit(node);
+  }
+
+  private void checkReceiverParameter(AstFunctionHeader header) {
+    // Receiver functions must have exactly one receiver parameter: the single parameter with no
+    // explicit type. Free functions must not have any untyped parameters.
+    var parameters = header.getParameters();
+    if (header.getReceiverType() != null) {
+      var receiverIndex = -1;
+      var invalid = false;
+      for (int i = 0; i < parameters.size(); i++) {
+        if (parameters.get(i).getType() == null) {
+          if (receiverIndex >= 0) {
+            errorConsumer.errorAt(
+                header.getLocation(),
+                "Receiver function %s: multiple receiver parameters.",
+                header.getName());
+            invalid = true;
+            break;
+          }
+          receiverIndex = i;
+        }
+      }
+      if (!invalid && receiverIndex < 0) {
+        errorConsumer.errorAt(
+            header.getLocation(),
+            "Receiver function %s: missing the receiver parameter.",
+            header.getName());
+      } else {
+        header.setReceiverIndex(receiverIndex);
+        parameters.get(receiverIndex).setType(header.getReceiverType());
+      }
+    } else {
+      for (var parameter : parameters) {
+        if (parameter.getType() == null) {
+          errorConsumer.errorAt(
+              parameter.getLocation(),
+              "Free function %s cannot have a receiver parameter %s.",
+              header.getName(),
+              parameter.getName());
+        }
+      }
+    }
   }
 
   @Override
@@ -153,13 +200,13 @@ class PreprocessVisitor extends AstRewriteExpressionVisitor {
 
   @Override
   protected Object visit(AstNullLiteral node) {
-    node.setType(AstTypeRef.of(AstBuiltinType.NULL));
+    node.setType(AstTypeRef.ofType(AstBuiltinType.NULL));
     return node;
   }
 
   @Override
   protected Object visit(AstBoolLiteral node) {
-    node.setType(AstTypeRef.of(AstBuiltinType.BOOL));
+    node.setType(AstTypeRef.ofType(AstBuiltinType.BOOL));
     return node;
   }
 
@@ -173,10 +220,10 @@ class PreprocessVisitor extends AstRewriteExpressionVisitor {
     try {
       if (value.contains(".")) {
         number = new AstNumberLiteral(parseDouble(value));
-        number.setType(AstTypeRef.of(AstBuiltinType.FLOAT64));
+        number.setType(AstTypeRef.ofType(AstBuiltinType.FLOAT64));
       } else {
         number = new AstNumberLiteral(parseLong(value));
-        number.setType(AstTypeRef.of(AstBuiltinType.INT64));
+        number.setType(AstTypeRef.ofType(AstBuiltinType.INT64));
       }
       number.setLocation(node.getLocation());
       return number;
@@ -188,7 +235,7 @@ class PreprocessVisitor extends AstRewriteExpressionVisitor {
 
   @Override
   protected Object visit(AstStringLiteral node) {
-    node.setType(AstTypeRef.of(AstBuiltinType.STRING));
+    node.setType(AstTypeRef.ofType(AstBuiltinType.STRING));
     return node;
   }
 

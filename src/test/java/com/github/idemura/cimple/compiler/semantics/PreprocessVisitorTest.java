@@ -5,16 +5,19 @@ import static org.junit.jupiter.api.Assertions.*;
 
 import com.github.idemura.cimple.compiler.InMemoryErrorConsumer;
 import com.github.idemura.cimple.compiler.ast.AstBoolLiteral;
+import com.github.idemura.cimple.compiler.ast.AstBuiltinType;
 import com.github.idemura.cimple.compiler.ast.AstDefer;
 import com.github.idemura.cimple.compiler.ast.AstExpressionStatement;
 import com.github.idemura.cimple.compiler.ast.AstFor;
 import com.github.idemura.cimple.compiler.ast.AstFunction;
+import com.github.idemura.cimple.compiler.ast.AstFunctionHeader;
 import com.github.idemura.cimple.compiler.ast.AstIf;
 import com.github.idemura.cimple.compiler.ast.AstLocal;
 import com.github.idemura.cimple.compiler.ast.AstModule;
 import com.github.idemura.cimple.compiler.ast.AstNullLiteral;
 import com.github.idemura.cimple.compiler.ast.AstReturn;
 import com.github.idemura.cimple.compiler.ast.AstType;
+import com.github.idemura.cimple.compiler.ast.AstTypeRef;
 import com.github.idemura.cimple.compiler.ast.AstVariable;
 import com.github.idemura.cimple.compiler.parser.Keyword;
 import com.google.common.collect.ImmutableList;
@@ -41,6 +44,10 @@ class PreprocessVisitorTest {
         .filter(AstVariable.class::isInstance)
         .map(AstVariable.class::cast)
         .toList();
+  }
+
+  private static AstFunctionHeader header(AstModule module, int index) {
+    return functions(module).get(index).getHeader();
   }
 
   @Test
@@ -140,6 +147,82 @@ class PreprocessVisitorTest {
     assertSame(functions(module).get(0), nameMap.lookupEntity("f"));
     assertSame(functions(module).get(1), nameMap.lookupEntity("g"));
     assertSame(types(module).get(0), nameMap.lookupType("R"));
+  }
+
+  @Test
+  void testNormalizeFunctionHeader() {
+    var code =
+        """
+        module test;
+
+        type record Duration {}
+
+        function Duration:toMillis(x int, this) {}
+        function f(x int) {}
+        """;
+
+    var errorConsumer = new InMemoryErrorConsumer();
+    var module = parseCode(code, errorConsumer);
+    var nameMap = new NameMap();
+    module.accept(new PreprocessVisitor(nameMap, Keyword.valueList(), errorConsumer));
+
+    assertEquals(List.of(), errorConsumer.getErrors());
+    {
+      var header = header(module, 0);
+      var receiverType = AstTypeRef.of("test", "Duration");
+      assertEquals(receiverType, header.getReceiverType());
+      assertEquals(1, header.getReceiverIndex());
+      assertEquals(receiverType, header.getParameters().get(1).getType());
+      assertEquals(AstTypeRef.ofType(AstBuiltinType.VOID), header.getResultType());
+    }
+    {
+      var header = header(module, 1);
+      assertEquals(-1, header.getReceiverIndex());
+      assertEquals(AstTypeRef.ofType(AstBuiltinType.VOID), header.getResultType());
+    }
+  }
+
+  @Test
+  void testReceiverFunctionMustHaveExactlyOneUntypedParameter() {
+    var code =
+        """
+        module test;
+
+        type record Duration {}
+
+        function Duration:a(x int) {}
+        function Duration:b(x, y) {}
+        """;
+
+    var errorConsumer = new InMemoryErrorConsumer();
+    var module = parseCode(code, errorConsumer);
+    var nameMap = new NameMap();
+    module.accept(new PreprocessVisitor(nameMap, Keyword.valueList(), errorConsumer));
+
+    assertEquals(
+        List.of(
+            "Receiver function test::a: missing the receiver parameter.",
+            "Receiver function test::b: multiple receiver parameters."),
+        errorConsumer.getErrors());
+  }
+
+  @Test
+  void testFreeFunctionCannotHaveUntypedParameter() {
+    var code =
+        """
+        module test;
+
+        function f(x) {}
+        """;
+
+    var errorConsumer = new InMemoryErrorConsumer();
+    var module = parseCode(code, errorConsumer);
+    var nameMap = new NameMap();
+    module.accept(new PreprocessVisitor(nameMap, Keyword.valueList(), errorConsumer));
+
+    assertEquals(
+        List.of("Free function test::f cannot have a receiver parameter x."),
+        errorConsumer.getErrors());
   }
 
   @Test

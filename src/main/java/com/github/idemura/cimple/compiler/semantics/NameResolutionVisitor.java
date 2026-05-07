@@ -47,6 +47,9 @@ public class NameResolutionVisitor extends AstVisitor {
 
   @Override
   protected Object visit(AstTypeRef node) {
+    if (node.getType() == null) {
+      return null;
+    }
     return super.visit(node);
   }
 
