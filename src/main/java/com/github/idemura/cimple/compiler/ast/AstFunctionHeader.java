@@ -7,7 +7,7 @@ import java.util.Objects;
 
 public final class AstFunctionHeader extends AstNode {
   private QualifiedName name;
-  private AstTypeRef objectType;
+  private AstTypeRef receiverType;
   private List<AstVariable> parameters;
   private AstTypeRef resultType;
 
@@ -30,7 +30,7 @@ public final class AstFunctionHeader extends AstNode {
             && Objects.equals(name, other.name)
             && Objects.equals(parameters, other.parameters)
             && Objects.equals(resultType, other.resultType)
-            && Objects.equals(objectType, other.objectType));
+            && Objects.equals(receiverType, other.receiverType));
   }
 
   public QualifiedName getName() {
@@ -41,12 +41,12 @@ public final class AstFunctionHeader extends AstNode {
     this.name = name;
   }
 
-  public AstTypeRef getObjectType() {
-    return objectType;
+  public AstTypeRef getReceiverType() {
+    return receiverType;
   }
 
-  public void setObjectType(AstTypeRef objectType) {
-    this.objectType = objectType;
+  public void setReceiverType(AstTypeRef receiverType) {
+    this.receiverType = receiverType;
   }
 
   public List<AstVariable> getParameters() {

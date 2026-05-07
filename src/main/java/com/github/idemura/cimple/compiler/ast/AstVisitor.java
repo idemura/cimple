@@ -20,7 +20,7 @@ public abstract class AstVisitor {
   }
 
   protected void visitChildren(AstFunctionHeader node) {
-    acceptSafe(node.getObjectType());
+    acceptSafe(node.getReceiverType());
     for (var parameter : node.getParameters()) {
       parameter.accept(this);
     }

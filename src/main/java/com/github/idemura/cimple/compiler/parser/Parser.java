@@ -454,10 +454,10 @@ public class Parser {
     var header = new AstFunctionHeader();
     var current = take(IDENTIFIER);
     if (tokenizer.takeIf(COLON)) {
-      var objectType = new AstTypeRef();
-      objectType.setName(new QualifiedName(current.value()));
-      objectType.setLocation(current.location());
-      header.setObjectType(objectType);
+      var receiverType = new AstTypeRef();
+      receiverType.setName(new QualifiedName(current.value()));
+      receiverType.setLocation(current.location());
+      header.setReceiverType(receiverType);
       header.setLocation(tokenizer.currentLocation());
       header.setName(takeIdentifier());
     } else {

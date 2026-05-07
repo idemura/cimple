@@ -281,7 +281,7 @@ class ParserTest {
     var functions = functions(module);
     assertEquals(1, functions.size());
     var header = functions.get(0).getHeader();
-    assertEquals(AstTypeRef.ofString("Duration"), header.getObjectType());
+    assertEquals(AstTypeRef.ofString("Duration"), header.getReceiverType());
     assertEquals(new QualifiedName("toMillis"), header.getName());
     assertEquals(AstTypeRef.ofString("int"), header.getResultType());
     assertEquals(ImmutableList.of(parameter("this", "int")), header.getParameters());

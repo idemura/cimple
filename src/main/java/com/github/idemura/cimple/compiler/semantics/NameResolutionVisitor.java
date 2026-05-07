@@ -102,8 +102,8 @@ public class NameResolutionVisitor extends AstVisitor {
   }
 
   private void resolveHeader(AstFunctionHeader header) {
-    if (header.getObjectType() != null) {
-      resolveTypeRef(header.getObjectType());
+    if (header.getReceiverType() != null) {
+      resolveTypeRef(header.getReceiverType());
     }
     resolveTypeRef(header.getResultType());
   }
