@@ -136,11 +136,11 @@ class PreprocessVisitorTest {
     module.accept(new PreprocessVisitor(nameMap, Keyword.valueList(), errorConsumer));
 
     assertEquals(List.of(), errorConsumer.getErrors());
-    assertSame(variables(module).get(0), nameMap.getVariable("x"));
-    assertSame(variables(module).get(1), nameMap.getVariable("y"));
-    assertSame(functions(module).get(0), nameMap.getFunction("f"));
-    assertSame(functions(module).get(1), nameMap.getFunction("g"));
-    assertSame(types(module).get(0), nameMap.getType("R"));
+    assertSame(variables(module).get(0), nameMap.lookupVariable("x"));
+    assertSame(variables(module).get(1), nameMap.lookupVariable("y"));
+    assertSame(functions(module).get(0), nameMap.lookupFunction("f"));
+    assertSame(functions(module).get(1), nameMap.lookupFunction("g"));
+    assertSame(types(module).get(0), nameMap.lookupType("R"));
   }
 
   @Test
@@ -216,8 +216,7 @@ class PreprocessVisitorTest {
     var nameMap = new NameMap();
     module.accept(new PreprocessVisitor(nameMap, Keyword.valueList(), errorConsumer));
 
-    assertEquals(
-        List.of("Duplicate record field: x. Defined at 4,7."), errorConsumer.getErrors());
+    assertEquals(List.of("Duplicate record field: x. Defined at 4,7."), errorConsumer.getErrors());
   }
 
   @Test
@@ -237,7 +236,6 @@ class PreprocessVisitorTest {
     var nameMap = new NameMap();
     module.accept(new PreprocessVisitor(nameMap, Keyword.valueList(), errorConsumer));
 
-    assertEquals(
-        List.of("Duplicate union variant: A. Defined at 4,3."), errorConsumer.getErrors());
+    assertEquals(List.of("Duplicate union variant: A. Defined at 4,3."), errorConsumer.getErrors());
   }
 }

@@ -44,7 +44,7 @@ class NameResolutionVisitorTest {
         module test;
 
         type record R {}
-        
+
         var x;
 
         function f() {

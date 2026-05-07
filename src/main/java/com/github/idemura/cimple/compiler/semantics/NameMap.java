@@ -1,6 +1,5 @@
 package com.github.idemura.cimple.compiler.semantics;
 
-import com.github.idemura.cimple.compiler.ast.AstEntity;
 import com.github.idemura.cimple.compiler.ast.AstFunction;
 import com.github.idemura.cimple.compiler.ast.AstType;
 import com.github.idemura.cimple.compiler.ast.AstVariable;
@@ -18,10 +17,6 @@ public class NameMap {
     return typesByName.putIfAbsent(type.getName().name(), type);
   }
 
-  public AstType getType(String name) {
-    return typesByName.get(name);
-  }
-
   public AstFunction addFunction(AstFunction function) {
     return functionsByName.putIfAbsent(function.getHeader().getName().name(), function);
   }
@@ -30,11 +25,15 @@ public class NameMap {
     return variablesByName.putIfAbsent(variable.getName().name(), variable);
   }
 
-  public AstFunction getFunction(String name) {
+  public AstType lookupType(String name) {
+    return typesByName.get(name);
+  }
+
+  public AstFunction lookupFunction(String name) {
     return functionsByName.get(name);
   }
 
-  public AstVariable getVariable(String name) {
+  public AstVariable lookupVariable(String name) {
     return variablesByName.get(name);
   }
 }

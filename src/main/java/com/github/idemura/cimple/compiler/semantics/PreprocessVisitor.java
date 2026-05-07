@@ -190,7 +190,7 @@ class PreprocessVisitor extends AstRewriteExpressionVisitor {
   protected Object visit(AstTypeRef node) {
     AstType type = AstBuiltinType.find(node.getName().name());
     if (type == null) {
-      type = nameMap.getType(node.getName().name());
+      type = nameMap.lookupType(node.getName().name());
     }
     if (type != null) {
       node.setName(type.getName());
@@ -214,7 +214,7 @@ class PreprocessVisitor extends AstRewriteExpressionVisitor {
       newNode.setLocation(node.getLocation());
     } else {
       checkName(node.getName().name(), node.getLocation());
-      var variable = nameMap.getVariable(node.getName().name());
+      var variable = nameMap.lookupVariable(node.getName().name());
       if (variable != null) {
         node.setName(variable.getName());
         node.setEntity(variable);

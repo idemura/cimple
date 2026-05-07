@@ -1,5 +1,7 @@
 package com.github.idemura.cimple.compiler.ast;
 
+import static java.util.Objects.requireNonNull;
+
 import com.github.idemura.cimple.compiler.QualifiedName;
 import java.util.Objects;
 
@@ -39,6 +41,7 @@ public final class AstEntityRef extends AstExpression {
 
   @Override
   public AstTypeRef getType() {
+    requireNonNull(entity);
     return switch (entity) {
       case AstVariable variable -> variable.getType();
       case AstFunction function -> function.getHeader().getResultType();
@@ -58,6 +61,6 @@ public final class AstEntityRef extends AstExpression {
   }
 
   public void setEntity(AstEntity entity) {
-    this.entity = entity;
+    this.entity = requireNonNull(entity);
   }
 }
