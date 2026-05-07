@@ -452,16 +452,18 @@ public class Parser {
   private AstFunctionHeader parseFunctionHeader() {
     takeKeyword(FUNCTION);
     var header = new AstFunctionHeader();
-    if (tokenizer.next() != null && tokenizer.next().is(PERIOD)) {
-      var current = tokenizer.current();
+    var current = take(IDENTIFIER);
+    if (tokenizer.takeIf(COLON)) {
       var objectType = new AstTypeRef();
       objectType.setName(new QualifiedName(current.value()));
       objectType.setLocation(current.location());
       header.setObjectType(objectType);
-      take(PERIOD);
+      header.setLocation(tokenizer.current().location());
+      header.setName(takeIdentifier());
+    } else {
+      header.setLocation(current.location());
+      header.setName(new QualifiedName(current.value()));
     }
-    header.setLocation(tokenizer.current().location());
-    header.setName(takeIdentifier());
     header.setParameters(parseParameters());
     if (tokenizer.current().is(IDENTIFIER)) {
       header.setResultType(parseTypeRef());
