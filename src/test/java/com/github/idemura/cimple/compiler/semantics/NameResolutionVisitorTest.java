@@ -14,13 +14,14 @@ import com.github.idemura.cimple.compiler.ast.AstType;
 import com.github.idemura.cimple.compiler.ast.AstVariable;
 import com.github.idemura.cimple.compiler.parser.Keyword;
 import java.util.List;
+import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 
 class NameResolutionVisitorTest {
-  private static List<AstFunction> moduleFunctions(AstModule module) {
+  private static List<AstType> types(AstModule module) {
     return module.definitions().stream()
-        .filter(AstFunction.class::isInstance)
-        .map(AstFunction.class::cast)
+        .filter(AstType.class::isInstance)
+        .map(AstType.class::cast)
         .toList();
   }
 
@@ -31,10 +32,10 @@ class NameResolutionVisitorTest {
         .toList();
   }
 
-  private static List<AstType> types(AstModule module) {
+  private static List<AstFunction> moduleFunctions(AstModule module) {
     return module.definitions().stream()
-        .filter(AstType.class::isInstance)
-        .map(AstType.class::cast)
+        .filter(AstFunction.class::isInstance)
+        .map(AstFunction.class::cast)
         .toList();
   }
 
@@ -43,12 +44,10 @@ class NameResolutionVisitorTest {
   }
 
   @Test
-  void testResolveValuesAndTypes() {
+  void testResolveVariableAndFunction() {
     var code =
         """
         module test;
-
-        type record R {}
 
         var x;
 
@@ -69,12 +68,98 @@ class NameResolutionVisitorTest {
 
     assertEquals(List.of(), errorConsumer.getErrors());
 
-    var varX = moduleVariables(module).get(0);
+    var variables = moduleVariables(module);
     var functions = moduleFunctions(module);
     {
       var expr = extractBodyExpression(functions.get(0));
       var entityRef = (AstEntityRef) expr;
-      assertSame(varX, entityRef.getEntity());
+      assertSame(variables.get(0), entityRef.getEntity());
+    }
+    {
+      var expr = extractBodyExpression(functions.get(1));
+      var call = (AstCall) expr;
+      var entityRef = (AstEntityRef) call.getFunction();
+      assertSame(moduleFunctions(module).get(0), entityRef.getEntity());
+    }
+  }
+
+  @Test
+  void testResolveVariableAndFunctionInvertOrder() {
+    var code =
+        """
+        module test;
+
+        function g() {
+          f();
+        }
+
+        function f() {
+          x;
+        }
+
+        var x;
+        """;
+
+    var errorConsumer = new InMemoryErrorConsumer();
+    var module = parseCode(code, errorConsumer);
+    var nameMap = new NameMap();
+    module.accept(new PreprocessVisitor(nameMap, Keyword.valueList(), errorConsumer));
+    module.accept(new NameResolutionVisitor(nameMap, errorConsumer));
+
+    assertEquals(List.of(), errorConsumer.getErrors());
+
+    var variables = moduleVariables(module);
+    var functions = moduleFunctions(module);
+    {
+      var expr = extractBodyExpression(functions.get(0));
+      var call = (AstCall) expr;
+      var entityRef = (AstEntityRef) call.getFunction();
+      assertSame(moduleFunctions(module).get(1), entityRef.getEntity());
+    }
+    {
+      var expr = extractBodyExpression(functions.get(1));
+      var entityRef = (AstEntityRef) expr;
+      assertSame(variables.get(0), entityRef.getEntity());
+    }
+  }
+
+  @Disabled
+  @Test
+  void testBoundFunctions() {
+    var code =
+        """
+        module test;
+
+        type record Duration {
+          var seconds int;
+        }
+
+        function Duration:toMillis(this) {
+          return this.seconds * 1000;
+        }
+        # function Duration:add(this, Duration d) {
+        #   this.seconds += d.seconds;
+        # }
+
+        function f(Duration d) {
+          f();
+        }
+        """;
+
+    var errorConsumer = new InMemoryErrorConsumer();
+    var module = parseCode(code, errorConsumer);
+    var nameMap = new NameMap();
+    module.accept(new PreprocessVisitor(nameMap, Keyword.valueList(), errorConsumer));
+    module.accept(new NameResolutionVisitor(nameMap, errorConsumer));
+
+    assertEquals(List.of(), errorConsumer.getErrors());
+
+    var variables = moduleVariables(module);
+    var functions = moduleFunctions(module);
+    {
+      var expr = extractBodyExpression(functions.get(0));
+      var entityRef = (AstEntityRef) expr;
+      assertSame(variables.get(0), entityRef.getEntity());
     }
     {
       var expr = extractBodyExpression(functions.get(1));
