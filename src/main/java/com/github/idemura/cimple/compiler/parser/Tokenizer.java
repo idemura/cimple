@@ -118,6 +118,15 @@ public class Tokenizer {
     return true;
   }
 
+  /// Get current token location. If end of tokens reached, doesn't throw and returns null.
+  Location currentLocation() {
+    if (pos < tokens.size()) {
+      return tokens.get(pos).location();
+    } else {
+      return null;
+    }
+  }
+
   Token current() {
     checkPosition();
     return tokens.get(pos);
