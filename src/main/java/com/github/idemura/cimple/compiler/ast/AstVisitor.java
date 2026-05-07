@@ -99,12 +99,12 @@ public abstract class AstVisitor {
     node.getExpression().accept(this);
   }
 
-  protected Object visit(AstLet node) {
+  protected Object visit(AstLocal node) {
     visitChildren(node);
     return null;
   }
 
-  protected void visitChildren(AstLet node) {
+  protected void visitChildren(AstLocal node) {
     node.getVariable().accept(this);
   }
 

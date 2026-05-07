@@ -19,7 +19,7 @@ public class AstRewriteExpressionVisitor extends AstVisitor {
   }
 
   @Override
-  protected void visitChildren(AstLet node) {
+  protected void visitChildren(AstLocal node) {
     super.visitChildren(node);
   }
 

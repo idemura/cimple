@@ -17,7 +17,7 @@ import com.github.idemura.cimple.compiler.ast.AstFunctionHeader;
 import com.github.idemura.cimple.compiler.ast.AstFunctionType;
 import com.github.idemura.cimple.compiler.ast.AstGoto;
 import com.github.idemura.cimple.compiler.ast.AstIf;
-import com.github.idemura.cimple.compiler.ast.AstLet;
+import com.github.idemura.cimple.compiler.ast.AstLocal;
 import com.github.idemura.cimple.compiler.ast.AstModule;
 import com.github.idemura.cimple.compiler.ast.AstNullLiteral;
 import com.github.idemura.cimple.compiler.ast.AstNumberLiteral;
@@ -87,7 +87,7 @@ class TypeCheckVisitor extends AstVisitor {
   }
 
   @Override
-  protected Object visit(AstLet node) {
+  protected Object visit(AstLocal node) {
     return super.visit(node);
   }
 

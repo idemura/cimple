@@ -10,7 +10,7 @@ import com.github.idemura.cimple.compiler.ast.AstExpressionStatement;
 import com.github.idemura.cimple.compiler.ast.AstFor;
 import com.github.idemura.cimple.compiler.ast.AstFunction;
 import com.github.idemura.cimple.compiler.ast.AstIf;
-import com.github.idemura.cimple.compiler.ast.AstLet;
+import com.github.idemura.cimple.compiler.ast.AstLocal;
 import com.github.idemura.cimple.compiler.ast.AstModule;
 import com.github.idemura.cimple.compiler.ast.AstNullLiteral;
 import com.github.idemura.cimple.compiler.ast.AstReturn;
@@ -76,7 +76,7 @@ class PreprocessVisitorTest {
           new AstNullLiteral(), ((AstExpressionStatement) statements1.get(0)).getExpression());
     }
     assertEquals(
-        new AstBoolLiteral(false), ((AstLet) statements.get(i++)).getVariable().getExpression());
+        new AstBoolLiteral(false), ((AstLocal) statements.get(i++)).getVariable().getExpression());
     {
       var stmt = (AstFor) statements.get(i++);
       assertEquals(new AstNullLiteral(), stmt.getInit().getExpression());

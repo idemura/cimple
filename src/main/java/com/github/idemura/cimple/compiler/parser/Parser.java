@@ -23,7 +23,7 @@ import com.github.idemura.cimple.compiler.ast.AstFunctionHeader;
 import com.github.idemura.cimple.compiler.ast.AstFunctionType;
 import com.github.idemura.cimple.compiler.ast.AstGoto;
 import com.github.idemura.cimple.compiler.ast.AstIf;
-import com.github.idemura.cimple.compiler.ast.AstLet;
+import com.github.idemura.cimple.compiler.ast.AstLocal;
 import com.github.idemura.cimple.compiler.ast.AstModule;
 import com.github.idemura.cimple.compiler.ast.AstNumberLiteral;
 import com.github.idemura.cimple.compiler.ast.AstRecordType;
@@ -177,8 +177,8 @@ public class Parser {
     return variable;
   }
 
-  private AstLet parseVariableStatement(boolean mutable) {
-    var stmt = new AstLet();
+  private AstLocal parseVariableStatement(boolean mutable) {
+    var stmt = new AstLocal();
     stmt.setVariable(parseVariable(mutable));
     return stmt;
   }

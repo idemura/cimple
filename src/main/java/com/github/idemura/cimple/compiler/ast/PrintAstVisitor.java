@@ -122,7 +122,7 @@ public class PrintAstVisitor extends AstVisitor {
   }
 
   @Override
-  protected Object visit(AstLet node) {
+  protected Object visit(AstLocal node) {
     return super.visit(node);
   }
 
