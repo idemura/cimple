@@ -6,6 +6,7 @@ import static org.junit.jupiter.api.Assertions.*;
 import com.github.idemura.cimple.compiler.InMemoryErrorConsumer;
 import com.github.idemura.cimple.compiler.ast.AstCall;
 import com.github.idemura.cimple.compiler.ast.AstEntityRef;
+import com.github.idemura.cimple.compiler.ast.AstExpression;
 import com.github.idemura.cimple.compiler.ast.AstExpressionStatement;
 import com.github.idemura.cimple.compiler.ast.AstFunction;
 import com.github.idemura.cimple.compiler.ast.AstModule;
@@ -16,14 +17,14 @@ import java.util.List;
 import org.junit.jupiter.api.Test;
 
 class NameResolutionVisitorTest {
-  private static List<AstFunction> functions(AstModule module) {
+  private static List<AstFunction> moduleFunctions(AstModule module) {
     return module.definitions().stream()
         .filter(AstFunction.class::isInstance)
         .map(AstFunction.class::cast)
         .toList();
   }
 
-  private static List<AstVariable> variables(AstModule module) {
+  private static List<AstVariable> moduleVariables(AstModule module) {
     return module.definitions().stream()
         .filter(AstVariable.class::isInstance)
         .map(AstVariable.class::cast)
@@ -35,6 +36,10 @@ class NameResolutionVisitorTest {
         .filter(AstType.class::isInstance)
         .map(AstType.class::cast)
         .toList();
+  }
+
+  private static AstExpression extractBodyExpression(AstFunction function) {
+    return ((AstExpressionStatement) function.getBlock().statements().get(0)).getExpression();
   }
 
   @Test
@@ -64,19 +69,18 @@ class NameResolutionVisitorTest {
 
     assertEquals(List.of(), errorConsumer.getErrors());
 
-    var varX = variables(module).get(0);
+    var varX = moduleVariables(module).get(0);
+    var functions = moduleFunctions(module);
     {
-      var function = functions(module).get(0);
-      var expr = ((AstExpressionStatement) function.getBlock().statements().get(0)).getExpression();
+      var expr = extractBodyExpression(functions.get(0));
       var entityRef = (AstEntityRef) expr;
       assertSame(varX, entityRef.getEntity());
     }
     {
-      var function = functions(module).get(1);
-      var expr = ((AstExpressionStatement) function.getBlock().statements().get(0)).getExpression();
+      var expr = extractBodyExpression(functions.get(1));
       var call = (AstCall) expr;
       var entityRef = (AstEntityRef) call.getFunction();
-      assertSame(functions(module).get(0), entityRef.getEntity());
+      assertSame(moduleFunctions(module).get(0), entityRef.getEntity());
     }
   }
 }
