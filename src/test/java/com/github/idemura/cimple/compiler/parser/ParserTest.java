@@ -268,7 +268,7 @@ class ParserTest {
   }
 
   @Test
-  void testBoundFunction() {
+  void testReceiverFunction() {
     var code =
         """
         module test;

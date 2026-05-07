@@ -125,7 +125,7 @@ class NameResolutionVisitorTest {
 
   @Disabled
   @Test
-  void testBoundFunctions() {
+  void testReceiverFunctions() {
     var code =
         """
         module test;

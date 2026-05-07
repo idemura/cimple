@@ -97,7 +97,7 @@ Modules cannot be nested.
 <block> := "{" <statement>* "}"
 ```
 
-There are two kinds of functions: free and bound.
+There are two kinds of functions: free functions and receiver functions.
 This section is incomplete.
 
 ## Types
