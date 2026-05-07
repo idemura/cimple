@@ -14,7 +14,6 @@ import com.github.idemura.cimple.compiler.ast.AstUnionType;
 import com.github.idemura.cimple.compiler.ast.AstVariable;
 import com.github.idemura.cimple.compiler.ast.AstVisitor;
 
-/// Resolves names.
 public class NameResolutionVisitor extends AstVisitor {
   private final NameMap nameMap;
   private final ErrorConsumer errorConsumer;
@@ -30,19 +29,24 @@ public class NameResolutionVisitor extends AstVisitor {
   }
 
   @Override
+  protected Object visit(AstFunctionHeader node) {
+    return super.visit(node);
+  }
+
+  @Override
   protected Object visit(AstFunction node) {
     resolveHeader(node.getHeader());
     return super.visit(node);
   }
 
   @Override
-  protected Object visit(AstBlock node) {
+  protected Object visit(AstVariable node) {
+    resolveTypeRef(node.getType());
     return super.visit(node);
   }
 
   @Override
-  protected Object visit(AstVariable node) {
-    resolveTypeRef(node.getType());
+  protected Object visit(AstTypeRef node) {
     return super.visit(node);
   }
 
@@ -69,8 +73,7 @@ public class NameResolutionVisitor extends AstVisitor {
   }
 
   @Override
-  protected Object visit(AstCast node) {
-    resolveTypeRef(node.getTypeRef());
+  protected Object visit(AstBlock node) {
     return super.visit(node);
   }
 
@@ -90,6 +93,12 @@ public class NameResolutionVisitor extends AstVisitor {
     } finally {
       node.markNameResolved();
     }
+  }
+
+  @Override
+  protected Object visit(AstCast node) {
+    resolveTypeRef(node.getTypeRef());
+    return super.visit(node);
   }
 
   private void resolveHeader(AstFunctionHeader header) {

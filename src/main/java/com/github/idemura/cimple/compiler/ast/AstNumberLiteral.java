@@ -10,4 +10,9 @@ public final class AstNumberLiteral extends AstLiteral {
     super(value);
     // Don't know the type yet.
   }
+
+  @Override
+  public Object accept(AstVisitor visitor) {
+    return visitor.visit(this);
+  }
 }

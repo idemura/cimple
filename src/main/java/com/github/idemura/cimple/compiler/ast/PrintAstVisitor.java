@@ -24,16 +24,55 @@ public class PrintAstVisitor extends AstVisitor {
   }
 
   @Override
+  protected Object visit(AstFunctionHeader node) {
+    return super.visit(node);
+  }
+
+  @Override
   protected Object visit(AstFunction node) {
     var header = node.getHeader();
     printEntity("FUNCTION", header.getName(), header.getResultType());
     output.indent();
-    for (var p : header.getParameters()) {
-      printEntity("ARG", p.getName(), p.getType());
+    for (var parameter : header.getParameters()) {
+      printEntity("ARG", parameter.getName(), parameter.getType());
     }
     node.getBlock().accept(this);
     output.unindent();
     output.writeLine("END");
+    return null;
+  }
+
+  @Override
+  protected Object visit(AstVariable node) {
+    printEntity(node.getBit(AstVariable.MUTABLE) ? "VAR" : "CONST", node.getName(), node.getType());
+    output.indent();
+    if (node.getExpression() != null) {
+      node.getExpression().accept(this);
+    }
+    output.unindent();
+    return null;
+  }
+
+  @Override
+  protected Object visit(AstTypeRef node) {
+    return super.visit(node);
+  }
+
+  @Override
+  protected Object visit(AstBuiltinType node) {
+    output.writeLine("TYPE BUILTIN %s".formatted(node.getName()));
+    return null;
+  }
+
+  @Override
+  protected Object visit(AstFunctionType node) {
+    var header = node.getHeader();
+    printEntity("TYPE FUNCTION", node.getName(), header.getResultType());
+    output.indent();
+    for (var parameter : header.getParameters()) {
+      printEntity("ARG", parameter.getName(), parameter.getType());
+    }
+    output.unindent();
     return null;
   }
 
@@ -44,18 +83,6 @@ public class PrintAstVisitor extends AstVisitor {
     visitChildren(node);
     output.unindent();
     output.writeLine("END");
-    return null;
-  }
-
-  @Override
-  protected Object visit(AstFunctionType node) {
-    var header = node.getHeader();
-    printEntity("TYPE FUNCTION", node.getName(), header.getResultType());
-    output.indent();
-    for (var p : header.getParameters()) {
-      printEntity("ARG", p.getName(), p.getType());
-    }
-    output.unindent();
     return null;
   }
 
@@ -76,12 +103,6 @@ public class PrintAstVisitor extends AstVisitor {
   }
 
   @Override
-  protected Object visit(AstBuiltinType node) {
-    output.writeLine("TYPE BUILTIN %s".formatted(node.getName()));
-    return null;
-  }
-
-  @Override
   protected Object visit(AstBlock node) {
     output.writeLine("BLOCK");
     output.indent();
@@ -92,51 +113,8 @@ public class PrintAstVisitor extends AstVisitor {
   }
 
   @Override
-  protected Object visit(AstReturn node) {
-    output.writeLine("RETURN");
-    output.indent();
-    visitChildren(node);
-    output.unindent();
-    return null;
-  }
-
-  @Override
-  protected Object visit(AstLiteral node) {
-    printEntity("LITERAL", node.value(), node.getType());
-    return null;
-  }
-
-  @Override
-  protected Object visit(AstFieldAccess node) {
-    output.writeLine("FIELD %s".formatted(node.getFieldName()));
-    output.indent();
-    node.getObject().accept(this);
-    output.unindent();
-    return null;
-  }
-
-  @Override
-  protected Object visit(AstBind node) {
-    output.writeLine("BIND %s".formatted(node.getFunctionName()));
-    output.indent();
-    node.getObject().accept(this);
-    output.unindent();
-    return null;
-  }
-
-  @Override
-  protected Object visit(AstArrayAccess node) {
-    output.writeLine("INDEX");
-    output.indent();
-    node.getArray().accept(this);
-    node.getIndex().accept(this);
-    output.unindent();
-    return null;
-  }
-
-  @Override
-  protected Object visit(AstCast node) {
-    output.writeLine("CAST %s".formatted(node.getTypeRef()));
+  protected Object visit(AstExpressionStatement node) {
+    output.writeLine("EXPR");
     output.indent();
     node.getExpression().accept(this);
     output.unindent();
@@ -144,29 +122,8 @@ public class PrintAstVisitor extends AstVisitor {
   }
 
   @Override
-  protected Object visit(AstEntityRef node) {
-    output.writeLine("IDENTIFIER %s".formatted(node.getName()));
-    return null;
-  }
-
-  @Override
-  protected Object visit(AstCall node) {
-    output.writeLine("CALL");
-    output.indent();
-    visitChildren(node);
-    output.unindent();
-    return null;
-  }
-
-  @Override
-  protected Object visit(AstVariable node) {
-    printEntity(node.getBit(AstVariable.MUTABLE) ? "VAR" : "CONST", node.getName(), node.getType());
-    output.indent();
-    if (node.getExpression() != null) {
-      node.getExpression().accept(this);
-    }
-    output.unindent();
-    return null;
+  protected Object visit(AstLet node) {
+    return super.visit(node);
   }
 
   @Override
@@ -219,8 +176,11 @@ public class PrintAstVisitor extends AstVisitor {
   }
 
   @Override
-  protected Object visit(AstGoto node) {
-    output.writeLine("GOTO %s".formatted(node.getLabel()));
+  protected Object visit(AstReturn node) {
+    output.writeLine("RETURN");
+    output.indent();
+    visitChildren(node);
+    output.unindent();
     return null;
   }
 
@@ -234,19 +194,96 @@ public class PrintAstVisitor extends AstVisitor {
   }
 
   @Override
-  protected Object visit(AstExpressionStatement node) {
-    output.writeLine("EXPR");
+  protected Object visit(AstGoto node) {
+    output.writeLine("GOTO %s".formatted(node.getLabel()));
+    return null;
+  }
+
+  @Override
+  protected Object visit(AstNullLiteral node) {
+    printLiteral(node);
+    return null;
+  }
+
+  @Override
+  protected Object visit(AstBoolLiteral node) {
+    printLiteral(node);
+    return null;
+  }
+
+  @Override
+  protected Object visit(AstNumberLiteral node) {
+    printLiteral(node);
+    return null;
+  }
+
+  @Override
+  protected Object visit(AstStringLiteral node) {
+    printLiteral(node);
+    return null;
+  }
+
+  @Override
+  protected Object visit(AstEntityRef node) {
+    output.writeLine("IDENTIFIER %s".formatted(node.getName()));
+    return null;
+  }
+
+  @Override
+  protected Object visit(AstCall node) {
+    output.writeLine("CALL");
+    output.indent();
+    visitChildren(node);
+    output.unindent();
+    return null;
+  }
+
+  @Override
+  protected Object visit(AstArrayAccess node) {
+    output.writeLine("INDEX");
+    output.indent();
+    node.getArray().accept(this);
+    node.getIndex().accept(this);
+    output.unindent();
+    return null;
+  }
+
+  @Override
+  protected Object visit(AstFieldAccess node) {
+    output.writeLine("FIELD %s".formatted(node.getFieldName()));
+    output.indent();
+    node.getObject().accept(this);
+    output.unindent();
+    return null;
+  }
+
+  @Override
+  protected Object visit(AstBind node) {
+    output.writeLine("BIND %s".formatted(node.getFunctionName()));
+    output.indent();
+    node.getObject().accept(this);
+    output.unindent();
+    return null;
+  }
+
+  @Override
+  protected Object visit(AstCast node) {
+    output.writeLine("CAST %s".formatted(node.getTypeRef()));
     output.indent();
     node.getExpression().accept(this);
     output.unindent();
     return null;
   }
 
-  private void printEntity(String clazz, Object value, AstTypeRef type) {
+  private void printLiteral(AstLiteral node) {
+    printEntity("LITERAL", node.value(), node.getType());
+  }
+
+  private void printEntity(String kind, Object value, AstTypeRef type) {
     if (type == null) {
-      output.writeLine("%s %s".formatted(clazz, value));
+      output.writeLine("%s %s".formatted(kind, value));
     } else {
-      output.writeLine("%s %s %s".formatted(clazz, value, type));
+      output.writeLine("%s %s %s".formatted(kind, value, type));
     }
   }
 }

@@ -14,11 +14,6 @@ public abstract sealed class AstLiteral extends AstExpression
   }
 
   @Override
-  public Object accept(AstVisitor visitor) {
-    return visitor.visit(this);
-  }
-
-  @Override
   public int hashCode() {
     return Objects.hash(getClass(), value);
   }

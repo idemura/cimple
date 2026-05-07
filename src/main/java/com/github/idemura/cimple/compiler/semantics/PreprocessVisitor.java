@@ -11,8 +11,8 @@ import com.github.idemura.cimple.compiler.ast.AstCall;
 import com.github.idemura.cimple.compiler.ast.AstEntity;
 import com.github.idemura.cimple.compiler.ast.AstEntityRef;
 import com.github.idemura.cimple.compiler.ast.AstFunction;
+import com.github.idemura.cimple.compiler.ast.AstFunctionHeader;
 import com.github.idemura.cimple.compiler.ast.AstFunctionType;
-import com.github.idemura.cimple.compiler.ast.AstLiteral;
 import com.github.idemura.cimple.compiler.ast.AstModule;
 import com.github.idemura.cimple.compiler.ast.AstNullLiteral;
 import com.github.idemura.cimple.compiler.ast.AstNumberLiteral;
@@ -26,10 +26,6 @@ import com.github.idemura.cimple.compiler.ast.AstVariable;
 import java.util.HashMap;
 import java.util.List;
 
-/// Does the following steps:
-///   * Replaces "true", "false", "null" with literals.
-///   * Checks identifiers for reserved words.
-///   * Transforms numeric literals into typed numeric literals.
 class PreprocessVisitor extends AstRewriteExpressionVisitor {
   private final NameMap nameMap;
   private final ReservedWords reservedWords;
@@ -83,7 +79,7 @@ class PreprocessVisitor extends AstRewriteExpressionVisitor {
   }
 
   @Override
-  protected Object visit(AstCall node) {
+  protected Object visit(AstFunctionHeader node) {
     return super.visit(node);
   }
 
@@ -97,6 +93,21 @@ class PreprocessVisitor extends AstRewriteExpressionVisitor {
   protected Object visit(AstVariable node) {
     checkName(node.getName().name(), node.getLocation());
     return super.visit(node);
+  }
+
+  @Override
+  protected Object visit(AstTypeRef node) {
+    AstType type = AstBuiltinType.find(node.getName().name());
+    if (type == null) {
+      type = nameMap.lookupType(node.getName().name());
+    }
+    if (type != null) {
+      node.setName(type.getName());
+      node.setType(type);
+    } else {
+      errorConsumer.errorAt(node.getLocation(), "Undefined type: %s", node.getName());
+    }
+    return node;
   }
 
   @Override
@@ -141,56 +152,43 @@ class PreprocessVisitor extends AstRewriteExpressionVisitor {
   }
 
   @Override
-  protected Object visit(AstLiteral node) {
-    if (node.getType() != null) {
-      return node;
-    }
-    return switch (node) {
-      case AstNumberLiteral ignored -> {
-        AstNumberLiteral number;
-        var value = (String) node.value();
-        try {
-          if (value.contains(".")) {
-            number = new AstNumberLiteral(parseDouble(value));
-            number.setType(AstTypeRef.of(AstBuiltinType.FLOAT64));
-          } else {
-            number = new AstNumberLiteral(parseLong(value));
-            number.setType(AstTypeRef.of(AstBuiltinType.INT64));
-          }
-          number.setLocation(node.getLocation());
-          yield number;
-        } catch (NumberFormatException e) {
-          errorConsumer.errorAt(node.getLocation(), "Invalid number %s: %s", value, e.getMessage());
-          yield node;
-        }
-      }
-      case AstStringLiteral ignored -> {
-        node.setType(AstTypeRef.of(AstBuiltinType.STRING));
-        yield node;
-      }
-      case AstBoolLiteral ignored -> {
-        node.setType(AstTypeRef.of(AstBuiltinType.BOOL));
-        yield node;
-      }
-      case AstNullLiteral ignored -> {
-        node.setType(AstTypeRef.of(AstBuiltinType.NULL));
-        yield node;
-      }
-    };
+  protected Object visit(AstNullLiteral node) {
+    node.setType(AstTypeRef.of(AstBuiltinType.NULL));
+    return node;
   }
 
   @Override
-  protected Object visit(AstTypeRef node) {
-    AstType type = AstBuiltinType.find(node.getName().name());
-    if (type == null) {
-      type = nameMap.lookupType(node.getName().name());
+  protected Object visit(AstBoolLiteral node) {
+    node.setType(AstTypeRef.of(AstBuiltinType.BOOL));
+    return node;
+  }
+
+  @Override
+  protected Object visit(AstNumberLiteral node) {
+    if (node.getType() != null) {
+      return node;
     }
-    if (type != null) {
-      node.setName(type.getName());
-      node.setType(type);
-    } else {
-      errorConsumer.errorAt(node.getLocation(), "Undefined type: %s", node.getName());
+    AstNumberLiteral number;
+    var value = (String) node.value();
+    try {
+      if (value.contains(".")) {
+        number = new AstNumberLiteral(parseDouble(value));
+        number.setType(AstTypeRef.of(AstBuiltinType.FLOAT64));
+      } else {
+        number = new AstNumberLiteral(parseLong(value));
+        number.setType(AstTypeRef.of(AstBuiltinType.INT64));
+      }
+      number.setLocation(node.getLocation());
+      return number;
+    } catch (NumberFormatException e) {
+      errorConsumer.errorAt(node.getLocation(), "Invalid number %s: %s", value, e.getMessage());
+      return node;
     }
+  }
+
+  @Override
+  protected Object visit(AstStringLiteral node) {
+    node.setType(AstTypeRef.of(AstBuiltinType.STRING));
     return node;
   }
 
@@ -209,6 +207,11 @@ class PreprocessVisitor extends AstRewriteExpressionVisitor {
       checkName(node.getName().name(), node.getLocation());
     }
     return newNode;
+  }
+
+  @Override
+  protected Object visit(AstCall node) {
+    return super.visit(node);
   }
 
   private void checkName(String name, Location location) {

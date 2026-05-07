@@ -1,9 +1,9 @@
 package com.github.idemura.cimple.compiler.ast;
 
-public final class AstVariableStatement extends AstStatement {
+public final class AstLet extends AstStatement {
   private AstVariable variable;
 
-  public AstVariableStatement() {}
+  public AstLet() {}
 
   @Override
   public Object accept(AstVisitor visitor) {

@@ -23,6 +23,7 @@ import com.github.idemura.cimple.compiler.ast.AstFunctionHeader;
 import com.github.idemura.cimple.compiler.ast.AstFunctionType;
 import com.github.idemura.cimple.compiler.ast.AstGoto;
 import com.github.idemura.cimple.compiler.ast.AstIf;
+import com.github.idemura.cimple.compiler.ast.AstLet;
 import com.github.idemura.cimple.compiler.ast.AstModule;
 import com.github.idemura.cimple.compiler.ast.AstNumberLiteral;
 import com.github.idemura.cimple.compiler.ast.AstRecordType;
@@ -33,7 +34,6 @@ import com.github.idemura.cimple.compiler.ast.AstType;
 import com.github.idemura.cimple.compiler.ast.AstTypeRef;
 import com.github.idemura.cimple.compiler.ast.AstUnionType;
 import com.github.idemura.cimple.compiler.ast.AstVariable;
-import com.github.idemura.cimple.compiler.ast.AstVariableStatement;
 import com.google.common.collect.ImmutableList;
 import java.util.ArrayList;
 import java.util.List;
@@ -177,8 +177,8 @@ public class Parser {
     return variable;
   }
 
-  private AstVariableStatement parseVariableStatement(boolean mutable) {
-    var stmt = new AstVariableStatement();
+  private AstLet parseVariableStatement(boolean mutable) {
+    var stmt = new AstLet();
     stmt.setVariable(parseVariable(mutable));
     return stmt;
   }

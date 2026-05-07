@@ -4,4 +4,9 @@ public final class AstNullLiteral extends AstLiteral {
   public AstNullLiteral() {
     super(null);
   }
+
+  @Override
+  public Object accept(AstVisitor visitor) {
+    return visitor.visit(this);
+  }
 }
