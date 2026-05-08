@@ -10,11 +10,11 @@ public final class AstLocal extends AstStatement {
     return visitor.visit(this);
   }
 
-  public AstVariable getVariable() {
+  public AstVariable variable() {
     return variable;
   }
 
-  public void setVariable(AstVariable variable) {
+  public void variable(AstVariable variable) {
     this.variable = variable;
   }
 }

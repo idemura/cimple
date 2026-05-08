@@ -5,7 +5,7 @@ import java.util.List;
 
 public final class AstCall extends AstExpression {
   private AstExpression function;
-  private List<AstExpression> args;
+  private List<AstExpression> arguments;
 
   public AstCall() {}
 
@@ -15,23 +15,23 @@ public final class AstCall extends AstExpression {
   }
 
   @Override
-  public AstTypeRef getType() {
-    return function.getType();
+  public AstTypeRef type() {
+    return function.type();
   }
 
-  public AstExpression getFunction() {
+  public AstExpression function() {
     return function;
   }
 
-  public void setFunction(AstExpression function) {
+  public void function(AstExpression function) {
     this.function = function;
   }
 
-  public List<AstExpression> getArgs() {
-    return args;
+  public List<AstExpression> arguments() {
+    return arguments;
   }
 
-  public void setArgs(List<AstExpression> args) {
-    this.args = ImmutableList.copyOf(args);
+  public void arguments(List<AstExpression> arguments) {
+    this.arguments = ImmutableList.copyOf(arguments);
   }
 }

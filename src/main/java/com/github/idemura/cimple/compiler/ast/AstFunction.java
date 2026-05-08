@@ -7,27 +7,27 @@ public final class AstFunction extends AstEntity {
   private AstFunctionHeader header;
   private AstBlock block;
 
-  public QualifiedName getName() {
-    return header.getName();
+  public QualifiedName name() {
+    return header.name();
   }
 
-  public void setName(QualifiedName name) {
-    header.setName(name);
-  }
-
-  @Override
-  public Location getLocation() {
-    return header.getLocation();
+  public void name(QualifiedName name) {
+    header.name(name);
   }
 
   @Override
-  public void setLocation(Location location) {
-    header.setLocation(location);
+  public Location location() {
+    return header.location();
+  }
+
+  @Override
+  public void location(Location location) {
+    header.location(location);
   }
 
   @Override
   public int hashCode() {
-    return header.getName().hashCode();
+    return header.name().hashCode();
   }
 
   @Override
@@ -35,14 +35,12 @@ public final class AstFunction extends AstEntity {
     if (this == object) {
       return true;
     }
-    return (object instanceof AstFunction other)
-        && header.getName().equals(other.getHeader().getName());
+    return (object instanceof AstFunction other) && header.name().equals(other.header().name());
   }
 
   @Override
   public String toString() {
-    return "FUNCTION %s(%s): %s"
-        .formatted(header.getName(), header.getParameters(), header.getResultType());
+    return "FUNCTION %s(%s): %s".formatted(header.name(), header.parameters(), header.resultType());
   }
 
   @Override
@@ -50,19 +48,19 @@ public final class AstFunction extends AstEntity {
     return visitor.visit(this);
   }
 
-  public AstFunctionHeader getHeader() {
+  public AstFunctionHeader header() {
     return header;
   }
 
-  public void setHeader(AstFunctionHeader header) {
+  public void header(AstFunctionHeader header) {
     this.header = header;
   }
 
-  public AstBlock getBlock() {
+  public AstBlock block() {
     return block;
   }
 
-  public void setBlock(AstBlock block) {
+  public void block(AstBlock block) {
     this.block = block;
   }
 }

@@ -82,7 +82,7 @@ public abstract class ErrorConsumer {
   }
 
   /// May throw if not supported.
-  public List<String> getErrors() {
+  public List<String> errors() {
     throw new UnsupportedOperationException();
   }
 }

@@ -1,7 +1,7 @@
 package com.github.idemura.cimple.compiler;
 
 public interface CompilerParams {
-  Appendable getDebugOutput();
+  Appendable debugOutput();
 
   default boolean printTokens() {
     return false;

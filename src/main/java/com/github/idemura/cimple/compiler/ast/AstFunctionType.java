@@ -11,19 +11,19 @@ public final class AstFunctionType extends AstType {
   }
 
   @Override
-  public QualifiedName getName() {
-    return header.getName();
+  public QualifiedName name() {
+    return header.name();
   }
 
-  public void setName(QualifiedName name) {
-    header.setName(name);
+  public void name(QualifiedName name) {
+    header.name(name);
   }
 
-  public AstFunctionHeader getHeader() {
+  public AstFunctionHeader header() {
     return header;
   }
 
-  public void setHeader(AstFunctionHeader header) {
+  public void header(AstFunctionHeader header) {
     this.header = header;
   }
 }

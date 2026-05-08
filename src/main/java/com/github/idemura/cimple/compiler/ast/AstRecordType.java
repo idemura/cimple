@@ -16,20 +16,20 @@ public final class AstRecordType extends AstType {
   }
 
   @Override
-  public QualifiedName getName() {
+  public QualifiedName name() {
     return name;
   }
 
   @Override
-  public void setName(QualifiedName name) {
+  public void name(QualifiedName name) {
     this.name = name;
   }
 
-  public List<AstVariable> getFields() {
+  public List<AstVariable> fields() {
     return fields;
   }
 
-  public void setFields(List<AstVariable> fields) {
+  public void fields(List<AstVariable> fields) {
     this.fields = ImmutableList.copyOf(fields);
   }
 }

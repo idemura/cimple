@@ -24,11 +24,11 @@ public abstract sealed class Entity permits Function, Variable {
     return name;
   }
 
-  public Type getType() {
+  public Type type() {
     return type;
   }
 
-  public void setType(Type type) {
+  public void type(Type type) {
     this.type = type;
   }
 }

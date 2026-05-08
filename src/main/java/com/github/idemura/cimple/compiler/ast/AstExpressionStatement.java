@@ -5,7 +5,7 @@ public final class AstExpressionStatement extends AstStatement {
 
   public static AstExpressionStatement of(AstExpression expression) {
     var stmt = new AstExpressionStatement();
-    stmt.setExpression(expression);
+    stmt.expression(expression);
     return stmt;
   }
 
@@ -16,11 +16,11 @@ public final class AstExpressionStatement extends AstStatement {
     return visitor.visit(this);
   }
 
-  public AstExpression getExpression() {
+  public AstExpression expression() {
     return expression;
   }
 
-  public void setExpression(AstExpression expression) {
+  public void expression(AstExpression expression) {
     this.expression = expression;
   }
 }

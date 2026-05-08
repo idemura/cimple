@@ -10,23 +10,23 @@ public final class AstArrayAccess extends AstExpression {
   }
 
   @Override
-  public AstTypeRef getType() {
+  public AstTypeRef type() {
     return null;
   }
 
-  public AstExpression getArray() {
+  public AstExpression array() {
     return array;
   }
 
-  public void setArray(AstExpression array) {
+  public void array(AstExpression array) {
     this.array = array;
   }
 
-  public AstExpression getIndex() {
+  public AstExpression index() {
     return index;
   }
 
-  public void setIndex(AstExpression index) {
+  public void index(AstExpression index) {
     this.index = index;
   }
 }

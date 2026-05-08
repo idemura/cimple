@@ -30,35 +30,35 @@ public final class AstFor extends AstStatement {
             && Objects.equals(block, other.block));
   }
 
-  public AstVariable getInit() {
+  public AstVariable init() {
     return init;
   }
 
-  public void setInit(AstVariable init) {
+  public void init(AstVariable init) {
     this.init = init;
   }
 
-  public AstExpression getCondition() {
+  public AstExpression condition() {
     return condition;
   }
 
-  public void setCondition(AstExpression condition) {
+  public void condition(AstExpression condition) {
     this.condition = condition;
   }
 
-  public AstExpression getIncrement() {
+  public AstExpression increment() {
     return increment;
   }
 
-  public void setIncrement(AstExpression increment) {
+  public void increment(AstExpression increment) {
     this.increment = increment;
   }
 
-  public AstBlock getBlock() {
+  public AstBlock block() {
     return block;
   }
 
-  public void setBlock(AstBlock block) {
+  public void block(AstBlock block) {
     this.block = block;
   }
 }

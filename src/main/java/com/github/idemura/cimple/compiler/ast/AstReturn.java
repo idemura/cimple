@@ -8,11 +8,11 @@ public final class AstReturn extends AstStatement {
     return visitor.visit(this);
   }
 
-  public AstExpression getExpression() {
+  public AstExpression expression() {
     return expression;
   }
 
-  public void setExpression(AstExpression expression) {
+  public void expression(AstExpression expression) {
     this.expression = expression;
   }
 }

@@ -16,7 +16,7 @@ public final class AstEntityRef extends AstExpression {
 
   public static AstEntityRef ofName(String moduleName, String name) {
     var ref = new AstEntityRef();
-    ref.setName(new QualifiedName(moduleName, name));
+    ref.name(new QualifiedName(moduleName, name));
     return ref;
   }
 
@@ -44,27 +44,27 @@ public final class AstEntityRef extends AstExpression {
   }
 
   @Override
-  public AstTypeRef getType() {
+  public AstTypeRef type() {
     requireNonNull(entity);
     return switch (entity) {
-      case AstVariable variable -> variable.getType();
-      case AstFunction function -> function.getHeader().getResultType();
+      case AstVariable variable -> variable.type();
+      case AstFunction function -> function.header().resultType();
     };
   }
 
-  public QualifiedName getName() {
+  public QualifiedName name() {
     return name;
   }
 
-  public void setName(QualifiedName name) {
+  public void name(QualifiedName name) {
     this.name = name;
   }
 
-  public AstEntity getEntity() {
+  public AstEntity entity() {
     return entity;
   }
 
-  public void setEntity(AstEntity entity) {
+  public void entity(AstEntity entity) {
     this.entity = requireNonNull(entity);
   }
 

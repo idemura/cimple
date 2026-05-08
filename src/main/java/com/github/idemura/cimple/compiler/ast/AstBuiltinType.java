@@ -46,12 +46,12 @@ public final class AstBuiltinType extends AstType {
   }
 
   @Override
-  public QualifiedName getName() {
+  public QualifiedName name() {
     return name;
   }
 
   @Override
-  public void setName(QualifiedName name) {
+  public void name(QualifiedName name) {
     throw new UnsupportedOperationException();
   }
 }

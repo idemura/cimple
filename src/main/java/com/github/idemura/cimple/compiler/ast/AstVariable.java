@@ -48,27 +48,27 @@ public final class AstVariable extends AstEntity {
     flags |= mask;
   }
 
-  public QualifiedName getName() {
+  public QualifiedName name() {
     return name;
   }
 
-  public void setName(QualifiedName name) {
+  public void name(QualifiedName name) {
     this.name = name;
   }
 
-  public AstTypeRef getType() {
+  public AstTypeRef type() {
     return type;
   }
 
-  public void setType(AstTypeRef type) {
+  public void type(AstTypeRef type) {
     this.type = type;
   }
 
-  public AstExpression getExpression() {
+  public AstExpression expression() {
     return expression;
   }
 
-  public void setExpression(AstExpression expression) {
+  public void expression(AstExpression expression) {
     this.expression = expression;
   }
 }

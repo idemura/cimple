@@ -27,7 +27,7 @@ public class NameMap {
   public NameMap() {}
 
   public AstType addType(AstType type) {
-    var qname = type.getName();
+    var qname = type.name();
     var existing = typeQualifiedNameMap.putIfAbsent(qname, type);
     if (existing != null) {
       return existing;
@@ -37,21 +37,21 @@ public class NameMap {
   }
 
   public AstEntity addFunction(AstFunction function) {
-    var receiverType = function.getHeader().getReceiverType();
+    var receiverType = function.header().receiverType();
     if (receiverType != null) {
       return receiverFunctionMap.putIfAbsent(
-          new ReceiverFunctionKey(receiverType.getName(), function.getName().name()), function);
+          new ReceiverFunctionKey(receiverType.name(), function.name().name()), function);
     }
-    return entityNameMap.putIfAbsent(function.getHeader().getName().name(), function);
+    return entityNameMap.putIfAbsent(function.header().name().name(), function);
   }
 
   public AstEntity addVariable(AstVariable variable) {
-    return entityNameMap.putIfAbsent(variable.getName().name(), variable);
+    return entityNameMap.putIfAbsent(variable.name().name(), variable);
   }
 
   public AstEntity addLocal(AstVariable variable) {
     checkArgument(variable.isAnyOf(AstVariable.PARAMETER | AstVariable.LOCAL));
-    var name = variable.getName().name();
+    var name = variable.name().name();
     var existing = entityNameMap.get(name);
     if (existing == null) {
       entityNameMap.put(name, variable);
@@ -76,7 +76,7 @@ public class NameMap {
     }
     localNames.clear();
     for (var entity : shadowed) {
-      entityNameMap.put(entity.getName().name(), entity);
+      entityNameMap.put(entity.name().name(), entity);
     }
     shadowed.clear();
   }

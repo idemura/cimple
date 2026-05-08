@@ -5,8 +5,8 @@ public class AstExpressionRewriteVisitor extends AstVisitor {
 
   @Override
   protected void visitChildren(AstVariable node) {
-    acceptSafe(node.getType());
-    node.setExpression(rewrite(node.getExpression()));
+    acceptSafe(node.type());
+    node.expression(rewrite(node.expression()));
   }
 
   @Override
@@ -16,7 +16,7 @@ public class AstExpressionRewriteVisitor extends AstVisitor {
 
   @Override
   protected void visitChildren(AstExpressionStatement node) {
-    node.setExpression(rewrite(node.getExpression()));
+    node.expression(rewrite(node.expression()));
   }
 
   @Override
@@ -26,33 +26,33 @@ public class AstExpressionRewriteVisitor extends AstVisitor {
 
   @Override
   protected void visitChildren(AstIf node) {
-    node.setConditions(node.getConditions().stream().map(this::rewrite).toList());
-    for (var thenBlock : node.getThenBlocks()) {
+    node.conditions(node.conditions().stream().map(this::rewrite).toList());
+    for (var thenBlock : node.thenBlocks()) {
       thenBlock.accept(this);
     }
-    if (node.getElseBlock() != null) {
-      node.getElseBlock().accept(this);
+    if (node.elseBlock() != null) {
+      node.elseBlock().accept(this);
     }
   }
 
   @Override
   protected void visitChildren(AstFor node) {
-    if (node.getInit() != null) {
-      node.getInit().accept(this);
+    if (node.init() != null) {
+      node.init().accept(this);
     }
-    node.setCondition(rewrite(node.getCondition()));
-    node.setIncrement(rewrite(node.getIncrement()));
-    node.getBlock().accept(this);
+    node.condition(rewrite(node.condition()));
+    node.increment(rewrite(node.increment()));
+    node.block().accept(this);
   }
 
   @Override
   protected void visitChildren(AstReturn node) {
-    node.setExpression(rewrite(node.getExpression()));
+    node.expression(rewrite(node.expression()));
   }
 
   @Override
   protected void visitChildren(AstDefer node) {
-    node.getBlock().accept(this);
+    node.block().accept(this);
   }
 
   @Override
@@ -88,8 +88,8 @@ public class AstExpressionRewriteVisitor extends AstVisitor {
 
   @Override
   protected void visitChildren(AstCall node) {
-    node.setFunction(rewrite(node.getFunction()));
-    node.setArgs(node.getArgs().stream().map(this::rewrite).toList());
+    node.function(rewrite(node.function()));
+    node.arguments(node.arguments().stream().map(this::rewrite).toList());
   }
 
   @Override
@@ -100,8 +100,8 @@ public class AstExpressionRewriteVisitor extends AstVisitor {
 
   @Override
   protected void visitChildren(AstArrayAccess node) {
-    node.setArray(rewrite(node.getArray()));
-    node.setIndex(rewrite(node.getIndex()));
+    node.array(rewrite(node.array()));
+    node.index(rewrite(node.index()));
   }
 
   @Override
@@ -112,7 +112,7 @@ public class AstExpressionRewriteVisitor extends AstVisitor {
 
   @Override
   protected void visitChildren(AstFieldAccess node) {
-    node.setObject(rewrite(node.getObject()));
+    node.object(rewrite(node.object()));
   }
 
   @Override
@@ -123,7 +123,7 @@ public class AstExpressionRewriteVisitor extends AstVisitor {
 
   @Override
   protected void visitChildren(AstReceiverLookup node) {
-    node.setObject(rewrite(node.getObject()));
+    node.object(rewrite(node.object()));
   }
 
   @Override
@@ -134,7 +134,7 @@ public class AstExpressionRewriteVisitor extends AstVisitor {
 
   @Override
   protected void visitChildren(AstCast node) {
-    node.setExpression(rewrite(node.getExpression()));
+    node.expression(rewrite(node.expression()));
   }
 
   private AstExpression rewrite(AstExpression expression) {

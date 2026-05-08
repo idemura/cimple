@@ -15,27 +15,27 @@ public final class AstIf extends AstStatement {
     return visitor.visit(this);
   }
 
-  public List<AstExpression> getConditions() {
+  public List<AstExpression> conditions() {
     return conditions;
   }
 
-  public void setConditions(List<AstExpression> conditions) {
+  public void conditions(List<AstExpression> conditions) {
     this.conditions = ImmutableList.copyOf(conditions);
   }
 
-  public List<AstBlock> getThenBlocks() {
+  public List<AstBlock> thenBlocks() {
     return thenBlocks;
   }
 
-  public void setThenBlocks(List<AstBlock> thenBlocks) {
+  public void thenBlocks(List<AstBlock> thenBlocks) {
     this.thenBlocks = ImmutableList.copyOf(thenBlocks);
   }
 
-  public AstBlock getElseBlock() {
+  public AstBlock elseBlock() {
     return elseBlock;
   }
 
-  public void setElseBlock(AstBlock elseBlock) {
+  public void elseBlock(AstBlock elseBlock) {
     this.elseBlock = elseBlock;
   }
 }

@@ -10,23 +10,23 @@ public final class AstReceiverLookup extends AstExpression {
   }
 
   @Override
-  public AstTypeRef getType() {
+  public AstTypeRef type() {
     return null;
   }
 
-  public AstExpression getObject() {
+  public AstExpression object() {
     return object;
   }
 
-  public void setObject(AstExpression object) {
+  public void object(AstExpression object) {
     this.object = object;
   }
 
-  public String getFunctionName() {
+  public String functionName() {
     return functionName;
   }
 
-  public void setFunctionName(String functionName) {
+  public void functionName(String functionName) {
     this.functionName = functionName;
   }
 }

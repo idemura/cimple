@@ -30,19 +30,19 @@ public abstract sealed class AstLiteral extends AstExpression
     return value;
   }
 
-  public AstTypeRef getType() {
+  public AstTypeRef type() {
     return type;
   }
 
-  public void setType(AstTypeRef type) {
+  public void type(AstTypeRef type) {
     this.type = type;
   }
 
-  public Location getLocation() {
+  public Location location() {
     return location;
   }
 
-  public void setLocation(Location location) {
+  public void location(Location location) {
     this.location = location;
   }
 }

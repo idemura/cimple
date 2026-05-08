@@ -16,7 +16,7 @@ import org.junit.jupiter.api.Test;
 
 class NameResolutionVisitorTest {
   private static AstExpression extractBodyExpression(AstFunction function) {
-    return ((AstExpressionStatement) function.getBlock().statements().get(0)).getExpression();
+    return ((AstExpressionStatement) function.block().statements().get(0)).expression();
   }
 
   @Test
@@ -42,17 +42,17 @@ class NameResolutionVisitorTest {
     module.accept(new PreprocessVisitor(nameMap, Keyword.valueList(), errorConsumer));
     module.accept(new NameResolutionVisitor(nameMap, errorConsumer));
 
-    assertEquals(List.of(), errorConsumer.getErrors());
+    assertEquals(List.of(), errorConsumer.errors());
     {
       var expr = extractBodyExpression(module.findFunction("f"));
       var entityRef = (AstEntityRef) expr;
-      assertSame(module.findVariable("x"), entityRef.getEntity());
+      assertSame(module.findVariable("x"), entityRef.entity());
     }
     {
       var expr = extractBodyExpression(module.findFunction("g"));
       var call = (AstCall) expr;
-      var entityRef = (AstEntityRef) call.getFunction();
-      assertSame(module.findFunction("f"), entityRef.getEntity());
+      var entityRef = (AstEntityRef) call.function();
+      assertSame(module.findFunction("f"), entityRef.entity());
     }
   }
 
@@ -79,17 +79,17 @@ class NameResolutionVisitorTest {
     module.accept(new PreprocessVisitor(nameMap, Keyword.valueList(), errorConsumer));
     module.accept(new NameResolutionVisitor(nameMap, errorConsumer));
 
-    assertEquals(List.of(), errorConsumer.getErrors());
+    assertEquals(List.of(), errorConsumer.errors());
     {
       var expr = extractBodyExpression(module.findFunction("g"));
       var call = (AstCall) expr;
-      var entityRef = (AstEntityRef) call.getFunction();
-      assertSame(module.findFunction("f"), entityRef.getEntity());
+      var entityRef = (AstEntityRef) call.function();
+      assertSame(module.findFunction("f"), entityRef.entity());
     }
     {
       var expr = extractBodyExpression(module.findFunction("f"));
       var entityRef = (AstEntityRef) expr;
-      assertSame(module.findVariable("x"), entityRef.getEntity());
+      assertSame(module.findVariable("x"), entityRef.entity());
     }
   }
 
@@ -119,13 +119,13 @@ class NameResolutionVisitorTest {
     module.accept(new PreprocessVisitor(nameMap, Keyword.valueList(), errorConsumer));
     module.accept(new NameResolutionVisitor(nameMap, errorConsumer));
 
-    assertEquals(List.of(), errorConsumer.getErrors());
+    assertEquals(List.of(), errorConsumer.errors());
 
     {
       var expr = extractBodyExpression(module.findFunction("f"));
       var call = (AstCall) expr;
-      var entityRef = (AstEntityRef) call.getFunction();
-      assertSame(module.findFunction("f"), entityRef.getEntity());
+      var entityRef = (AstEntityRef) call.function();
+      assertSame(module.findFunction("f"), entityRef.entity());
     }
   }
 }

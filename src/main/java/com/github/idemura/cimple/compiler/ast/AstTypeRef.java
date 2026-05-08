@@ -14,14 +14,14 @@ public final class AstTypeRef extends AstNode {
 
   public static AstTypeRef ofName(String moduleName, String name) {
     var ref = new AstTypeRef();
-    ref.setName(new QualifiedName(moduleName, name));
+    ref.name(new QualifiedName(moduleName, name));
     return ref;
   }
 
   public static AstTypeRef ofType(AstType type) {
     var ref = new AstTypeRef();
-    ref.setName(type.getName());
-    ref.setType(type);
+    ref.name(type.name());
+    ref.type(type);
     ref.markNameResolved();
     return ref;
   }
@@ -47,19 +47,19 @@ public final class AstTypeRef extends AstNode {
     return "TYPE_REF(%s)".formatted(name);
   }
 
-  public QualifiedName getName() {
+  public QualifiedName name() {
     return name;
   }
 
-  public void setName(QualifiedName name) {
+  public void name(QualifiedName name) {
     this.name = name;
   }
 
-  public AstType getType() {
+  public AstType type() {
     return type;
   }
 
-  public void setType(AstType type) {
+  public void type(AstType type) {
     this.type = type;
   }
 }

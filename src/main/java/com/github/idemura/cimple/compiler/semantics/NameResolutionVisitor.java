@@ -41,9 +41,9 @@ public class NameResolutionVisitor extends AstExpressionRewriteVisitor {
   @Override
   protected Object visit(AstFunction node) {
     try {
-      resolveHeader(node.getHeader());
+      resolveHeader(node.header());
       nameMap.beginScope();
-      for (var parameter : node.getHeader().getParameters()) {
+      for (var parameter : node.header().parameters()) {
         registerLocal(parameter);
       }
       return super.visit(node);
@@ -54,7 +54,7 @@ public class NameResolutionVisitor extends AstExpressionRewriteVisitor {
 
   @Override
   protected Object visit(AstVariable node) {
-    resolveTypeRef(node.getType());
+    resolveTypeRef(node.type());
     return super.visit(node);
   }
 
@@ -69,22 +69,22 @@ public class NameResolutionVisitor extends AstExpressionRewriteVisitor {
 
   @Override
   protected Object visit(AstFunctionType node) {
-    resolveHeader(node.getHeader());
+    resolveHeader(node.header());
     return super.visit(node);
   }
 
   @Override
   protected Object visit(AstRecordType node) {
-    for (var field : node.getFields()) {
-      resolveTypeRef(field.getType());
+    for (var field : node.fields()) {
+      resolveTypeRef(field.type());
     }
     return super.visit(node);
   }
 
   @Override
   protected Object visit(AstUnionType node) {
-    for (var variant : node.getVariants()) {
-      resolveTypeRef(variant.getValueType());
+    for (var variant : node.variants()) {
+      resolveTypeRef(variant.valueType());
     }
     return super.visit(node);
   }
@@ -96,7 +96,7 @@ public class NameResolutionVisitor extends AstExpressionRewriteVisitor {
 
   @Override
   protected Object visit(AstLocal node) {
-    registerLocal(node.getVariable());
+    registerLocal(node.variable());
     return super.visit(node);
   }
 
@@ -110,12 +110,12 @@ public class NameResolutionVisitor extends AstExpressionRewriteVisitor {
       return node;
     }
     try {
-      var entity = nameMap.lookupEntity(node.getName().name());
+      var entity = nameMap.lookupEntity(node.name().name());
       if (entity == null) {
-        errorConsumer.errorAt(node.getLocation(), "Undefined name: %s", node.getName());
+        errorConsumer.errorAt(node.location(), "Undefined name: %s", node.name());
         return node;
       }
-      node.setEntity(entity);
+      node.entity(entity);
       return node;
     } finally {
       node.markNameResolved();
@@ -128,7 +128,7 @@ public class NameResolutionVisitor extends AstExpressionRewriteVisitor {
       // First, resolve children.
       super.visit(node);
       // If this is a builtin method call, resolve overload. Add casts if necessary.
-      var function = node.getFunction();
+      var function = node.function();
       if (function instanceof AstEntityRef ref && ref.isBuiltin()) {
         checkState(!ref.isNameResolved());
         return resolveBuiltinCall(node);
@@ -142,26 +142,26 @@ public class NameResolutionVisitor extends AstExpressionRewriteVisitor {
 
   @Override
   protected Object visit(AstCast node) {
-    resolveTypeRef(node.getTypeRef());
+    resolveTypeRef(node.type());
     return super.visit(node);
   }
 
   private void resolveHeader(AstFunctionHeader header) {
-    if (header.getReceiverType() != null) {
-      resolveTypeRef(header.getReceiverType());
+    if (header.receiverType() != null) {
+      resolveTypeRef(header.receiverType());
     }
-    resolveTypeRef(header.getResultType());
+    resolveTypeRef(header.resultType());
   }
 
   private void resolveTypeRef(AstTypeRef typeRef) {
     try {
-      var type = nameMap.lookupType(typeRef.getName());
+      var type = nameMap.lookupType(typeRef.name());
       if (type == null) {
-        errorConsumer.errorAt(typeRef.getLocation(), "Undefined type: %s", typeRef.getName());
+        errorConsumer.errorAt(typeRef.location(), "Undefined type: %s", typeRef.name());
         return;
       }
-      typeRef.setName(type.getName());
-      typeRef.setType(type);
+      typeRef.name(type.name());
+      typeRef.type(type);
     } finally {
       typeRef.markNameResolved();
     }
@@ -169,9 +169,9 @@ public class NameResolutionVisitor extends AstExpressionRewriteVisitor {
 
   private AstExpression resolveBuiltinCall(AstCall node) {
     // TODO Resolve using arguments
-    var operatorRef = (AstEntityRef) node.getFunction();
+    var operatorRef = (AstEntityRef) node.function();
     AstFunction function;
-    switch (operatorRef.getName().name()) {
+    switch (operatorRef.name().name()) {
       case "+":
         {
           function = BuiltinFunctions.ADD_I64_I64;
@@ -184,10 +184,10 @@ public class NameResolutionVisitor extends AstExpressionRewriteVisitor {
         }
       default:
         throw new IllegalStateException(
-            "Unknown builtin entity '%s'".formatted(operatorRef.getName()));
+            "Unknown builtin entity '%s'".formatted(operatorRef.name()));
     }
-    operatorRef.setName(function.getName());
-    operatorRef.setEntity(function);
+    operatorRef.name(function.name());
+    operatorRef.entity(function);
     return node;
   }
 
@@ -195,10 +195,10 @@ public class NameResolutionVisitor extends AstExpressionRewriteVisitor {
     var existing = nameMap.addLocal(variable);
     if (existing != null) {
       errorConsumer.errorAt(
-          variable.getLocation(),
+          variable.location(),
           "Duplicate local variable: %s. Defined at %s.",
-          variable.getName(),
-          existing.getLocation());
+          variable.name(),
+          existing.location());
     }
   }
 }

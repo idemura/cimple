@@ -18,11 +18,11 @@ public final class AstUtils {
   public static AstFunction function(String receiverTypeName, String name) {
     var function = new AstFunction();
     var header = new AstFunctionHeader();
-    header.setName(new QualifiedName(name));
+    header.name(new QualifiedName(name));
     if (receiverTypeName != null) {
-      header.setReceiverType(AstTypeRef.ofName(receiverTypeName));
+      header.receiverType(AstTypeRef.ofName(receiverTypeName));
     }
-    function.setHeader(header);
+    function.header(header);
     return function;
   }
 
@@ -48,20 +48,20 @@ public final class AstUtils {
 
   public static AstUnionType.Variant unionVariant(String name, String typeName) {
     var unionVariant = new AstUnionType.Variant();
-    unionVariant.setTag(name);
+    unionVariant.tag(name);
     if (typeName != null) {
-      unionVariant.setValueType(AstTypeRef.ofName(typeName));
+      unionVariant.valueType(AstTypeRef.ofName(typeName));
     }
     return unionVariant;
   }
 
   private static AstVariable variable(String moduleName, String name, long flags, AstTypeRef type) {
     var variable = new AstVariable();
-    variable.setName(new QualifiedName(moduleName, name));
+    variable.name(new QualifiedName(moduleName, name));
     if (flags != 0) {
       variable.setBit(flags);
     }
-    variable.setType(type);
+    variable.type(type);
     return variable;
   }
 }

@@ -44,25 +44,25 @@ class PreprocessVisitorTest {
     var nameMap = new NameMap();
     module.accept(new PreprocessVisitor(nameMap, Keyword.valueList(), errorConsumer));
 
-    var statements = module.findFunction("f").getBlock().statements();
+    var statements = module.findFunction("f").block().statements();
     int i = 0;
-    assertEquals(new AstBoolLiteral(true), ((AstIf) statements.get(i++)).getConditions().get(0));
+    assertEquals(new AstBoolLiteral(true), ((AstIf) statements.get(i++)).conditions().get(0));
     {
       var stmt = (AstDefer) statements.get(i++);
-      var statements1 = stmt.getBlock().statements();
+      var statements1 = stmt.block().statements();
       assertEquals(1, statements1.size());
       assertEquals(
-          new AstNullLiteral(), ((AstExpressionStatement) statements1.get(0)).getExpression());
+          new AstNullLiteral(), ((AstExpressionStatement) statements1.get(0)).expression());
     }
     assertEquals(
-        new AstBoolLiteral(false), ((AstLocal) statements.get(i++)).getVariable().getExpression());
+        new AstBoolLiteral(false), ((AstLocal) statements.get(i++)).variable().expression());
     {
       var stmt = (AstFor) statements.get(i++);
-      assertEquals(new AstNullLiteral(), stmt.getInit().getExpression());
-      assertEquals(new AstBoolLiteral(true), stmt.getCondition());
-      assertEquals(new AstBoolLiteral(true), stmt.getIncrement());
+      assertEquals(new AstNullLiteral(), stmt.init().expression());
+      assertEquals(new AstBoolLiteral(true), stmt.condition());
+      assertEquals(new AstBoolLiteral(true), stmt.increment());
     }
-    assertEquals(new AstBoolLiteral(true), ((AstReturn) statements.get(i++)).getExpression());
+    assertEquals(new AstBoolLiteral(true), ((AstReturn) statements.get(i++)).expression());
   }
 
   @Test
@@ -90,7 +90,7 @@ class PreprocessVisitorTest {
             "Reserved word cannot be used as a name: true",
             "Reserved type name cannot be used as a type name: int",
             "Reserved type name cannot be used as a type name: byte"),
-        errorConsumer.getErrors());
+        errorConsumer.errors());
   }
 
   @Test
@@ -113,7 +113,7 @@ class PreprocessVisitorTest {
     var nameMap = new NameMap();
     module.accept(new PreprocessVisitor(nameMap, Keyword.valueList(), errorConsumer));
 
-    assertEquals(List.of(), errorConsumer.getErrors());
+    assertEquals(List.of(), errorConsumer.errors());
     assertSame(module.findVariable("x"), nameMap.lookupEntity("x"));
     assertSame(module.findVariable("y"), nameMap.lookupEntity("y"));
     assertSame(module.findFunction("f"), nameMap.lookupEntity("f"));
@@ -138,19 +138,19 @@ class PreprocessVisitorTest {
     var nameMap = new NameMap();
     module.accept(new PreprocessVisitor(nameMap, Keyword.valueList(), errorConsumer));
 
-    assertEquals(List.of(), errorConsumer.getErrors());
+    assertEquals(List.of(), errorConsumer.errors());
     {
-      var header = module.findFunction("toMillis").getHeader();
+      var header = module.findFunction("toMillis").header();
       var receiverType = AstTypeRef.ofName("test", "Duration");
-      assertEquals(receiverType, header.getReceiverType());
-      assertEquals(1, header.getReceiverIndex());
-      assertEquals(receiverType, header.getParameters().get(1).getType());
-      assertEquals(AstTypeRef.ofType(AstBuiltinType.VOID), header.getResultType());
+      assertEquals(receiverType, header.receiverType());
+      assertEquals(1, header.receiverIndex());
+      assertEquals(receiverType, header.parameters().get(1).type());
+      assertEquals(AstTypeRef.ofType(AstBuiltinType.VOID), header.resultType());
     }
     {
-      var header = module.findFunction("f").getHeader();
-      assertEquals(-1, header.getReceiverIndex());
-      assertEquals(AstTypeRef.ofType(AstBuiltinType.VOID), header.getResultType());
+      var header = module.findFunction("f").header();
+      assertEquals(-1, header.receiverIndex());
+      assertEquals(AstTypeRef.ofType(AstBuiltinType.VOID), header.resultType());
     }
     assertSame(
         module.findFunction("toMillis"),
@@ -178,17 +178,16 @@ class PreprocessVisitorTest {
     var nameMap = new NameMap();
     module.accept(new PreprocessVisitor(nameMap, Keyword.valueList(), errorConsumer));
 
-    assertEquals(List.of(), errorConsumer.getErrors());
-    assertEquals(AstTypeRef.ofType(AstBuiltinType.INT64), module.findVariable("x").getType());
+    assertEquals(List.of(), errorConsumer.errors());
+    assertEquals(AstTypeRef.ofType(AstBuiltinType.INT64), module.findVariable("x").type());
     assertEquals(
         AstTypeRef.ofType(AstBuiltinType.FLOAT64),
-        ((AstRecordType) module.findType("R")).getFields().get(0).getType());
+        ((AstRecordType) module.findType("R")).fields().get(0).type());
     assertEquals(
         AstTypeRef.ofType(AstBuiltinType.INT64),
-        module.findFunction("f").getHeader().getParameters().get(0).getType());
+        module.findFunction("f").header().parameters().get(0).type());
     assertEquals(
-        AstTypeRef.ofType(AstBuiltinType.FLOAT64),
-        module.findFunction("f").getHeader().getResultType());
+        AstTypeRef.ofType(AstBuiltinType.FLOAT64), module.findFunction("f").header().resultType());
   }
 
   @Test
@@ -212,7 +211,7 @@ class PreprocessVisitorTest {
         List.of(
             "Receiver function test::a: missing the receiver parameter.",
             "Receiver function test::b: multiple receiver parameters."),
-        errorConsumer.getErrors());
+        errorConsumer.errors());
   }
 
   @Test
@@ -231,7 +230,7 @@ class PreprocessVisitorTest {
 
     assertEquals(
         List.of("Free function test::f cannot have a receiver parameter x."),
-        errorConsumer.getErrors());
+        errorConsumer.errors());
   }
 
   @Test
@@ -261,7 +260,7 @@ class PreprocessVisitorTest {
             "Variable test::x must have a type or an initializer.",
             "Variable z must have a type or an initializer.",
             "Variable y must have a type or an initializer."),
-        errorConsumer.getErrors());
+        errorConsumer.errors());
   }
 
   @Test
@@ -282,7 +281,7 @@ class PreprocessVisitorTest {
     assertEquals(
         List.of(
             "Definition of variable test::x has a name collision with variable defined at 3,5."),
-        errorConsumer.getErrors());
+        errorConsumer.errors());
   }
 
   @Test
@@ -303,7 +302,7 @@ class PreprocessVisitorTest {
     assertEquals(
         List.of(
             "Definition of function test::f has a name collision with function defined at 3,10."),
-        errorConsumer.getErrors());
+        errorConsumer.errors());
   }
 
   @Test
@@ -324,7 +323,7 @@ class PreprocessVisitorTest {
     assertEquals(
         List.of(
             "Definition of function test::f has a name collision with variable defined at 3,5."),
-        errorConsumer.getErrors());
+        errorConsumer.errors());
   }
 
   @Test
@@ -345,7 +344,7 @@ class PreprocessVisitorTest {
     assertEquals(
         List.of(
             "Definition of variable test::f has a name collision with function defined at 3,10."),
-        errorConsumer.getErrors());
+        errorConsumer.errors());
   }
 
   @Test
@@ -363,7 +362,7 @@ class PreprocessVisitorTest {
     var nameMap = new NameMap();
     module.accept(new PreprocessVisitor(nameMap, Keyword.valueList(), errorConsumer));
 
-    assertEquals(List.of("Duplicate type: test::R. Defined at 3,13."), errorConsumer.getErrors());
+    assertEquals(List.of("Duplicate type: test::R. Defined at 3,13."), errorConsumer.errors());
   }
 
   @Test
@@ -383,7 +382,7 @@ class PreprocessVisitorTest {
     var nameMap = new NameMap();
     module.accept(new PreprocessVisitor(nameMap, Keyword.valueList(), errorConsumer));
 
-    assertEquals(List.of("Duplicate record field: x. Defined at 4,7."), errorConsumer.getErrors());
+    assertEquals(List.of("Duplicate record field: x. Defined at 4,7."), errorConsumer.errors());
   }
 
   @Test
@@ -403,6 +402,6 @@ class PreprocessVisitorTest {
     var nameMap = new NameMap();
     module.accept(new PreprocessVisitor(nameMap, Keyword.valueList(), errorConsumer));
 
-    assertEquals(List.of("Duplicate union variant: A. Defined at 4,3."), errorConsumer.getErrors());
+    assertEquals(List.of("Duplicate union variant: A. Defined at 4,3."), errorConsumer.errors());
   }
 }

@@ -22,27 +22,27 @@ public final class AstUnionType extends AstType {
       return this == object || (object instanceof Variant other && Objects.equals(tag, other.tag));
     }
 
-    public Location getLocation() {
+    public Location location() {
       return location;
     }
 
-    public void setLocation(Location location) {
+    public void location(Location location) {
       this.location = location;
     }
 
-    public String getTag() {
+    public String tag() {
       return tag;
     }
 
-    public void setTag(String tag) {
+    public void tag(String tag) {
       this.tag = tag;
     }
 
-    public AstTypeRef getValueType() {
+    public AstTypeRef valueType() {
       return valueType;
     }
 
-    public void setValueType(AstTypeRef valueType) {
+    public void valueType(AstTypeRef valueType) {
       this.valueType = valueType;
     }
   }
@@ -56,20 +56,20 @@ public final class AstUnionType extends AstType {
   }
 
   @Override
-  public QualifiedName getName() {
+  public QualifiedName name() {
     return name;
   }
 
   @Override
-  public void setName(QualifiedName name) {
+  public void name(QualifiedName name) {
     this.name = name;
   }
 
-  public List<Variant> getVariants() {
+  public List<Variant> variants() {
     return variants;
   }
 
-  public void setVariants(List<Variant> variants) {
+  public void variants(List<Variant> variants) {
     this.variants = ImmutableList.copyOf(variants);
   }
 }

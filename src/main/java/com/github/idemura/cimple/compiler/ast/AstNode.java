@@ -8,11 +8,11 @@ public abstract class AstNode {
 
   public abstract Object accept(AstVisitor visitor);
 
-  public Location getLocation() {
+  public Location location() {
     return location;
   }
 
-  public void setLocation(Location location) {
+  public void location(Location location) {
     this.location = location;
   }
 

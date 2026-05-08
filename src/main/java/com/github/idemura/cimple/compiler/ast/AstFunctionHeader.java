@@ -39,50 +39,50 @@ public final class AstFunctionHeader extends AstNode {
       return false;
     }
     for (var i = 0; i < a.size(); i++) {
-      if (!Objects.equals(a.get(i).getType(), b.get(i).getType())) {
+      if (!Objects.equals(a.get(i).type(), b.get(i).type())) {
         return false;
       }
     }
     return true;
   }
 
-  public QualifiedName getName() {
+  public QualifiedName name() {
     return name;
   }
 
-  public void setName(QualifiedName name) {
+  public void name(QualifiedName name) {
     this.name = name;
   }
 
-  public AstTypeRef getReceiverType() {
+  public AstTypeRef receiverType() {
     return receiverType;
   }
 
-  public void setReceiverType(AstTypeRef receiverType) {
+  public void receiverType(AstTypeRef receiverType) {
     this.receiverType = receiverType;
   }
 
-  public int getReceiverIndex() {
+  public int receiverIndex() {
     return receiverIndex;
   }
 
-  public void setReceiverIndex(int receiverIndex) {
+  public void receiverIndex(int receiverIndex) {
     this.receiverIndex = receiverIndex;
   }
 
-  public List<AstVariable> getParameters() {
+  public List<AstVariable> parameters() {
     return parameters;
   }
 
-  public void setParameters(List<AstVariable> parameters) {
+  public void parameters(List<AstVariable> parameters) {
     this.parameters = ImmutableList.copyOf(parameters);
   }
 
-  public AstTypeRef getResultType() {
+  public AstTypeRef resultType() {
     return resultType;
   }
 
-  public void setResultType(AstTypeRef resultType) {
+  public void resultType(AstTypeRef resultType) {
     this.resultType = resultType;
   }
 }

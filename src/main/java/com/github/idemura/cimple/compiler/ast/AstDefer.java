@@ -10,11 +10,11 @@ public final class AstDefer extends AstStatement {
     return visitor.visit(this);
   }
 
-  public AstBlock getBlock() {
+  public AstBlock block() {
     return block;
   }
 
-  public void setBlock(AstBlock block) {
+  public void block(AstBlock block) {
     this.block = block;
   }
 }

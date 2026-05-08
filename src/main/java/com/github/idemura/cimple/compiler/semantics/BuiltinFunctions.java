@@ -18,8 +18,8 @@ public final class BuiltinFunctions {
 
   static AstVariable makeParameter(String name, AstBuiltinType type) {
     var parameter = new AstVariable();
-    parameter.setName(new QualifiedName(name));
-    parameter.setType(AstTypeRef.ofType(type));
+    parameter.name(new QualifiedName(name));
+    parameter.type(AstTypeRef.ofType(type));
     parameter.setBit(AstVariable.PARAMETER);
     return parameter;
   }
@@ -27,11 +27,11 @@ public final class BuiltinFunctions {
   static AstFunction makeBinaryOperator(
       String name, AstBuiltinType result, AstBuiltinType arg1, AstBuiltinType arg2) {
     var header = new AstFunctionHeader();
-    header.setName(QualifiedName.ofBuiltin(name));
-    header.setParameters(ImmutableList.of(makeParameter("_0", arg1), makeParameter("_1", arg2)));
-    header.setResultType(AstTypeRef.ofType(result));
+    header.name(QualifiedName.ofBuiltin(name));
+    header.parameters(ImmutableList.of(makeParameter("_0", arg1), makeParameter("_1", arg2)));
+    header.resultType(AstTypeRef.ofType(result));
     var function = new AstFunction();
-    function.setHeader(header);
+    function.header(header);
     function.markNameResolved();
     return function;
   }

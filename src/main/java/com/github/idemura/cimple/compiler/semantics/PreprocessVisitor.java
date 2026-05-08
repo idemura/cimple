@@ -41,28 +41,28 @@ class PreprocessVisitor extends AstExpressionRewriteVisitor {
 
   @Override
   protected Object visit(AstModule node) {
-    checkName(node.getName(), node.getLocation());
-    moduleName = node.getName();
+    checkName(node.name(), node.location());
+    moduleName = node.name();
     for (var definition : node.definitions()) {
       switch (definition) {
         case AstType type -> {
-          type.setName(type.getName().withModuleName(moduleName));
+          type.name(type.name().withModuleName(moduleName));
           var existing = nameMap.addType(type);
           if (existing != null) {
             errorConsumer.errorAt(
-                type.getLocation(),
+                type.location(),
                 "Duplicate type: %s. Defined at %s.",
-                type.getName(),
-                existing.getLocation());
+                type.name(),
+                existing.location());
           }
         }
         case AstFunction function -> {
-          var header = function.getHeader();
-          var receiverType = header.getReceiverType();
+          var header = function.header();
+          var receiverType = header.receiverType();
           if (receiverType != null) {
-            receiverType.setName(receiverType.getName().withModuleName(moduleName));
+            receiverType.name(receiverType.name().withModuleName(moduleName));
           }
-          header.setName(header.getName().withModuleName(moduleName));
+          header.name(header.name().withModuleName(moduleName));
           var existing = nameMap.addFunction(function);
           if (existing != null) {
             errorEntityCollision(function, existing);
@@ -70,7 +70,7 @@ class PreprocessVisitor extends AstExpressionRewriteVisitor {
         }
         case AstVariable variable -> {
           variable.setBit(AstVariable.GLOBAL);
-          variable.setName(variable.getName().withModuleName(moduleName));
+          variable.name(variable.name().withModuleName(moduleName));
           var existing = nameMap.addVariable(variable);
           if (existing != null) {
             errorEntityCollision(variable, existing);
@@ -86,13 +86,13 @@ class PreprocessVisitor extends AstExpressionRewriteVisitor {
 
   @Override
   protected Object visit(AstFunctionHeader node) {
-    for (var parameter : node.getParameters()) {
+    for (var parameter : node.parameters()) {
       parameter.setBit(AstVariable.PARAMETER);
     }
     checkReceiverParameter(node);
     // Default return type if missing.
-    if (node.getResultType() == null) {
-      node.setResultType(AstTypeRef.ofType(AstBuiltinType.VOID));
+    if (node.resultType() == null) {
+      node.resultType(AstTypeRef.ofType(AstBuiltinType.VOID));
     }
     return super.visit(node);
   }
@@ -100,17 +100,17 @@ class PreprocessVisitor extends AstExpressionRewriteVisitor {
   private void checkReceiverParameter(AstFunctionHeader header) {
     // Receiver functions must have exactly one receiver parameter: the single parameter with no
     // explicit type. Free functions must not have any untyped parameters.
-    var parameters = header.getParameters();
-    if (header.getReceiverType() != null) {
+    var parameters = header.parameters();
+    if (header.receiverType() != null) {
       var receiverIndex = -1;
       var invalid = false;
       for (int i = 0; i < parameters.size(); i++) {
-        if (parameters.get(i).getType() == null) {
+        if (parameters.get(i).type() == null) {
           if (receiverIndex >= 0) {
             errorConsumer.errorAt(
-                header.getLocation(),
+                header.location(),
                 "Receiver function %s: multiple receiver parameters.",
-                header.getName());
+                header.name());
             invalid = true;
             break;
           }
@@ -119,21 +119,21 @@ class PreprocessVisitor extends AstExpressionRewriteVisitor {
       }
       if (!invalid && receiverIndex < 0) {
         errorConsumer.errorAt(
-            header.getLocation(),
+            header.location(),
             "Receiver function %s: missing the receiver parameter.",
-            header.getName());
+            header.name());
       } else {
-        header.setReceiverIndex(receiverIndex);
-        parameters.get(receiverIndex).setType(header.getReceiverType());
+        header.receiverIndex(receiverIndex);
+        parameters.get(receiverIndex).type(header.receiverType());
       }
     } else {
       for (var parameter : parameters) {
-        if (parameter.getType() == null) {
+        if (parameter.type() == null) {
           errorConsumer.errorAt(
-              parameter.getLocation(),
+              parameter.location(),
               "Free function %s cannot have a receiver parameter %s.",
-              header.getName(),
-              parameter.getName());
+              header.name(),
+              parameter.name());
         }
       }
     }
@@ -141,32 +141,30 @@ class PreprocessVisitor extends AstExpressionRewriteVisitor {
 
   @Override
   protected Object visit(AstFunction node) {
-    checkName(node.getName().name(), node.getLocation());
+    checkName(node.name().name(), node.location());
     return super.visit(node);
   }
 
   @Override
   protected Object visit(AstVariable node) {
-    checkName(node.getName().name(), node.getLocation());
-    if (!node.getBit(AstVariable.PARAMETER)
-        && node.getType() == null
-        && node.getExpression() == null) {
+    checkName(node.name().name(), node.location());
+    if (!node.getBit(AstVariable.PARAMETER) && node.type() == null && node.expression() == null) {
       errorConsumer.errorAt(
-          node.getLocation(), "Variable %s must have a type or an initializer.", node.getName());
+          node.location(), "Variable %s must have a type or an initializer.", node.name());
     }
     return super.visit(node);
   }
 
   @Override
   protected Object visit(AstTypeRef node) {
-    switch (node.getName().name()) {
+    switch (node.name().name()) {
       case "int":
-        node.setName(AstBuiltinType.INT64.getName());
-        node.setType(AstBuiltinType.INT64);
+        node.name(AstBuiltinType.INT64.name());
+        node.type(AstBuiltinType.INT64);
         break;
       case "float":
-        node.setName(AstBuiltinType.FLOAT64.getName());
-        node.setType(AstBuiltinType.FLOAT64);
+        node.name(AstBuiltinType.FLOAT64.name());
+        node.type(AstBuiltinType.FLOAT64);
         break;
       default:
         break;
@@ -176,28 +174,28 @@ class PreprocessVisitor extends AstExpressionRewriteVisitor {
 
   @Override
   protected Object visit(AstFunctionType node) {
-    checkName(node.getName().name(), node.getLocation());
+    checkName(node.name().name(), node.location());
     return super.visit(node);
   }
 
   @Override
   protected Object visit(AstLocal node) {
-    node.getVariable().setBit(AstVariable.LOCAL);
+    node.variable().setBit(AstVariable.LOCAL);
     return super.visit(node);
   }
 
   @Override
   protected Object visit(AstRecordType node) {
-    checkTypeName(node.getName().name(), node.getLocation());
+    checkTypeName(node.name().name(), node.location());
     var fieldMap = new HashMap<String, AstVariable>();
-    for (var field : node.getFields()) {
-      var existing = fieldMap.putIfAbsent(field.getName().name(), field);
+    for (var field : node.fields()) {
+      var existing = fieldMap.putIfAbsent(field.name().name(), field);
       if (existing != null) {
         errorConsumer.errorAt(
-            field.getLocation(),
+            field.location(),
             "Duplicate record field: %s. Defined at %s.",
-            field.getName().name(),
-            existing.getLocation());
+            field.name().name(),
+            existing.location());
       }
     }
     return super.visit(node);
@@ -205,17 +203,17 @@ class PreprocessVisitor extends AstExpressionRewriteVisitor {
 
   @Override
   protected Object visit(AstUnionType node) {
-    checkTypeName(node.getName().name(), node.getLocation());
+    checkTypeName(node.name().name(), node.location());
     var variantMap = new HashMap<String, AstUnionType.Variant>();
-    for (var variant : node.getVariants()) {
-      checkName(variant.getTag(), variant.getLocation());
-      var existing = variantMap.putIfAbsent(variant.getTag(), variant);
+    for (var variant : node.variants()) {
+      checkName(variant.tag(), variant.location());
+      var existing = variantMap.putIfAbsent(variant.tag(), variant);
       if (existing != null) {
         errorConsumer.errorAt(
-            variant.getLocation(),
+            variant.location(),
             "Duplicate union variant: %s. Defined at %s.",
-            variant.getTag(),
-            existing.getLocation());
+            variant.tag(),
+            existing.location());
       }
     }
     return super.visit(node);
@@ -223,19 +221,19 @@ class PreprocessVisitor extends AstExpressionRewriteVisitor {
 
   @Override
   protected Object visit(AstNullLiteral node) {
-    node.setType(AstTypeRef.ofType(AstBuiltinType.NULL));
+    node.type(AstTypeRef.ofType(AstBuiltinType.NULL));
     return node;
   }
 
   @Override
   protected Object visit(AstBoolLiteral node) {
-    node.setType(AstTypeRef.ofType(AstBuiltinType.BOOL));
+    node.type(AstTypeRef.ofType(AstBuiltinType.BOOL));
     return node;
   }
 
   @Override
   protected Object visit(AstNumberLiteral node) {
-    if (node.getType() != null) {
+    if (node.type() != null) {
       return node;
     }
     AstNumberLiteral number;
@@ -243,38 +241,38 @@ class PreprocessVisitor extends AstExpressionRewriteVisitor {
     try {
       if (value.contains(".")) {
         number = new AstNumberLiteral(parseDouble(value));
-        number.setType(AstTypeRef.ofType(AstBuiltinType.FLOAT64));
+        number.type(AstTypeRef.ofType(AstBuiltinType.FLOAT64));
       } else {
         number = new AstNumberLiteral(parseLong(value));
-        number.setType(AstTypeRef.ofType(AstBuiltinType.INT64));
+        number.type(AstTypeRef.ofType(AstBuiltinType.INT64));
       }
-      number.setLocation(node.getLocation());
+      number.location(node.location());
       return number;
     } catch (NumberFormatException e) {
-      errorConsumer.errorAt(node.getLocation(), "Invalid number %s: %s", value, e.getMessage());
+      errorConsumer.errorAt(node.location(), "Invalid number %s: %s", value, e.getMessage());
       return node;
     }
   }
 
   @Override
   protected Object visit(AstStringLiteral node) {
-    node.setType(AstTypeRef.ofType(AstBuiltinType.STRING));
+    node.type(AstTypeRef.ofType(AstBuiltinType.STRING));
     return node;
   }
 
   @Override
   protected Object visit(AstEntityRef node) {
     var newNode =
-        switch (node.getName().name()) {
+        switch (node.name().name()) {
           case "true" -> new AstBoolLiteral(true);
           case "false" -> new AstBoolLiteral(false);
           case "null" -> new AstNullLiteral();
           default -> node;
         };
     if (newNode != node) {
-      newNode.setLocation(node.getLocation());
+      newNode.location(node.location());
     } else {
-      checkName(node.getName().name(), node.getLocation());
+      checkName(node.name().name(), node.location());
     }
     return newNode;
   }
@@ -305,11 +303,11 @@ class PreprocessVisitor extends AstExpressionRewriteVisitor {
 
   private void errorEntityCollision(AstEntity entity, AstEntity existing) {
     errorConsumer.errorAt(
-        entity.getLocation(),
+        entity.location(),
         "Definition of %s %s has a name collision with %s defined at %s.",
         entityKind(entity),
-        entity.getName(),
+        entity.name(),
         entityKind(existing),
-        existing.getLocation());
+        existing.location());
   }
 }

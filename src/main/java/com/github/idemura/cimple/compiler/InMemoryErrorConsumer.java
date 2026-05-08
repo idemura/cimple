@@ -14,7 +14,7 @@ public class InMemoryErrorConsumer extends ErrorConsumer {
   }
 
   @Override
-  public List<String> getErrors() {
+  public List<String> errors() {
     return errors;
   }
 }

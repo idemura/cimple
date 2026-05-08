@@ -11,11 +11,11 @@ public final class AstModule extends AstNode {
     super();
   }
 
-  public String getName() {
+  public String name() {
     return name;
   }
 
-  public void setName(String name) {
+  public void name(String name) {
     this.name = name;
   }
 
@@ -30,7 +30,7 @@ public final class AstModule extends AstNode {
 
   public AstType findType(String name) {
     for (var definition : definitions) {
-      if (definition instanceof AstType type && type.getName().name().equals(name)) {
+      if (definition instanceof AstType type && type.name().name().equals(name)) {
         return type;
       }
     }
@@ -39,7 +39,7 @@ public final class AstModule extends AstNode {
 
   public AstVariable findVariable(String name) {
     for (var definition : definitions) {
-      if (definition instanceof AstVariable variable && variable.getName().name().equals(name)) {
+      if (definition instanceof AstVariable variable && variable.name().name().equals(name)) {
         return variable;
       }
     }
@@ -48,11 +48,8 @@ public final class AstModule extends AstNode {
 
   public AstFunction findFunction(String name) {
     for (var definition : definitions) {
-      if (definition instanceof AstFunction function && function.getName().name().equals(name)) {
-        var receiverType = function.getHeader().getReceiverType();
-        if (receiverType == null) {
-          return function;
-        }
+      if (definition instanceof AstFunction function && function.name().name().equals(name)) {
+        return function;
       }
     }
     return null;
@@ -60,9 +57,9 @@ public final class AstModule extends AstNode {
 
   public AstFunction findReceiverFunction(String receiverTypeName, String name) {
     for (var definition : definitions) {
-      if (definition instanceof AstFunction function && function.getName().name().equals(name)) {
-        var receiverType = function.getHeader().getReceiverType();
-        if (receiverType != null && receiverType.getName().name().equals(receiverTypeName)) {
+      if (definition instanceof AstFunction function && function.name().name().equals(name)) {
+        var receiverType = function.header().receiverType();
+        if (receiverType != null && receiverType.name().name().equals(receiverTypeName)) {
           return function;
         }
       }

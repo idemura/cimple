@@ -27,11 +27,11 @@ public final class AstGoto extends AstStatement {
         || (object instanceof AstGoto other && Objects.equals(label, other.label));
   }
 
-  public String getLabel() {
+  public String label() {
     return label;
   }
 
-  public void setLabel(String label) {
+  public void label(String label) {
     this.label = label;
   }
 }

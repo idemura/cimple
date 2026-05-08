@@ -6,7 +6,7 @@ public abstract sealed class AstType extends AstNode
     permits AstBuiltinType, AstFunctionType, AstRecordType, AstUnionType {
   protected AstType() {}
 
-  public abstract QualifiedName getName();
+  public abstract QualifiedName name();
 
-  public abstract void setName(QualifiedName name);
+  public abstract void name(QualifiedName name);
 }
