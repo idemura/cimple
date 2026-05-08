@@ -3,8 +3,8 @@ package com.github.idemura.cimple.compiler.semantics;
 import static com.google.common.base.Preconditions.checkState;
 
 import com.github.idemura.cimple.compiler.ErrorConsumer;
-import com.github.idemura.cimple.compiler.ast.AstBuiltinType;
 import com.github.idemura.cimple.compiler.ast.AstBlock;
+import com.github.idemura.cimple.compiler.ast.AstBuiltinType;
 import com.github.idemura.cimple.compiler.ast.AstCall;
 import com.github.idemura.cimple.compiler.ast.AstCast;
 import com.github.idemura.cimple.compiler.ast.AstEntityRef;
@@ -15,8 +15,8 @@ import com.github.idemura.cimple.compiler.ast.AstFunctionHeader;
 import com.github.idemura.cimple.compiler.ast.AstFunctionType;
 import com.github.idemura.cimple.compiler.ast.AstLocal;
 import com.github.idemura.cimple.compiler.ast.AstModule;
-import com.github.idemura.cimple.compiler.ast.AstRecordType;
 import com.github.idemura.cimple.compiler.ast.AstReceiverLookup;
+import com.github.idemura.cimple.compiler.ast.AstRecordType;
 import com.github.idemura.cimple.compiler.ast.AstTypeRef;
 import com.github.idemura.cimple.compiler.ast.AstUnionType;
 import com.github.idemura.cimple.compiler.ast.AstVariable;
@@ -57,7 +57,7 @@ public class NameResolutionVisitor extends AstExpressionRewriteVisitor {
 
   @Override
   protected Object visit(AstVariable node) {
-    resolveTypeRef(node.type());
+    resolveTypeRef(node.typeRef());
     return super.visit(node);
   }
 
@@ -79,7 +79,7 @@ public class NameResolutionVisitor extends AstExpressionRewriteVisitor {
   @Override
   protected Object visit(AstRecordType node) {
     for (var field : node.fields()) {
-      resolveTypeRef(field.type());
+      resolveTypeRef(field.typeRef());
     }
     return super.visit(node);
   }
@@ -148,7 +148,7 @@ public class NameResolutionVisitor extends AstExpressionRewriteVisitor {
 
   @Override
   protected Object visit(AstCast node) {
-    resolveTypeRef(node.type());
+    resolveTypeRef(node.typeRef());
     return super.visit(node);
   }
 
@@ -180,12 +180,12 @@ public class NameResolutionVisitor extends AstExpressionRewriteVisitor {
     switch (operatorRef.name().name()) {
       case "+":
         {
-          function = BuiltinFunctions.ADD_I64_I64;
+          function = BuiltinFunctions.ADD_I64;
           break;
         }
       case "*":
         {
-          function = BuiltinFunctions.MUL_I64_I64;
+          function = BuiltinFunctions.MUL_I64;
           break;
         }
       default:
@@ -198,7 +198,7 @@ public class NameResolutionVisitor extends AstExpressionRewriteVisitor {
   }
 
   private AstExpression resolveReceiverCall(AstCall node, AstReceiverLookup receiverLookup) {
-    var receiverType = receiverLookup.receiver().type();
+    var receiverType = receiverLookup.receiver().typeRef();
     checkState(receiverType != null);
     if (receiverType.type() == AstBuiltinType.NULL) {
       errorConsumer.errorAt(

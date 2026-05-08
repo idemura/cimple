@@ -55,13 +55,14 @@ public final class AstUtils {
     return unionVariant;
   }
 
-  private static AstVariable variable(String moduleName, String name, long flags, AstTypeRef type) {
+  private static AstVariable variable(
+      String moduleName, String name, long flags, AstTypeRef typeRef) {
     var variable = new AstVariable();
     variable.name(new QualifiedName(moduleName, name));
     if (flags != 0) {
       variable.setBit(flags);
     }
-    variable.type(type);
+    variable.typeRef(typeRef);
     return variable;
   }
 }

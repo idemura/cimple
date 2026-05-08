@@ -44,10 +44,10 @@ public final class AstEntityRef extends AstExpression {
   }
 
   @Override
-  public AstTypeRef type() {
+  public AstTypeRef typeRef() {
     requireNonNull(entity);
     return switch (entity) {
-      case AstVariable variable -> variable.type();
+      case AstVariable variable -> variable.typeRef();
       case AstFunction function -> function.header().resultType();
     };
   }

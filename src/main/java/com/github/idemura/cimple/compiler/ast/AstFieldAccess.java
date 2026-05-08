@@ -10,8 +10,8 @@ public final class AstFieldAccess extends AstExpression {
   }
 
   @Override
-  public AstTypeRef type() {
-    return null;
+  public AstTypeRef typeRef() {
+    throw new UnsupportedOperationException();
   }
 
   public AstExpression object() {

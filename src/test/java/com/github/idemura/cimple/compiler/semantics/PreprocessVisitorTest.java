@@ -144,7 +144,7 @@ class PreprocessVisitorTest {
       var receiverType = AstTypeRef.ofName("test", "Duration");
       assertEquals(receiverType, header.receiverType());
       assertEquals(1, header.receiverIndex());
-      assertEquals(receiverType, header.parameters().get(1).type());
+      assertEquals(receiverType, header.parameters().get(1).typeRef());
       assertEquals(AstTypeRef.ofType(AstBuiltinType.VOID), header.resultType());
     }
     {
@@ -179,13 +179,13 @@ class PreprocessVisitorTest {
     module.accept(new PreprocessVisitor(nameMap, Keyword.valueList(), errorConsumer));
 
     assertEquals(List.of(), errorConsumer.errors());
-    assertEquals(AstTypeRef.ofType(AstBuiltinType.INT64), module.findVariable("x").type());
+    assertEquals(AstTypeRef.ofType(AstBuiltinType.INT64), module.findVariable("x").typeRef());
     assertEquals(
         AstTypeRef.ofType(AstBuiltinType.FLOAT64),
-        ((AstRecordType) module.findType("R")).fields().get(0).type());
+        ((AstRecordType) module.findType("R")).fields().get(0).typeRef());
     assertEquals(
         AstTypeRef.ofType(AstBuiltinType.INT64),
-        module.findFunction("f").header().parameters().get(0).type());
+        module.findFunction("f").header().parameters().get(0).typeRef());
     assertEquals(
         AstTypeRef.ofType(AstBuiltinType.FLOAT64), module.findFunction("f").header().resultType());
   }

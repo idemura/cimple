@@ -6,7 +6,7 @@ import java.util.Objects;
 public abstract sealed class AstLiteral extends AstExpression
     permits AstBoolLiteral, AstNullLiteral, AstNumberLiteral, AstStringLiteral {
   private final Object value;
-  private AstTypeRef type;
+  private AstTypeRef typeRef;
   private Location location;
 
   protected AstLiteral(Object value) {
@@ -23,19 +23,19 @@ public abstract sealed class AstLiteral extends AstExpression
     return this == object
         || (object instanceof AstLiteral other
             && Objects.equals(value, other.value)
-            && Objects.equals(type, other.type));
+            && Objects.equals(typeRef, other.typeRef));
   }
 
   public Object value() {
     return value;
   }
 
-  public AstTypeRef type() {
-    return type;
+  public AstTypeRef typeRef() {
+    return typeRef;
   }
 
-  public void type(AstTypeRef type) {
-    this.type = type;
+  public void typeRef(AstTypeRef typeRef) {
+    this.typeRef = typeRef;
   }
 
   public Location location() {

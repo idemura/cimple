@@ -10,11 +10,11 @@ public final class AstCast extends AstExpression {
   }
 
   @Override
-  public AstTypeRef type() {
+  public AstTypeRef typeRef() {
     return typeRef;
   }
 
-  public void type(AstTypeRef typeRef) {
+  public void typeRef(AstTypeRef typeRef) {
     this.typeRef = typeRef;
   }
 

@@ -39,7 +39,7 @@ public final class AstFunctionHeader extends AstNode {
       return false;
     }
     for (var i = 0; i < a.size(); i++) {
-      if (!Objects.equals(a.get(i).type(), b.get(i).type())) {
+      if (!Objects.equals(a.get(i).typeRef(), b.get(i).typeRef())) {
         return false;
       }
     }

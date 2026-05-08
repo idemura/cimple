@@ -11,15 +11,15 @@ import com.github.idemura.cimple.compiler.ast.AstVariable;
 import com.google.common.collect.ImmutableList;
 
 public final class BuiltinFunctions {
-  public static final AstFunction ADD_I64_I64 = makeBinaryOperator("add_i64", INT64, INT64, INT64);
-  public static final AstFunction MUL_I64_I64 = makeBinaryOperator("mul_i64", INT64, INT64, INT64);
+  public static final AstFunction ADD_I64 = makeBinaryOperator("_add_i64", INT64, INT64, INT64);
+  public static final AstFunction MUL_I64 = makeBinaryOperator("_mul_i64", INT64, INT64, INT64);
 
   private BuiltinFunctions() {}
 
   static AstVariable makeParameter(String name, AstBuiltinType type) {
     var parameter = new AstVariable();
     parameter.name(new QualifiedName(name));
-    parameter.type(AstTypeRef.ofType(type));
+    parameter.typeRef(AstTypeRef.ofType(type));
     parameter.setBit(AstVariable.PARAMETER);
     return parameter;
   }

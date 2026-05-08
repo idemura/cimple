@@ -90,25 +90,25 @@ class ParserTest {
     {
       var v = module.findVariable("v0");
       assertEquals(new QualifiedName("v0"), v.name());
-      assertEquals(AstTypeRef.ofName("int"), v.type());
+      assertEquals(AstTypeRef.ofName("int"), v.typeRef());
       assertTrue(v.getBit(AstVariable.MUTABLE));
     }
     {
       var v = module.findVariable("v1");
       assertEquals(new QualifiedName("v1"), v.name());
-      assertEquals(AstTypeRef.ofName("int"), v.type());
+      assertEquals(AstTypeRef.ofName("int"), v.typeRef());
       assertTrue(v.getBit(AstVariable.MUTABLE));
     }
     {
       var v = module.findVariable("v2");
       assertEquals(new QualifiedName("v2"), v.name());
-      assertNull(v.type());
+      assertNull(v.typeRef());
       assertTrue(v.getBit(AstVariable.MUTABLE));
     }
     {
       var v = module.findVariable("c0");
       assertEquals(new QualifiedName("c0"), v.name());
-      assertEquals(AstTypeRef.ofName("int"), v.type());
+      assertEquals(AstTypeRef.ofName("int"), v.typeRef());
       assertFalse(v.getBit(AstVariable.MUTABLE));
     }
   }
@@ -143,19 +143,19 @@ class ParserTest {
       {
         var f = fields.get(j++);
         assertEquals(new QualifiedName("x"), f.name());
-        assertEquals(AstTypeRef.ofName("int"), f.type());
+        assertEquals(AstTypeRef.ofName("int"), f.typeRef());
         assertTrue(f.getBit(AstVariable.MUTABLE));
       }
       {
         var f = fields.get(j++);
         assertEquals(new QualifiedName("y"), f.name());
-        assertEquals(AstTypeRef.ofName("int"), f.type());
+        assertEquals(AstTypeRef.ofName("int"), f.typeRef());
         assertTrue(f.getBit(AstVariable.MUTABLE));
       }
       {
         var f = fields.get(j++);
         assertEquals(new QualifiedName("name"), f.name());
-        assertEquals(AstTypeRef.ofName("string"), f.type());
+        assertEquals(AstTypeRef.ofName("string"), f.typeRef());
         assertFalse(f.getBit(AstVariable.MUTABLE));
       }
     }
@@ -377,7 +377,7 @@ class ParserTest {
       var expr = ((AstLocal) statements.get(i++)).variable().expression();
       {
         var cast = (AstCast) expr;
-        assertEquals(AstTypeRef.ofName("int"), cast.type());
+        assertEquals(AstTypeRef.ofName("int"), cast.typeRef());
         var callAdd = (AstCall) cast.expression();
         assertEquals(builtinEntityRef("+"), callAdd.function());
         assertEquals(2, callAdd.arguments().size());
@@ -582,7 +582,7 @@ class ParserTest {
       var stmt = (AstFor) statements.get(i++);
       var init = stmt.init();
       assertEquals(new QualifiedName("i"), init.name());
-      assertNull(init.type());
+      assertNull(init.typeRef());
       assertEquals(AstNumberLiteral.of(0), init.expression());
       assertEquals(AstEntityRef.ofName("true"), stmt.condition());
       assertNull(stmt.increment());
@@ -592,7 +592,7 @@ class ParserTest {
       var stmt = (AstFor) statements.get(i++);
       var init = stmt.init();
       assertEquals(new QualifiedName("i"), init.name());
-      assertNull(init.type());
+      assertNull(init.typeRef());
       assertEquals(AstNumberLiteral.of(0), init.expression());
       assertEquals(AstEntityRef.ofName("true"), stmt.condition());
       assertEquals(AstEntityRef.ofName("i"), stmt.increment());

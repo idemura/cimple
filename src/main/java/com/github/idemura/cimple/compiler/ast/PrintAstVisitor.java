@@ -34,7 +34,7 @@ public class PrintAstVisitor extends AstVisitor {
     printEntity("FUNCTION", header.name(), header.resultType());
     output.indent();
     for (var parameter : header.parameters()) {
-      printEntity("ARG", parameter.name(), parameter.type());
+      printEntity("ARG", parameter.name(), parameter.typeRef());
     }
     node.block().accept(this);
     output.unindent();
@@ -44,7 +44,7 @@ public class PrintAstVisitor extends AstVisitor {
 
   @Override
   protected Object visit(AstVariable node) {
-    printEntity(node.getBit(AstVariable.MUTABLE) ? "VAR" : "CONST", node.name(), node.type());
+    printEntity(node.getBit(AstVariable.MUTABLE) ? "VAR" : "CONST", node.name(), node.typeRef());
     output.indent();
     if (node.expression() != null) {
       node.expression().accept(this);
@@ -70,7 +70,7 @@ public class PrintAstVisitor extends AstVisitor {
     printEntity("TYPE FUNCTION", node.name(), header.resultType());
     output.indent();
     for (var parameter : header.parameters()) {
-      printEntity("ARG", parameter.name(), parameter.type());
+      printEntity("ARG", parameter.name(), parameter.typeRef());
     }
     output.unindent();
     return null;
@@ -268,7 +268,7 @@ public class PrintAstVisitor extends AstVisitor {
 
   @Override
   protected Object visit(AstCast node) {
-    output.writeLine("CAST %s".formatted(node.type()));
+    output.writeLine("CAST %s".formatted(node.typeRef()));
     output.indent();
     node.expression().accept(this);
     output.unindent();
@@ -276,7 +276,7 @@ public class PrintAstVisitor extends AstVisitor {
   }
 
   private void printLiteral(AstLiteral node) {
-    printEntity("LITERAL", node.value(), node.type());
+    printEntity("LITERAL", node.value(), node.typeRef());
   }
 
   private void printEntity(String kind, Object value, AstTypeRef type) {

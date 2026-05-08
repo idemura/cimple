@@ -43,7 +43,7 @@ public abstract class AstVisitor {
   }
 
   protected void visitChildren(AstVariable node) {
-    acceptSafe(node.type());
+    acceptSafe(node.typeRef());
     acceptSafe(node.expression());
   }
 

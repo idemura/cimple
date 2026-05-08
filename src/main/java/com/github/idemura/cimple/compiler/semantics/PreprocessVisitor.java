@@ -105,7 +105,7 @@ class PreprocessVisitor extends AstExpressionRewriteVisitor {
       var receiverIndex = -1;
       var invalid = false;
       for (int i = 0; i < parameters.size(); i++) {
-        if (parameters.get(i).type() == null) {
+        if (parameters.get(i).typeRef() == null) {
           if (receiverIndex >= 0) {
             errorConsumer.errorAt(
                 header.location(),
@@ -124,11 +124,11 @@ class PreprocessVisitor extends AstExpressionRewriteVisitor {
             header.name());
       } else {
         header.receiverIndex(receiverIndex);
-        parameters.get(receiverIndex).type(header.receiverType());
+        parameters.get(receiverIndex).typeRef(header.receiverType());
       }
     } else {
       for (var parameter : parameters) {
-        if (parameter.type() == null) {
+        if (parameter.typeRef() == null) {
           errorConsumer.errorAt(
               parameter.location(),
               "Free function %s cannot have a receiver parameter %s.",
@@ -148,7 +148,9 @@ class PreprocessVisitor extends AstExpressionRewriteVisitor {
   @Override
   protected Object visit(AstVariable node) {
     checkName(node.name().name(), node.location());
-    if (!node.getBit(AstVariable.PARAMETER) && node.type() == null && node.expression() == null) {
+    if (!node.getBit(AstVariable.PARAMETER)
+        && node.typeRef() == null
+        && node.expression() == null) {
       errorConsumer.errorAt(
           node.location(), "Variable %s must have a type or an initializer.", node.name());
     }
@@ -221,19 +223,19 @@ class PreprocessVisitor extends AstExpressionRewriteVisitor {
 
   @Override
   protected Object visit(AstNullLiteral node) {
-    node.type(AstTypeRef.ofType(AstBuiltinType.NULL));
+    node.typeRef(AstTypeRef.ofType(AstBuiltinType.NULL));
     return node;
   }
 
   @Override
   protected Object visit(AstBoolLiteral node) {
-    node.type(AstTypeRef.ofType(AstBuiltinType.BOOL));
+    node.typeRef(AstTypeRef.ofType(AstBuiltinType.BOOL));
     return node;
   }
 
   @Override
   protected Object visit(AstNumberLiteral node) {
-    if (node.type() != null) {
+    if (node.typeRef() != null) {
       return node;
     }
     AstNumberLiteral number;
@@ -241,10 +243,10 @@ class PreprocessVisitor extends AstExpressionRewriteVisitor {
     try {
       if (value.contains(".")) {
         number = new AstNumberLiteral(parseDouble(value));
-        number.type(AstTypeRef.ofType(AstBuiltinType.FLOAT64));
+        number.typeRef(AstTypeRef.ofType(AstBuiltinType.FLOAT64));
       } else {
         number = new AstNumberLiteral(parseLong(value));
-        number.type(AstTypeRef.ofType(AstBuiltinType.INT64));
+        number.typeRef(AstTypeRef.ofType(AstBuiltinType.INT64));
       }
       number.location(node.location());
       return number;
@@ -256,7 +258,7 @@ class PreprocessVisitor extends AstExpressionRewriteVisitor {
 
   @Override
   protected Object visit(AstStringLiteral node) {
-    node.type(AstTypeRef.ofType(AstBuiltinType.STRING));
+    node.typeRef(AstTypeRef.ofType(AstBuiltinType.STRING));
     return node;
   }
 

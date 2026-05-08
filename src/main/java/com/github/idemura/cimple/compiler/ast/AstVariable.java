@@ -11,7 +11,7 @@ public final class AstVariable extends AstEntity {
   public static final long GLOBAL = 0x10L;
 
   private QualifiedName name;
-  private AstTypeRef type;
+  private AstTypeRef typeRef;
   private AstExpression expression;
   private long flags;
 
@@ -32,7 +32,7 @@ public final class AstVariable extends AstEntity {
     return this == object
         || (object instanceof AstVariable other
             && Objects.equals(name, other.name)
-            && Objects.equals(type, other.type)
+            && Objects.equals(typeRef, other.typeRef)
             && flags == other.flags);
   }
 
@@ -56,12 +56,12 @@ public final class AstVariable extends AstEntity {
     this.name = name;
   }
 
-  public AstTypeRef type() {
-    return type;
+  public AstTypeRef typeRef() {
+    return typeRef;
   }
 
-  public void type(AstTypeRef type) {
-    this.type = type;
+  public void typeRef(AstTypeRef typeRef) {
+    this.typeRef = typeRef;
   }
 
   public AstExpression expression() {

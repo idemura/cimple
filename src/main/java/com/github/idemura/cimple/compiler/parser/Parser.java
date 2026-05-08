@@ -168,7 +168,7 @@ public class Parser {
     variable.location(tokenizer.currentLocation());
     variable.name(takeIdentifier());
     if (tokenizer.current().is(IDENTIFIER)) {
-      variable.type(parseTypeRef());
+      variable.typeRef(parseTypeRef());
     }
     if (tokenizer.takeIf(ASSIGN)) {
       variable.expression(parseExpression());
@@ -401,7 +401,7 @@ public class Parser {
       var expr = new AstCast();
       expr.expression(parseExpression());
       takeKeyword(TYPE);
-      expr.type(parseTypeRef());
+      expr.typeRef(parseTypeRef());
       take(RBRACKET);
       return expr;
     }
@@ -482,7 +482,7 @@ public class Parser {
         variable.location(tokenizer.currentLocation());
         variable.name(takeIdentifier());
         if (tokenizer.current().is(IDENTIFIER)) {
-          variable.type(parseTypeRef());
+          variable.typeRef(parseTypeRef());
         }
         parameters.add(variable);
       } while (tokenizer.takeIf(COMMA));
