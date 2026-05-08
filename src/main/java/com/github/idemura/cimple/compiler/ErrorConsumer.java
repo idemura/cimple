@@ -81,7 +81,7 @@ public abstract class ErrorConsumer {
     outputError(message);
   }
 
-  /// May throw if not supported.
+  // Returns collected diagnostics when the implementation stores them in memory.
   public List<String> errors() {
     throw new UnsupportedOperationException();
   }

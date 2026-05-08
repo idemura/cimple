@@ -90,7 +90,7 @@ class PreprocessVisitor extends AstExpressionRewriteVisitor {
       parameter.setBit(AstVariable.PARAMETER);
     }
     checkReceiverParameter(node);
-    // Default return type if missing.
+    // Default the result type to void when it is omitted.
     if (node.resultType() == null) {
       node.resultType(AstTypeRef.ofType(AstBuiltinType.VOID));
     }
@@ -98,7 +98,7 @@ class PreprocessVisitor extends AstExpressionRewriteVisitor {
   }
 
   private void checkReceiverParameter(AstFunctionHeader header) {
-    // Receiver functions must have exactly one receiver parameter: the single parameter with no
+    // Receiver functions must have exactly one receiver parameter: the only parameter without an
     // explicit type. Free functions must not have any untyped parameters.
     var parameters = header.parameters();
     if (header.receiverType() != null) {

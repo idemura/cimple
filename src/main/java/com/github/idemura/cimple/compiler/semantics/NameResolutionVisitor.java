@@ -108,7 +108,7 @@ public class NameResolutionVisitor extends AstExpressionRewriteVisitor {
     if (node.isNameResolved()) {
       return node;
     }
-    // Do not resolve builtin here. It will be resolved in AstCall.
+    // Builtin names are resolved in AstCall, after the argument expressions are available.
     if (node.isBuiltin()) {
       return node;
     }
@@ -128,18 +128,19 @@ public class NameResolutionVisitor extends AstExpressionRewriteVisitor {
   @Override
   protected Object visit(AstCall node) {
     try {
-      // First, resolve children.
+      // Resolve the callee expression and all argument expressions first.
       super.visit(node);
       var function = node.function();
       if (function instanceof AstReceiverLookup receiverLookup) {
         return resolveReceiverCall(node, receiverLookup);
       }
-      // If this is a builtin method call, resolve overload. Add casts if necessary.
+      // Builtin calls are selected here, once argument expressions are available.
       if (function instanceof AstEntityRef ref && ref.isBuiltin()) {
         checkState(!ref.isNameResolved());
         return resolveBuiltinCall(node);
       }
       // Normal function resolved when AstEntityRef resolved.
+      // Receiver lookup and builtin resolution may replace the callee expression.
       return node;
     } finally {
       node.markNameResolved();
@@ -174,7 +175,7 @@ public class NameResolutionVisitor extends AstExpressionRewriteVisitor {
   }
 
   private AstExpression resolveBuiltinCall(AstCall node) {
-    // TODO Resolve using arguments
+    // TODO: Select the builtin overload using the resolved argument types.
     var operatorRef = (AstEntityRef) node.function();
     AstFunction function;
     switch (operatorRef.name().name()) {

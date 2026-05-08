@@ -39,10 +39,10 @@ public class Compiler {
         new PrintAstVisitor(debugOutput).print(module);
       }
     } catch (CompilerException e) {
-      // Parser normally throws fatal error.
+      // Fatal frontend errors are reported through the error consumer.
       return false;
     }
-    // Future-proof
+    // Keep the control flow explicit in case earlier phases start reporting recoverable errors.
     if (errorConsumer.errorCount() > 0) {
       return false;
     }
@@ -54,7 +54,7 @@ public class Compiler {
       debugOutput.writeLine("Analyzed\n");
       new PrintAstVisitor(debugOutput).print(module);
     }
-    // Outside of try because codegen should not generate user errors.
+    // Code generation is not expected to report user-facing diagnostics.
     codeGenerator.generateCode(module);
     return true;
   }

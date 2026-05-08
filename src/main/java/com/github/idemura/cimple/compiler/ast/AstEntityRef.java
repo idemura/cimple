@@ -9,7 +9,7 @@ public final class AstEntityRef extends AstExpression {
   private QualifiedName name;
   private AstEntity entity;
 
-  // For testing
+  // Test helper.
   public static AstEntityRef ofName(String name) {
     return ofName(null, name);
   }

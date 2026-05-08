@@ -11,7 +11,7 @@ import com.github.idemura.cimple.compiler.Location;
 import java.util.ArrayList;
 import java.util.List;
 
-// Transforms input code into a token stream.
+// Converts source code into a flat token stream with source locations.
 public class Tokenizer {
   private static final class SplitContext {
     private final String code;
@@ -92,10 +92,6 @@ public class Tokenizer {
     return List.copyOf(tokens);
   }
 
-  // public void add(Token token) {
-  //   tokens.add(token);
-  // }
-
   public boolean done() {
     return pos == tokens.size();
   }
@@ -120,7 +116,7 @@ public class Tokenizer {
     return true;
   }
 
-  /// Get current token location. If end of tokens reached, doesn't throw and returns null.
+  // Returns the current token location. At end of input, returns null instead of throwing.
   Location currentLocation() {
     if (pos < tokens.size()) {
       return tokens.get(pos).location();
@@ -182,7 +178,7 @@ public class Tokenizer {
   }
 
   private Token takeString(SplitContext context) {
-    // TODO: Escape sequences
+    // TODO: Support escape sequences.
     var location = currentLocation(context);
     int first = context.index++;
     while (context.code.charAt(context.index) != '"') {

@@ -7,7 +7,7 @@ public final class AstTypeRef extends AstNode {
   private QualifiedName name;
   private AstType type;
 
-  // For testing
+  // Test helper.
   public static AstTypeRef ofName(String name) {
     return ofName(null, name);
   }

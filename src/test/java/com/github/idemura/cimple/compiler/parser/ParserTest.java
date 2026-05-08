@@ -402,8 +402,8 @@ class ParserTest {
 
   @Test
   void testInvokeExpression() {
-    // Note that we allow syntax "(foo)()" because in C or Java this is ambiguous with
-    // type case. In Cimple, type cast is different: [<expression> type <cast-type>].
+    // We allow `(foo)()` because there is no ambiguity with type casts in Ci.
+    // Casts use the dedicated form `[<expression> type <cast-type>]`.
     var code =
         """
         module test;

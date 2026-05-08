@@ -31,6 +31,6 @@ public class CCodeGenerator extends CodeGenerator {
   }
 
   private void emitEpilogue() {
-    // Empty
+    // No epilogue yet.
   }
 }

@@ -38,12 +38,12 @@ import com.google.common.collect.ImmutableList;
 import java.util.ArrayList;
 import java.util.List;
 
-// Parses token stream, type checks and build the AST.
+// Parses the token stream and builds the AST. Semantic analysis runs later.
 public class Parser {
   private final Tokenizer tokenizer;
   private final ErrorConsumer errorConsumer;
 
-  // For testing
+  // Test helper for parsing a single in-memory source string.
   public static AstModule parseCode(String code, ErrorConsumer errorConsumer) {
     var tokenizer = new Tokenizer(errorConsumer);
     tokenizer.split(code, null);
@@ -63,7 +63,7 @@ public class Parser {
     var module = new AstModule();
     parseModuleName(module);
 
-    // TODO Parse imports
+    // TODO: Parse imports when the module system is implemented.
 
     while (!tokenizer.done()) {
       switch (keyword(tokenizer.current())) {
@@ -246,7 +246,7 @@ public class Parser {
     if (keywordOrNull(tokenizer.current()) == VAR) {
       stmt.init(parseVariable(true));
     }
-    // Condition must be present, even if simple "true".
+    // The loop condition is required, even for an infinite loop such as `for ; true; ...`.
     stmt.condition(parseExpression());
     if (tokenizer.takeIf(SEMICOLON)) {
       stmt.increment(parseExpression());
@@ -387,10 +387,11 @@ public class Parser {
     return expr;
   }
 
-  // Parses:
-  //  - (<expression>)
-  //  - [<expression> type <type_ref>]
-  //  - <name_ref> | <literal>
+  // Parses one primary expression:
+  //   - (<expression>)
+  //   - [<expression> type <type-ref>]
+  //   - <identifier> or <module>~<identifier>
+  //   - <literal>
   private AstExpression parsePrimary() {
     if (tokenizer.takeIf(LPAREN)) {
       var expr = parseExpression();

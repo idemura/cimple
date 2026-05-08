@@ -30,7 +30,7 @@ public record QualifiedName(String moduleName, String name) implements Comparabl
 
   @Override
   public String toString() {
-    if (moduleName == null) {
+    if (moduleName == null || isBuiltin()) {
       return name;
     }
     return moduleName + "::" + name;
