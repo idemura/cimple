@@ -1,10 +1,11 @@
 package com.github.idemura.cimple.compiler.ast;
 
-public class AstRewriteExpressionVisitor extends AstVisitor {
-  protected AstRewriteExpressionVisitor() {}
+public class AstExpressionRewriteVisitor extends AstVisitor {
+  protected AstExpressionRewriteVisitor() {}
 
   @Override
   protected void visitChildren(AstVariable node) {
+    acceptSafe(node.getType());
     node.setExpression(rewrite(node.getExpression()));
   }
 

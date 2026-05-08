@@ -4,52 +4,24 @@ import static com.github.idemura.cimple.compiler.parser.Parser.parseCode;
 import static org.junit.jupiter.api.Assertions.*;
 
 import com.github.idemura.cimple.compiler.InMemoryErrorConsumer;
+import com.github.idemura.cimple.compiler.QualifiedName;
 import com.github.idemura.cimple.compiler.ast.AstBoolLiteral;
 import com.github.idemura.cimple.compiler.ast.AstBuiltinType;
 import com.github.idemura.cimple.compiler.ast.AstDefer;
 import com.github.idemura.cimple.compiler.ast.AstExpressionStatement;
 import com.github.idemura.cimple.compiler.ast.AstFor;
-import com.github.idemura.cimple.compiler.ast.AstFunction;
-import com.github.idemura.cimple.compiler.ast.AstFunctionHeader;
 import com.github.idemura.cimple.compiler.ast.AstIf;
 import com.github.idemura.cimple.compiler.ast.AstLocal;
-import com.github.idemura.cimple.compiler.ast.AstModule;
 import com.github.idemura.cimple.compiler.ast.AstNullLiteral;
+import com.github.idemura.cimple.compiler.ast.AstRecordType;
 import com.github.idemura.cimple.compiler.ast.AstReturn;
-import com.github.idemura.cimple.compiler.ast.AstType;
 import com.github.idemura.cimple.compiler.ast.AstTypeRef;
-import com.github.idemura.cimple.compiler.ast.AstVariable;
 import com.github.idemura.cimple.compiler.parser.Keyword;
 import com.google.common.collect.ImmutableList;
 import java.util.List;
 import org.junit.jupiter.api.Test;
 
 class PreprocessVisitorTest {
-  private static List<AstFunction> functions(AstModule module) {
-    return module.definitions().stream()
-        .filter(AstFunction.class::isInstance)
-        .map(AstFunction.class::cast)
-        .toList();
-  }
-
-  private static List<AstType> types(AstModule module) {
-    return module.definitions().stream()
-        .filter(AstType.class::isInstance)
-        .map(AstType.class::cast)
-        .toList();
-  }
-
-  private static List<AstVariable> variables(AstModule module) {
-    return module.definitions().stream()
-        .filter(AstVariable.class::isInstance)
-        .map(AstVariable.class::cast)
-        .toList();
-  }
-
-  private static AstFunctionHeader header(AstModule module, int index) {
-    return functions(module).get(index).getHeader();
-  }
-
   @Test
   void testRewriteTrueFalseNullLiterals() {
     var code =
@@ -72,7 +44,7 @@ class PreprocessVisitorTest {
     var nameMap = new NameMap();
     module.accept(new PreprocessVisitor(nameMap, Keyword.valueList(), errorConsumer));
 
-    var statements = functions(module).get(0).getBlock().statements();
+    var statements = module.findFunction("f").getBlock().statements();
     int i = 0;
     assertEquals(new AstBoolLiteral(true), ((AstIf) statements.get(i++)).getConditions().get(0));
     {
@@ -142,11 +114,11 @@ class PreprocessVisitorTest {
     module.accept(new PreprocessVisitor(nameMap, Keyword.valueList(), errorConsumer));
 
     assertEquals(List.of(), errorConsumer.getErrors());
-    assertSame(variables(module).get(0), nameMap.lookupEntity("x"));
-    assertSame(variables(module).get(1), nameMap.lookupEntity("y"));
-    assertSame(functions(module).get(0), nameMap.lookupEntity("f"));
-    assertSame(functions(module).get(1), nameMap.lookupEntity("g"));
-    assertSame(types(module).get(0), nameMap.lookupType("R"));
+    assertSame(module.findVariable("x"), nameMap.lookupEntity("x"));
+    assertSame(module.findVariable("y"), nameMap.lookupEntity("y"));
+    assertSame(module.findFunction("f"), nameMap.lookupEntity("f"));
+    assertSame(module.findFunction("g"), nameMap.lookupEntity("g"));
+    assertSame(module.findType("R"), nameMap.lookupType(new QualifiedName(null, "R")));
   }
 
   @Test
@@ -168,18 +140,50 @@ class PreprocessVisitorTest {
 
     assertEquals(List.of(), errorConsumer.getErrors());
     {
-      var header = header(module, 0);
-      var receiverType = AstTypeRef.ofName("test", "Duration");
+      var header = module.findFunction("toMillis").getHeader();
+      var receiverType = AstTypeRef.ofName("Duration");
       assertEquals(receiverType, header.getReceiverType());
       assertEquals(1, header.getReceiverIndex());
       assertEquals(receiverType, header.getParameters().get(1).getType());
       assertEquals(AstTypeRef.ofType(AstBuiltinType.VOID), header.getResultType());
     }
     {
-      var header = header(module, 1);
+      var header = module.findFunction("f").getHeader();
       assertEquals(-1, header.getReceiverIndex());
       assertEquals(AstTypeRef.ofType(AstBuiltinType.VOID), header.getResultType());
     }
+  }
+
+  @Test
+  void testNormalizeIntAndFloatTypeRefs() {
+    var code =
+        """
+        module test;
+
+        type record R {
+          var y float;
+        }
+
+        var x int;
+
+        function f(a int) float {}
+        """;
+
+    var errorConsumer = new InMemoryErrorConsumer();
+    var module = parseCode(code, errorConsumer);
+    var nameMap = new NameMap();
+    module.accept(new PreprocessVisitor(nameMap, Keyword.valueList(), errorConsumer));
+
+    assertEquals(List.of(), errorConsumer.getErrors());
+    assertEquals(AstTypeRef.ofType(AstBuiltinType.INT64), module.findVariable("x").getType());
+    assertEquals(
+        AstTypeRef.ofType(AstBuiltinType.FLOAT64),
+        ((AstRecordType) module.findType("R")).getFields().get(0).getType());
+    assertEquals(
+        AstTypeRef.ofType(AstBuiltinType.INT64), module.findFunction("f").getHeader().getParameters().get(0).getType());
+    assertEquals(
+        AstTypeRef.ofType(AstBuiltinType.FLOAT64),
+        module.findFunction("f").getHeader().getResultType());
   }
 
   @Test
@@ -222,6 +226,36 @@ class PreprocessVisitorTest {
 
     assertEquals(
         List.of("Free function test::f cannot have a receiver parameter x."),
+        errorConsumer.getErrors());
+  }
+
+  @Test
+  void testVariableMustHaveTypeOrInitializer() {
+    var code =
+        """
+        module test;
+
+        var x;
+
+        type record R {
+          var z;
+        }
+
+        function f() {
+          const y;
+        }
+        """;
+
+    var errorConsumer = new InMemoryErrorConsumer();
+    var module = parseCode(code, errorConsumer);
+    var nameMap = new NameMap();
+    module.accept(new PreprocessVisitor(nameMap, Keyword.valueList(), errorConsumer));
+
+    assertEquals(
+        List.of(
+            "Variable test::x must have a type or an initializer.",
+            "Variable z must have a type or an initializer.",
+            "Variable y must have a type or an initializer."),
         errorConsumer.getErrors());
   }
 

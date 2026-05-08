@@ -1,8 +1,18 @@
 package com.github.idemura.cimple.compiler;
 
+import static com.github.idemura.cimple.compiler.Constants.BUILTIN_MODULE;
+
 public record QualifiedName(String moduleName, String name) implements Comparable<QualifiedName> {
   public QualifiedName(String name) {
     this(null, name);
+  }
+
+  public static QualifiedName ofBuiltin(String name) {
+    return new QualifiedName(BUILTIN_MODULE, name);
+  }
+
+  public boolean isBuiltin() {
+    return BUILTIN_MODULE.equals(moduleName);
   }
 
   public QualifiedName withModuleName(String moduleName) {
@@ -20,7 +30,7 @@ public record QualifiedName(String moduleName, String name) implements Comparabl
 
   @Override
   public String toString() {
-    if (moduleName == null || moduleName.isEmpty()) {
+    if (moduleName == null) {
       return name;
     }
     return moduleName + "::" + name;

@@ -10,6 +10,7 @@ import com.github.idemura.cimple.compiler.ast.AstBuiltinType;
 import com.github.idemura.cimple.compiler.ast.AstCall;
 import com.github.idemura.cimple.compiler.ast.AstEntity;
 import com.github.idemura.cimple.compiler.ast.AstEntityRef;
+import com.github.idemura.cimple.compiler.ast.AstExpressionRewriteVisitor;
 import com.github.idemura.cimple.compiler.ast.AstFunction;
 import com.github.idemura.cimple.compiler.ast.AstFunctionHeader;
 import com.github.idemura.cimple.compiler.ast.AstFunctionType;
@@ -17,7 +18,6 @@ import com.github.idemura.cimple.compiler.ast.AstModule;
 import com.github.idemura.cimple.compiler.ast.AstNullLiteral;
 import com.github.idemura.cimple.compiler.ast.AstNumberLiteral;
 import com.github.idemura.cimple.compiler.ast.AstRecordType;
-import com.github.idemura.cimple.compiler.ast.AstRewriteExpressionVisitor;
 import com.github.idemura.cimple.compiler.ast.AstStringLiteral;
 import com.github.idemura.cimple.compiler.ast.AstType;
 import com.github.idemura.cimple.compiler.ast.AstTypeRef;
@@ -26,7 +26,7 @@ import com.github.idemura.cimple.compiler.ast.AstVariable;
 import java.util.HashMap;
 import java.util.List;
 
-class PreprocessVisitor extends AstRewriteExpressionVisitor {
+class PreprocessVisitor extends AstExpressionRewriteVisitor {
   private final NameMap nameMap;
   private final ReservedWords reservedWords;
   private final ErrorConsumer errorConsumer;
@@ -139,22 +139,32 @@ class PreprocessVisitor extends AstRewriteExpressionVisitor {
   @Override
   protected Object visit(AstVariable node) {
     checkName(node.getName().name(), node.getLocation());
+    if (!node.getBit(AstVariable.PARAM)
+        && node.getType() == null
+        && node.getExpression() == null) {
+      errorConsumer.errorAt(
+          node.getLocation(),
+          "Variable %s must have a type or an initializer.",
+          node.getName());
+    }
     return super.visit(node);
   }
 
   @Override
   protected Object visit(AstTypeRef node) {
-    AstType type = AstBuiltinType.find(node.getName().name());
-    if (type == null) {
-      type = nameMap.lookupType(node.getName().name());
+    switch (node.getName().name()) {
+      case "int":
+        node.setName(AstBuiltinType.INT64.getName());
+        node.setType(AstBuiltinType.INT64);
+        break;
+      case "float":
+        node.setName(AstBuiltinType.FLOAT64.getName());
+        node.setType(AstBuiltinType.FLOAT64);
+        break;
+      default:
+        break;
     }
-    if (type != null) {
-      node.setName(type.getName());
-      node.setType(type);
-    } else {
-      errorConsumer.errorAt(node.getLocation(), "Undefined type: %s", node.getName());
-    }
-    return node;
+    return super.visit(node);
   }
 
   @Override

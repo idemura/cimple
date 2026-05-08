@@ -38,22 +38,22 @@ public abstract class ErrorConsumer {
   }
 
   public void error(String pattern, Object... args) {
-    outputErrorWithCount(formatError(ERROR, null, pattern, args));
+    processAndOutputError(formatError(ERROR, null, pattern, args));
   }
 
   public void errorAt(Location location, String pattern, Object... args) {
-    outputErrorWithCount(formatError(ERROR, location, pattern, args));
+    processAndOutputError(formatError(ERROR, location, pattern, args));
   }
 
   public CompilerException fatal(String pattern, Object... args) {
     var message = formatError(FATAL, null, pattern, args);
-    outputErrorWithCount(message);
+    processAndOutputError(message);
     return new CompilerException(message);
   }
 
   public CompilerException fatalAt(Location location, String pattern, Object... args) {
     var message = formatError(FATAL, location, pattern, args);
-    outputErrorWithCount(message);
+    processAndOutputError(message);
     return new CompilerException(message);
   }
 
@@ -73,7 +73,7 @@ public abstract class ErrorConsumer {
     return (this.mode & mode.bit) != 0;
   }
 
-  private void outputErrorWithCount(String message) {
+  private void processAndOutputError(String message) {
     errorCount++;
     if (checkMode(Mode.THROW_ON_ERROR)) {
       throw new CompilerException(message);

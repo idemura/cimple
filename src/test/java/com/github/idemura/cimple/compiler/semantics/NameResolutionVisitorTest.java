@@ -14,7 +14,6 @@ import com.github.idemura.cimple.compiler.ast.AstType;
 import com.github.idemura.cimple.compiler.ast.AstVariable;
 import com.github.idemura.cimple.compiler.parser.Keyword;
 import java.util.List;
-import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 
 class NameResolutionVisitorTest {
@@ -49,7 +48,7 @@ class NameResolutionVisitorTest {
         """
         module test;
 
-        var x;
+        var x int;
 
         function f() {
           x;
@@ -97,7 +96,7 @@ class NameResolutionVisitorTest {
           x;
         }
 
-        var x;
+        var x int;
         """;
 
     var errorConsumer = new InMemoryErrorConsumer();
@@ -123,7 +122,7 @@ class NameResolutionVisitorTest {
     }
   }
 
-  @Disabled
+  // @Disabled
   @Test
   void testReceiverFunctions() {
     var code =

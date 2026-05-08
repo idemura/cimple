@@ -4,12 +4,14 @@
 
 ## Motivation
 
-* Statically typed
-* Reduced amount of language concepts
-* Compiled
-* Compatible with C, but safer.
-* Simple: easy to read and grep.
-* Manual memory management
+* Small amount of language concepts. Easy to start and master the language.
+* Simple grammar. Explicit constructs.
+* Strong statical type system.
+* Type inference in the heart.
+* Compiled.
+* Compatible with C. Use C libraries and create libraries for C in Cimple.
+* Grep-friendly. Even if you don't have access to the IDE, still can find the definition.
+* Manual memory management, but safer. Not safe, but safer. We write system software after all.
 * Generics
 * Built for a 64-bit CPU world (who uses 32 bits?)
 
@@ -25,13 +27,17 @@ Comments start with `#` and continue until the end of the line:
 # File operations module
 module file_io;
 
-# Creates file in /tmp
-function create_temp(string name) int {
+type record File {
+  # Fields
+}
+
+# Creates a file in /tmp
+function createTemp(name string) File* {
 }
 ```
 
 There are no multiline comments.
-Comments like `/* */` in C are not grepable.
+Comments like `/* */` in C are not grep-friendly.
 Consider the following C code:
 
 ```

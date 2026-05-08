@@ -63,7 +63,7 @@ public class Parser {
     var module = new AstModule();
     parseModuleName(module);
 
-    // TODO: Parse imports
+    // TODO Parse imports
 
     while (!tokenizer.done()) {
       switch (keyword(tokenizer.current())) {
@@ -501,7 +501,7 @@ public class Parser {
 
   private AstEntityRef parseOperator(Token token) {
     var ref = new AstEntityRef();
-    ref.setName(new QualifiedName(token.type().symbolName()));
+    ref.setName(QualifiedName.ofBuiltin(token.type().symbolName()));
     ref.setLocation(token.location());
     return ref;
   }

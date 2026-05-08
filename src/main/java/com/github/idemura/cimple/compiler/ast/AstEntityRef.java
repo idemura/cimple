@@ -67,4 +67,8 @@ public final class AstEntityRef extends AstExpression {
   public void setEntity(AstEntity entity) {
     this.entity = requireNonNull(entity);
   }
+
+  public boolean isBuiltin() {
+    return name.isBuiltin();
+  }
 }

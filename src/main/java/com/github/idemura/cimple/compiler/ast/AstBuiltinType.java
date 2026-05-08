@@ -19,10 +19,10 @@ public final class AstBuiltinType extends AstType {
   private QualifiedName name;
 
   private AstBuiltinType(String name) {
-    this.name = new QualifiedName("builtin", name);
+    this.name = QualifiedName.ofBuiltin(name);
   }
 
-  public static AstBuiltinType find(String name) {
+  public static AstBuiltinType lookup(String name) {
     return switch (name) {
       case "bool" -> BOOL;
       case "byte" -> BYTE;

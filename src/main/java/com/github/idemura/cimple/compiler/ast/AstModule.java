@@ -27,4 +27,31 @@ public final class AstModule extends AstNode {
   public List<AstNode> definitions() {
     return definitions;
   }
+
+  public AstFunction findFunction(String name) {
+    for (var definition : definitions) {
+      if (definition instanceof AstFunction function && function.getName().name().equals(name)) {
+        return function;
+      }
+    }
+    return null;
+  }
+
+  public AstType findType(String name) {
+    for (var definition : definitions) {
+      if (definition instanceof AstType type && type.getName().name().equals(name)) {
+        return type;
+      }
+    }
+    return null;
+  }
+
+  public AstVariable findVariable(String name) {
+    for (var definition : definitions) {
+      if (definition instanceof AstVariable variable && variable.getName().name().equals(name)) {
+        return variable;
+      }
+    }
+    return null;
+  }
 }
