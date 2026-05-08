@@ -402,19 +402,28 @@ class ParserTest {
 
   @Test
   void testInvokeExpression() {
+    // Note that we allow syntax "(foo)()" because in C or Java this is ambiguous with
+    // type case. In Cimple, type cast is different: [<expression> type <cast-type>].
     var code =
         """
         module test;
         function f() {
+          var x = foo~bar;
           var x = foo();
-          # Allowed, because we case with different expression:
           var x = (foo)();
           var x = foo(1, 2);
+          var x = foo~bar();
         }
         """;
     var module = parseCode(code, makeErrorConsumer());
     var statements = module.findFunction("f").block().statements();
+    assertEquals(5, statements.size());
     int i = 0;
+    {
+      var expr = ((AstLocal) statements.get(i++)).variable().expression();
+      var entityRef = (AstEntityRef) expr;
+      assertEquals(AstEntityRef.ofName("foo", "bar"), entityRef);
+    }
     {
       var expr = ((AstLocal) statements.get(i++)).variable().expression();
       var call = (AstCall) expr;
@@ -434,6 +443,12 @@ class ParserTest {
       assertEquals(2, call.arguments().size());
       assertEquals(AstNumberLiteral.of(1), call.arguments().get(0));
       assertEquals(AstNumberLiteral.of(2), call.arguments().get(1));
+    }
+    {
+      var expr = ((AstLocal) statements.get(i++)).variable().expression();
+      var call = (AstCall) expr;
+      assertEquals(AstEntityRef.ofName("foo", "bar"), call.function());
+      assertEquals(ImmutableList.of(), call.arguments());
     }
   }
 

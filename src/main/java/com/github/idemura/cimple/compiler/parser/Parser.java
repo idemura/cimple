@@ -409,7 +409,7 @@ public class Parser {
       case IDENTIFIER -> {
         var current = tokenizer.take();
         var expr = new AstEntityRef();
-        expr.name(new QualifiedName(current.value()));
+        expr.name(parseQualifiedName(current));
         expr.location(current.location());
         return expr;
       }
@@ -521,6 +521,13 @@ public class Parser {
 
   private QualifiedName takeIdentifier() {
     return new QualifiedName(take(IDENTIFIER).value());
+  }
+
+  private QualifiedName parseQualifiedName(Token firstIdentifier) {
+    if (!tokenizer.takeIf(TILDE)) {
+      return new QualifiedName(firstIdentifier.value());
+    }
+    return new QualifiedName(firstIdentifier.value(), take(IDENTIFIER).value());
   }
 
   private Location takeKeyword(Keyword keyword) {

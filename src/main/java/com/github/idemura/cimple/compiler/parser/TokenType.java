@@ -13,6 +13,7 @@ public enum TokenType {
   RCURLY("}"),
   SEMICOLON(";"),
   COLON(":"),
+  TILDE("~"),
   COMMA(","),
   PERIOD("."),
   ASSIGN("="),

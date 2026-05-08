@@ -68,6 +68,7 @@ public class Tokenizer {
           case '{' -> tokens.add(take1CharToken(context, LCURLY));
           case '}' -> tokens.add(take1CharToken(context, RCURLY));
           case ':' -> tokens.add(take1CharToken(context, COLON));
+          case '~' -> tokens.add(take1CharToken(context, TILDE));
           case ',' -> tokens.add(take1CharToken(context, COMMA));
           case '.' -> tokens.add(take1CharToken(context, PERIOD));
           case '=' -> tokens.add(take1CharToken(context, ASSIGN));
