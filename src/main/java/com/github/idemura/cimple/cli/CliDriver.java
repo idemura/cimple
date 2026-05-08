@@ -12,7 +12,7 @@ import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.List;
 
-public class CimpleCli implements CompilerParams {
+public class CliDriver implements CompilerParams {
   @Parameter() List<String> files = new ArrayList<>();
 
   @Parameter(names = {"--codegen"})
@@ -42,7 +42,7 @@ public class CimpleCli implements CompilerParams {
     return debug && debugPrintAst;
   }
 
-  CimpleCli() {}
+  CliDriver() {}
 
   void parseCmdLine(String[] args) {
     JCommander.newBuilder().addObject(this).build().parse(args);
@@ -67,7 +67,7 @@ public class CimpleCli implements CompilerParams {
   }
 
   public static void main(String[] args) {
-    var app = new CimpleCli();
+    var app = new CliDriver();
     app.parseCmdLine(args);
     System.exit(app.run() ? 1 : 0);
   }
