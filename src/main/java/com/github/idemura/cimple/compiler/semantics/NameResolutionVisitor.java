@@ -96,7 +96,6 @@ public class NameResolutionVisitor extends AstExpressionRewriteVisitor {
 
   @Override
   protected Object visit(AstLocal node) {
-    node.getVariable().setBit(AstVariable.LOCAL);
     registerLocal(node.getVariable());
     return super.visit(node);
   }

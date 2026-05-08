@@ -14,6 +14,7 @@ import com.github.idemura.cimple.compiler.ast.AstExpressionRewriteVisitor;
 import com.github.idemura.cimple.compiler.ast.AstFunction;
 import com.github.idemura.cimple.compiler.ast.AstFunctionHeader;
 import com.github.idemura.cimple.compiler.ast.AstFunctionType;
+import com.github.idemura.cimple.compiler.ast.AstLocal;
 import com.github.idemura.cimple.compiler.ast.AstModule;
 import com.github.idemura.cimple.compiler.ast.AstNullLiteral;
 import com.github.idemura.cimple.compiler.ast.AstNumberLiteral;
@@ -64,6 +65,7 @@ class PreprocessVisitor extends AstExpressionRewriteVisitor {
           }
         }
         case AstVariable variable -> {
+          variable.setBit(AstVariable.GLOBAL);
           variable.setName(variable.getName().withModuleName(moduleName));
           var existing = nameMap.addVariable(variable);
           if (existing != null) {
@@ -173,6 +175,12 @@ class PreprocessVisitor extends AstExpressionRewriteVisitor {
   @Override
   protected Object visit(AstFunctionType node) {
     checkName(node.getName().name(), node.getLocation());
+    return super.visit(node);
+  }
+
+  @Override
+  protected Object visit(AstLocal node) {
+    node.getVariable().setBit(AstVariable.LOCAL);
     return super.visit(node);
   }
 

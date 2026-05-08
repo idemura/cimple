@@ -8,6 +8,7 @@ public final class AstVariable extends AstEntity {
   public static final long PARAMETER = 0x2L;
   public static final long LOCAL = 0x4L;
   public static final long FIELD = 0x8L;
+  public static final long GLOBAL = 0x10L;
 
   private QualifiedName name;
   private AstTypeRef type;
