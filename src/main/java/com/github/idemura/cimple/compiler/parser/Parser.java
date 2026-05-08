@@ -363,7 +363,7 @@ public class Parser {
         expr = fieldAccess;
       } else if (tokenizer.takeIf(COLON)) {
         var receiverLookup = new AstReceiverLookup();
-        receiverLookup.object(expr);
+        receiverLookup.receiver(expr);
         receiverLookup.functionName(take(IDENTIFIER).value());
         expr = receiverLookup;
       } else if (tokenizer.takeIf(LBRACKET)) {

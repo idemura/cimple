@@ -214,7 +214,7 @@ public abstract class AstVisitor {
   }
 
   protected void visitChildren(AstReceiverLookup node) {
-    node.object().accept(this);
+    node.receiver().accept(this);
   }
 
   protected Object visit(AstCast node) {

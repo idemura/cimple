@@ -123,7 +123,7 @@ public class AstExpressionRewriteVisitor extends AstVisitor {
 
   @Override
   protected void visitChildren(AstReceiverLookup node) {
-    node.object(rewrite(node.object()));
+    node.receiver(rewrite(node.receiver()));
   }
 
   @Override

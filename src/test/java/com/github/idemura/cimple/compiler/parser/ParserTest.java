@@ -220,16 +220,16 @@ class ParserTest {
         """
         module test;
 
-        function Duration:toMillis(this Duration) int {
+        function Duration:toMillis(this) int {
           return 6;
         }
         """;
     var module = parseCode(code, makeErrorConsumer());
-    var header = module.findFunction("toMillis").header();
+    var header = module.findReceiverFunction("Duration", "toMillis").header();
     assertEquals(AstTypeRef.ofName("Duration"), header.receiverType());
     assertEquals(new QualifiedName("toMillis"), header.name());
     assertEquals(AstTypeRef.ofName("int"), header.resultType());
-    assertEquals(ImmutableList.of(rawVariable("this", "Duration")), header.parameters());
+    assertEquals(ImmutableList.of(rawVariable("this")), header.parameters());
   }
 
   @Test
@@ -441,7 +441,7 @@ class ParserTest {
     {
       var expr = ((AstLocal) statements.get(i++)).variable().expression();
       var receiverLookup = (AstReceiverLookup) expr;
-      assertEquals(AstEntityRef.ofName("foo"), receiverLookup.object());
+      assertEquals(AstEntityRef.ofName("foo"), receiverLookup.receiver());
       assertEquals("bar", receiverLookup.functionName());
     }
     {
@@ -455,7 +455,7 @@ class ParserTest {
       var receiverLookup = (AstReceiverLookup) expr;
       assertEquals("baz", receiverLookup.functionName());
       {
-        var index = (AstArrayAccess) receiverLookup.object();
+        var index = (AstArrayAccess) receiverLookup.receiver();
         assertEquals(AstNumberLiteral.of(3), index.index());
         {
           var call = (AstCall) index.array();

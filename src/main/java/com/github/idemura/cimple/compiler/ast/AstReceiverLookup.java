@@ -1,7 +1,7 @@
 package com.github.idemura.cimple.compiler.ast;
 
 public final class AstReceiverLookup extends AstExpression {
-  private AstExpression object;
+  private AstExpression receiver;
   private String functionName;
 
   @Override
@@ -14,12 +14,12 @@ public final class AstReceiverLookup extends AstExpression {
     return null;
   }
 
-  public AstExpression object() {
-    return object;
+  public AstExpression receiver() {
+    return receiver;
   }
 
-  public void object(AstExpression object) {
-    this.object = object;
+  public void receiver(AstExpression receiver) {
+    this.receiver = receiver;
   }
 
   public String functionName() {

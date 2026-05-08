@@ -49,7 +49,10 @@ public final class AstModule extends AstNode {
   public AstFunction findFunction(String name) {
     for (var definition : definitions) {
       if (definition instanceof AstFunction function && function.name().name().equals(name)) {
-        return function;
+        var receiverType = function.header().receiverType();
+        if (receiverType == null) {
+          return function;
+        }
       }
     }
     return null;
