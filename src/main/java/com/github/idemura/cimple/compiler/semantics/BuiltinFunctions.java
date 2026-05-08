@@ -20,7 +20,7 @@ public final class BuiltinFunctions {
     var parameter = new AstVariable();
     parameter.setName(new QualifiedName(name));
     parameter.setType(AstTypeRef.ofType(type));
-    parameter.setBit(AstVariable.PARAM);
+    parameter.setBit(AstVariable.PARAMETER);
     return parameter;
   }
 

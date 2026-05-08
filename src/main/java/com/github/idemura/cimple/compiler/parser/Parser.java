@@ -477,7 +477,7 @@ public class Parser {
     if (!tokenizer.current().is(RPAREN)) {
       do {
         var variable = new AstVariable();
-        variable.setBit(AstVariable.PARAM);
+        variable.setBit(AstVariable.PARAMETER);
         variable.setLocation(tokenizer.currentLocation());
         variable.setName(takeIdentifier());
         if (tokenizer.current().is(IDENTIFIER)) {

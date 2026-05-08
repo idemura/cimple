@@ -1,6 +1,6 @@
 package com.github.idemura.cimple.compiler.semantics;
 
-import static com.google.common.base.Preconditions.checkArgument;
+import static com.google.common.base.Preconditions.checkState;
 
 import com.github.idemura.cimple.compiler.ErrorConsumer;
 import com.github.idemura.cimple.compiler.ast.AstBlock;
@@ -12,6 +12,7 @@ import com.github.idemura.cimple.compiler.ast.AstExpressionRewriteVisitor;
 import com.github.idemura.cimple.compiler.ast.AstFunction;
 import com.github.idemura.cimple.compiler.ast.AstFunctionHeader;
 import com.github.idemura.cimple.compiler.ast.AstFunctionType;
+import com.github.idemura.cimple.compiler.ast.AstLocal;
 import com.github.idemura.cimple.compiler.ast.AstModule;
 import com.github.idemura.cimple.compiler.ast.AstRecordType;
 import com.github.idemura.cimple.compiler.ast.AstTypeRef;
@@ -39,8 +40,16 @@ public class NameResolutionVisitor extends AstExpressionRewriteVisitor {
 
   @Override
   protected Object visit(AstFunction node) {
-    resolveHeader(node.getHeader());
-    return super.visit(node);
+    try {
+      resolveHeader(node.getHeader());
+      nameMap.beginScope();
+      for (var parameter : node.getHeader().getParameters()) {
+        registerLocal(parameter);
+      }
+      return super.visit(node);
+    } finally {
+      nameMap.endScope();
+    }
   }
 
   @Override
@@ -86,11 +95,21 @@ public class NameResolutionVisitor extends AstExpressionRewriteVisitor {
   }
 
   @Override
+  protected Object visit(AstLocal node) {
+    node.getVariable().setBit(AstVariable.LOCAL);
+    registerLocal(node.getVariable());
+    return super.visit(node);
+  }
+
+  @Override
   protected Object visit(AstEntityRef node) {
     if (node.isNameResolved()) {
       return node;
     }
-    checkArgument(!node.isBuiltin());
+    // Do not resolve builtin here. It will be resolved in AstCall.
+    if (node.isBuiltin()) {
+      return node;
+    }
     try {
       var entity = nameMap.lookupEntity(node.getName().name());
       if (entity == null) {
@@ -112,6 +131,7 @@ public class NameResolutionVisitor extends AstExpressionRewriteVisitor {
       // If this is a builtin method call, resolve overload. Add casts if necessary.
       var function = node.getFunction();
       if (function instanceof AstEntityRef ref && ref.isBuiltin()) {
+        checkState(!ref.isNameResolved());
         return resolveBuiltinCall(node);
       }
       // Normal function resolved when AstEntityRef resolved.
@@ -170,5 +190,16 @@ public class NameResolutionVisitor extends AstExpressionRewriteVisitor {
     operatorRef.setName(function.getName());
     operatorRef.setEntity(function);
     return node;
+  }
+
+  private void registerLocal(AstVariable variable) {
+    var existing = nameMap.addLocal(variable);
+    if (existing != null) {
+      errorConsumer.errorAt(
+          variable.getLocation(),
+          "Duplicate local variable: %s. Defined at %s.",
+          variable.getName(),
+          existing.getLocation());
+    }
   }
 }

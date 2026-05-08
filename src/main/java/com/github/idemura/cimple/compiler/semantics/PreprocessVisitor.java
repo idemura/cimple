@@ -139,7 +139,7 @@ class PreprocessVisitor extends AstExpressionRewriteVisitor {
   @Override
   protected Object visit(AstVariable node) {
     checkName(node.getName().name(), node.getLocation());
-    if (!node.getBit(AstVariable.PARAM)
+    if (!node.getBit(AstVariable.PARAMETER)
         && node.getType() == null
         && node.getExpression() == null) {
       errorConsumer.errorAt(

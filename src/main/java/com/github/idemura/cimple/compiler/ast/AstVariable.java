@@ -4,9 +4,10 @@ import com.github.idemura.cimple.compiler.QualifiedName;
 import java.util.Objects;
 
 public final class AstVariable extends AstEntity {
-  public static final long MUTABLE = 0x1L; // const/var
-  public static final long PARAM = 0x2L; // Whether it is a function parameter.
-  public static final long FIELD = 0x4L; // Whether it is a field.
+  public static final long MUTABLE = 0x1L;
+  public static final long PARAMETER = 0x2L;
+  public static final long LOCAL = 0x4L;
+  public static final long FIELD = 0x8L;
 
   private QualifiedName name;
   private AstTypeRef type;
@@ -35,6 +36,10 @@ public final class AstVariable extends AstEntity {
   }
 
   public boolean getBit(long mask) {
+    return (flags & mask) != 0;
+  }
+
+  public boolean isAnyOf(long mask) {
     return (flags & mask) != 0;
   }
 

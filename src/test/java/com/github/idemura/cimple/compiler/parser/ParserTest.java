@@ -68,7 +68,7 @@ class ParserTest {
     var type = new AstTypeRef();
     type.setName(new QualifiedName(typeName));
     parameter.setType(type);
-    parameter.setBit(AstVariable.PARAM);
+    parameter.setBit(AstVariable.PARAMETER);
     return parameter;
   }
 
