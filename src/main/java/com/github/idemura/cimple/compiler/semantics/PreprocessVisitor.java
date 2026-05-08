@@ -148,9 +148,7 @@ class PreprocessVisitor extends AstExpressionRewriteVisitor {
         && node.getType() == null
         && node.getExpression() == null) {
       errorConsumer.errorAt(
-          node.getLocation(),
-          "Variable %s must have a type or an initializer.",
-          node.getName());
+          node.getLocation(), "Variable %s must have a type or an initializer.", node.getName());
     }
     return super.visit(node);
   }

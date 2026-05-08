@@ -1,6 +1,6 @@
 package com.github.idemura.cimple.compiler.parser;
 
-import static com.github.idemura.cimple.compiler.Constants.BUILTIN_MODULE;
+import static com.github.idemura.cimple.compiler.ast.AstUtils.*;
 import static com.github.idemura.cimple.compiler.parser.Parser.parseCode;
 import static org.junit.jupiter.api.Assertions.*;
 
@@ -62,28 +62,6 @@ class ParserTest {
     return errorConsumer;
   }
 
-  private static AstVariable parameter(String name, String typeName) {
-    var parameter = new AstVariable();
-    parameter.setName(new QualifiedName(name));
-    var type = new AstTypeRef();
-    type.setName(new QualifiedName(typeName));
-    parameter.setType(type);
-    return parameter;
-  }
-
-  private static AstUnionType.Variant unionVariant(String name, String typeName) {
-    var unionVariant = new AstUnionType.Variant();
-    unionVariant.setTag(name);
-    if (typeName != null) {
-      unionVariant.setValueType(AstTypeRef.ofName(typeName));
-    }
-    return unionVariant;
-  }
-
-  private static AstEntityRef builtinEntityRef(String symbol) {
-    return AstEntityRef.ofName(BUILTIN_MODULE, symbol);
-  }
-
   @Test
   void testModule() {
     var code =
@@ -119,7 +97,7 @@ class ParserTest {
       assertNull(f.getHeader().getResultType());
       var params = f.getHeader().getParameters();
       assertEquals(1, params.size());
-      assertEquals(parameter("x", "int"), params.get(0));
+      assertEquals(rawVariable("x", "int"), params.get(0));
     }
     {
       var f = functions.get(2);
@@ -127,8 +105,8 @@ class ParserTest {
       assertNull(f.getHeader().getResultType());
       var params = f.getHeader().getParameters();
       assertEquals(2, params.size());
-      assertEquals(parameter("x", "int"), params.get(0));
-      assertEquals(parameter("y", "int"), params.get(1));
+      assertEquals(rawVariable("x", "int"), params.get(0));
+      assertEquals(rawVariable("y", "int"), params.get(1));
     }
     {
       var f = functions.get(3);
@@ -254,8 +232,8 @@ class ParserTest {
       assertEquals(AstTypeRef.ofName("bool"), type.getHeader().getResultType());
       var params = type.getHeader().getParameters();
       assertEquals(2, params.size());
-      assertEquals(parameter("a", "int"), params.get(0));
-      assertEquals(parameter("b", "int"), params.get(1));
+      assertEquals(rawVariable("a", "int"), params.get(0));
+      assertEquals(rawVariable("b", "int"), params.get(1));
     }
     {
       var type = (AstFunctionType) types.get(1);
@@ -267,7 +245,7 @@ class ParserTest {
       var type = (AstFunctionType) types.get(2);
       assertEquals(new QualifiedName("Consumer"), type.getName());
       assertNull(type.getHeader().getResultType());
-      assertEquals(ImmutableList.of(parameter("v", "string")), type.getHeader().getParameters());
+      assertEquals(ImmutableList.of(rawVariable("v", "string")), type.getHeader().getParameters());
     }
   }
 
@@ -288,7 +266,7 @@ class ParserTest {
     assertEquals(AstTypeRef.ofName("Duration"), header.getReceiverType());
     assertEquals(new QualifiedName("toMillis"), header.getName());
     assertEquals(AstTypeRef.ofName("int"), header.getResultType());
-    assertEquals(ImmutableList.of(parameter("this", "int")), header.getParameters());
+    assertEquals(ImmutableList.of(rawVariable("this", "int")), header.getParameters());
   }
 
   @Test

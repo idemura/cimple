@@ -1,37 +1,15 @@
 package com.github.idemura.cimple.compiler.semantics;
 
+import static com.github.idemura.cimple.compiler.ast.AstUtils.*;
 import static org.junit.jupiter.api.Assertions.*;
 
-import com.github.idemura.cimple.compiler.QualifiedName;
-import com.github.idemura.cimple.compiler.ast.AstVariable;
 import org.junit.jupiter.api.Test;
 
 class NameMapTest {
-  private static AstVariable makeGlobal(String name) {
-    var variable = new AstVariable();
-    variable.setName(new QualifiedName("test", name));
-    return variable;
-  }
-
-  private static AstVariable makeLocal(String name) {
-    return makeLocal(name, AstVariable.LOCAL);
-  }
-
-  private static AstVariable makeParameter(String name) {
-    return makeLocal(name, AstVariable.PARAMETER);
-  }
-
-  private static AstVariable makeLocal(String name, long flag) {
-    var variable = new AstVariable();
-    variable.setName(new QualifiedName(name));
-    variable.setBit(flag);
-    return variable;
-  }
-
   @Test
   void testAddLocalNoCollision() {
     var nameMap = new NameMap();
-    var local = makeLocal("x");
+    var local = localVariable("x");
 
     assertNull(nameMap.addLocal(local));
     assertSame(local, nameMap.lookupEntity("x"));
@@ -40,8 +18,8 @@ class NameMapTest {
   @Test
   void testAddLocalDuplicateLocal() {
     var nameMap = new NameMap();
-    var first = makeLocal("x");
-    var second = makeLocal("x");
+    var first = localVariable("x");
+    var second = localVariable("x");
 
     assertNull(nameMap.addLocal(first));
     assertSame(first, nameMap.addLocal(second));
@@ -51,8 +29,8 @@ class NameMapTest {
   @Test
   void testAddLocalDuplicateParameter() {
     var nameMap = new NameMap();
-    var parameter = makeParameter("x");
-    var local = makeLocal("x");
+    var parameter = parameter("x");
+    var local = localVariable("x");
 
     assertNull(nameMap.addLocal(parameter));
     assertSame(parameter, nameMap.addLocal(local));
@@ -62,8 +40,8 @@ class NameMapTest {
   @Test
   void testAddLocalShadowsAndEndScopeRestoresGlobal() {
     var nameMap = new NameMap();
-    var global = makeGlobal("x");
-    var local = makeLocal("x");
+    var global = globalVariable("test", "x");
+    var local = localVariable("x");
 
     assertNull(nameMap.addVariable(global));
     nameMap.beginScope();

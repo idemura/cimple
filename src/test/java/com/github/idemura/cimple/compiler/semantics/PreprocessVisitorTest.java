@@ -180,7 +180,8 @@ class PreprocessVisitorTest {
         AstTypeRef.ofType(AstBuiltinType.FLOAT64),
         ((AstRecordType) module.findType("R")).getFields().get(0).getType());
     assertEquals(
-        AstTypeRef.ofType(AstBuiltinType.INT64), module.findFunction("f").getHeader().getParameters().get(0).getType());
+        AstTypeRef.ofType(AstBuiltinType.INT64),
+        module.findFunction("f").getHeader().getParameters().get(0).getType());
     assertEquals(
         AstTypeRef.ofType(AstBuiltinType.FLOAT64),
         module.findFunction("f").getHeader().getResultType());
