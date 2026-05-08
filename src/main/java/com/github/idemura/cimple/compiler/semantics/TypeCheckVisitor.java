@@ -2,7 +2,6 @@ package com.github.idemura.cimple.compiler.semantics;
 
 import com.github.idemura.cimple.compiler.ErrorConsumer;
 import com.github.idemura.cimple.compiler.ast.AstArrayAccess;
-import com.github.idemura.cimple.compiler.ast.AstBind;
 import com.github.idemura.cimple.compiler.ast.AstBlock;
 import com.github.idemura.cimple.compiler.ast.AstBoolLiteral;
 import com.github.idemura.cimple.compiler.ast.AstCall;
@@ -21,6 +20,7 @@ import com.github.idemura.cimple.compiler.ast.AstLocal;
 import com.github.idemura.cimple.compiler.ast.AstModule;
 import com.github.idemura.cimple.compiler.ast.AstNullLiteral;
 import com.github.idemura.cimple.compiler.ast.AstNumberLiteral;
+import com.github.idemura.cimple.compiler.ast.AstReceiverLookup;
 import com.github.idemura.cimple.compiler.ast.AstRecordType;
 import com.github.idemura.cimple.compiler.ast.AstReturn;
 import com.github.idemura.cimple.compiler.ast.AstStringLiteral;
@@ -157,7 +157,7 @@ class TypeCheckVisitor extends AstVisitor {
   }
 
   @Override
-  protected Object visit(AstBind node) {
+  protected Object visit(AstReceiverLookup node) {
     return super.visit(node);
   }
 

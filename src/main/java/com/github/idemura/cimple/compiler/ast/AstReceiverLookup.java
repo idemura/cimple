@@ -1,6 +1,6 @@
 package com.github.idemura.cimple.compiler.ast;
 
-public final class AstBind extends AstExpression {
+public final class AstReceiverLookup extends AstExpression {
   private AstExpression object;
   private String functionName;
 

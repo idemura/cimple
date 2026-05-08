@@ -208,12 +208,12 @@ public abstract class AstVisitor {
     node.getObject().accept(this);
   }
 
-  protected Object visit(AstBind node) {
+  protected Object visit(AstReceiverLookup node) {
     visitChildren(node);
     return null;
   }
 
-  protected void visitChildren(AstBind node) {
+  protected void visitChildren(AstReceiverLookup node) {
     node.getObject().accept(this);
   }
 

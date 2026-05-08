@@ -116,13 +116,13 @@ public class AstExpressionRewriteVisitor extends AstVisitor {
   }
 
   @Override
-  protected Object visit(AstBind node) {
+  protected Object visit(AstReceiverLookup node) {
     visitChildren(node);
     return node;
   }
 
   @Override
-  protected void visitChildren(AstBind node) {
+  protected void visitChildren(AstReceiverLookup node) {
     node.setObject(rewrite(node.getObject()));
   }
 

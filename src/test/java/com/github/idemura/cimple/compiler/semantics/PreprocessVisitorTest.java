@@ -141,7 +141,7 @@ class PreprocessVisitorTest {
     assertEquals(List.of(), errorConsumer.getErrors());
     {
       var header = module.findFunction("toMillis").getHeader();
-      var receiverType = AstTypeRef.ofName("Duration");
+      var receiverType = AstTypeRef.ofName("test", "Duration");
       assertEquals(receiverType, header.getReceiverType());
       assertEquals(1, header.getReceiverIndex());
       assertEquals(receiverType, header.getParameters().get(1).getType());
@@ -154,7 +154,7 @@ class PreprocessVisitorTest {
     }
     assertSame(
         module.findFunction("toMillis"),
-        nameMap.lookupReceiverFunction(new QualifiedName("Duration"), "toMillis"));
+        nameMap.lookupReceiverFunction(new QualifiedName("test", "Duration"), "toMillis"));
     assertNull(nameMap.lookupEntity("toMillis"));
   }
 

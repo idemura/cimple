@@ -9,7 +9,6 @@ import com.github.idemura.cimple.compiler.ErrorConsumer;
 import com.github.idemura.cimple.compiler.InMemoryErrorConsumer;
 import com.github.idemura.cimple.compiler.QualifiedName;
 import com.github.idemura.cimple.compiler.ast.AstArrayAccess;
-import com.github.idemura.cimple.compiler.ast.AstBind;
 import com.github.idemura.cimple.compiler.ast.AstCall;
 import com.github.idemura.cimple.compiler.ast.AstCast;
 import com.github.idemura.cimple.compiler.ast.AstDefer;
@@ -22,6 +21,7 @@ import com.github.idemura.cimple.compiler.ast.AstGoto;
 import com.github.idemura.cimple.compiler.ast.AstIf;
 import com.github.idemura.cimple.compiler.ast.AstLocal;
 import com.github.idemura.cimple.compiler.ast.AstNumberLiteral;
+import com.github.idemura.cimple.compiler.ast.AstReceiverLookup;
 import com.github.idemura.cimple.compiler.ast.AstRecordType;
 import com.github.idemura.cimple.compiler.ast.AstReturn;
 import com.github.idemura.cimple.compiler.ast.AstTypeRef;
@@ -440,9 +440,9 @@ class ParserTest {
     }
     {
       var expr = ((AstLocal) statements.get(i++)).getVariable().getExpression();
-      var bind = (AstBind) expr;
-      assertEquals(AstEntityRef.ofName("foo"), bind.getObject());
-      assertEquals("bar", bind.getFunctionName());
+      var receiverLookup = (AstReceiverLookup) expr;
+      assertEquals(AstEntityRef.ofName("foo"), receiverLookup.getObject());
+      assertEquals("bar", receiverLookup.getFunctionName());
     }
     {
       var expr = ((AstLocal) statements.get(i++)).getVariable().getExpression();
@@ -452,10 +452,10 @@ class ParserTest {
     }
     {
       var expr = ((AstLocal) statements.get(i++)).getVariable().getExpression();
-      var bind = (AstBind) expr;
-      assertEquals("baz", bind.getFunctionName());
+      var receiverLookup = (AstReceiverLookup) expr;
+      assertEquals("baz", receiverLookup.getFunctionName());
       {
-        var index = (AstArrayAccess) bind.getObject();
+        var index = (AstArrayAccess) receiverLookup.getObject();
         assertEquals(AstNumberLiteral.of(3), index.getIndex());
         {
           var call = (AstCall) index.getArray();

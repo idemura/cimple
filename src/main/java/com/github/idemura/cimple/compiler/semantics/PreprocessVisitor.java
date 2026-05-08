@@ -58,6 +58,10 @@ class PreprocessVisitor extends AstExpressionRewriteVisitor {
         }
         case AstFunction function -> {
           var header = function.getHeader();
+          var receiverType = header.getReceiverType();
+          if (receiverType != null) {
+            receiverType.setName(receiverType.getName().withModuleName(moduleName));
+          }
           header.setName(header.getName().withModuleName(moduleName));
           var existing = nameMap.addFunction(function);
           if (existing != null) {

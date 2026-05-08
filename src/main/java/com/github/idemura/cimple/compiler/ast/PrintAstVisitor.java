@@ -258,7 +258,7 @@ public class PrintAstVisitor extends AstVisitor {
   }
 
   @Override
-  protected Object visit(AstBind node) {
+  protected Object visit(AstReceiverLookup node) {
     output.writeLine("BIND %s".formatted(node.getFunctionName()));
     output.indent();
     node.getObject().accept(this);

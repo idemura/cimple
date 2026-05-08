@@ -60,8 +60,6 @@ class NameMapTest {
 
     assertNull(nameMap.addFunction(function));
     assertNull(nameMap.lookupEntity("toMillis"));
-    assertSame(
-        function,
-        nameMap.lookupReceiverFunction(new QualifiedName("Duration"), "toMillis"));
+    assertSame(function, nameMap.lookupReceiverFunction(new QualifiedName("Duration"), "toMillis"));
   }
 }

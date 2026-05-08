@@ -8,7 +8,6 @@ import com.github.idemura.cimple.compiler.ErrorConsumer;
 import com.github.idemura.cimple.compiler.Location;
 import com.github.idemura.cimple.compiler.QualifiedName;
 import com.github.idemura.cimple.compiler.ast.AstArrayAccess;
-import com.github.idemura.cimple.compiler.ast.AstBind;
 import com.github.idemura.cimple.compiler.ast.AstBlock;
 import com.github.idemura.cimple.compiler.ast.AstCall;
 import com.github.idemura.cimple.compiler.ast.AstCast;
@@ -26,6 +25,7 @@ import com.github.idemura.cimple.compiler.ast.AstIf;
 import com.github.idemura.cimple.compiler.ast.AstLocal;
 import com.github.idemura.cimple.compiler.ast.AstModule;
 import com.github.idemura.cimple.compiler.ast.AstNumberLiteral;
+import com.github.idemura.cimple.compiler.ast.AstReceiverLookup;
 import com.github.idemura.cimple.compiler.ast.AstRecordType;
 import com.github.idemura.cimple.compiler.ast.AstReturn;
 import com.github.idemura.cimple.compiler.ast.AstStatement;
@@ -362,10 +362,10 @@ public class Parser {
         fieldAccess.setFieldName(take(IDENTIFIER).value());
         expr = fieldAccess;
       } else if (tokenizer.takeIf(COLON)) {
-        var bind = new AstBind();
-        bind.setObject(expr);
-        bind.setFunctionName(take(IDENTIFIER).value());
-        expr = bind;
+        var receiverLookup = new AstReceiverLookup();
+        receiverLookup.setObject(expr);
+        receiverLookup.setFunctionName(take(IDENTIFIER).value());
+        expr = receiverLookup;
       } else if (tokenizer.takeIf(LBRACKET)) {
         var arrayAccess = new AstArrayAccess();
         arrayAccess.setArray(expr);
