@@ -80,6 +80,9 @@ class PreprocessVisitor extends AstExpressionRewriteVisitor {
 
   @Override
   protected Object visit(AstFunctionHeader node) {
+    for (var parameter : node.getParameters()) {
+      parameter.setBit(AstVariable.PARAMETER);
+    }
     checkReceiverParameter(node);
     // Default return type if missing.
     if (node.getResultType() == null) {
