@@ -49,10 +49,10 @@ class PreprocessVisitorTest {
     assertEquals(new AstBoolLiteral(true), ((AstIf) statements.get(i++)).conditions().get(0));
     {
       var stmt = (AstDefer) statements.get(i++);
-      var statements1 = stmt.block().statements();
-      assertEquals(1, statements1.size());
+      var deferStatements = stmt.block().statements();
+      assertEquals(1, deferStatements.size());
       assertEquals(
-          new AstNullLiteral(), ((AstExpressionStatement) statements1.get(0)).expression());
+          new AstNullLiteral(), ((AstExpressionStatement) deferStatements.get(0)).expression());
     }
     assertEquals(
         new AstBoolLiteral(false), ((AstLocal) statements.get(i++)).variable().expression());

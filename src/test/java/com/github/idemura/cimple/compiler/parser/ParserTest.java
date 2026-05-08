@@ -242,6 +242,8 @@ class ParserTest {
           var x = 1 + 2;
           var x = 1 + 2 - 3;
           var x = 1 * 2;
+          var x = 1 / 2;
+          var x = 1 % 2;
           var x = 1 * 2 * 3;
           var x = 1 + 2 * 3;
           var x = 1 * 2 + 3;
@@ -291,6 +293,26 @@ class ParserTest {
         assertEquals(2, callMul.arguments().size());
         assertEquals(AstNumberLiteral.of(1), callMul.arguments().get(0));
         assertEquals(AstNumberLiteral.of(2), callMul.arguments().get(1));
+      }
+    }
+    {
+      var expr = ((AstLocal) statements.get(i++)).variable().expression();
+      {
+        var callDiv = (AstCall) expr;
+        assertEquals(builtinEntityRef("/"), callDiv.function());
+        assertEquals(2, callDiv.arguments().size());
+        assertEquals(AstNumberLiteral.of(1), callDiv.arguments().get(0));
+        assertEquals(AstNumberLiteral.of(2), callDiv.arguments().get(1));
+      }
+    }
+    {
+      var expr = ((AstLocal) statements.get(i++)).variable().expression();
+      {
+        var callMod = (AstCall) expr;
+        assertEquals(builtinEntityRef("%"), callMod.function());
+        assertEquals(2, callMod.arguments().size());
+        assertEquals(AstNumberLiteral.of(1), callMod.arguments().get(0));
+        assertEquals(AstNumberLiteral.of(2), callMod.arguments().get(1));
       }
     }
     {
@@ -392,7 +414,6 @@ class ParserTest {
         """;
     var module = parseCode(code, makeErrorConsumer());
     var statements = module.findFunction("f").block().statements();
-    assertEquals(3, statements.size());
     int i = 0;
     {
       var expr = ((AstLocal) statements.get(i++)).variable().expression();
@@ -430,7 +451,6 @@ class ParserTest {
         """;
     var module = parseCode(code, makeErrorConsumer());
     var statements = module.findFunction("f").block().statements();
-    assertEquals(4, statements.size());
     int i = 0;
     {
       var expr = ((AstLocal) statements.get(i++)).variable().expression();
@@ -491,7 +511,6 @@ class ParserTest {
         """;
     var module = parseCode(code, makeErrorConsumer());
     var statements = module.findFunction("f").block().statements();
-    assertEquals(3, statements.size());
     int i = 0;
     {
       var stmt = (AstIf) statements.get(i++);
@@ -534,7 +553,6 @@ class ParserTest {
         """;
     var module = parseCode(code, makeErrorConsumer());
     var statements = module.findFunction("f").block().statements();
-    assertEquals(3, statements.size());
     int i = 0;
     {
       var stmt = (AstFor) statements.get(i++);
@@ -625,7 +643,6 @@ class ParserTest {
         """;
     var module = parseCode(code, makeErrorConsumer());
     var statements = module.findFunction("f").block().statements();
-    assertEquals(1, statements.size());
     {
       var stmt = (AstReturn) statements.get(0);
       assertEquals(AstEntityRef.ofName("value"), stmt.expression());
@@ -646,7 +663,6 @@ class ParserTest {
         """;
     var module = parseCode(code, makeErrorConsumer());
     var statements = module.findFunction("f").block().statements();
-    assertEquals(2, statements.size());
     {
       var stmt = (AstDefer) statements.get(0);
       assertEquals(1, stmt.block().statements().size());

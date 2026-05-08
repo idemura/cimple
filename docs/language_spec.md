@@ -178,18 +178,13 @@ From highest to lowest:
 |----------------------|---------------|
 | `(e)` `[e type t]`   | Left-to-right |
 | `.` `:` `[]` `f(x)`  | Left-to-right |
-| `x++` `x--`          | Left-to-right |
-| `++x` `--x` `~` `!`  | Right-to-left |
 | `*` `/` `%`          | Left-to-right |
 | `+` `-`              | Left-to-right |
-| `<<` `>>` `>>>`      | Left-to-right |
-| `&`                  | Left-to-right |
-| `^`                  | Left-to-right |
-| `\|`                 | Left-to-right |
 | `<` `>` `>=` `<=`    | Left-to-right |
 | `==` `!=`            | Left-to-right |
-| `&&`                 | Left-to-right |
-| `\|\|`               | Left-to-right |
+| `!`                  | Right-to-left |
+| `&`                  | Left-to-right |
+| `\|`                 | Left-to-right |
 | `=` and op-shorthand | None          |
 
 Only one assignment per expression is allowed. Therefore, it does not matter whether it is

@@ -317,7 +317,7 @@ public class Parser {
     if (expr == null) {
       return null;
     }
-    while (tokenizer.current().is(PLUS) || tokenizer.current().is(MINUS)) {
+    while (tokenizer.current().is(OP_ADD) || tokenizer.current().is(OP_SUB)) {
       var operator = tokenizer.take();
       var m = parseMultiplicativeChain();
       if (m == null) {
@@ -337,7 +337,9 @@ public class Parser {
     if (expr == null) {
       return null;
     }
-    while (tokenizer.current().is(ASTERISK) || tokenizer.current().is(SLASH)) {
+    while (tokenizer.current().is(OP_MUL)
+        || tokenizer.current().is(OP_DIV)
+        || tokenizer.current().is(OP_MOD)) {
       var operator = tokenizer.take();
       var m = parseFieldArrayCallChain();
       if (m == null) {
