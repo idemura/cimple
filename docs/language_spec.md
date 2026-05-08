@@ -59,7 +59,7 @@ Two or more underscores in a row are not allowed.
 
 ```
 short_path
-temp_
+temp
 Point
 RandomGenerator
 openConnection
