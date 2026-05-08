@@ -4,7 +4,6 @@ import static com.github.idemura.cimple.compiler.parser.Parser.parseCode;
 import static org.junit.jupiter.api.Assertions.*;
 
 import com.github.idemura.cimple.compiler.InMemoryErrorConsumer;
-import com.github.idemura.cimple.compiler.QualifiedName;
 import com.github.idemura.cimple.compiler.ast.AstCall;
 import com.github.idemura.cimple.compiler.ast.AstEntityRef;
 import com.github.idemura.cimple.compiler.ast.AstExpression;
@@ -96,7 +95,7 @@ class NameResolutionVisitorTest {
 
   @Disabled
   @Test
-  void testReceiverFunctions() {
+  void testReceiverFunctionResolution() {
     var code =
         """
         module test;
@@ -105,12 +104,13 @@ class NameResolutionVisitorTest {
           var seconds int;
         }
 
-        function Duration:toMillis(this) {
+        function Duration:toMillis(this) int {
           return this.seconds * 1000;
         }
-        # function Duration:add(this, d Duration) {
-        #   this.seconds += d.seconds;
-        # }
+
+        function f(d Duration) {
+          d:toMillis();
+        }
         """;
 
     var errorConsumer = new InMemoryErrorConsumer();
@@ -122,9 +122,7 @@ class NameResolutionVisitorTest {
     assertEquals(List.of(), errorConsumer.getErrors());
 
     {
-      var expr =
-          extractBodyExpression(
-              nameMap.lookupReceiverFunction(new QualifiedName("Duration"), "toMillis"));
+      var expr = extractBodyExpression(module.findFunction("f"));
       var call = (AstCall) expr;
       var entityRef = (AstEntityRef) call.getFunction();
       assertSame(module.findFunction("f"), entityRef.getEntity());
