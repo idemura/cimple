@@ -49,13 +49,15 @@ public class CliDriver implements CompilerParams {
   }
 
   boolean run() {
+    var success = true;
+    var compiler = new Compiler(this, System.out, new CliErrorConsumer(), new NoopCodeGenerator());
     for (var fileName : files) {
       var code = readCodeFromFile(fileName);
-      var compiler =
-          new Compiler(this, System.out, new CliErrorConsumer(), new NoopCodeGenerator());
-      compiler.compile(fileName, code);
+      if (!compiler.compile(fileName, code)) {
+        success = false;
+      }
     }
-    return true;
+    return success;
   }
 
   static String readCodeFromFile(String fileName) {
