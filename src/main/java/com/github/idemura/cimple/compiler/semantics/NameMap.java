@@ -14,10 +14,13 @@ import java.util.List;
 import java.util.Map;
 
 public class NameMap {
+  private record ReceiverFunctionKey(QualifiedName receiverType, String name) {}
+
   private final Map<QualifiedName, AstType> typeQualifiedNameMap = new HashMap<>();
   private final Map<String, AstType> typeNameMap = new HashMap<>();
   private final Map<QualifiedName, AstEntity> entityQualifiedNameMap = new HashMap<>();
   private final Map<String, AstEntity> entityNameMap = new HashMap<>();
+  private final Map<ReceiverFunctionKey, AstFunction> receiverFunctionMap = new HashMap<>();
   private final List<AstEntity> shadowed = new ArrayList<>();
   private final List<String> localNames = new ArrayList<>();
 
@@ -34,6 +37,11 @@ public class NameMap {
   }
 
   public AstEntity addFunction(AstFunction function) {
+    var receiverType = function.getHeader().getReceiverType();
+    if (receiverType != null) {
+      return receiverFunctionMap.putIfAbsent(
+          new ReceiverFunctionKey(receiverType.getName(), function.getName().name()), function);
+    }
     return entityNameMap.putIfAbsent(function.getHeader().getName().name(), function);
   }
 
@@ -86,5 +94,9 @@ public class NameMap {
 
   public AstEntity lookupEntity(String name) {
     return entityNameMap.get(name);
+  }
+
+  public AstFunction lookupReceiverFunction(QualifiedName receiverType, String name) {
+    return receiverFunctionMap.get(new ReceiverFunctionKey(receiverType, name));
   }
 }

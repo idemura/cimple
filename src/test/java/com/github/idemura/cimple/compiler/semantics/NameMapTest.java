@@ -3,6 +3,7 @@ package com.github.idemura.cimple.compiler.semantics;
 import static com.github.idemura.cimple.compiler.ast.AstUtils.*;
 import static org.junit.jupiter.api.Assertions.*;
 
+import com.github.idemura.cimple.compiler.QualifiedName;
 import org.junit.jupiter.api.Test;
 
 class NameMapTest {
@@ -50,5 +51,17 @@ class NameMapTest {
     nameMap.endScope();
 
     assertSame(global, nameMap.lookupEntity("x"));
+  }
+
+  @Test
+  void testReceiverFunctionHasSeparateMap() {
+    var nameMap = new NameMap();
+    var function = function("Duration", "toMillis");
+
+    assertNull(nameMap.addFunction(function));
+    assertNull(nameMap.lookupEntity("toMillis"));
+    assertSame(
+        function,
+        nameMap.lookupReceiverFunction(new QualifiedName("Duration"), "toMillis"));
   }
 }

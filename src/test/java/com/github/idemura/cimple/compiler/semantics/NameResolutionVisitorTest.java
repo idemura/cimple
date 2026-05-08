@@ -4,6 +4,7 @@ import static com.github.idemura.cimple.compiler.parser.Parser.parseCode;
 import static org.junit.jupiter.api.Assertions.*;
 
 import com.github.idemura.cimple.compiler.InMemoryErrorConsumer;
+import com.github.idemura.cimple.compiler.QualifiedName;
 import com.github.idemura.cimple.compiler.ast.AstCall;
 import com.github.idemura.cimple.compiler.ast.AstEntityRef;
 import com.github.idemura.cimple.compiler.ast.AstExpression;
@@ -11,6 +12,7 @@ import com.github.idemura.cimple.compiler.ast.AstExpressionStatement;
 import com.github.idemura.cimple.compiler.ast.AstFunction;
 import com.github.idemura.cimple.compiler.parser.Keyword;
 import java.util.List;
+import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 
 class NameResolutionVisitorTest {
@@ -92,7 +94,7 @@ class NameResolutionVisitorTest {
     }
   }
 
-  // @Disabled
+  @Disabled
   @Test
   void testReceiverFunctions() {
     var code =
@@ -119,11 +121,13 @@ class NameResolutionVisitorTest {
 
     assertEquals(List.of(), errorConsumer.getErrors());
 
-    // {
-    //   var expr = extractBodyExpression(module.findFunction("f"));
-    //   var call = (AstCall) expr;
-    //   var entityRef = (AstEntityRef) call.getFunction();
-    //   assertSame(module.findFunction("f"), entityRef.getEntity());
-    // }
+    {
+      var expr =
+          extractBodyExpression(
+              nameMap.lookupReceiverFunction(new QualifiedName("Duration"), "toMillis"));
+      var call = (AstCall) expr;
+      var entityRef = (AstEntityRef) call.getFunction();
+      assertSame(module.findFunction("f"), entityRef.getEntity());
+    }
   }
 }

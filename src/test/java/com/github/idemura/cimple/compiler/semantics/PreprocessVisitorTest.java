@@ -118,7 +118,7 @@ class PreprocessVisitorTest {
     assertSame(module.findVariable("y"), nameMap.lookupEntity("y"));
     assertSame(module.findFunction("f"), nameMap.lookupEntity("f"));
     assertSame(module.findFunction("g"), nameMap.lookupEntity("g"));
-    assertSame(module.findType("R"), nameMap.lookupType(new QualifiedName(null, "R")));
+    assertSame(module.findType("R"), nameMap.lookupType(new QualifiedName("R")));
   }
 
   @Test
@@ -152,6 +152,10 @@ class PreprocessVisitorTest {
       assertEquals(-1, header.getReceiverIndex());
       assertEquals(AstTypeRef.ofType(AstBuiltinType.VOID), header.getResultType());
     }
+    assertSame(
+        module.findFunction("toMillis"),
+        nameMap.lookupReceiverFunction(new QualifiedName("Duration"), "toMillis"));
+    assertNull(nameMap.lookupEntity("toMillis"));
   }
 
   @Test

@@ -11,6 +11,21 @@ public final class AstUtils {
     return AstEntityRef.ofName(BUILTIN_MODULE, symbol);
   }
 
+  public static AstFunction function(String name) {
+    return function(null, name);
+  }
+
+  public static AstFunction function(String receiverTypeName, String name) {
+    var function = new AstFunction();
+    var header = new AstFunctionHeader();
+    header.setName(new QualifiedName(name));
+    if (receiverTypeName != null) {
+      header.setReceiverType(AstTypeRef.ofName(receiverTypeName));
+    }
+    function.setHeader(header);
+    return function;
+  }
+
   public static AstVariable rawVariable(String name, String typeName) {
     return variable(null, name, 0, AstTypeRef.ofName(typeName));
   }
