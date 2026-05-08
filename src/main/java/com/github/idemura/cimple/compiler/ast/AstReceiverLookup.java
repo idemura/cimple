@@ -11,7 +11,7 @@ public final class AstReceiverLookup extends AstExpression {
 
   @Override
   public AstTypeRef type() {
-    return null;
+    return receiver.type();
   }
 
   public AstExpression receiver() {

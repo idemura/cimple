@@ -3,6 +3,7 @@ package com.github.idemura.cimple.compiler.semantics;
 import static com.google.common.base.Preconditions.checkState;
 
 import com.github.idemura.cimple.compiler.ErrorConsumer;
+import com.github.idemura.cimple.compiler.ast.AstBuiltinType;
 import com.github.idemura.cimple.compiler.ast.AstBlock;
 import com.github.idemura.cimple.compiler.ast.AstCall;
 import com.github.idemura.cimple.compiler.ast.AstCast;
@@ -15,9 +16,11 @@ import com.github.idemura.cimple.compiler.ast.AstFunctionType;
 import com.github.idemura.cimple.compiler.ast.AstLocal;
 import com.github.idemura.cimple.compiler.ast.AstModule;
 import com.github.idemura.cimple.compiler.ast.AstRecordType;
+import com.github.idemura.cimple.compiler.ast.AstReceiverLookup;
 import com.github.idemura.cimple.compiler.ast.AstTypeRef;
 import com.github.idemura.cimple.compiler.ast.AstUnionType;
 import com.github.idemura.cimple.compiler.ast.AstVariable;
+import java.util.ArrayList;
 
 public class NameResolutionVisitor extends AstExpressionRewriteVisitor {
   private final NameMap nameMap;
@@ -127,8 +130,11 @@ public class NameResolutionVisitor extends AstExpressionRewriteVisitor {
     try {
       // First, resolve children.
       super.visit(node);
-      // If this is a builtin method call, resolve overload. Add casts if necessary.
       var function = node.function();
+      if (function instanceof AstReceiverLookup receiverLookup) {
+        return resolveReceiverCall(node, receiverLookup);
+      }
+      // If this is a builtin method call, resolve overload. Add casts if necessary.
       if (function instanceof AstEntityRef ref && ref.isBuiltin()) {
         checkState(!ref.isNameResolved());
         return resolveBuiltinCall(node);
@@ -188,6 +194,39 @@ public class NameResolutionVisitor extends AstExpressionRewriteVisitor {
     }
     operatorRef.name(function.name());
     operatorRef.entity(function);
+    return node;
+  }
+
+  private AstExpression resolveReceiverCall(AstCall node, AstReceiverLookup receiverLookup) {
+    var receiverType = receiverLookup.receiver().type();
+    checkState(receiverType != null);
+    if (receiverType.type() == AstBuiltinType.NULL) {
+      errorConsumer.errorAt(
+          receiverLookup.location(),
+          "Cannot resolve receiver function %s for null receiver",
+          receiverLookup.functionName());
+      return node;
+    }
+    var function = nameMap.lookupReceiverFunction(receiverType.name(), receiverLookup.functionName());
+    if (function == null) {
+      errorConsumer.errorAt(
+          receiverLookup.location(),
+          "Undefined receiver function: %s:%s",
+          receiverType.name(),
+          receiverLookup.functionName());
+      return node;
+    }
+
+    var functionRef = new AstEntityRef();
+    functionRef.name(function.name());
+    functionRef.entity(function);
+    functionRef.markNameResolved();
+    functionRef.location(receiverLookup.location());
+
+    var arguments = new ArrayList<>(node.arguments());
+    arguments.add(function.header().receiverIndex(), receiverLookup.receiver());
+    node.arguments(arguments);
+    node.function(functionRef);
     return node;
   }
 

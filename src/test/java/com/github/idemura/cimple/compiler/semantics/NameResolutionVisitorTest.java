@@ -10,7 +10,6 @@ import com.github.idemura.cimple.compiler.ast.AstEntityRef;
 import com.github.idemura.cimple.compiler.ast.AstExpression;
 import com.github.idemura.cimple.compiler.ast.AstExpressionStatement;
 import com.github.idemura.cimple.compiler.ast.AstFunction;
-import com.github.idemura.cimple.compiler.ast.AstReceiverLookup;
 import com.github.idemura.cimple.compiler.ast.AstTypeRef;
 import com.github.idemura.cimple.compiler.parser.Keyword;
 import java.util.List;
@@ -125,12 +124,12 @@ class NameResolutionVisitorTest {
     {
       var expr = extractBodyExpression(module.findFunction("f"));
       var call = (AstCall) expr;
-      assertEquals(List.of(), call.arguments());
+      var function = (AstEntityRef) call.function();
+      assertSame(module.findReceiverFunction("Duration", "toMillis"), function.entity());
+      assertEquals(new QualifiedName("test", "toMillis"), function.name());
 
-      var receiverLookup = (AstReceiverLookup) call.function();
-      assertEquals("toMillis", receiverLookup.functionName());
-
-      var receiver = (AstEntityRef) receiverLookup.receiver();
+      assertEquals(1, call.arguments().size());
+      var receiver = (AstEntityRef) call.arguments().get(0);
       assertEquals(new QualifiedName("d"), receiver.name());
       assertSame(module.findFunction("f").header().parameters().get(0), receiver.entity());
     }
