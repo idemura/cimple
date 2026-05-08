@@ -21,10 +21,6 @@ public class SemanticAnalyzer {
     if (errorConsumer.errorCount() > 0) {
       return false;
     }
-    module.accept(new TypeCheckVisitor(errorConsumer));
-    if (errorConsumer.errorCount() > 0) {
-      return false;
-    }
     return true;
   }
 }
