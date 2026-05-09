@@ -11,6 +11,14 @@ public final class AstUtils {
     return AstEntityRef.ofName(BUILTIN_MODULE, symbol);
   }
 
+  public static AstBoolLiteral boolLiteral(boolean value) {
+    return new AstBoolLiteral(value);
+  }
+
+  public static AstNullLiteral nullLiteral() {
+    return new AstNullLiteral();
+  }
+
   public static AstFunction function(String name) {
     return function(null, name);
   }

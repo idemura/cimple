@@ -1,18 +1,17 @@
 package com.github.idemura.cimple.compiler.semantics;
 
+import static com.github.idemura.cimple.compiler.ast.AstUtils.*;
 import static com.github.idemura.cimple.compiler.parser.Parser.parseCode;
 import static org.junit.jupiter.api.Assertions.*;
 
 import com.github.idemura.cimple.compiler.InMemoryErrorConsumer;
 import com.github.idemura.cimple.compiler.QualifiedName;
-import com.github.idemura.cimple.compiler.ast.AstBoolLiteral;
-import com.github.idemura.cimple.compiler.ast.AstBuiltinType;
 import com.github.idemura.cimple.compiler.ast.AstDefer;
+import com.github.idemura.cimple.compiler.ast.AstBuiltinType;
 import com.github.idemura.cimple.compiler.ast.AstExpressionStatement;
 import com.github.idemura.cimple.compiler.ast.AstFor;
 import com.github.idemura.cimple.compiler.ast.AstIf;
 import com.github.idemura.cimple.compiler.ast.AstLocal;
-import com.github.idemura.cimple.compiler.ast.AstNullLiteral;
 import com.github.idemura.cimple.compiler.ast.AstRecordType;
 import com.github.idemura.cimple.compiler.ast.AstReturn;
 import com.github.idemura.cimple.compiler.ast.AstTypeRef;
@@ -46,23 +45,21 @@ class PreprocessVisitorTest {
 
     var statements = module.findFunction("f").block().statements();
     int i = 0;
-    assertEquals(new AstBoolLiteral(true), ((AstIf) statements.get(i++)).conditions().get(0));
+    assertEquals(boolLiteral(true), ((AstIf) statements.get(i++)).conditions().get(0));
     {
       var stmt = (AstDefer) statements.get(i++);
       var deferStatements = stmt.block().statements();
       assertEquals(1, deferStatements.size());
-      assertEquals(
-          new AstNullLiteral(), ((AstExpressionStatement) deferStatements.get(0)).expression());
+      assertEquals(nullLiteral(), ((AstExpressionStatement) deferStatements.get(0)).expression());
     }
-    assertEquals(
-        new AstBoolLiteral(false), ((AstLocal) statements.get(i++)).variable().expression());
+    assertEquals(boolLiteral(false), ((AstLocal) statements.get(i++)).variable().expression());
     {
       var stmt = (AstFor) statements.get(i++);
-      assertEquals(new AstNullLiteral(), stmt.init().expression());
-      assertEquals(new AstBoolLiteral(true), stmt.condition());
-      assertEquals(new AstBoolLiteral(true), stmt.increment());
+      assertEquals(nullLiteral(), stmt.init().expression());
+      assertEquals(boolLiteral(true), stmt.condition());
+      assertEquals(boolLiteral(true), stmt.increment());
     }
-    assertEquals(new AstBoolLiteral(true), ((AstReturn) statements.get(i++)).expression());
+    assertEquals(boolLiteral(true), ((AstReturn) statements.get(i++)).expression());
   }
 
   @Test
