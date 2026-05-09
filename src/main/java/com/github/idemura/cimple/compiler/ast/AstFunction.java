@@ -7,6 +7,7 @@ public final class AstFunction extends AstEntity {
   private QualifiedName name;
   private AstFunctionHeader header;
   private AstBlock block;
+  private AstTypeRef typeRef;
 
   public QualifiedName name() {
     return name;
@@ -55,6 +56,20 @@ public final class AstFunction extends AstEntity {
 
   public void header(AstFunctionHeader header) {
     this.header = header;
+  }
+
+  public void makeLambdaType() {
+    var typeName = new QualifiedName("_lambda");
+    var type = new AstFunctionType();
+    type.name(typeName);
+    type.header(header);
+    typeRef = new AstTypeRef();
+    typeRef.name(typeName);
+    typeRef.type(type);
+  }
+
+  public AstTypeRef typeRef() {
+    return typeRef;
   }
 
   public AstBlock block() {

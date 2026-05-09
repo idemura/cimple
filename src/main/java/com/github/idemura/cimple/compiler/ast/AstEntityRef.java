@@ -48,7 +48,7 @@ public final class AstEntityRef extends AstExpression {
     requireNonNull(entity);
     return switch (entity) {
       case AstVariable variable -> variable.typeRef();
-      case AstFunction function -> function.header().resultType();
+      case AstFunction function -> function.typeRef();
     };
   }
 

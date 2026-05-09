@@ -12,6 +12,17 @@ public final class AstFunctionType extends AstType {
   }
 
   @Override
+  public int hashCode() {
+    return name.hashCode();
+  }
+
+  @Override
+  public boolean equals(Object object) {
+    return this == object
+        || (object instanceof AstFunctionType other && header.equals(other.header()));
+  }
+
+  @Override
   public QualifiedName name() {
     return name;
   }
