@@ -11,11 +11,13 @@ import com.github.idemura.cimple.compiler.ast.AstExpression;
 import com.github.idemura.cimple.compiler.ast.AstExpressionStatement;
 import com.github.idemura.cimple.compiler.ast.AstFunction;
 import com.github.idemura.cimple.compiler.ast.AstTypeRef;
-import com.github.idemura.cimple.compiler.parser.Keyword;
 import java.util.List;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
-class NameResolutionVisitorTest {
+class SemanticAnalyzerTest {
+  private InMemoryErrorConsumer errorConsumer = new InMemoryErrorConsumer();
+
   private static AstExpression extractBodyExpression(AstFunction function) {
     return ((AstExpressionStatement) function.block().statements().get(0)).expression();
   }
@@ -37,11 +39,9 @@ class NameResolutionVisitorTest {
         }
         """;
 
-    var errorConsumer = new InMemoryErrorConsumer();
     var module = parseCode(code, errorConsumer);
-    var nameMap = new NameMap();
-    module.accept(new PreprocessVisitor(nameMap, Keyword.valueList(), errorConsumer));
-    module.accept(new NameResolutionVisitor(nameMap, errorConsumer));
+    var semanticAnalyzer = new SemanticAnalyzer(errorConsumer);
+    assertTrue(semanticAnalyzer.analyze(module));
 
     assertEquals(List.of(), errorConsumer.errors());
     {
@@ -74,11 +74,9 @@ class NameResolutionVisitorTest {
         var x int;
         """;
 
-    var errorConsumer = new InMemoryErrorConsumer();
     var module = parseCode(code, errorConsumer);
-    var nameMap = new NameMap();
-    module.accept(new PreprocessVisitor(nameMap, Keyword.valueList(), errorConsumer));
-    module.accept(new NameResolutionVisitor(nameMap, errorConsumer));
+    var semanticAnalyzer = new SemanticAnalyzer(errorConsumer);
+    assertTrue(semanticAnalyzer.analyze(module));
 
     assertEquals(List.of(), errorConsumer.errors());
     {
@@ -113,11 +111,9 @@ class NameResolutionVisitorTest {
         }
         """;
 
-    var errorConsumer = new InMemoryErrorConsumer();
     var module = parseCode(code, errorConsumer);
-    var nameMap = new NameMap();
-    module.accept(new PreprocessVisitor(nameMap, Keyword.valueList(), errorConsumer));
-    module.accept(new NameResolutionVisitor(nameMap, errorConsumer));
+    var semanticAnalyzer = new SemanticAnalyzer(errorConsumer);
+    assertTrue(semanticAnalyzer.analyze(module));
 
     assertEquals(List.of(), errorConsumer.errors());
 
