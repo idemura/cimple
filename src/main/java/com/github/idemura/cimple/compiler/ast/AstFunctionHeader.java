@@ -27,8 +27,7 @@ public final class AstFunctionHeader extends AstNode {
     return this == object
         || (object instanceof AstFunctionHeader other
             && parameterListsEqual(parameters, other.parameters)
-            && Objects.equals(resultType, other.resultType)
-            && Objects.equals(receiverType, other.receiverType));
+            && Objects.equals(resultType, other.resultType));
   }
 
   public static boolean parameterListsEqual(List<AstVariable> a, List<AstVariable> b) {
