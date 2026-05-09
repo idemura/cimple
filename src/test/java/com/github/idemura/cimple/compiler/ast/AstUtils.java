@@ -15,6 +15,10 @@ public final class AstUtils {
     return new AstBoolLiteral(value);
   }
 
+  public static AstExpression extractReturnExpression(AstFunction function) {
+    return ((AstReturn) function.block().statements().get(0)).expression();
+  }
+
   public static AstNullLiteral nullLiteral() {
     return new AstNullLiteral();
   }

@@ -9,7 +9,6 @@ import com.github.idemura.cimple.compiler.QualifiedName;
 import com.github.idemura.cimple.compiler.ast.AstBoolLiteral;
 import com.github.idemura.cimple.compiler.ast.AstBuiltinType;
 import com.github.idemura.cimple.compiler.ast.AstCall;
-import com.github.idemura.cimple.compiler.ast.AstEntity;
 import com.github.idemura.cimple.compiler.ast.AstEntityRef;
 import com.github.idemura.cimple.compiler.ast.AstExpressionRewriteVisitor;
 import com.github.idemura.cimple.compiler.ast.AstFunction;
@@ -21,7 +20,6 @@ import com.github.idemura.cimple.compiler.ast.AstNullLiteral;
 import com.github.idemura.cimple.compiler.ast.AstNumberLiteral;
 import com.github.idemura.cimple.compiler.ast.AstRecordType;
 import com.github.idemura.cimple.compiler.ast.AstStringLiteral;
-import com.github.idemura.cimple.compiler.ast.AstType;
 import com.github.idemura.cimple.compiler.ast.AstTypeRef;
 import com.github.idemura.cimple.compiler.ast.AstUnionType;
 import com.github.idemura.cimple.compiler.ast.AstVariable;
@@ -29,13 +27,10 @@ import java.util.HashMap;
 import java.util.List;
 
 class PreprocessVisitor extends AstExpressionRewriteVisitor {
-  private final NameMap nameMap;
   private final ReservedWords reservedWords;
   private final ErrorConsumer errorConsumer;
-  private String moduleName;
 
-  PreprocessVisitor(NameMap nameMap, List<String> reservedWords, ErrorConsumer errorConsumer) {
-    this.nameMap = nameMap;
+  PreprocessVisitor(List<String> reservedWords, ErrorConsumer errorConsumer) {
     this.reservedWords = new ReservedWords(reservedWords);
     this.errorConsumer = errorConsumer;
   }
@@ -43,45 +38,6 @@ class PreprocessVisitor extends AstExpressionRewriteVisitor {
   @Override
   protected Object visit(AstModule node) {
     checkName(node.name(), node.location());
-    moduleName = node.name();
-    for (var definition : node.definitions()) {
-      switch (definition) {
-        case AstType type -> {
-          type.name(type.name().withModuleName(moduleName));
-          var existing = nameMap.addType(type);
-          if (existing != null) {
-            errorConsumer.errorAt(
-                type.location(),
-                "Duplicate type: %s. Defined at %s.",
-                type.name(),
-                existing.location());
-          }
-        }
-        case AstFunction function -> {
-          var header = function.header();
-          var receiverType = header.receiverType();
-          if (receiverType != null) {
-            receiverType.name(receiverType.name().withModuleName(moduleName));
-          }
-          function.name(function.name().withModuleName(moduleName));
-          var existing = nameMap.addFunction(function);
-          if (existing != null) {
-            errorEntityCollision(function, existing);
-          }
-        }
-        case AstVariable variable -> {
-          variable.setBit(AstVariable.GLOBAL);
-          variable.name(variable.name().withModuleName(moduleName));
-          var existing = nameMap.addVariable(variable);
-          if (existing != null) {
-            errorEntityCollision(variable, existing);
-          }
-        }
-        default ->
-            throw new IllegalArgumentException(
-                "Unsupported module definition: %s".formatted(definition));
-      }
-    }
     return super.visit(node);
   }
 
@@ -99,7 +55,7 @@ class PreprocessVisitor extends AstExpressionRewriteVisitor {
 
   @Override
   protected Object visit(AstFunction node) {
-    checkName(node.name().name(), node.location());
+    checkName(node.name().baseName(), node.location());
     checkReceiverParameter(node.name(), node.header());
     return super.visit(node);
   }
@@ -116,7 +72,7 @@ class PreprocessVisitor extends AstExpressionRewriteVisitor {
           if (receiverIndex >= 0) {
             errorConsumer.errorAt(
                 header.location(),
-                "Receiver function %s: multiple receiver parameters.",
+                "Receiver function '%s': multiple receiver parameters",
                 functionName);
             invalid = true;
             break;
@@ -127,7 +83,7 @@ class PreprocessVisitor extends AstExpressionRewriteVisitor {
       if (!invalid && receiverIndex < 0) {
         errorConsumer.errorAt(
             header.location(),
-            "Receiver function %s: missing the receiver parameter.",
+            "Receiver function '%s': missing the receiver parameter",
             functionName);
       } else {
         header.receiverIndex(receiverIndex);
@@ -138,7 +94,7 @@ class PreprocessVisitor extends AstExpressionRewriteVisitor {
         if (parameter.typeRef() == null) {
           errorConsumer.errorAt(
               parameter.location(),
-              "Free function %s cannot have a receiver parameter %s.",
+              "Free function '%s' cannot have a receiver parameter '%s'",
               functionName,
               parameter.name());
         }
@@ -148,19 +104,19 @@ class PreprocessVisitor extends AstExpressionRewriteVisitor {
 
   @Override
   protected Object visit(AstVariable node) {
-    checkName(node.name().name(), node.location());
+    checkName(node.name().baseName(), node.location());
     if (!node.getBit(AstVariable.PARAMETER)
         && node.typeRef() == null
         && node.expression() == null) {
       errorConsumer.errorAt(
-          node.location(), "Variable %s must have a type or an initializer.", node.name());
+          node.location(), "Variable '%s' must have a type or an initializer", node.name());
     }
     return super.visit(node);
   }
 
   @Override
   protected Object visit(AstTypeRef node) {
-    switch (node.name().name()) {
+    switch (node.name().baseName()) {
       case "int":
         node.name(AstBuiltinType.INT64.name());
         node.type(AstBuiltinType.INT64);
@@ -177,7 +133,7 @@ class PreprocessVisitor extends AstExpressionRewriteVisitor {
 
   @Override
   protected Object visit(AstFunctionType node) {
-    checkName(node.name().name(), node.location());
+    checkName(node.name().baseName(), node.location());
     checkReceiverParameter(node.name(), node.header());
     return super.visit(node);
   }
@@ -190,15 +146,15 @@ class PreprocessVisitor extends AstExpressionRewriteVisitor {
 
   @Override
   protected Object visit(AstRecordType node) {
-    checkTypeName(node.name().name(), node.location());
+    checkTypeName(node.name().baseName(), node.location());
     var fieldMap = new HashMap<String, AstVariable>();
     for (var field : node.fields()) {
-      var existing = fieldMap.putIfAbsent(field.name().name(), field);
+      var existing = fieldMap.putIfAbsent(field.name().baseName(), field);
       if (existing != null) {
         errorConsumer.errorAt(
             field.location(),
-            "Duplicate record field: %s. Defined at %s.",
-            field.name().name(),
+            "Duplicate record field '%s'. First defined at %s.",
+            field.name().baseName(),
             existing.location());
       }
     }
@@ -207,7 +163,7 @@ class PreprocessVisitor extends AstExpressionRewriteVisitor {
 
   @Override
   protected Object visit(AstUnionType node) {
-    checkTypeName(node.name().name(), node.location());
+    checkTypeName(node.name().baseName(), node.location());
     var variantMap = new HashMap<String, AstUnionType.Variant>();
     for (var variant : node.variants()) {
       checkName(variant.tag(), variant.location());
@@ -215,7 +171,7 @@ class PreprocessVisitor extends AstExpressionRewriteVisitor {
       if (existing != null) {
         errorConsumer.errorAt(
             variant.location(),
-            "Duplicate union variant: %s. Defined at %s.",
+            "Duplicate union variant '%s'. First defined at %s.",
             variant.tag(),
             existing.location());
       }
@@ -253,7 +209,7 @@ class PreprocessVisitor extends AstExpressionRewriteVisitor {
       number.location(node.location());
       return number;
     } catch (NumberFormatException e) {
-      errorConsumer.errorAt(node.location(), "Invalid number %s: %s", value, e.getMessage());
+      errorConsumer.errorAt(node.location(), "Invalid number '%s': %s", value, e.getMessage());
       return node;
     }
   }
@@ -267,7 +223,7 @@ class PreprocessVisitor extends AstExpressionRewriteVisitor {
   @Override
   protected Object visit(AstEntityRef node) {
     var newNode =
-        switch (node.name().name()) {
+        switch (node.name().baseName()) {
           case "true" -> new AstBoolLiteral(true);
           case "false" -> new AstBoolLiteral(false);
           case "null" -> new AstNullLiteral();
@@ -276,7 +232,7 @@ class PreprocessVisitor extends AstExpressionRewriteVisitor {
     if (newNode != node) {
       newNode.location(node.location());
     } else {
-      checkName(node.name().name(), node.location());
+      checkName(node.name().baseName(), node.location());
     }
     return newNode;
   }
@@ -288,30 +244,13 @@ class PreprocessVisitor extends AstExpressionRewriteVisitor {
 
   private void checkName(String name, Location location) {
     if (reservedWords.isReservedName(name)) {
-      errorConsumer.errorAt(location, "Reserved word cannot be used as a name: %s", name);
+      errorConsumer.errorAt(location, "Reserved word '%s' cannot be used as a name", name);
     }
   }
 
   private void checkTypeName(String name, Location location) {
     if (reservedWords.isReservedTypeName(name)) {
-      errorConsumer.errorAt(location, "Reserved type name cannot be used as a type name: %s", name);
+      errorConsumer.errorAt(location, "Reserved word '%s' cannot be used as a type name", name);
     }
-  }
-
-  private static String entityKind(AstEntity entity) {
-    return switch (entity) {
-      case AstFunction ignored -> "function";
-      case AstVariable ignored -> "variable";
-    };
-  }
-
-  private void errorEntityCollision(AstEntity entity, AstEntity existing) {
-    errorConsumer.errorAt(
-        entity.location(),
-        "Definition of %s %s has a name collision with %s defined at %s.",
-        entityKind(entity),
-        entity.name(),
-        entityKind(existing),
-        existing.location());
   }
 }

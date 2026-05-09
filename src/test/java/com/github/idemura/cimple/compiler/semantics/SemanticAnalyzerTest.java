@@ -1,5 +1,6 @@
 package com.github.idemura.cimple.compiler.semantics;
 
+import static com.github.idemura.cimple.compiler.ast.AstUtils.*;
 import static com.github.idemura.cimple.compiler.parser.Parser.parseCode;
 import static org.junit.jupiter.api.Assertions.*;
 
@@ -7,20 +8,12 @@ import com.github.idemura.cimple.compiler.InMemoryErrorConsumer;
 import com.github.idemura.cimple.compiler.QualifiedName;
 import com.github.idemura.cimple.compiler.ast.AstCall;
 import com.github.idemura.cimple.compiler.ast.AstEntityRef;
-import com.github.idemura.cimple.compiler.ast.AstExpression;
-import com.github.idemura.cimple.compiler.ast.AstExpressionStatement;
-import com.github.idemura.cimple.compiler.ast.AstFunction;
 import com.github.idemura.cimple.compiler.ast.AstTypeRef;
 import java.util.List;
-import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
 class SemanticAnalyzerTest {
-  private InMemoryErrorConsumer errorConsumer = new InMemoryErrorConsumer();
-
-  private static AstExpression extractBodyExpression(AstFunction function) {
-    return ((AstExpressionStatement) function.block().statements().get(0)).expression();
-  }
+  private final InMemoryErrorConsumer errorConsumer = new InMemoryErrorConsumer();
 
   @Test
   void testResolveVariableAndFunction() {
@@ -31,11 +24,11 @@ class SemanticAnalyzerTest {
         var x int;
 
         function f() {
-          x;
+          return x;
         }
 
         function g() {
-          f();
+          return f();
         }
         """;
 
@@ -45,12 +38,12 @@ class SemanticAnalyzerTest {
 
     assertEquals(List.of(), errorConsumer.errors());
     {
-      var expr = extractBodyExpression(module.findFunction("f"));
+      var expr = extractReturnExpression(module.findFunction("f"));
       var entityRef = (AstEntityRef) expr;
       assertSame(module.findVariable("x"), entityRef.entity());
     }
     {
-      var expr = extractBodyExpression(module.findFunction("g"));
+      var expr = extractReturnExpression(module.findFunction("g"));
       var call = (AstCall) expr;
       var entityRef = (AstEntityRef) call.function();
       assertSame(module.findFunction("f"), entityRef.entity());
@@ -64,11 +57,11 @@ class SemanticAnalyzerTest {
         module test;
 
         function g() {
-          f();
+          return f();
         }
 
         function f() {
-          x;
+          return x;
         }
 
         var x int;
@@ -80,13 +73,13 @@ class SemanticAnalyzerTest {
 
     assertEquals(List.of(), errorConsumer.errors());
     {
-      var expr = extractBodyExpression(module.findFunction("g"));
+      var expr = extractReturnExpression(module.findFunction("g"));
       var call = (AstCall) expr;
       var entityRef = (AstEntityRef) call.function();
       assertSame(module.findFunction("f"), entityRef.entity());
     }
     {
-      var expr = extractBodyExpression(module.findFunction("f"));
+      var expr = extractReturnExpression(module.findFunction("f"));
       var entityRef = (AstEntityRef) expr;
       assertSame(module.findVariable("x"), entityRef.entity());
     }
@@ -107,7 +100,7 @@ class SemanticAnalyzerTest {
         }
 
         function f(d Duration) {
-          d:toMillis();
+          return d:toMillis();
         }
         """;
 
@@ -118,11 +111,11 @@ class SemanticAnalyzerTest {
     assertEquals(List.of(), errorConsumer.errors());
 
     {
-      var expr = extractBodyExpression(module.findFunction("f"));
+      var expr = extractReturnExpression(module.findFunction("f"));
       var call = (AstCall) expr;
       var function = (AstEntityRef) call.function();
       assertSame(module.findReceiverFunction("Duration", "toMillis"), function.entity());
-      assertEquals(new QualifiedName("test", "toMillis"), function.name());
+      assertEquals(new QualifiedName("toMillis"), function.name());
 
       assertEquals(1, call.arguments().size());
       var receiver = (AstEntityRef) call.arguments().get(0);

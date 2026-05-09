@@ -113,7 +113,7 @@ public class NameResolutionVisitor extends AstExpressionRewriteVisitor {
       return node;
     }
     try {
-      var entity = nameMap.lookupEntity(node.name().name());
+      var entity = nameMap.lookupEntity(node.name().baseName());
       if (entity == null) {
         errorConsumer.errorAt(node.location(), "Undefined name: %s", node.name());
         return node;
@@ -178,7 +178,7 @@ public class NameResolutionVisitor extends AstExpressionRewriteVisitor {
     // TODO: Select the builtin overload using the resolved argument types.
     var operatorRef = (AstEntityRef) node.function();
     AstFunction function;
-    switch (operatorRef.name().name()) {
+    switch (operatorRef.name().baseName()) {
       case "+":
         {
           function = BuiltinFunctions.ADD_I64;

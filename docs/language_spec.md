@@ -174,18 +174,18 @@ type interface FileSystem {
 
 From highest to lowest:
 
-| Operators            | Associativity |
-|----------------------|---------------|
-| `(e)` `[e type t]`   | Left-to-right |
-| `.` `:` `[]` `f(x)`  | Left-to-right |
-| `*` `/` `%`          | Left-to-right |
-| `+` `-`              | Left-to-right |
-| `<` `>` `>=` `<=`    | Left-to-right |
-| `==` `!=`            | Left-to-right |
-| `!`                  | Right-to-left |
-| `&`                  | Left-to-right |
-| `\|`                 | Left-to-right |
-| `=` and op-shorthand | None          |
+| Operators                 | Associativity |
+|---------------------------|---------------|
+| `(e)` `[e type t]`        | Left-to-right |
+| `new` `.` `:` `[]` `f(x)` | Left-to-right |
+| `*` `/` `%`               | Left-to-right |
+| `+` `-`                   | Left-to-right |
+| `<` `>` `>=` `<=`         | Left-to-right |
+| `==` `!=`                 | Left-to-right |
+| `!`                       | Right-to-left |
+| `&`                       | Left-to-right |
+| `\|`                      | Left-to-right |
+| `=` and op-shorthand      | None          |
 
 Only one assignment per expression is allowed. Therefore, it does not matter whether it is
 left-to-right or right-to-left. For simplicity, the parser parses it in left-to-right order.

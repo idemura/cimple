@@ -5,9 +5,8 @@ import static com.github.idemura.cimple.compiler.parser.Parser.parseCode;
 import static org.junit.jupiter.api.Assertions.*;
 
 import com.github.idemura.cimple.compiler.InMemoryErrorConsumer;
-import com.github.idemura.cimple.compiler.QualifiedName;
-import com.github.idemura.cimple.compiler.ast.AstDefer;
 import com.github.idemura.cimple.compiler.ast.AstBuiltinType;
+import com.github.idemura.cimple.compiler.ast.AstDefer;
 import com.github.idemura.cimple.compiler.ast.AstExpressionStatement;
 import com.github.idemura.cimple.compiler.ast.AstFor;
 import com.github.idemura.cimple.compiler.ast.AstIf;
@@ -21,6 +20,8 @@ import java.util.List;
 import org.junit.jupiter.api.Test;
 
 class PreprocessVisitorTest {
+  private final InMemoryErrorConsumer errorConsumer = new InMemoryErrorConsumer();
+
   @Test
   void testRewriteTrueFalseNullLiterals() {
     var code =
@@ -38,10 +39,8 @@ class PreprocessVisitorTest {
         }
         """;
 
-    var errorConsumer = new InMemoryErrorConsumer();
     var module = parseCode(code, errorConsumer);
-    var nameMap = new NameMap();
-    module.accept(new PreprocessVisitor(nameMap, Keyword.valueList(), errorConsumer));
+    module.accept(new PreprocessVisitor(Keyword.valueList(), errorConsumer));
 
     var statements = module.findFunction("f").block().statements();
     int i = 0;
@@ -74,48 +73,18 @@ class PreprocessVisitorTest {
         type union byte {}
         """;
 
-    var errorConsumer = new InMemoryErrorConsumer();
     var module = parseCode(code, errorConsumer);
-    var nameMap = new NameMap();
-    module.accept(new PreprocessVisitor(nameMap, Keyword.valueList(), errorConsumer));
+    module.accept(new PreprocessVisitor(Keyword.valueList(), errorConsumer));
 
     assertEquals(
         ImmutableList.of(
-            "Reserved word cannot be used as a name: if",
-            "Reserved word cannot be used as a name: return",
-            "Reserved word cannot be used as a name: else",
-            "Reserved word cannot be used as a name: true",
-            "Reserved type name cannot be used as a type name: int",
-            "Reserved type name cannot be used as a type name: byte"),
+            "Reserved word 'if' cannot be used as a name",
+            "Reserved word 'return' cannot be used as a name",
+            "Reserved word 'else' cannot be used as a name",
+            "Reserved word 'true' cannot be used as a name",
+            "Reserved word 'int' cannot be used as a type name",
+            "Reserved word 'byte' cannot be used as a type name"),
         errorConsumer.errors());
-  }
-
-  @Test
-  void testPopulateNameMap() {
-    var code =
-        """
-        module test;
-
-        type record R {}
-
-        var x int;
-        const y int;
-
-        function f() {}
-        function g() {}
-        """;
-
-    var errorConsumer = new InMemoryErrorConsumer();
-    var module = parseCode(code, errorConsumer);
-    var nameMap = new NameMap();
-    module.accept(new PreprocessVisitor(nameMap, Keyword.valueList(), errorConsumer));
-
-    assertEquals(List.of(), errorConsumer.errors());
-    assertSame(module.findVariable("x"), nameMap.lookupEntity("x"));
-    assertSame(module.findVariable("y"), nameMap.lookupEntity("y"));
-    assertSame(module.findFunction("f"), nameMap.lookupEntity("f"));
-    assertSame(module.findFunction("g"), nameMap.lookupEntity("g"));
-    assertSame(module.findType("R"), nameMap.lookupType(new QualifiedName("R")));
   }
 
   @Test
@@ -130,17 +99,16 @@ class PreprocessVisitorTest {
         function f(x int) {}
         """;
 
-    var errorConsumer = new InMemoryErrorConsumer();
     var module = parseCode(code, errorConsumer);
-    var nameMap = new NameMap();
-    module.accept(new PreprocessVisitor(nameMap, Keyword.valueList(), errorConsumer));
+    module.accept(new PreprocessVisitor(Keyword.valueList(), errorConsumer));
 
     assertEquals(List.of(), errorConsumer.errors());
     {
       var header = module.findReceiverFunction("Duration", "toMillis").header();
-      var receiverType = AstTypeRef.ofName("test", "Duration");
+      var receiverType = AstTypeRef.ofName("Duration");
       assertEquals(receiverType, header.receiverType());
       assertEquals(1, header.receiverIndex());
+      assertEquals(AstTypeRef.ofType(AstBuiltinType.INT64), header.parameters().get(0).typeRef());
       assertEquals(receiverType, header.parameters().get(1).typeRef());
       assertEquals(AstTypeRef.ofType(AstBuiltinType.VOID), header.resultType());
     }
@@ -149,10 +117,6 @@ class PreprocessVisitorTest {
       assertEquals(-1, header.receiverIndex());
       assertEquals(AstTypeRef.ofType(AstBuiltinType.VOID), header.resultType());
     }
-    assertSame(
-        module.findReceiverFunction("Duration", "toMillis"),
-        nameMap.lookupReceiverFunction(new QualifiedName("test", "Duration"), "toMillis"));
-    assertNull(nameMap.lookupEntity("toMillis"));
   }
 
   @Test
@@ -170,10 +134,8 @@ class PreprocessVisitorTest {
         function f(a int) float {}
         """;
 
-    var errorConsumer = new InMemoryErrorConsumer();
     var module = parseCode(code, errorConsumer);
-    var nameMap = new NameMap();
-    module.accept(new PreprocessVisitor(nameMap, Keyword.valueList(), errorConsumer));
+    module.accept(new PreprocessVisitor(Keyword.valueList(), errorConsumer));
 
     assertEquals(List.of(), errorConsumer.errors());
     assertEquals(AstTypeRef.ofType(AstBuiltinType.INT64), module.findVariable("x").typeRef());
@@ -188,6 +150,39 @@ class PreprocessVisitorTest {
   }
 
   @Test
+  void testNormalizeAliases() {
+    var code =
+        """
+        module test;
+
+        type record R {
+          var f float;
+        }
+
+        var g int;
+
+        function f(p int) {
+          var l float;
+        }
+        """;
+
+    var module = parseCode(code, errorConsumer);
+    module.accept(new PreprocessVisitor(Keyword.valueList(), errorConsumer));
+
+    assertEquals(List.of(), errorConsumer.errors());
+    assertEquals(AstTypeRef.ofType(AstBuiltinType.INT64), module.findVariable("g").typeRef());
+    assertEquals(
+        AstTypeRef.ofType(AstBuiltinType.FLOAT64),
+        ((AstRecordType) module.findType("R")).fields().get(0).typeRef());
+    assertEquals(
+        AstTypeRef.ofType(AstBuiltinType.INT64),
+        module.findFunction("f").header().parameters().get(0).typeRef());
+    assertEquals(
+        AstTypeRef.ofType(AstBuiltinType.FLOAT64),
+        ((AstLocal) module.findFunction("f").block().statements().get(0)).variable().typeRef());
+  }
+
+  @Test
   void testReceiverFunctionMustHaveExactlyOneUntypedParameter() {
     var code =
         """
@@ -199,15 +194,13 @@ class PreprocessVisitorTest {
         function Duration:b(x, y) {}
         """;
 
-    var errorConsumer = new InMemoryErrorConsumer();
     var module = parseCode(code, errorConsumer);
-    var nameMap = new NameMap();
-    module.accept(new PreprocessVisitor(nameMap, Keyword.valueList(), errorConsumer));
+    module.accept(new PreprocessVisitor(Keyword.valueList(), errorConsumer));
 
     assertEquals(
         List.of(
-            "Receiver function test::a: missing the receiver parameter.",
-            "Receiver function test::b: multiple receiver parameters."),
+            "Receiver function 'a': missing the receiver parameter",
+            "Receiver function 'b': multiple receiver parameters"),
         errorConsumer.errors());
   }
 
@@ -220,14 +213,11 @@ class PreprocessVisitorTest {
         function f(x) {}
         """;
 
-    var errorConsumer = new InMemoryErrorConsumer();
     var module = parseCode(code, errorConsumer);
-    var nameMap = new NameMap();
-    module.accept(new PreprocessVisitor(nameMap, Keyword.valueList(), errorConsumer));
+    module.accept(new PreprocessVisitor(Keyword.valueList(), errorConsumer));
 
     assertEquals(
-        List.of("Free function test::f cannot have a receiver parameter x."),
-        errorConsumer.errors());
+        List.of("Free function 'f' cannot have a receiver parameter 'x'"), errorConsumer.errors());
   }
 
   @Test
@@ -239,127 +229,23 @@ class PreprocessVisitorTest {
         var x;
 
         type record R {
-          var z;
+          var y;
         }
 
         function f() {
-          const y;
+          const z;
         }
         """;
 
-    var errorConsumer = new InMemoryErrorConsumer();
     var module = parseCode(code, errorConsumer);
-    var nameMap = new NameMap();
-    module.accept(new PreprocessVisitor(nameMap, Keyword.valueList(), errorConsumer));
+    module.accept(new PreprocessVisitor(Keyword.valueList(), errorConsumer));
 
     assertEquals(
         List.of(
-            "Variable test::x must have a type or an initializer.",
-            "Variable z must have a type or an initializer.",
-            "Variable y must have a type or an initializer."),
+            "Variable 'x' must have a type or an initializer",
+            "Variable 'y' must have a type or an initializer",
+            "Variable 'z' must have a type or an initializer"),
         errorConsumer.errors());
-  }
-
-  @Test
-  void testDuplicateVariableFailure() {
-    var code =
-        """
-        module test;
-
-        var x int;
-        const x int;
-        """;
-
-    var errorConsumer = new InMemoryErrorConsumer();
-    var module = parseCode(code, errorConsumer);
-    var nameMap = new NameMap();
-    module.accept(new PreprocessVisitor(nameMap, Keyword.valueList(), errorConsumer));
-
-    assertEquals(
-        List.of(
-            "Definition of variable test::x has a name collision with variable defined at 3,5."),
-        errorConsumer.errors());
-  }
-
-  @Test
-  void testDuplicateFunctionFailure() {
-    var code =
-        """
-        module test;
-
-        function f() {}
-        function f() {}
-        """;
-
-    var errorConsumer = new InMemoryErrorConsumer();
-    var module = parseCode(code, errorConsumer);
-    var nameMap = new NameMap();
-    module.accept(new PreprocessVisitor(nameMap, Keyword.valueList(), errorConsumer));
-
-    assertEquals(
-        List.of(
-            "Definition of function test::f has a name collision with function defined at 3,10."),
-        errorConsumer.errors());
-  }
-
-  @Test
-  void testFunctionVariableCollisionFailure() {
-    var code =
-        """
-        module test;
-
-        var f int;
-        function f() {}
-        """;
-
-    var errorConsumer = new InMemoryErrorConsumer();
-    var module = parseCode(code, errorConsumer);
-    var nameMap = new NameMap();
-    module.accept(new PreprocessVisitor(nameMap, Keyword.valueList(), errorConsumer));
-
-    assertEquals(
-        List.of(
-            "Definition of function test::f has a name collision with variable defined at 3,5."),
-        errorConsumer.errors());
-  }
-
-  @Test
-  void testVariableFunctionCollisionFailure() {
-    var code =
-        """
-        module test;
-
-        function f() {}
-        var f int;
-        """;
-
-    var errorConsumer = new InMemoryErrorConsumer();
-    var module = parseCode(code, errorConsumer);
-    var nameMap = new NameMap();
-    module.accept(new PreprocessVisitor(nameMap, Keyword.valueList(), errorConsumer));
-
-    assertEquals(
-        List.of(
-            "Definition of variable test::f has a name collision with function defined at 3,10."),
-        errorConsumer.errors());
-  }
-
-  @Test
-  void testDuplicateTypeFailure() {
-    var code =
-        """
-        module test;
-
-        type record R {}
-        type record R {}
-        """;
-
-    var errorConsumer = new InMemoryErrorConsumer();
-    var module = parseCode(code, errorConsumer);
-    var nameMap = new NameMap();
-    module.accept(new PreprocessVisitor(nameMap, Keyword.valueList(), errorConsumer));
-
-    assertEquals(List.of("Duplicate type: test::R. Defined at 3,13."), errorConsumer.errors());
   }
 
   @Test
@@ -374,12 +260,11 @@ class PreprocessVisitorTest {
         }
         """;
 
-    var errorConsumer = new InMemoryErrorConsumer();
     var module = parseCode(code, errorConsumer);
-    var nameMap = new NameMap();
-    module.accept(new PreprocessVisitor(nameMap, Keyword.valueList(), errorConsumer));
+    module.accept(new PreprocessVisitor(Keyword.valueList(), errorConsumer));
 
-    assertEquals(List.of("Duplicate record field: x. Defined at 4,7."), errorConsumer.errors());
+    assertEquals(
+        List.of("Duplicate record field 'x'. First defined at 4,7."), errorConsumer.errors());
   }
 
   @Test
@@ -396,9 +281,9 @@ class PreprocessVisitorTest {
 
     var errorConsumer = new InMemoryErrorConsumer();
     var module = parseCode(code, errorConsumer);
-    var nameMap = new NameMap();
-    module.accept(new PreprocessVisitor(nameMap, Keyword.valueList(), errorConsumer));
+    module.accept(new PreprocessVisitor(Keyword.valueList(), errorConsumer));
 
-    assertEquals(List.of("Duplicate union variant: A. Defined at 4,3."), errorConsumer.errors());
+    assertEquals(
+        List.of("Duplicate union variant 'A'. First defined at 4,3."), errorConsumer.errors());
   }
 }

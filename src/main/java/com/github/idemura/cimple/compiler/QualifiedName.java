@@ -2,13 +2,14 @@ package com.github.idemura.cimple.compiler;
 
 import static com.github.idemura.cimple.compiler.Constants.BUILTIN_MODULE;
 
-public record QualifiedName(String moduleName, String name) implements Comparable<QualifiedName> {
-  public QualifiedName(String name) {
-    this(null, name);
+public record QualifiedName(String moduleName, String baseName)
+    implements Comparable<QualifiedName> {
+  public QualifiedName(String baseName) {
+    this(null, baseName);
   }
 
-  public static QualifiedName ofBuiltin(String name) {
-    return new QualifiedName(BUILTIN_MODULE, name);
+  public static QualifiedName ofBuiltin(String baseName) {
+    return new QualifiedName(BUILTIN_MODULE, baseName);
   }
 
   public boolean isBuiltin() {
@@ -16,7 +17,7 @@ public record QualifiedName(String moduleName, String name) implements Comparabl
   }
 
   public QualifiedName withModuleName(String moduleName) {
-    return new QualifiedName(moduleName, name);
+    return new QualifiedName(moduleName, baseName);
   }
 
   @Override
@@ -25,15 +26,15 @@ public record QualifiedName(String moduleName, String name) implements Comparabl
     if (cmp != 0) {
       return cmp;
     }
-    return name.compareTo(other.name);
+    return baseName.compareTo(other.baseName);
   }
 
   @Override
   public String toString() {
     if (moduleName == null || isBuiltin()) {
-      return name;
+      return baseName;
     }
-    return moduleName + "::" + name;
+    return moduleName + "::" + baseName;
   }
 
   private static int compareNullable(String left, String right) {
