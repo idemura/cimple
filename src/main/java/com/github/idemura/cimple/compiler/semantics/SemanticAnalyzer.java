@@ -17,13 +17,6 @@ public class SemanticAnalyzer {
     if (errorConsumer.errorCount() > 0) {
       return false;
     }
-    // First resolve leaf types. Because visitor traversal does not guarantee the order we
-    // need here, doing this in a single phase could expose entities whose types are still
-    // unresolved.
-    module.accept(new TypeResolutionVisitor(nameMap, errorConsumer));
-    if (errorConsumer.errorCount() > 0) {
-      return false;
-    }
     module.accept(new NameResolutionVisitor(nameMap, errorConsumer));
     if (errorConsumer.errorCount() > 0) {
       return false;
