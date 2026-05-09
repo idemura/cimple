@@ -1,12 +1,10 @@
 package com.github.idemura.cimple.compiler.ast;
 
-import com.github.idemura.cimple.compiler.QualifiedName;
 import com.google.common.collect.ImmutableList;
 import java.util.List;
 import java.util.Objects;
 
 public final class AstFunctionHeader extends AstNode {
-  private QualifiedName name;
   private AstTypeRef receiverType;
   private int receiverIndex = -1;
   private List<AstVariable> parameters;
@@ -21,14 +19,13 @@ public final class AstFunctionHeader extends AstNode {
 
   @Override
   public int hashCode() {
-    return name.hashCode();
+    return Objects.hash(receiverType, parameters, resultType);
   }
 
   @Override
   public boolean equals(Object object) {
     return this == object
         || (object instanceof AstFunctionHeader other
-            && Objects.equals(name, other.name)
             && parameterListsEqual(parameters, other.parameters)
             && Objects.equals(resultType, other.resultType)
             && Objects.equals(receiverType, other.receiverType));
@@ -44,14 +41,6 @@ public final class AstFunctionHeader extends AstNode {
       }
     }
     return true;
-  }
-
-  public QualifiedName name() {
-    return name;
-  }
-
-  public void name(QualifiedName name) {
-    this.name = name;
   }
 
   public AstTypeRef receiverType() {

@@ -208,7 +208,8 @@ public class NameResolutionVisitor extends AstExpressionRewriteVisitor {
           receiverLookup.functionName());
       return node;
     }
-    var function = nameMap.lookupReceiverFunction(receiverType.name(), receiverLookup.functionName());
+    var function =
+        nameMap.lookupReceiverFunction(receiverType.name(), receiverLookup.functionName());
     if (function == null) {
       errorConsumer.errorAt(
           receiverLookup.location(),

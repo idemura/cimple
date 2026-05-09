@@ -140,7 +140,9 @@ public class Parser {
 
   private AstFunctionType parseTypeFunction() {
     var type = new AstFunctionType();
-    type.header(parseFunctionHeader());
+    var header = parseFunctionHeaderWithName();
+    type.name(header.name());
+    type.header(header.header());
     take(SEMICOLON);
     return type;
   }
@@ -154,7 +156,9 @@ public class Parser {
 
   private AstFunction parseFunction() {
     var function = new AstFunction();
-    function.header(parseFunctionHeader());
+    var header = parseFunctionHeaderWithName();
+    function.name(header.name());
+    function.header(header.header());
     function.block(parseBlock());
     return function;
   }
@@ -452,26 +456,29 @@ public class Parser {
     }
   }
 
-  private AstFunctionHeader parseFunctionHeader() {
+  private record FunctionHeaderWithName(QualifiedName name, AstFunctionHeader header) {}
+
+  private FunctionHeaderWithName parseFunctionHeaderWithName() {
     takeKeyword(FUNCTION);
     var header = new AstFunctionHeader();
     var current = take(IDENTIFIER);
+    QualifiedName name;
     if (tokenizer.takeIf(COLON)) {
       var receiverType = new AstTypeRef();
       receiverType.name(new QualifiedName(current.value()));
       receiverType.location(current.location());
       header.receiverType(receiverType);
       header.location(tokenizer.currentLocation());
-      header.name(takeIdentifier());
+      name = takeIdentifier();
     } else {
       header.location(current.location());
-      header.name(new QualifiedName(current.value()));
+      name = new QualifiedName(current.value());
     }
     header.parameters(parseParameters());
     if (tokenizer.current().is(IDENTIFIER)) {
       header.resultType(parseTypeRef());
     }
-    return header;
+    return new FunctionHeaderWithName(name, header);
   }
 
   private List<AstVariable> parseParameters() {

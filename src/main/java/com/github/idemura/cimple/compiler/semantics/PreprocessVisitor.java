@@ -5,6 +5,7 @@ import static java.lang.Long.parseLong;
 
 import com.github.idemura.cimple.compiler.ErrorConsumer;
 import com.github.idemura.cimple.compiler.Location;
+import com.github.idemura.cimple.compiler.QualifiedName;
 import com.github.idemura.cimple.compiler.ast.AstBoolLiteral;
 import com.github.idemura.cimple.compiler.ast.AstBuiltinType;
 import com.github.idemura.cimple.compiler.ast.AstCall;
@@ -62,7 +63,7 @@ class PreprocessVisitor extends AstExpressionRewriteVisitor {
           if (receiverType != null) {
             receiverType.name(receiverType.name().withModuleName(moduleName));
           }
-          header.name(header.name().withModuleName(moduleName));
+          function.name(function.name().withModuleName(moduleName));
           var existing = nameMap.addFunction(function);
           if (existing != null) {
             errorEntityCollision(function, existing);
@@ -89,7 +90,6 @@ class PreprocessVisitor extends AstExpressionRewriteVisitor {
     for (var parameter : node.parameters()) {
       parameter.setBit(AstVariable.PARAMETER);
     }
-    checkReceiverParameter(node);
     // Default the result type to void when it is omitted.
     if (node.resultType() == null) {
       node.resultType(AstTypeRef.ofType(AstBuiltinType.VOID));
@@ -97,7 +97,14 @@ class PreprocessVisitor extends AstExpressionRewriteVisitor {
     return super.visit(node);
   }
 
-  private void checkReceiverParameter(AstFunctionHeader header) {
+  @Override
+  protected Object visit(AstFunction node) {
+    checkName(node.name().name(), node.location());
+    checkReceiverParameter(node.name(), node.header());
+    return super.visit(node);
+  }
+
+  private void checkReceiverParameter(QualifiedName functionName, AstFunctionHeader header) {
     // Receiver functions must have exactly one receiver parameter: the only parameter without an
     // explicit type. Free functions must not have any untyped parameters.
     var parameters = header.parameters();
@@ -110,7 +117,7 @@ class PreprocessVisitor extends AstExpressionRewriteVisitor {
             errorConsumer.errorAt(
                 header.location(),
                 "Receiver function %s: multiple receiver parameters.",
-                header.name());
+                functionName);
             invalid = true;
             break;
           }
@@ -121,7 +128,7 @@ class PreprocessVisitor extends AstExpressionRewriteVisitor {
         errorConsumer.errorAt(
             header.location(),
             "Receiver function %s: missing the receiver parameter.",
-            header.name());
+            functionName);
       } else {
         header.receiverIndex(receiverIndex);
         parameters.get(receiverIndex).typeRef(header.receiverType());
@@ -132,17 +139,11 @@ class PreprocessVisitor extends AstExpressionRewriteVisitor {
           errorConsumer.errorAt(
               parameter.location(),
               "Free function %s cannot have a receiver parameter %s.",
-              header.name(),
+              functionName,
               parameter.name());
         }
       }
     }
-  }
-
-  @Override
-  protected Object visit(AstFunction node) {
-    checkName(node.name().name(), node.location());
-    return super.visit(node);
   }
 
   @Override
@@ -177,6 +178,7 @@ class PreprocessVisitor extends AstExpressionRewriteVisitor {
   @Override
   protected Object visit(AstFunctionType node) {
     checkName(node.name().name(), node.location());
+    checkReceiverParameter(node.name(), node.header());
     return super.visit(node);
   }
 

@@ -17,8 +17,8 @@ public final class AstUtils {
 
   public static AstFunction function(String receiverTypeName, String name) {
     var function = new AstFunction();
+    function.name(new QualifiedName(name));
     var header = new AstFunctionHeader();
-    header.name(new QualifiedName(name));
     if (receiverTypeName != null) {
       header.receiverType(AstTypeRef.ofName(receiverTypeName));
     }

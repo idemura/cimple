@@ -42,7 +42,7 @@ public class NameMap {
       return receiverFunctionMap.putIfAbsent(
           new ReceiverFunctionKey(receiverType.name(), function.name().name()), function);
     }
-    return entityNameMap.putIfAbsent(function.header().name().name(), function);
+    return entityNameMap.putIfAbsent(function.name().name(), function);
   }
 
   public AstEntity addVariable(AstVariable variable) {

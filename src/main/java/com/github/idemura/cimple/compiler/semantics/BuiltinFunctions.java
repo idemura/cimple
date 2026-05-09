@@ -27,10 +27,10 @@ public final class BuiltinFunctions {
   static AstFunction makeBinaryOperator(
       String name, AstBuiltinType result, AstBuiltinType arg1, AstBuiltinType arg2) {
     var header = new AstFunctionHeader();
-    header.name(QualifiedName.ofBuiltin(name));
     header.parameters(ImmutableList.of(makeParameter("_0", arg1), makeParameter("_1", arg2)));
     header.resultType(AstTypeRef.ofType(result));
     var function = new AstFunction();
+    function.name(QualifiedName.ofBuiltin(name));
     function.header(header);
     function.markNameResolved();
     return function;

@@ -60,13 +60,13 @@ class ParserTest {
     assertEquals("test", module.name());
     {
       var f = module.findFunction("f0");
-      assertEquals(new QualifiedName("f0"), f.header().name());
+      assertEquals(new QualifiedName("f0"), f.name());
       assertNull(f.header().resultType());
       assertEquals(ImmutableList.of(), f.header().parameters());
     }
     {
       var f = module.findFunction("f1");
-      assertEquals(new QualifiedName("f1"), f.header().name());
+      assertEquals(new QualifiedName("f1"), f.name());
       assertNull(f.header().resultType());
       var params = f.header().parameters();
       assertEquals(1, params.size());
@@ -74,7 +74,7 @@ class ParserTest {
     }
     {
       var f = module.findFunction("f2");
-      assertEquals(new QualifiedName("f2"), f.header().name());
+      assertEquals(new QualifiedName("f2"), f.name());
       assertNull(f.header().resultType());
       var params = f.header().parameters();
       assertEquals(2, params.size());
@@ -83,7 +83,7 @@ class ParserTest {
     }
     {
       var f = module.findFunction("rv");
-      assertEquals(new QualifiedName("rv"), f.header().name());
+      assertEquals(new QualifiedName("rv"), f.name());
       assertEquals(AstTypeRef.ofName("int"), f.header().resultType());
       assertEquals(ImmutableList.of(), f.header().parameters());
     }
@@ -227,7 +227,8 @@ class ParserTest {
     var module = parseCode(code, makeErrorConsumer());
     var header = module.findReceiverFunction("Duration", "toMillis").header();
     assertEquals(AstTypeRef.ofName("Duration"), header.receiverType());
-    assertEquals(new QualifiedName("toMillis"), header.name());
+    assertEquals(
+        new QualifiedName("toMillis"), module.findReceiverFunction("Duration", "toMillis").name());
     assertEquals(AstTypeRef.ofName("int"), header.resultType());
     assertEquals(ImmutableList.of(rawVariable("this")), header.parameters());
   }

@@ -3,6 +3,7 @@ package com.github.idemura.cimple.compiler.ast;
 import com.github.idemura.cimple.compiler.QualifiedName;
 
 public final class AstFunctionType extends AstType {
+  private QualifiedName name;
   private AstFunctionHeader header;
 
   @Override
@@ -12,11 +13,11 @@ public final class AstFunctionType extends AstType {
 
   @Override
   public QualifiedName name() {
-    return header.name();
+    return name;
   }
 
   public void name(QualifiedName name) {
-    header.name(name);
+    this.name = name;
   }
 
   public AstFunctionHeader header() {

@@ -4,15 +4,16 @@ import com.github.idemura.cimple.compiler.Location;
 import com.github.idemura.cimple.compiler.QualifiedName;
 
 public final class AstFunction extends AstEntity {
+  private QualifiedName name;
   private AstFunctionHeader header;
   private AstBlock block;
 
   public QualifiedName name() {
-    return header.name();
+    return name;
   }
 
   public void name(QualifiedName name) {
-    header.name(name);
+    this.name = name;
   }
 
   @Override
@@ -27,7 +28,7 @@ public final class AstFunction extends AstEntity {
 
   @Override
   public int hashCode() {
-    return header.name().hashCode();
+    return name.hashCode();
   }
 
   @Override
@@ -35,12 +36,12 @@ public final class AstFunction extends AstEntity {
     if (this == object) {
       return true;
     }
-    return (object instanceof AstFunction other) && header.name().equals(other.header().name());
+    return (object instanceof AstFunction other) && name.equals(other.name());
   }
 
   @Override
   public String toString() {
-    return "FUNCTION %s(%s): %s".formatted(header.name(), header.parameters(), header.resultType());
+    return "FUNCTION %s(%s): %s".formatted(name, header.parameters(), header.resultType());
   }
 
   @Override
