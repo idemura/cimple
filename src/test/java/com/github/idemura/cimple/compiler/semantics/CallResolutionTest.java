@@ -4,7 +4,7 @@ import static com.github.idemura.cimple.compiler.ast.AstUtils.*;
 import static com.github.idemura.cimple.compiler.parser.Parser.parseCode;
 import static org.junit.jupiter.api.Assertions.*;
 
-import com.github.idemura.cimple.compiler.QualifiedName;
+import com.github.idemura.cimple.compiler.Identifier;
 import com.github.idemura.cimple.compiler.ast.AstBuiltinType;
 import com.github.idemura.cimple.compiler.ast.AstCall;
 import com.github.idemura.cimple.compiler.ast.AstEntityRef;
@@ -43,8 +43,8 @@ class CallResolutionTest extends AbstractSemanticsTest {
     var nameMap = semanticAnalyzer.nameMap();
     assertSame(
         module.findReceiverFunction("Duration", "toMillis"),
-        nameMap.lookupReceiverFunction(new QualifiedName("test", "Duration", "toMillis")));
-    assertNull(nameMap.lookupEntity(QualifiedName.ofEntity("toMillis")));
+        nameMap.lookupReceiverFunction(new Identifier("test", "Duration", "toMillis")));
+    assertNull(nameMap.lookupEntity(Identifier.ofEntity("toMillis")));
   }
 
   @Test
@@ -128,11 +128,11 @@ class CallResolutionTest extends AbstractSemanticsTest {
       var call = (AstCall) expr;
       var function = (AstEntityRef) call.function();
       assertSame(module.findReceiverFunction("Duration", "toMillis"), function.entity());
-      assertEquals(new QualifiedName("test", "Duration", "toMillis"), function.name());
+      assertEquals(new Identifier("test", "Duration", "toMillis"), function.name());
 
       assertEquals(1, call.arguments().size());
       var receiver = (AstEntityRef) call.arguments().get(0);
-      assertEquals(QualifiedName.ofEntity("d"), receiver.name());
+      assertEquals(Identifier.ofEntity("d"), receiver.name());
       assertSame(module.findFunction("f").header().parameters().get(0), receiver.entity());
     }
     {
@@ -157,7 +157,7 @@ class CallResolutionTest extends AbstractSemanticsTest {
     {
       var block = module.findFunction("g").block();
       var local = (AstLocal) block.statements().get(0);
-      assertEquals(QualifiedName.ofEntity("t"), local.variable().name());
+      assertEquals(Identifier.ofEntity("t"), local.variable().name());
       assertEquals(AstTypeRef.ofType(AstBuiltinType.STRING), local.variable().typeRef());
       var call = (AstCall) local.variable().expression();
       assertEquals(AstEntityRef.ofName("test", "f"), call.function());

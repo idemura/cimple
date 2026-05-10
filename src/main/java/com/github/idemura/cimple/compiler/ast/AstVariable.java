@@ -1,6 +1,6 @@
 package com.github.idemura.cimple.compiler.ast;
 
-import com.github.idemura.cimple.compiler.QualifiedName;
+import com.github.idemura.cimple.compiler.Identifier;
 import java.util.Objects;
 
 public final class AstVariable extends AstEntity {
@@ -10,7 +10,7 @@ public final class AstVariable extends AstEntity {
   public static final long FIELD = 0x8L;
   public static final long GLOBAL = 0x10L;
 
-  private QualifiedName name;
+  private Identifier name;
   private AstTypeRef typeRef;
   private AstExpression expression;
   private long flags;
@@ -48,11 +48,11 @@ public final class AstVariable extends AstEntity {
     flags |= mask;
   }
 
-  public QualifiedName name() {
+  public Identifier name() {
     return name;
   }
 
-  public void name(QualifiedName name) {
+  public void name(Identifier name) {
     this.name = name;
   }
 

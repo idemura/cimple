@@ -1,11 +1,11 @@
 package com.github.idemura.cimple.compiler.ast;
 
-import com.github.idemura.cimple.compiler.QualifiedName;
+import com.github.idemura.cimple.compiler.Identifier;
 import com.google.common.collect.ImmutableList;
 import java.util.List;
 
 public final class AstRecordType extends AstType {
-  private QualifiedName name;
+  private Identifier name;
   private List<AstVariable> fields;
 
   public AstRecordType() {}
@@ -16,12 +16,12 @@ public final class AstRecordType extends AstType {
   }
 
   @Override
-  public QualifiedName name() {
+  public Identifier name() {
     return name;
   }
 
   @Override
-  public void name(QualifiedName name) {
+  public void name(Identifier name) {
     this.name = name;
   }
 

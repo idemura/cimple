@@ -1,6 +1,6 @@
 package com.github.idemura.cimple.compiler.ast;
 
-import com.github.idemura.cimple.compiler.QualifiedName;
+import com.github.idemura.cimple.compiler.Identifier;
 
 public final class AstBuiltinType extends AstType {
   public static final AstBuiltinType VOID = new AstBuiltinType("void");
@@ -16,10 +16,10 @@ public final class AstBuiltinType extends AstType {
   public static final AstBuiltinType CHAR = new AstBuiltinType("char");
   public static final AstBuiltinType STRING = new AstBuiltinType("string");
 
-  private final QualifiedName name;
+  private final Identifier name;
 
   private AstBuiltinType(String name) {
-    this.name = QualifiedName.ofType(name).builtin();
+    this.name = Identifier.ofType(name).builtin();
   }
 
   public static AstBuiltinType lookup(String name) {
@@ -46,12 +46,12 @@ public final class AstBuiltinType extends AstType {
   }
 
   @Override
-  public QualifiedName name() {
+  public Identifier name() {
     return name;
   }
 
   @Override
-  public void name(QualifiedName name) {
+  public void name(Identifier name) {
     throw new UnsupportedOperationException();
   }
 }

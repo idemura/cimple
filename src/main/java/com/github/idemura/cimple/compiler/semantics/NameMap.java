@@ -2,7 +2,7 @@ package com.github.idemura.cimple.compiler.semantics;
 
 import static com.google.common.base.Preconditions.checkArgument;
 
-import com.github.idemura.cimple.compiler.QualifiedName;
+import com.github.idemura.cimple.compiler.Identifier;
 import com.github.idemura.cimple.compiler.ast.AstBuiltinType;
 import com.github.idemura.cimple.compiler.ast.AstEntity;
 import com.github.idemura.cimple.compiler.ast.AstFunction;
@@ -14,11 +14,11 @@ import java.util.List;
 import java.util.Map;
 
 public class NameMap {
-  private final Map<QualifiedName, AstType> typeQualifiedNameMap = new HashMap<>();
+  private final Map<Identifier, AstType> typeQualifiedNameMap = new HashMap<>();
   private final Map<String, AstType> typeNameMap = new HashMap<>();
-  private final Map<QualifiedName, AstEntity> entityQualifiedNameMap = new HashMap<>();
+  private final Map<Identifier, AstEntity> entityQualifiedNameMap = new HashMap<>();
   private final Map<String, AstEntity> entityNameMap = new HashMap<>();
-  private final Map<QualifiedName, AstFunction> receiverFunctionMap = new HashMap<>();
+  private final Map<Identifier, AstFunction> receiverFunctionMap = new HashMap<>();
   private final List<AstEntity> shadowed = new ArrayList<>();
   private final List<String> localNames = new ArrayList<>();
 
@@ -87,7 +87,7 @@ public class NameMap {
     shadowed.clear();
   }
 
-  public AstType lookupType(QualifiedName name) {
+  public AstType lookupType(Identifier name) {
     var builtinType = AstBuiltinType.lookup(name.typeName());
     if (builtinType != null) {
       return builtinType;
@@ -98,14 +98,14 @@ public class NameMap {
     return typeNameMap.get(name.typeName());
   }
 
-  public AstEntity lookupEntity(QualifiedName name) {
+  public AstEntity lookupEntity(Identifier name) {
     if (name.moduleName() != null) {
       return entityQualifiedNameMap.get(name);
     }
     return entityNameMap.get(name.entityName());
   }
 
-  public AstFunction lookupReceiverFunction(QualifiedName name) {
+  public AstFunction lookupReceiverFunction(Identifier name) {
     return receiverFunctionMap.get(name);
   }
 }

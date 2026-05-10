@@ -2,11 +2,11 @@ package com.github.idemura.cimple.compiler.ast;
 
 import static com.google.common.base.Preconditions.checkNotNull;
 
-import com.github.idemura.cimple.compiler.QualifiedName;
+import com.github.idemura.cimple.compiler.Identifier;
 import java.util.Objects;
 
 public final class AstEntityRef extends AstExpression {
-  private QualifiedName name;
+  private Identifier name;
   private AstEntity entity;
 
   // Test helper.
@@ -16,7 +16,7 @@ public final class AstEntityRef extends AstExpression {
 
   public static AstEntityRef ofName(String moduleName, String name) {
     var ref = new AstEntityRef();
-    ref.name(QualifiedName.ofEntity(name).withModule(moduleName));
+    ref.name(Identifier.ofEntity(name).withModule(moduleName));
     return ref;
   }
 
@@ -51,11 +51,11 @@ public final class AstEntityRef extends AstExpression {
     };
   }
 
-  public QualifiedName name() {
+  public Identifier name() {
     return name;
   }
 
-  public void name(QualifiedName name) {
+  public void name(Identifier name) {
     this.name = name;
   }
 

@@ -1,7 +1,7 @@
 package com.github.idemura.cimple.compiler.semantics;
 
 import com.github.idemura.cimple.compiler.ErrorConsumer;
-import com.github.idemura.cimple.compiler.QualifiedName;
+import com.github.idemura.cimple.compiler.Identifier;
 import com.github.idemura.cimple.compiler.ast.AstEntity;
 import com.github.idemura.cimple.compiler.ast.AstFunction;
 import com.github.idemura.cimple.compiler.ast.AstModule;
@@ -80,7 +80,7 @@ public class SemanticAnalyzer {
     }
   }
 
-  private QualifiedName resolveTypeName(QualifiedName typeName, String moduleName) {
+  private Identifier resolveTypeName(Identifier typeName, String moduleName) {
     // TODO: Use imports to resolve.
     return typeName.withModule(moduleName);
   }

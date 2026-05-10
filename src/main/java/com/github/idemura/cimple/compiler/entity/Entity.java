@@ -1,12 +1,12 @@
 package com.github.idemura.cimple.compiler.entity;
 
-import com.github.idemura.cimple.compiler.QualifiedName;
+import com.github.idemura.cimple.compiler.Identifier;
 
 public abstract sealed class Entity permits Function, Variable {
-  private final QualifiedName name;
+  private final Identifier name;
   private Type type;
 
-  public Entity(QualifiedName name) {
+  public Entity(Identifier name) {
     this.name = name;
   }
 
@@ -20,7 +20,7 @@ public abstract sealed class Entity permits Function, Variable {
     return this == object || (object instanceof Entity other && name.equals(other.name));
   }
 
-  public QualifiedName name() {
+  public Identifier name() {
     return name;
   }
 

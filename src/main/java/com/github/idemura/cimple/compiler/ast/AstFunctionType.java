@@ -1,9 +1,9 @@
 package com.github.idemura.cimple.compiler.ast;
 
-import com.github.idemura.cimple.compiler.QualifiedName;
+import com.github.idemura.cimple.compiler.Identifier;
 
 public final class AstFunctionType extends AstType {
-  private QualifiedName name;
+  private Identifier name;
   private AstFunctionHeader header;
 
   @Override
@@ -23,11 +23,11 @@ public final class AstFunctionType extends AstType {
   }
 
   @Override
-  public QualifiedName name() {
+  public Identifier name() {
     return name;
   }
 
-  public void name(QualifiedName name) {
+  public void name(Identifier name) {
     this.name = name;
   }
 

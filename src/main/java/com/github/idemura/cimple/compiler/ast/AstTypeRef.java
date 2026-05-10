@@ -1,10 +1,10 @@
 package com.github.idemura.cimple.compiler.ast;
 
-import com.github.idemura.cimple.compiler.QualifiedName;
+import com.github.idemura.cimple.compiler.Identifier;
 import java.util.Objects;
 
 public final class AstTypeRef extends AstNode {
-  private QualifiedName name;
+  private Identifier name;
   private AstType type;
 
   // Test helper.
@@ -14,7 +14,7 @@ public final class AstTypeRef extends AstNode {
 
   public static AstTypeRef ofName(String moduleName, String name) {
     var ref = new AstTypeRef();
-    ref.name(QualifiedName.ofType(name).withModule(moduleName));
+    ref.name(Identifier.ofType(name).withModule(moduleName));
     return ref;
   }
 
@@ -47,11 +47,11 @@ public final class AstTypeRef extends AstNode {
     return "TYPE_REF(%s)".formatted(name);
   }
 
-  public QualifiedName name() {
+  public Identifier name() {
     return name;
   }
 
-  public void name(QualifiedName name) {
+  public void name(Identifier name) {
     this.name = name;
   }
 

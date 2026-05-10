@@ -2,42 +2,42 @@ package com.github.idemura.cimple.compiler;
 
 import static com.github.idemura.cimple.compiler.Constants.BUILTIN_MODULE;
 
-public record QualifiedName(String moduleName, String typeName, String entityName)
-    implements Comparable<QualifiedName> {
-  public static QualifiedName ofEntity(String entityName) {
-    return new QualifiedName(null, null, entityName);
+public record Identifier(String moduleName, String typeName, String entityName)
+    implements Comparable<Identifier> {
+  public static Identifier ofEntity(String entityName) {
+    return new Identifier(null, null, entityName);
   }
 
-  public static QualifiedName ofType(String typeName) {
-    return new QualifiedName(null, typeName, null);
+  public static Identifier ofType(String typeName) {
+    return new Identifier(null, typeName, null);
   }
 
-  public static QualifiedName ofTypeEntity(String typeName, String entityName) {
-    return new QualifiedName(null, typeName, entityName);
+  public static Identifier ofTypeEntity(String typeName, String entityName) {
+    return new Identifier(null, typeName, entityName);
   }
 
   public boolean isBuiltin() {
     return BUILTIN_MODULE.equals(moduleName);
   }
 
-  public QualifiedName builtin() {
+  public Identifier builtin() {
     return withModule(BUILTIN_MODULE);
   }
 
-  public QualifiedName withModule(String moduleName) {
-    return new QualifiedName(moduleName, typeName, entityName);
+  public Identifier withModule(String moduleName) {
+    return new Identifier(moduleName, typeName, entityName);
   }
 
-  public QualifiedName withType(String typeName) {
-    return new QualifiedName(moduleName, typeName, entityName);
+  public Identifier withType(String typeName) {
+    return new Identifier(moduleName, typeName, entityName);
   }
 
-  public QualifiedName withEntity(String entityName) {
-    return new QualifiedName(moduleName, typeName, entityName);
+  public Identifier withEntity(String entityName) {
+    return new Identifier(moduleName, typeName, entityName);
   }
 
   @Override
-  public int compareTo(QualifiedName other) {
+  public int compareTo(Identifier other) {
     var cmp = compareNullable(moduleName, other.moduleName);
     if (cmp != 0) {
       return cmp;

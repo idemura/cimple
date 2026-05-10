@@ -1,19 +1,19 @@
 package com.github.idemura.cimple.compiler.ast;
 
+import com.github.idemura.cimple.compiler.Identifier;
 import com.github.idemura.cimple.compiler.Location;
-import com.github.idemura.cimple.compiler.QualifiedName;
 
 public final class AstFunction extends AstEntity {
-  private QualifiedName name;
+  private Identifier name;
   private AstFunctionHeader header;
   private AstBlock block;
   private AstTypeRef typeRef;
 
-  public QualifiedName name() {
+  public Identifier name() {
     return name;
   }
 
-  public void name(QualifiedName name) {
+  public void name(Identifier name) {
     this.name = name;
   }
 
@@ -59,7 +59,7 @@ public final class AstFunction extends AstEntity {
   }
 
   public void makeLambdaType() {
-    var typeName = QualifiedName.ofEntity("_lambda");
+    var typeName = Identifier.ofEntity("_lambda");
     var type = new AstFunctionType();
     type.name(typeName);
     type.header(header);

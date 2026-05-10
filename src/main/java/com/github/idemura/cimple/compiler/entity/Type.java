@@ -1,15 +1,15 @@
 package com.github.idemura.cimple.compiler.entity;
 
-import com.github.idemura.cimple.compiler.QualifiedName;
+import com.github.idemura.cimple.compiler.Identifier;
 
 public abstract class Type {
-  private final QualifiedName name;
+  private final Identifier name;
 
-  public Type(QualifiedName name) {
+  public Type(Identifier name) {
     this.name = name;
   }
 
-  public QualifiedName name() {
+  public Identifier name() {
     return name;
   }
 }

@@ -2,7 +2,7 @@ package com.github.idemura.cimple.compiler.ast;
 
 import static com.github.idemura.cimple.compiler.Constants.BUILTIN_MODULE;
 
-import com.github.idemura.cimple.compiler.QualifiedName;
+import com.github.idemura.cimple.compiler.Identifier;
 
 public final class AstUtils {
   private AstUtils() {}
@@ -37,7 +37,7 @@ public final class AstUtils {
       header.receiverType(AstTypeRef.ofName(receiverTypeName));
     }
     var function = new AstFunction();
-    function.name(QualifiedName.ofTypeEntity(receiverTypeName, name));
+    function.name(Identifier.ofTypeEntity(receiverTypeName, name));
     function.header(header);
     return function;
   }
@@ -74,7 +74,7 @@ public final class AstUtils {
   private static AstVariable variable(
       String moduleName, String name, long flags, AstTypeRef typeRef) {
     var variable = new AstVariable();
-    variable.name(QualifiedName.ofEntity(name).withModule(moduleName));
+    variable.name(Identifier.ofEntity(name).withModule(moduleName));
     if (flags != 0) {
       variable.setBit(flags);
     }

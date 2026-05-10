@@ -5,8 +5,8 @@ import static com.github.idemura.cimple.compiler.parser.TokenType.*;
 
 import com.github.idemura.cimple.compiler.CompilerException;
 import com.github.idemura.cimple.compiler.ErrorConsumer;
+import com.github.idemura.cimple.compiler.Identifier;
 import com.github.idemura.cimple.compiler.Location;
-import com.github.idemura.cimple.compiler.QualifiedName;
 import com.github.idemura.cimple.compiler.ast.AstArrayAccess;
 import com.github.idemura.cimple.compiler.ast.AstBlock;
 import com.github.idemura.cimple.compiler.ast.AstCall;
@@ -102,7 +102,7 @@ public class Parser {
     var type = new AstRecordType();
     takeKeyword(RECORD);
     type.location(tokenizer.currentLocation());
-    type.name(QualifiedName.ofType(take(IDENTIFIER).value()));
+    type.name(Identifier.ofType(take(IDENTIFIER).value()));
     take(LCURLY);
     var fields = new ImmutableList.Builder<AstVariable>();
     while (!tokenizer.takeIf(RCURLY)) {
@@ -116,7 +116,7 @@ public class Parser {
     var type = new AstUnionType();
     takeKeyword(UNION);
     type.location(tokenizer.currentLocation());
-    type.name(QualifiedName.ofType(take(IDENTIFIER).value()));
+    type.name(Identifier.ofType(take(IDENTIFIER).value()));
     take(LCURLY);
     var variants = new ImmutableList.Builder<AstUnionType.Variant>();
     while (!tokenizer.takeIf(RCURLY)) {
@@ -170,7 +170,7 @@ public class Parser {
       variable.setBit(AstVariable.MUTABLE);
     }
     variable.location(tokenizer.currentLocation());
-    variable.name(QualifiedName.ofEntity(take(IDENTIFIER).value()));
+    variable.name(Identifier.ofEntity(take(IDENTIFIER).value()));
     if (tokenizer.current().is(IDENTIFIER)) {
       variable.typeRef(parseTypeRef());
     }
@@ -456,26 +456,26 @@ public class Parser {
     }
   }
 
-  private record ParsedFunctionHeader(QualifiedName name, AstFunctionHeader header) {}
+  private record ParsedFunctionHeader(Identifier name, AstFunctionHeader header) {}
 
   private ParsedFunctionHeader parseFunctionHeaderWithName(boolean parsingType) {
     takeKeyword(FUNCTION);
     var header = new AstFunctionHeader();
     var current = take(IDENTIFIER);
-    QualifiedName name;
+    Identifier name;
     if (tokenizer.takeIf(COLON)) {
       var receiverType = new AstTypeRef();
-      receiverType.name(QualifiedName.ofType(current.value()));
+      receiverType.name(Identifier.ofType(current.value()));
       receiverType.location(current.location());
       header.receiverType(receiverType);
       header.location(tokenizer.currentLocation());
-      name = QualifiedName.ofType(current.value()).withEntity(take(IDENTIFIER).value());
+      name = Identifier.ofType(current.value()).withEntity(take(IDENTIFIER).value());
     } else {
       header.location(current.location());
       if (parsingType) {
-        name = QualifiedName.ofType(current.value());
+        name = Identifier.ofType(current.value());
       } else {
-        name = QualifiedName.ofEntity(current.value());
+        name = Identifier.ofEntity(current.value());
       }
     }
     header.parameters(parseParameters());
@@ -492,7 +492,7 @@ public class Parser {
       do {
         var variable = new AstVariable();
         variable.location(tokenizer.currentLocation());
-        variable.name(QualifiedName.ofEntity(take(IDENTIFIER).value()));
+        variable.name(Identifier.ofEntity(take(IDENTIFIER).value()));
         if (tokenizer.current().is(IDENTIFIER)) {
           variable.typeRef(parseTypeRef());
         }
@@ -506,7 +506,7 @@ public class Parser {
   private AstTypeRef parseTypeRef() {
     var current = tokenizer.current();
     var ref = new AstTypeRef();
-    ref.name(QualifiedName.ofType(current.value()));
+    ref.name(Identifier.ofType(current.value()));
     ref.location(current.location());
     tokenizer.step();
     return ref;
@@ -514,7 +514,7 @@ public class Parser {
 
   private AstEntityRef parseOperator(Token token) {
     var ref = new AstEntityRef();
-    ref.name(QualifiedName.ofEntity(token.type().symbolName()).builtin());
+    ref.name(Identifier.ofEntity(token.type().symbolName()).builtin());
     ref.location(token.location());
     return ref;
   }
@@ -531,11 +531,11 @@ public class Parser {
     return tokenizer.take();
   }
 
-  private QualifiedName parseQualifiedName(Token first) {
+  private Identifier parseQualifiedName(Token first) {
     if (tokenizer.takeIf(TILDE)) {
-      return QualifiedName.ofEntity(take(IDENTIFIER).value()).withModule(first.value());
+      return Identifier.ofEntity(take(IDENTIFIER).value()).withModule(first.value());
     } else {
-      return QualifiedName.ofEntity(first.value());
+      return Identifier.ofEntity(first.value());
     }
   }
 

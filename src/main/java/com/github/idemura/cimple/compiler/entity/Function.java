@@ -1,9 +1,9 @@
 package com.github.idemura.cimple.compiler.entity;
 
-import com.github.idemura.cimple.compiler.QualifiedName;
+import com.github.idemura.cimple.compiler.Identifier;
 
 public final class Function extends Entity {
-  public Function(QualifiedName name) {
+  public Function(Identifier name) {
     super(name);
   }
 

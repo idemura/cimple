@@ -4,8 +4,8 @@ import static java.lang.Double.parseDouble;
 import static java.lang.Long.parseLong;
 
 import com.github.idemura.cimple.compiler.ErrorConsumer;
+import com.github.idemura.cimple.compiler.Identifier;
 import com.github.idemura.cimple.compiler.Location;
-import com.github.idemura.cimple.compiler.QualifiedName;
 import com.github.idemura.cimple.compiler.ast.AstBoolLiteral;
 import com.github.idemura.cimple.compiler.ast.AstBuiltinType;
 import com.github.idemura.cimple.compiler.ast.AstCall;
@@ -60,7 +60,7 @@ class PreprocessVisitor extends AstExpressionRewriteVisitor {
     return super.visit(node);
   }
 
-  private void checkReceiverParameter(QualifiedName functionName, AstFunctionHeader header) {
+  private void checkReceiverParameter(Identifier functionName, AstFunctionHeader header) {
     // Receiver functions must have exactly one receiver parameter: the only parameter without an
     // explicit type. Free functions must not have any untyped parameters.
     var parameters = header.parameters();
@@ -266,7 +266,7 @@ class PreprocessVisitor extends AstExpressionRewriteVisitor {
     }
   }
 
-  private void checkQualifiedName(QualifiedName name, Location location) {
+  private void checkQualifiedName(Identifier name, Location location) {
     if (name.moduleName() != null) {
       checkName(name.moduleName(), location);
     }

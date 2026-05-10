@@ -1,9 +1,9 @@
 package com.github.idemura.cimple.compiler.entity;
 
-import com.github.idemura.cimple.compiler.QualifiedName;
+import com.github.idemura.cimple.compiler.Identifier;
 
 public class UnionType extends Type {
-  public UnionType(QualifiedName name) {
+  public UnionType(Identifier name) {
     super(name);
   }
 }
