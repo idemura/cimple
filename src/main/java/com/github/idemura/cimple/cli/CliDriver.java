@@ -23,10 +23,13 @@ public class CliDriver implements CompilerParams {
   boolean debug;
 
   @Parameter(names = {"--debug_print_tokens"})
-  boolean debugPrintTokens;
+  boolean printTokens = CompilerParams.super.printTokens();
 
   @Parameter(names = {"--debug_print_ast"})
-  boolean debugPrintAst;
+  boolean printAst = CompilerParams.super.printAst();
+
+  @Parameter(names = {"--indent"})
+  int indent = CompilerParams.super.indent();
 
   @Override
   public Appendable debugOutput() {
@@ -34,13 +37,18 @@ public class CliDriver implements CompilerParams {
   }
 
   @Override
+  public int indent() {
+    return indent == 0 ? CompilerParams.super.indent() : indent;
+  }
+
+  @Override
   public boolean printTokens() {
-    return debug && debugPrintTokens;
+    return debug && printTokens;
   }
 
   @Override
   public boolean printAst() {
-    return debug && debugPrintAst;
+    return debug && printAst;
   }
 
   CliDriver() {}

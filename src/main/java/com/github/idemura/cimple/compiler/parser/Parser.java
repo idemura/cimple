@@ -24,6 +24,7 @@ import com.github.idemura.cimple.compiler.ast.AstGoto;
 import com.github.idemura.cimple.compiler.ast.AstIf;
 import com.github.idemura.cimple.compiler.ast.AstLocal;
 import com.github.idemura.cimple.compiler.ast.AstModule;
+import com.github.idemura.cimple.compiler.ast.AstNew;
 import com.github.idemura.cimple.compiler.ast.AstNumberLiteral;
 import com.github.idemura.cimple.compiler.ast.AstReceiverLookup;
 import com.github.idemura.cimple.compiler.ast.AstRecordType;
@@ -359,7 +360,9 @@ public class Parser {
   }
 
   private AstExpression parseFieldArrayCallChain() {
-    var expr = parsePrimary();
+    var expr = tokenizer.current().is(IDENTIFIER) && keywordOrNull(tokenizer.current()) == NEW
+        ? parseNew()
+        : parsePrimary();
     while (true) {
       var current = tokenizer.current();
       if (tokenizer.takeIf(PERIOD)) {
@@ -387,6 +390,17 @@ public class Parser {
         break;
       }
       expr.location(current.location());
+    }
+    return expr;
+  }
+
+  private AstNew parseNew() {
+    var expr = new AstNew();
+    expr.location(takeKeyword(NEW));
+    expr.typeRef(parseTypeRef());
+    if (tokenizer.takeIf(LBRACKET)) {
+      expr.size(parseExpression());
+      take(RBRACKET);
     }
     return expr;
   }

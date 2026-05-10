@@ -10,4 +10,8 @@ public interface CompilerParams {
   default boolean printAst() {
     return false;
   }
+
+  default int indent() {
+    return 2;
+  }
 }

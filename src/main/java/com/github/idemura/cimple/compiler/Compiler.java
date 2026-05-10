@@ -19,7 +19,7 @@ public class Compiler {
       ErrorConsumer errorConsumer,
       CodeGenerator codeGenerator) {
     this.params = params;
-    this.debugOutput = new IndentWriter(debugOutput, 2);
+    this.debugOutput = new IndentWriter(debugOutput, params.indent());
     this.errorConsumer = errorConsumer;
     this.codeGenerator = codeGenerator;
   }

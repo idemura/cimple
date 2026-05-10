@@ -205,6 +205,16 @@ public abstract class AstVisitor {
     return null;
   }
 
+  protected Object visit(AstNew node) {
+    visitChildren(node);
+    return null;
+  }
+
+  protected void visitChildren(AstNew node) {
+    acceptSafe(node.typeRef());
+    acceptSafe(node.size());
+  }
+
   protected Object visit(AstCall node) {
     visitChildren(node);
     return null;

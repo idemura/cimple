@@ -230,6 +230,17 @@ public class PrintAstVisitor extends AstVisitor {
   }
 
   @Override
+  protected Object visit(AstNew node) {
+    output.writeLine("NEW %s".formatted(node.typeRef()));
+    output.indent();
+    if (node.size() != null) {
+      node.size().accept(this);
+    }
+    output.unindent();
+    return null;
+  }
+
+  @Override
   protected Object visit(AstCall node) {
     output.writeLine("CALL");
     output.indent();

@@ -6,6 +6,7 @@ public abstract sealed class AstExpression extends AstNode
         AstArrayAccess,
         AstFieldAccess,
         AstReceiverLookup,
+        AstNew,
         AstLiteral,
         AstCast {
   protected AstExpression() {}

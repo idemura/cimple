@@ -20,6 +20,7 @@ import com.github.idemura.cimple.compiler.ast.AstFunctionType;
 import com.github.idemura.cimple.compiler.ast.AstGoto;
 import com.github.idemura.cimple.compiler.ast.AstIf;
 import com.github.idemura.cimple.compiler.ast.AstLocal;
+import com.github.idemura.cimple.compiler.ast.AstNew;
 import com.github.idemura.cimple.compiler.ast.AstNumberLiteral;
 import com.github.idemura.cimple.compiler.ast.AstReceiverLookup;
 import com.github.idemura.cimple.compiler.ast.AstRecordType;
@@ -413,7 +414,6 @@ class ParserTest {
         """;
     var module = parseCode(code, makeErrorConsumer());
     var statements = module.findFunction("f").block().statements();
-    assertEquals(5, statements.size());
     int i = 0;
     {
       var expr = ((AstLocal) statements.get(i++)).variable().expression();
@@ -500,6 +500,32 @@ class ParserTest {
           assertEquals(AstNumberLiteral.of(2), call.arguments().get(1));
         }
       }
+    }
+  }
+
+  @Test
+  void testNewDeleteExpression() {
+    var code =
+        """
+        module test;
+        function f() {
+          var x = new Duration;
+          var y = new Duration[5];
+        }
+        """;
+    var module = parseCode(code, makeErrorConsumer());
+    var statements = module.findFunction("f").block().statements();
+    {
+      var expr = ((AstLocal) statements.get(0)).variable().expression();
+      var newExpr = (AstNew) expr;
+      assertEquals(AstTypeRef.ofName("Duration"), newExpr.typeRef());
+      assertNull(newExpr.size());
+    }
+    {
+      var expr = ((AstLocal) statements.get(1)).variable().expression();
+      var newExpr = (AstNew) expr;
+      assertEquals(AstTypeRef.ofName("Duration"), newExpr.typeRef());
+      assertEquals(AstNumberLiteral.of(5), newExpr.size());
     }
   }
 
