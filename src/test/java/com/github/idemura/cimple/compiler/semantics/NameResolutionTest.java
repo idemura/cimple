@@ -30,7 +30,7 @@ class NameResolutionTest {
 
     var module = parseCode(code, errorConsumer);
     var semanticAnalyzer = new SemanticAnalyzer(errorConsumer);
-    semanticAnalyzer.analyze(module);
+    assertTrue(semanticAnalyzer.analyze(module));
 
     assertEquals(List.of(), errorConsumer.errors());
     var nameMap = semanticAnalyzer.nameMap();
@@ -55,7 +55,7 @@ class NameResolutionTest {
 
     var module = parseCode(code, errorConsumer);
     var semanticAnalyzer = new SemanticAnalyzer(errorConsumer);
-    semanticAnalyzer.analyze(module);
+    assertTrue(semanticAnalyzer.analyze(module));
 
     assertEquals(List.of(), errorConsumer.errors());
     {
@@ -83,17 +83,14 @@ class NameResolutionTest {
     var code =
         """
         module test;
-
         var x int;
         const x int;
         """;
-
     var module = parseCode(code, errorConsumer);
     var semanticAnalyzer = new SemanticAnalyzer(errorConsumer);
-    semanticAnalyzer.analyze(module);
-
+    assertFalse(semanticAnalyzer.analyze(module));
     assertEquals(
-        List.of("Definition of variable 'x' has a name collision with variable defined at 3,5."),
+        List.of("Definition of variable 'x' has a name collision with variable defined at 2,5"),
         errorConsumer.errors());
   }
 
@@ -102,17 +99,14 @@ class NameResolutionTest {
     var code =
         """
         module test;
-
         function f() {}
         function f() {}
         """;
-
     var module = parseCode(code, errorConsumer);
     var semanticAnalyzer = new SemanticAnalyzer(errorConsumer);
-    semanticAnalyzer.analyze(module);
-
+    assertFalse(semanticAnalyzer.analyze(module));
     assertEquals(
-        List.of("Definition of function 'f' has a name collision with function defined at 3,10."),
+        List.of("Definition of function 'f' has a name collision with function defined at 2,10"),
         errorConsumer.errors());
   }
 
@@ -121,36 +115,14 @@ class NameResolutionTest {
     var code =
         """
         module test;
-
         var f int;
         function f() {}
         """;
-
     var module = parseCode(code, errorConsumer);
     var semanticAnalyzer = new SemanticAnalyzer(errorConsumer);
-    semanticAnalyzer.analyze(module);
-
+    assertFalse(semanticAnalyzer.analyze(module));
     assertEquals(
-        List.of("Definition of function 'f' has a name collision with variable defined at 3,5."),
-        errorConsumer.errors());
-  }
-
-  @Test
-  void testVariableFunctionCollisionFailure() {
-    var code =
-        """
-        module test;
-
-        function f() {}
-        var f int;
-        """;
-
-    var module = parseCode(code, errorConsumer);
-    var semanticAnalyzer = new SemanticAnalyzer(errorConsumer);
-    semanticAnalyzer.analyze(module);
-
-    assertEquals(
-        List.of("Definition of variable 'f' has a name collision with function defined at 3,10."),
+        List.of("Definition of function 'f' has a name collision with variable defined at 2,5"),
         errorConsumer.errors());
   }
 
@@ -159,15 +131,12 @@ class NameResolutionTest {
     var code =
         """
         module test;
-
         type record R {}
         type record R {}
         """;
-
     var module = parseCode(code, errorConsumer);
     var semanticAnalyzer = new SemanticAnalyzer(errorConsumer);
-    semanticAnalyzer.analyze(module);
-
-    assertEquals(List.of("Duplicate type: 'test~R'. Defined at 3,13."), errorConsumer.errors());
+    assertFalse(semanticAnalyzer.analyze(module));
+    assertEquals(List.of("Duplicate type: 'test~R'. Defined at 2,13."), errorConsumer.errors());
   }
 }

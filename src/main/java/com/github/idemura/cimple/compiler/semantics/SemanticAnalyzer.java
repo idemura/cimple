@@ -103,7 +103,7 @@ public class SemanticAnalyzer {
   private void errorEntityCollision(AstEntity entity, AstEntity existing) {
     errorConsumer.errorAt(
         entity.location(),
-        "Definition of %s '%s' has a name collision with %s defined at %s.",
+        "Definition of %s '%s' has a name collision with %s defined at %s",
         entityKind(entity),
         entity.name().baseName(),
         entityKind(existing),
