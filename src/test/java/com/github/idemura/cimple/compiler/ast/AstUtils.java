@@ -12,15 +12,19 @@ public final class AstUtils {
   }
 
   public static AstBoolLiteral boolLiteral(boolean value) {
-    return new AstBoolLiteral(value);
+    var literal = new AstBoolLiteral(value);
+    literal.typeRef(AstTypeRef.ofType(AstBuiltinType.BOOL));
+    return literal;
+  }
+
+  public static AstNullLiteral nullLiteral() {
+    var literal = new AstNullLiteral();
+    literal.typeRef(AstTypeRef.ofType(AstBuiltinType.NULL));
+    return literal;
   }
 
   public static AstExpression extractReturnExpression(AstFunction function) {
     return ((AstReturn) function.block().statements().get(0)).expression();
-  }
-
-  public static AstNullLiteral nullLiteral() {
-    return new AstNullLiteral();
   }
 
   public static AstFunction function(String name) {

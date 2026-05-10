@@ -6,8 +6,10 @@ import static org.junit.jupiter.api.Assertions.*;
 
 import com.github.idemura.cimple.compiler.InMemoryErrorConsumer;
 import com.github.idemura.cimple.compiler.QualifiedName;
+import com.github.idemura.cimple.compiler.ast.AstBuiltinType;
 import com.github.idemura.cimple.compiler.ast.AstCall;
 import com.github.idemura.cimple.compiler.ast.AstEntityRef;
+import com.github.idemura.cimple.compiler.ast.AstLocal;
 import com.github.idemura.cimple.compiler.ast.AstTypeRef;
 import java.util.List;
 import org.junit.jupiter.api.Test;
@@ -126,5 +128,74 @@ class SemanticAnalyzerTest {
       var function = module.findReceiverFunction("Duration", "toMillis");
       assertEquals(AstTypeRef.ofName("test", "Duration"), function.header().receiverType());
     }
+  }
+
+  @Test
+  void testCallResolution() {
+    var code =
+        """
+        module test;
+
+        function f(x int) string {}
+
+        function g() {
+          var t = f(5);
+        }
+        """;
+
+    var module = parseCode(code, errorConsumer);
+    var semanticAnalyzer = new SemanticAnalyzer(errorConsumer);
+    assertTrue(semanticAnalyzer.analyze(module));
+
+    assertEquals(List.of(), errorConsumer.errors());
+    {
+      var block = module.findFunction("g").block();
+      var local = (AstLocal) block.statements().get(0);
+      assertEquals(new QualifiedName("t"), local.variable().name());
+      assertEquals(AstTypeRef.ofType(AstBuiltinType.STRING), local.variable().typeRef());
+      var call = (AstCall) local.variable().expression();
+      assertEquals(AstEntityRef.ofName("test", "f"), call.function());
+      assertEquals(AstBuiltinType.STRING, call.typeRef().type());
+    }
+  }
+
+  @Test
+  void testCallArityMismatch() {
+    var code =
+        """
+        module test;
+
+        function f(x int) {}
+
+        function g() {
+          f();
+        }
+        """;
+
+    var module = parseCode(code, errorConsumer);
+    var semanticAnalyzer = new SemanticAnalyzer(errorConsumer);
+    assertFalse(semanticAnalyzer.analyze(module));
+    assertEquals(List.of("Function 'test~f' expects 1 arguments, got 0"), errorConsumer.errors());
+  }
+
+  @Test
+  void testCallExactTypeMismatch() {
+    var code =
+        """
+        module test;
+
+        function f(x int) {}
+
+        function g() {
+          f(true);
+        }
+        """;
+
+    var module = parseCode(code, errorConsumer);
+    var semanticAnalyzer = new SemanticAnalyzer(errorConsumer);
+    assertFalse(semanticAnalyzer.analyze(module));
+    assertEquals(
+        List.of("Argument 0 of function 'test~f' has type 'bool', expected 'int64'"),
+        errorConsumer.errors());
   }
 }

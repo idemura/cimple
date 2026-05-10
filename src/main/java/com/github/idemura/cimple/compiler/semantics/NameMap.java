@@ -14,7 +14,12 @@ import java.util.List;
 import java.util.Map;
 
 public class NameMap {
-  private record ReceiverFunctionKey(QualifiedName receiverType, String name) {}
+  private record ReceiverFunctionKey(QualifiedName receiverType, String name) {
+    @Override
+    public String toString() {
+      return receiverType.toString() + ":" + name;
+    }
+  }
 
   private final Map<QualifiedName, AstType> typeQualifiedNameMap = new HashMap<>();
   private final Map<String, AstType> typeNameMap = new HashMap<>();
@@ -101,8 +106,11 @@ public class NameMap {
     return typeNameMap.get(name.baseName());
   }
 
-  public AstEntity lookupEntity(String name) {
-    return entityNameMap.get(name);
+  public AstEntity lookupEntity(QualifiedName name) {
+    if (name.moduleName() != null) {
+      return entityQualifiedNameMap.get(name);
+    }
+    return entityNameMap.get(name.baseName());
   }
 
   public AstFunction lookupReceiverFunction(QualifiedName receiverType, String name) {

@@ -20,7 +20,7 @@ public abstract class AstVisitor {
   }
 
   protected void visitChildren(AstFunctionHeader node) {
-    acceptSafe(node.receiverType());
+    // Receiver type ref visited as one of the parameters type ref.
     for (var parameter : node.parameters()) {
       parameter.accept(this);
     }
@@ -34,6 +34,7 @@ public abstract class AstVisitor {
 
   protected void visitChildren(AstFunction node) {
     node.header().accept(this);
+    acceptSafe(node.typeRef());
     node.block().accept(this);
   }
 
@@ -76,7 +77,14 @@ public abstract class AstVisitor {
   }
 
   protected Object visit(AstUnionType node) {
+    visitChildren(node);
     return null;
+  }
+
+  protected void visitChildren(AstUnionType node) {
+    for (var variant : node.variants()) {
+      acceptSafe(variant.valueType());
+    }
   }
 
   protected Object visit(AstBlock node) {
@@ -158,19 +166,39 @@ public abstract class AstVisitor {
   }
 
   protected Object visit(AstNullLiteral node) {
+    visitChildren(node);
     return null;
+  }
+
+  protected void visitChildren(AstNullLiteral node) {
+    acceptSafe(node.typeRef());
   }
 
   protected Object visit(AstBoolLiteral node) {
+    visitChildren(node);
     return null;
+  }
+
+  protected void visitChildren(AstBoolLiteral node) {
+    acceptSafe(node.typeRef());
   }
 
   protected Object visit(AstNumberLiteral node) {
+    visitChildren(node);
     return null;
   }
 
+  protected void visitChildren(AstNumberLiteral node) {
+    acceptSafe(node.typeRef());
+  }
+
   protected Object visit(AstStringLiteral node) {
+    visitChildren(node);
     return null;
+  }
+
+  protected void visitChildren(AstStringLiteral node) {
+    acceptSafe(node.typeRef());
   }
 
   protected Object visit(AstEntityRef node) {
@@ -224,6 +252,7 @@ public abstract class AstVisitor {
 
   protected void visitChildren(AstCast node) {
     node.expression().accept(this);
+    acceptSafe(node.typeRef());
   }
 
   protected void acceptSafe(AstNode node) {

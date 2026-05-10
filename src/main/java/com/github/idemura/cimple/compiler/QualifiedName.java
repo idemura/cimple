@@ -34,7 +34,7 @@ public record QualifiedName(String moduleName, String baseName)
     if (moduleName == null || isBuiltin()) {
       return baseName;
     }
-    return moduleName + "::" + baseName;
+    return moduleName + "~" + baseName;
   }
 
   private static int compareNullable(String left, String right) {

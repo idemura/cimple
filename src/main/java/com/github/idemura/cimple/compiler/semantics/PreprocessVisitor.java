@@ -224,9 +224,21 @@ class PreprocessVisitor extends AstExpressionRewriteVisitor {
   protected Object visit(AstEntityRef node) {
     var newNode =
         switch (node.name().baseName()) {
-          case "true" -> new AstBoolLiteral(true);
-          case "false" -> new AstBoolLiteral(false);
-          case "null" -> new AstNullLiteral();
+          case "true" -> {
+            var literal = new AstBoolLiteral(true);
+            literal.typeRef(AstTypeRef.ofType(AstBuiltinType.BOOL));
+            yield literal;
+          }
+          case "false" -> {
+            var literal = new AstBoolLiteral(false);
+            literal.typeRef(AstTypeRef.ofType(AstBuiltinType.BOOL));
+            yield literal;
+          }
+          case "null" -> {
+            var literal = new AstNullLiteral();
+            literal.typeRef(AstTypeRef.ofType(AstBuiltinType.NULL));
+            yield literal;
+          }
           default -> node;
         };
     if (newNode != node) {

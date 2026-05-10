@@ -4,7 +4,7 @@ import com.github.idemura.cimple.compiler.Location;
 
 public abstract class AstNode {
   private Location location;
-  private boolean nameResolved = false;
+  private boolean resolved = false;
 
   public abstract Object accept(AstVisitor visitor);
 
@@ -16,11 +16,11 @@ public abstract class AstNode {
     this.location = location;
   }
 
-  public boolean isNameResolved() {
-    return nameResolved;
+  public boolean isResolved() {
+    return resolved;
   }
 
-  public void markNameResolved() {
-    nameResolved = true;
+  public void markResolved() {
+    resolved = true;
   }
 }

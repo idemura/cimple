@@ -1,5 +1,6 @@
 package com.github.idemura.cimple.compiler.semantics;
 
+import static com.google.common.base.Preconditions.checkNotNull;
 import static com.google.common.base.Preconditions.checkState;
 
 import com.github.idemura.cimple.compiler.ErrorConsumer;
@@ -33,7 +34,22 @@ public class NameResolutionVisitor extends AstExpressionRewriteVisitor {
 
   @Override
   protected Object visit(AstModule node) {
-    return super.visit(node);
+    try {
+      // Named function types are structural:
+      //   type function foo(int x) bool;
+      //   type function bar(int x) bool;
+      // Values of types `foo` and `bar` are assignment-compatible because the signatures are the
+      // same. Functions therefore need an explicit lambda type derived from their headers. Assign
+      // those types to all module-level functions before resolving names inside function bodies.
+      for (var entity : node.definitions()) {
+        if (entity instanceof AstFunction function) {
+          function.makeLambdaType();
+        }
+      }
+      return super.visit(node);
+    } finally {
+      node.markResolved();
+    }
   }
 
   @Override
@@ -52,21 +68,34 @@ public class NameResolutionVisitor extends AstExpressionRewriteVisitor {
       return super.visit(node);
     } finally {
       nameMap.endScope();
+      node.markResolved();
     }
   }
 
   @Override
   protected Object visit(AstVariable node) {
-    resolveTypeRef(node.typeRef());
-    return super.visit(node);
+    try {
+      super.visit(node);
+      // Preprocessor has checked that we have typeRef or expression.
+      if (node.typeRef() == null) {
+        node.typeRef(node.expression().typeRef());
+      }
+      return null;
+    } finally {
+      node.markResolved();
+    }
   }
 
   @Override
   protected Object visit(AstTypeRef node) {
-    if (node.isNameResolved()) {
+    if (node.isResolved()) {
       return super.visit(node);
     }
-    // TODO: Resolve
+    var type = nameMap.lookupType(node.name());
+    if (type == null) {
+      errorConsumer.errorAt(node.location(), "Undefined type: '%s'", node.name());
+    }
+    node.type(type);
     return super.visit(node);
   }
 
@@ -105,7 +134,7 @@ public class NameResolutionVisitor extends AstExpressionRewriteVisitor {
 
   @Override
   protected Object visit(AstEntityRef node) {
-    if (node.isNameResolved()) {
+    if (node.isResolved()) {
       return node;
     }
     // Builtin names are resolved in AstCall, after the argument expressions are available.
@@ -113,15 +142,16 @@ public class NameResolutionVisitor extends AstExpressionRewriteVisitor {
       return node;
     }
     try {
-      var entity = nameMap.lookupEntity(node.name().baseName());
+      var entity = nameMap.lookupEntity(node.name());
       if (entity == null) {
-        errorConsumer.errorAt(node.location(), "Undefined name: %s", node.name());
+        errorConsumer.errorAt(node.location(), "Undefined name: '%s'", node.name());
         return node;
       }
+      node.name(entity.name());
       node.entity(entity);
       return node;
     } finally {
-      node.markNameResolved();
+      node.markResolved();
     }
   }
 
@@ -132,18 +162,18 @@ public class NameResolutionVisitor extends AstExpressionRewriteVisitor {
       super.visit(node);
       var function = node.function();
       if (function instanceof AstReceiverLookup receiverLookup) {
-        return resolveReceiverCall(node, receiverLookup);
+        resolveReceiverCall(node, receiverLookup);
       }
       // Builtin calls are selected here, once argument expressions are available.
       if (function instanceof AstEntityRef ref && ref.isBuiltin()) {
-        checkState(!ref.isNameResolved());
-        return resolveBuiltinCall(node);
+        checkState(!ref.isResolved());
+        resolveBuiltinCall(node);
       }
-      // Normal function resolved when AstEntityRef resolved.
       // Receiver lookup and builtin resolution may replace the callee expression.
+      checkCallParameters(node);
       return node;
     } finally {
-      node.markNameResolved();
+      node.markResolved();
     }
   }
 
@@ -164,72 +194,119 @@ public class NameResolutionVisitor extends AstExpressionRewriteVisitor {
     try {
       var type = nameMap.lookupType(typeRef.name());
       if (type == null) {
-        errorConsumer.errorAt(typeRef.location(), "Undefined type: %s", typeRef.name());
+        errorConsumer.errorAt(typeRef.location(), "Undefined type: '%s'", typeRef.name());
         return;
       }
       typeRef.name(type.name());
       typeRef.type(type);
     } finally {
-      typeRef.markNameResolved();
+      typeRef.markResolved();
     }
   }
 
-  private AstExpression resolveBuiltinCall(AstCall node) {
+  private void resolveBuiltinCall(AstCall node) {
     // TODO: Select the builtin overload using the resolved argument types.
     var operatorRef = (AstEntityRef) node.function();
-    AstFunction function;
-    switch (operatorRef.name().baseName()) {
-      case "+":
-        {
-          function = BuiltinFunctions.ADD_I64;
-          break;
-        }
-      case "*":
-        {
-          function = BuiltinFunctions.MUL_I64;
-          break;
-        }
-      default:
-        throw new IllegalStateException(
-            "Unknown builtin entity '%s'".formatted(operatorRef.name()));
-    }
+    var function =
+        switch (operatorRef.name().baseName()) {
+          case "+" -> BuiltinFunctions.ADD_I64;
+          case "*" -> BuiltinFunctions.MUL_I64;
+          default ->
+              throw new IllegalStateException(
+                  "Unknown builtin entity '%s'".formatted(operatorRef.name()));
+        };
     operatorRef.name(function.name());
     operatorRef.entity(function);
-    return node;
   }
 
-  private AstExpression resolveReceiverCall(AstCall node, AstReceiverLookup receiverLookup) {
+  private void resolveReceiverCall(AstCall node, AstReceiverLookup receiverLookup) {
     var receiverType = receiverLookup.receiver().typeRef();
     checkState(receiverType != null);
+    checkState(receiverType.isResolved());
     if (receiverType.type() == AstBuiltinType.NULL) {
       errorConsumer.errorAt(
           receiverLookup.location(),
-          "Cannot resolve receiver function %s for null receiver",
+          "Cannot resolve receiver function '%s' for null receiver",
           receiverLookup.functionName());
-      return node;
+      return;
     }
     var function =
         nameMap.lookupReceiverFunction(receiverType.name(), receiverLookup.functionName());
     if (function == null) {
       errorConsumer.errorAt(
           receiverLookup.location(),
-          "Undefined receiver function: %s:%s",
+          "Undefined receiver function: '%s:%s'",
           receiverType.name(),
           receiverLookup.functionName());
-      return node;
+      return;
     }
 
     var functionRef = new AstEntityRef();
     functionRef.name(function.name());
     functionRef.entity(function);
-    functionRef.markNameResolved();
     functionRef.location(receiverLookup.location());
+    functionRef.markResolved();
 
     var arguments = new ArrayList<>(node.arguments());
     arguments.add(function.header().receiverIndex(), receiverLookup.receiver());
     node.arguments(arguments);
     node.function(functionRef);
-    return node;
+  }
+
+  private void checkCallParameters(AstCall call) {
+    var functionTypeRef = call.function().typeRef();
+    if (functionTypeRef == null || functionTypeRef.type() == null) {
+      return;
+    }
+    var type = functionTypeRef.type();
+    if (type instanceof AstFunctionType functionType) {
+      var parameters = functionType.header().parameters();
+      var arguments = call.arguments();
+      if (arguments.size() != parameters.size()) {
+        errorConsumer.errorAt(
+            call.location(),
+            "Function '%s' expects %d arguments, got %d",
+            calleeExpressionMessage(call.function()),
+            parameters.size(),
+            arguments.size());
+        return;
+      }
+      for (int i = 0; i < arguments.size(); i++) {
+        var argumentType = checkNotNull(arguments.get(i).typeRef());
+        var parameterType = checkNotNull(parameters.get(i).typeRef());
+        var argumentResolvedType =
+            argumentType.type() != null
+                ? argumentType.type()
+                : nameMap.lookupType(argumentType.name());
+        var parameterResolvedType =
+            parameterType.type() != null
+                ? parameterType.type()
+                : nameMap.lookupType(parameterType.name());
+        var sameType =
+            argumentResolvedType != null && parameterResolvedType != null
+                ? parameterResolvedType.equals(argumentResolvedType)
+                : parameterType.equals(argumentType);
+        if (!sameType) {
+          errorConsumer.errorAt(
+              arguments.get(i).location(),
+              "Argument %d of function '%s' has type '%s', expected '%s'",
+              i,
+              calleeExpressionMessage(call.function()),
+              argumentType.name(),
+              parameterType.name());
+        }
+      }
+    } else {
+      errorConsumer.errorAt(
+          call.function().location(), "Calling expression of type '%s', function expected.", type);
+    }
+  }
+
+  private static String calleeExpressionMessage(AstExpression expression) {
+    if (expression instanceof AstEntityRef entityRef) {
+      return entityRef.name().toString();
+    }
+    return "function pointer";
   }
 
   private void registerLocal(AstVariable variable) {
@@ -237,7 +314,7 @@ public class NameResolutionVisitor extends AstExpressionRewriteVisitor {
     if (existing != null) {
       errorConsumer.errorAt(
           variable.location(),
-          "Duplicate local variable: %s. Defined at %s.",
+          "Duplicate local variable: '%s'. Defined at %s.",
           variable.name(),
           existing.location());
     }

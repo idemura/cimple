@@ -34,10 +34,10 @@ class NameResolutionTest {
 
     assertEquals(List.of(), errorConsumer.errors());
     var nameMap = semanticAnalyzer.nameMap();
-    assertSame(module.findVariable("x"), nameMap.lookupEntity("x"));
-    assertSame(module.findVariable("y"), nameMap.lookupEntity("y"));
-    assertSame(module.findFunction("f"), nameMap.lookupEntity("f"));
-    assertSame(module.findFunction("g"), nameMap.lookupEntity("g"));
+    assertSame(module.findVariable("x"), nameMap.lookupEntity(new QualifiedName("x")));
+    assertSame(module.findVariable("y"), nameMap.lookupEntity(new QualifiedName("y")));
+    assertSame(module.findFunction("f"), nameMap.lookupEntity(new QualifiedName("f")));
+    assertSame(module.findFunction("g"), nameMap.lookupEntity(new QualifiedName("g")));
     assertSame(module.findType("R"), nameMap.lookupType(new QualifiedName("R")));
   }
 
@@ -75,7 +75,7 @@ class NameResolutionTest {
     assertSame(
         module.findReceiverFunction("Duration", "toMillis"),
         nameMap.lookupReceiverFunction(new QualifiedName("test", "Duration"), "toMillis"));
-    assertNull(nameMap.lookupEntity("toMillis"));
+    assertNull(nameMap.lookupEntity(new QualifiedName("toMillis")));
   }
 
   @Test
@@ -168,6 +168,6 @@ class NameResolutionTest {
     var semanticAnalyzer = new SemanticAnalyzer(errorConsumer);
     semanticAnalyzer.analyze(module);
 
-    assertEquals(List.of("Duplicate type: test::R. Defined at 3,13."), errorConsumer.errors());
+    assertEquals(List.of("Duplicate type: 'test~R'. Defined at 3,13."), errorConsumer.errors());
   }
 }

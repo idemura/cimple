@@ -32,7 +32,7 @@ public final class BuiltinFunctions {
     var function = new AstFunction();
     function.name(QualifiedName.ofBuiltin(name));
     function.header(header);
-    function.markNameResolved();
+    function.markResolved();
     return function;
   }
 }

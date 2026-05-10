@@ -22,7 +22,7 @@ public final class AstTypeRef extends AstNode {
     var ref = new AstTypeRef();
     ref.name(type.name());
     ref.type(type);
-    ref.markNameResolved();
+    ref.markResolved();
     return ref;
   }
 

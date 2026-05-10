@@ -13,7 +13,7 @@ class NameMapTest {
     var local = localVariable("x");
 
     assertNull(nameMap.addLocal(local));
-    assertSame(local, nameMap.lookupEntity("x"));
+    assertSame(local, nameMap.lookupEntity(new QualifiedName("x")));
   }
 
   @Test
@@ -24,7 +24,7 @@ class NameMapTest {
 
     assertNull(nameMap.addLocal(first));
     assertSame(first, nameMap.addLocal(second));
-    assertSame(first, nameMap.lookupEntity("x"));
+    assertSame(first, nameMap.lookupEntity(new QualifiedName("x")));
   }
 
   @Test
@@ -35,7 +35,7 @@ class NameMapTest {
 
     assertNull(nameMap.addLocal(parameter));
     assertSame(parameter, nameMap.addLocal(local));
-    assertSame(parameter, nameMap.lookupEntity("x"));
+    assertSame(parameter, nameMap.lookupEntity(new QualifiedName("x")));
   }
 
   @Test
@@ -47,10 +47,10 @@ class NameMapTest {
     assertNull(nameMap.addVariable(global));
     nameMap.beginScope();
     assertNull(nameMap.addLocal(local));
-    assertSame(local, nameMap.lookupEntity("x"));
+    assertSame(local, nameMap.lookupEntity(new QualifiedName("x")));
     nameMap.endScope();
 
-    assertSame(global, nameMap.lookupEntity("x"));
+    assertSame(global, nameMap.lookupEntity(new QualifiedName("x")));
   }
 
   @Test
@@ -59,7 +59,7 @@ class NameMapTest {
     var function = function("Duration", "toMillis");
 
     assertNull(nameMap.addFunction(function));
-    assertNull(nameMap.lookupEntity("toMillis"));
+    assertNull(nameMap.lookupEntity(new QualifiedName("toMillis")));
     assertSame(function, nameMap.lookupReceiverFunction(new QualifiedName("Duration"), "toMillis"));
   }
 }

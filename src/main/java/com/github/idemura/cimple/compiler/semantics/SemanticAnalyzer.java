@@ -26,6 +26,7 @@ public class SemanticAnalyzer {
     if (hasErrors()) {
       return false;
     }
+    module.accept(new TypeResolutionVisitor(nameMap, errorConsumer));
     module.accept(new NameResolutionVisitor(nameMap, errorConsumer));
     if (hasErrors()) {
       return false;
@@ -50,7 +51,7 @@ public class SemanticAnalyzer {
         if (existing != null) {
           errorConsumer.errorAt(
               type.location(),
-              "Duplicate type: %s. Defined at %s.",
+              "Duplicate type: '%s'. Defined at %s.",
               type.name(),
               existing.location());
         }

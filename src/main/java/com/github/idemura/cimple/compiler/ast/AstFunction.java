@@ -42,7 +42,11 @@ public final class AstFunction extends AstEntity {
 
   @Override
   public String toString() {
-    return "FUNCTION %s(%s): %s".formatted(name, header.parameters(), header.resultType());
+    if (header.receiverType() != null) {
+      return "FUNCTION %s:%s".formatted(header.receiverType().name(), name);
+    } else {
+      return "FUNCTION %s".formatted(name);
+    }
   }
 
   @Override
@@ -66,6 +70,7 @@ public final class AstFunction extends AstEntity {
     typeRef = new AstTypeRef();
     typeRef.name(typeName);
     typeRef.type(type);
+    typeRef.markResolved();
   }
 
   public AstTypeRef typeRef() {
