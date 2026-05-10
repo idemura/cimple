@@ -89,14 +89,6 @@ public class NameResolutionVisitor extends AstExpressionRewriteVisitor {
 
   @Override
   protected Object visit(AstTypeRef node) {
-    if (node.isResolved()) {
-      return super.visit(node);
-    }
-    var type = nameMap.lookupType(node.name());
-    if (type == null) {
-      errorConsumer.errorAt(node.location(), "Undefined type: '%s'", node.name());
-    }
-    node.type(type);
     return super.visit(node);
   }
 
@@ -108,17 +100,11 @@ public class NameResolutionVisitor extends AstExpressionRewriteVisitor {
 
   @Override
   protected Object visit(AstRecordType node) {
-    for (var field : node.fields()) {
-      resolveTypeRef(field.typeRef());
-    }
     return super.visit(node);
   }
 
   @Override
   protected Object visit(AstUnionType node) {
-    for (var variant : node.variants()) {
-      resolveTypeRef(variant.valueType());
-    }
     return super.visit(node);
   }
 
@@ -208,7 +194,6 @@ public class NameResolutionVisitor extends AstExpressionRewriteVisitor {
 
   @Override
   protected Object visit(AstCast node) {
-    resolveTypeRef(node.typeRef());
     return super.visit(node);
   }
 
@@ -219,6 +204,7 @@ public class NameResolutionVisitor extends AstExpressionRewriteVisitor {
     resolveTypeRef(header.resultType());
   }
 
+  // TODO: Remove
   private void resolveTypeRef(AstTypeRef typeRef) {
     try {
       var type = nameMap.lookupType(typeRef.name());
