@@ -59,7 +59,7 @@ public final class AstFunction extends AstEntity {
   }
 
   public void makeLambdaType() {
-    var typeName = Identifier.ofEntity("_lambda");
+    var typeName = Identifier.ofEntity("_lambda").builtin();
     var type = new AstFunctionType();
     type.name(typeName);
     type.header(header);

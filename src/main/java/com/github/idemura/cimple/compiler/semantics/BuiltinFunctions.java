@@ -32,6 +32,7 @@ public final class BuiltinFunctions {
     var function = new AstFunction();
     function.name(Identifier.ofEntity(name).builtin());
     function.header(header);
+    function.makeLambdaType();
     function.markResolved();
     return function;
   }

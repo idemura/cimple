@@ -251,10 +251,7 @@ public class NameResolutionVisitor extends AstExpressionRewriteVisitor {
   }
 
   private void checkCallParameters(AstCall call) {
-    var functionTypeRef = call.function().typeRef();
-    if (functionTypeRef == null || functionTypeRef.type() == null) {
-      return;
-    }
+    var functionTypeRef = checkNotNull(call.function().typeRef());
     var type = functionTypeRef.type();
     if (type instanceof AstFunctionType functionType) {
       var parameters = functionType.header().parameters();
