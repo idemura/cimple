@@ -12,12 +12,39 @@ class ExpressionTest extends AbstractSemanticsTest {
     var code =
         """
         module test;
-        function f() {
+        type record Duration {
+          var seconds int;
+        }
+        function f(d Duration) {
           var x = 1 + 2;
+          var y = d.seconds;
         }
         """;
     var module = parseCode(code, errorConsumer);
     new SemanticAnalyzer(errorConsumer).analyze(module);
     assertEquals(List.of(), errorConsumer.errors());
+  }
+
+  @Test
+  void testInvalidFieldAccess() {
+    var code =
+        """
+        module test;
+        type record Duration {
+          var seconds int;
+        }
+        function f() {
+          var x = 1.seconds;
+          var d Duration;
+          var y = d.millis;
+        }
+        """;
+    var module = parseCode(code, errorConsumer);
+    new SemanticAnalyzer(errorConsumer).analyze(module);
+    assertEquals(
+        List.of(
+            "Field access requires a record, got 'int64'",
+            "Undefined field 'millis' in record 'test~Duration'"),
+        errorConsumer.errors());
   }
 }

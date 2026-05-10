@@ -11,6 +11,7 @@ import com.github.idemura.cimple.compiler.ast.AstCast;
 import com.github.idemura.cimple.compiler.ast.AstEntityRef;
 import com.github.idemura.cimple.compiler.ast.AstExpression;
 import com.github.idemura.cimple.compiler.ast.AstExpressionRewriteVisitor;
+import com.github.idemura.cimple.compiler.ast.AstFieldAccess;
 import com.github.idemura.cimple.compiler.ast.AstFunction;
 import com.github.idemura.cimple.compiler.ast.AstFunctionHeader;
 import com.github.idemura.cimple.compiler.ast.AstFunctionType;
@@ -149,6 +150,36 @@ public class NameResolutionVisitor extends AstExpressionRewriteVisitor {
       }
       node.name(entity.name());
       node.entity(entity);
+      return node;
+    } finally {
+      node.markResolved();
+    }
+  }
+
+  @Override
+  protected Object visit(AstFieldAccess node) {
+    try {
+      super.visit(node);
+      var objectTypeRef = checkNotNull(node.object().typeRef());
+      var objectType = objectTypeRef.type();
+      if (!(objectType instanceof AstRecordType recordType)) {
+        errorConsumer.errorAt(
+            node.location(),
+            "Field access requires a record, got '%s'",
+            objectTypeRef.name());
+        return node;
+      }
+      for (var field : recordType.fields()) {
+        if (field.name().entityName().equals(node.fieldName())) {
+          node.field(field);
+          return node;
+        }
+      }
+      errorConsumer.errorAt(
+          node.location(),
+          "Undefined field '%s' in record '%s'",
+          node.fieldName(),
+          recordType.name());
       return node;
     } finally {
       node.markResolved();

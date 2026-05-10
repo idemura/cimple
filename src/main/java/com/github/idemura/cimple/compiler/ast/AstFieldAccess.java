@@ -3,6 +3,7 @@ package com.github.idemura.cimple.compiler.ast;
 public final class AstFieldAccess extends AstExpression {
   private AstExpression object;
   private String fieldName;
+  private AstVariable field;
 
   @Override
   public Object accept(AstVisitor visitor) {
@@ -11,7 +12,7 @@ public final class AstFieldAccess extends AstExpression {
 
   @Override
   public AstTypeRef typeRef() {
-    throw new UnsupportedOperationException();
+    return field == null ? null : field.typeRef();
   }
 
   public AstExpression object() {
@@ -28,5 +29,13 @@ public final class AstFieldAccess extends AstExpression {
 
   public void fieldName(String fieldName) {
     this.fieldName = fieldName;
+  }
+
+  public AstVariable field() {
+    return field;
+  }
+
+  public void field(AstVariable field) {
+    this.field = field;
   }
 }
