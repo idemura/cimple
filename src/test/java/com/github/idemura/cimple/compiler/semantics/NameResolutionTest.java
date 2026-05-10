@@ -3,35 +3,25 @@ package com.github.idemura.cimple.compiler.semantics;
 import static com.github.idemura.cimple.compiler.parser.Parser.parseCode;
 import static org.junit.jupiter.api.Assertions.*;
 
-import com.github.idemura.cimple.compiler.InMemoryErrorConsumer;
 import com.github.idemura.cimple.compiler.QualifiedName;
-import com.github.idemura.cimple.compiler.ast.AstBuiltinType;
-import com.github.idemura.cimple.compiler.ast.AstTypeRef;
 import java.util.List;
 import org.junit.jupiter.api.Test;
 
-class NameResolutionTest {
-  private final InMemoryErrorConsumer errorConsumer = new InMemoryErrorConsumer();
-
+class NameResolutionTest extends AbstractSemanticsTest {
   @Test
   void testPopulateNameMap() {
     var code =
         """
         module test;
-
         type record R {}
-
         var x int;
         const y int;
-
         function f() {}
         function g() {}
         """;
-
     var module = parseCode(code, errorConsumer);
     var semanticAnalyzer = new SemanticAnalyzer(errorConsumer);
-    assertTrue(semanticAnalyzer.analyze(module));
-
+    semanticAnalyzer.analyze(module);
     assertEquals(List.of(), errorConsumer.errors());
     var nameMap = semanticAnalyzer.nameMap();
     assertSame(module.findVariable("x"), nameMap.lookupEntity(new QualifiedName("x")));
@@ -50,8 +40,7 @@ class NameResolutionTest {
         const x int;
         """;
     var module = parseCode(code, errorConsumer);
-    var semanticAnalyzer = new SemanticAnalyzer(errorConsumer);
-    assertFalse(semanticAnalyzer.analyze(module));
+    new SemanticAnalyzer(errorConsumer).analyze(module);
     assertEquals(
         List.of("Definition of variable 'x' has a name collision with variable defined at 2,5"),
         errorConsumer.errors());
@@ -66,8 +55,7 @@ class NameResolutionTest {
         function f() {}
         """;
     var module = parseCode(code, errorConsumer);
-    var semanticAnalyzer = new SemanticAnalyzer(errorConsumer);
-    assertFalse(semanticAnalyzer.analyze(module));
+    new SemanticAnalyzer(errorConsumer).analyze(module);
     assertEquals(
         List.of("Definition of function 'f' has a name collision with function defined at 2,10"),
         errorConsumer.errors());
@@ -82,8 +70,7 @@ class NameResolutionTest {
         function f() {}
         """;
     var module = parseCode(code, errorConsumer);
-    var semanticAnalyzer = new SemanticAnalyzer(errorConsumer);
-    assertFalse(semanticAnalyzer.analyze(module));
+    new SemanticAnalyzer(errorConsumer).analyze(module);
     assertEquals(
         List.of("Definition of function 'f' has a name collision with variable defined at 2,5"),
         errorConsumer.errors());
@@ -98,8 +85,7 @@ class NameResolutionTest {
         type record R {}
         """;
     var module = parseCode(code, errorConsumer);
-    var semanticAnalyzer = new SemanticAnalyzer(errorConsumer);
-    assertFalse(semanticAnalyzer.analyze(module));
+    new SemanticAnalyzer(errorConsumer).analyze(module);
     assertEquals(List.of("Duplicate type: 'test~R'. Defined at 2,13."), errorConsumer.errors());
   }
 }

@@ -4,6 +4,7 @@ import com.beust.jcommander.JCommander;
 import com.beust.jcommander.Parameter;
 import com.github.idemura.cimple.compiler.Compiler;
 import com.github.idemura.cimple.compiler.CompilerParams;
+import com.github.idemura.cimple.compiler.ErrorConsumer.Mode;
 import com.github.idemura.cimple.compiler.codegen.NoopCodeGenerator;
 import java.io.IOException;
 import java.io.UncheckedIOException;
@@ -50,7 +51,10 @@ public class CliDriver implements CompilerParams {
 
   boolean run() {
     var success = true;
-    var compiler = new Compiler(this, System.out, new CliErrorConsumer(), new NoopCodeGenerator());
+    var errorConsumer = new CliErrorConsumer();
+    errorConsumer.enable(Mode.PRINT_LEVEL);
+    errorConsumer.enable(Mode.PRINT_LOCATION);
+    var compiler = new Compiler(this, System.out, errorConsumer, new NoopCodeGenerator());
     for (var fileName : files) {
       var code = readCodeFromFile(fileName);
       if (!compiler.compile(fileName, code)) {

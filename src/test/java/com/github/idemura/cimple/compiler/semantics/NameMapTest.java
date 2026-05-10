@@ -11,7 +11,6 @@ class NameMapTest {
   void testAddLocalNoCollision() {
     var nameMap = new NameMap();
     var local = localVariable("x");
-
     assertNull(nameMap.addLocal(local));
     assertSame(local, nameMap.lookupEntity(new QualifiedName("x")));
   }
@@ -19,12 +18,11 @@ class NameMapTest {
   @Test
   void testAddLocalDuplicateLocal() {
     var nameMap = new NameMap();
-    var first = localVariable("x");
-    var second = localVariable("x");
-
-    assertNull(nameMap.addLocal(first));
-    assertSame(first, nameMap.addLocal(second));
-    assertSame(first, nameMap.lookupEntity(new QualifiedName("x")));
+    var local1 = localVariable("x");
+    var local2 = localVariable("x");
+    assertNull(nameMap.addLocal(local1));
+    assertSame(local1, nameMap.addLocal(local2));
+    assertSame(local1, nameMap.lookupEntity(new QualifiedName("x")));
   }
 
   @Test
@@ -32,7 +30,6 @@ class NameMapTest {
     var nameMap = new NameMap();
     var parameter = parameter("x");
     var local = localVariable("x");
-
     assertNull(nameMap.addLocal(parameter));
     assertSame(parameter, nameMap.addLocal(local));
     assertSame(parameter, nameMap.lookupEntity(new QualifiedName("x")));
@@ -43,13 +40,11 @@ class NameMapTest {
     var nameMap = new NameMap();
     var global = globalVariable("test", "x");
     var local = localVariable("x");
-
     assertNull(nameMap.addVariable(global));
     nameMap.beginScope();
     assertNull(nameMap.addLocal(local));
     assertSame(local, nameMap.lookupEntity(new QualifiedName("x")));
     nameMap.endScope();
-
     assertSame(global, nameMap.lookupEntity(new QualifiedName("x")));
   }
 
@@ -57,7 +52,6 @@ class NameMapTest {
   void testReceiverFunctionHasSeparateMap() {
     var nameMap = new NameMap();
     var function = function("Duration", "toMillis");
-
     assertNull(nameMap.addFunction(function));
     assertNull(nameMap.lookupEntity(new QualifiedName("toMillis")));
     assertSame(function, nameMap.lookupReceiverFunction(new QualifiedName("Duration"), "toMillis"));

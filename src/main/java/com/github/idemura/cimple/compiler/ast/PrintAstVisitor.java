@@ -259,7 +259,7 @@ public class PrintAstVisitor extends AstVisitor {
 
   @Override
   protected Object visit(AstReceiverLookup node) {
-    output.writeLine("BIND %s".formatted(node.functionName()));
+    output.writeLine("RECEIVEaR %s".formatted(node.functionName()));
     output.indent();
     node.receiver().accept(this);
     output.unindent();

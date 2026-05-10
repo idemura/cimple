@@ -4,7 +4,6 @@ import static com.github.idemura.cimple.compiler.ast.AstUtils.*;
 import static com.github.idemura.cimple.compiler.parser.Parser.parseCode;
 import static org.junit.jupiter.api.Assertions.*;
 
-import com.github.idemura.cimple.compiler.InMemoryErrorConsumer;
 import com.github.idemura.cimple.compiler.ast.AstBuiltinType;
 import com.github.idemura.cimple.compiler.ast.AstDefer;
 import com.github.idemura.cimple.compiler.ast.AstExpressionStatement;
@@ -19,15 +18,12 @@ import com.google.common.collect.ImmutableList;
 import java.util.List;
 import org.junit.jupiter.api.Test;
 
-class PreprocessVisitorTest {
-  private final InMemoryErrorConsumer errorConsumer = new InMemoryErrorConsumer();
-
+class PreprocessVisitorTest extends AbstractSemanticsTest {
   @Test
   void testRewriteTrueFalseNullLiterals() {
     var code =
         """
         module test;
-
         function f() {
           if true {
           }
@@ -38,10 +34,8 @@ class PreprocessVisitorTest {
           return true;
         }
         """;
-
     var module = parseCode(code, errorConsumer);
     module.accept(new PreprocessVisitor(Keyword.valueList(), errorConsumer));
-
     var statements = module.findFunction("f").block().statements();
     int i = 0;
     assertEquals(boolLiteral(true), ((AstIf) statements.get(i++)).conditions().get(0));
@@ -72,10 +66,8 @@ class PreprocessVisitorTest {
         type record int {}
         type union byte {}
         """;
-
     var module = parseCode(code, errorConsumer);
     module.accept(new PreprocessVisitor(Keyword.valueList(), errorConsumer));
-
     assertEquals(
         ImmutableList.of(
             "Reserved word 'if' cannot be used as a name",
@@ -92,16 +84,12 @@ class PreprocessVisitorTest {
     var code =
         """
         module test;
-
         type record Duration {}
-
         function Duration:toMillis(x int, this) {}
         function f(x int) {}
         """;
-
     var module = parseCode(code, errorConsumer);
     module.accept(new PreprocessVisitor(Keyword.valueList(), errorConsumer));
-
     assertEquals(List.of(), errorConsumer.errors());
     {
       var header = module.findReceiverFunction("Duration", "toMillis").header();
@@ -124,19 +112,14 @@ class PreprocessVisitorTest {
     var code =
         """
         module test;
-
         type record R {
           var y float;
         }
-
         var x int;
-
         function f(a int) float {}
         """;
-
     var module = parseCode(code, errorConsumer);
     module.accept(new PreprocessVisitor(Keyword.valueList(), errorConsumer));
-
     assertEquals(List.of(), errorConsumer.errors());
     assertEquals(AstTypeRef.ofType(AstBuiltinType.INT64), module.findVariable("x").typeRef());
     assertEquals(
@@ -154,21 +137,16 @@ class PreprocessVisitorTest {
     var code =
         """
         module test;
-
         type record R {
           var f float;
         }
-
         var g int;
-
         function f(p int) {
           var l float;
         }
         """;
-
     var module = parseCode(code, errorConsumer);
     module.accept(new PreprocessVisitor(Keyword.valueList(), errorConsumer));
-
     assertEquals(List.of(), errorConsumer.errors());
     assertEquals(AstTypeRef.ofType(AstBuiltinType.INT64), module.findVariable("g").typeRef());
     assertEquals(
@@ -187,16 +165,12 @@ class PreprocessVisitorTest {
     var code =
         """
         module test;
-
         type record Duration {}
-
         function Duration:a(x int) {}
         function Duration:b(x, y) {}
         """;
-
     var module = parseCode(code, errorConsumer);
     module.accept(new PreprocessVisitor(Keyword.valueList(), errorConsumer));
-
     assertEquals(
         List.of(
             "Receiver function 'a': missing the receiver parameter",
@@ -209,13 +183,10 @@ class PreprocessVisitorTest {
     var code =
         """
         module test;
-
         function f(x) {}
         """;
-
     var module = parseCode(code, errorConsumer);
     module.accept(new PreprocessVisitor(Keyword.valueList(), errorConsumer));
-
     assertEquals(
         List.of("Free function 'f' cannot have a receiver parameter 'x'"), errorConsumer.errors());
   }
@@ -225,21 +196,16 @@ class PreprocessVisitorTest {
     var code =
         """
         module test;
-
         var x;
-
         type record R {
           var y;
         }
-
         function f() {
           const z;
         }
         """;
-
     var module = parseCode(code, errorConsumer);
     module.accept(new PreprocessVisitor(Keyword.valueList(), errorConsumer));
-
     assertEquals(
         List.of(
             "Variable 'x' must have a type or an initializer",
@@ -253,18 +219,15 @@ class PreprocessVisitorTest {
     var code =
         """
         module test;
-
         type record R {
           var x int;
           const x int;
         }
         """;
-
     var module = parseCode(code, errorConsumer);
     module.accept(new PreprocessVisitor(Keyword.valueList(), errorConsumer));
-
     assertEquals(
-        List.of("Duplicate record field 'x'. First defined at 4,7."), errorConsumer.errors());
+        List.of("Duplicate record field 'x'. First defined at 3,7."), errorConsumer.errors());
   }
 
   @Test
@@ -272,18 +235,14 @@ class PreprocessVisitorTest {
     var code =
         """
         module test;
-
         type union U {
           A;
           A(int);
         }
         """;
-
-    var errorConsumer = new InMemoryErrorConsumer();
     var module = parseCode(code, errorConsumer);
     module.accept(new PreprocessVisitor(Keyword.valueList(), errorConsumer));
-
     assertEquals(
-        List.of("Duplicate union variant 'A'. First defined at 4,3."), errorConsumer.errors());
+        List.of("Duplicate union variant 'A'. First defined at 3,3."), errorConsumer.errors());
   }
 }

@@ -3,8 +3,8 @@ package com.github.idemura.cimple.compiler;
 import java.util.List;
 
 public abstract class ErrorConsumer {
-  public static final String FATAL = "fatal";
-  public static final String ERROR = "error";
+  public static final String FATAL = "Fatal";
+  public static final String ERROR = "Error";
 
   public enum Mode {
     PRINT_LOCATION(0x1L),
