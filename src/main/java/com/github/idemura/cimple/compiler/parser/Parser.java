@@ -12,6 +12,7 @@ import com.github.idemura.cimple.compiler.ast.AstBlock;
 import com.github.idemura.cimple.compiler.ast.AstCall;
 import com.github.idemura.cimple.compiler.ast.AstCast;
 import com.github.idemura.cimple.compiler.ast.AstDefer;
+import com.github.idemura.cimple.compiler.ast.AstDelete;
 import com.github.idemura.cimple.compiler.ast.AstEntityRef;
 import com.github.idemura.cimple.compiler.ast.AstExpression;
 import com.github.idemura.cimple.compiler.ast.AstExpressionStatement;
@@ -206,6 +207,7 @@ public class Parser {
       case VAR -> parseVariableStatement(true);
       case CONST -> parseVariableStatement(false);
       case RETURN -> parseReturn();
+      case DELETE -> parseDelete();
       case IF -> parseIf();
       case FOR -> parseFor();
       case DEFER -> parseDefer();
@@ -219,6 +221,14 @@ public class Parser {
   private AstStatement parseReturn() {
     var stmt = new AstReturn();
     stmt.location(takeKeyword(RETURN));
+    stmt.expression(parseExpression());
+    take(SEMICOLON);
+    return stmt;
+  }
+
+  private AstStatement parseDelete() {
+    var stmt = new AstDelete();
+    stmt.location(takeKeyword(DELETE));
     stmt.expression(parseExpression());
     take(SEMICOLON);
     return stmt;
@@ -360,9 +370,10 @@ public class Parser {
   }
 
   private AstExpression parseFieldArrayCallChain() {
-    var expr = tokenizer.current().is(IDENTIFIER) && keywordOrNull(tokenizer.current()) == NEW
-        ? parseNew()
-        : parsePrimary();
+    var expr =
+        tokenizer.current().is(IDENTIFIER) && keywordOrNull(tokenizer.current()) == NEW
+            ? parseNew()
+            : parsePrimary();
     while (true) {
       var current = tokenizer.current();
       if (tokenizer.takeIf(PERIOD)) {

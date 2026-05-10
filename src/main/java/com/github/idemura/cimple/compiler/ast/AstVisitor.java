@@ -152,6 +152,15 @@ public abstract class AstVisitor {
     acceptSafe(node.expression());
   }
 
+  protected Object visit(AstDelete node) {
+    visitChildren(node);
+    return null;
+  }
+
+  protected void visitChildren(AstDelete node) {
+    acceptSafe(node.expression());
+  }
+
   protected Object visit(AstDefer node) {
     visitChildren(node);
     return null;

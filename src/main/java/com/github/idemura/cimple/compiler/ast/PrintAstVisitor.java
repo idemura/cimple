@@ -185,6 +185,15 @@ public class PrintAstVisitor extends AstVisitor {
   }
 
   @Override
+  protected Object visit(AstDelete node) {
+    output.writeLine("DELETE");
+    output.indent();
+    visitChildren(node);
+    output.unindent();
+    return null;
+  }
+
+  @Override
   protected Object visit(AstDefer node) {
     output.writeLine("DEFER");
     output.indent();

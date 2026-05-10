@@ -51,6 +51,11 @@ public class AstExpressionRewriteVisitor extends AstVisitor {
   }
 
   @Override
+  protected void visitChildren(AstDelete node) {
+    node.expression(rewrite(node.expression()));
+  }
+
+  @Override
   protected void visitChildren(AstDefer node) {
     node.block().accept(this);
   }

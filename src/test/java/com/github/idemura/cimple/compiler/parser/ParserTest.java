@@ -12,6 +12,7 @@ import com.github.idemura.cimple.compiler.ast.AstArrayAccess;
 import com.github.idemura.cimple.compiler.ast.AstCall;
 import com.github.idemura.cimple.compiler.ast.AstCast;
 import com.github.idemura.cimple.compiler.ast.AstDefer;
+import com.github.idemura.cimple.compiler.ast.AstDelete;
 import com.github.idemura.cimple.compiler.ast.AstEntityRef;
 import com.github.idemura.cimple.compiler.ast.AstExpressionStatement;
 import com.github.idemura.cimple.compiler.ast.AstFieldAccess;
@@ -511,6 +512,7 @@ class ParserTest {
         function f() {
           var x = new Duration;
           var y = new Duration[5];
+          delete x;
         }
         """;
     var module = parseCode(code, makeErrorConsumer());
@@ -526,6 +528,10 @@ class ParserTest {
       var newExpr = (AstNew) expr;
       assertEquals(AstTypeRef.ofName("Duration"), newExpr.typeRef());
       assertEquals(AstNumberLiteral.of(5), newExpr.size());
+    }
+    {
+      var stmt = (AstDelete) statements.get(2);
+      assertEquals(AstEntityRef.ofName("x"), stmt.expression());
     }
   }
 

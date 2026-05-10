@@ -164,9 +164,7 @@ public class NameResolutionVisitor extends AstExpressionRewriteVisitor {
       var objectType = objectTypeRef.type();
       if (!(objectType instanceof AstRecordType recordType)) {
         errorConsumer.errorAt(
-            node.location(),
-            "Field access requires a record, got '%s'",
-            objectTypeRef.name());
+            node.location(), "Field access requires a record, got '%s'", objectTypeRef.name());
         return node;
       }
       for (var field : recordType.fields()) {
