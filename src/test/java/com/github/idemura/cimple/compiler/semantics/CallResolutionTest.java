@@ -14,8 +14,45 @@ import com.github.idemura.cimple.compiler.ast.AstTypeRef;
 import java.util.List;
 import org.junit.jupiter.api.Test;
 
-class SemanticAnalyzerTest {
+class CallResolutionTest {
   private final InMemoryErrorConsumer errorConsumer = new InMemoryErrorConsumer();
+
+  @Test
+  void testNormalizeFunctionHeader() {
+    var code =
+        """
+        module test;
+
+        type record Duration {}
+
+        function Duration:toMillis(x int, this) {}
+        function f(x int) {}
+        """;
+
+    var module = parseCode(code, errorConsumer);
+    var semanticAnalyzer = new SemanticAnalyzer(errorConsumer);
+    assertTrue(semanticAnalyzer.analyze(module));
+
+    assertEquals(List.of(), errorConsumer.errors());
+    {
+      var header = module.findReceiverFunction("Duration", "toMillis").header();
+      var receiverType = AstTypeRef.ofName("test", "Duration");
+      assertEquals(receiverType, header.receiverType());
+      assertEquals(1, header.receiverIndex());
+      assertEquals(receiverType, header.parameters().get(1).typeRef());
+      assertEquals(AstTypeRef.ofType(AstBuiltinType.VOID), header.resultType());
+    }
+    {
+      var header = module.findFunction("f").header();
+      assertEquals(-1, header.receiverIndex());
+      assertEquals(AstTypeRef.ofType(AstBuiltinType.VOID), header.resultType());
+    }
+    var nameMap = semanticAnalyzer.nameMap();
+    assertSame(
+        module.findReceiverFunction("Duration", "toMillis"),
+        nameMap.lookupReceiverFunction(new QualifiedName("test", "Duration"), "toMillis"));
+    assertNull(nameMap.lookupEntity(new QualifiedName("toMillis")));
+  }
 
   @Test
   void testResolveVariableAndFunction() {
