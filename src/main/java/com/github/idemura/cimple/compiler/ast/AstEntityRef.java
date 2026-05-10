@@ -1,6 +1,6 @@
 package com.github.idemura.cimple.compiler.ast;
 
-import static java.util.Objects.requireNonNull;
+import static com.google.common.base.Preconditions.checkNotNull;
 
 import com.github.idemura.cimple.compiler.QualifiedName;
 import java.util.Objects;
@@ -16,7 +16,7 @@ public final class AstEntityRef extends AstExpression {
 
   public static AstEntityRef ofName(String moduleName, String name) {
     var ref = new AstEntityRef();
-    ref.name(new QualifiedName(moduleName, name));
+    ref.name(QualifiedName.ofEntity(name).withModule(moduleName));
     return ref;
   }
 
@@ -45,7 +45,6 @@ public final class AstEntityRef extends AstExpression {
 
   @Override
   public AstTypeRef typeRef() {
-    requireNonNull(entity);
     return switch (entity) {
       case AstVariable variable -> variable.typeRef();
       case AstFunction function -> function.typeRef();
@@ -65,7 +64,7 @@ public final class AstEntityRef extends AstExpression {
   }
 
   public void entity(AstEntity entity) {
-    this.entity = requireNonNull(entity);
+    this.entity = checkNotNull(entity);
   }
 
   public boolean isBuiltin() {

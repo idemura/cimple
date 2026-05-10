@@ -42,11 +42,7 @@ public final class AstFunction extends AstEntity {
 
   @Override
   public String toString() {
-    if (header.receiverType() != null) {
-      return "FUNCTION %s:%s".formatted(header.receiverType().name(), name);
-    } else {
-      return "FUNCTION %s".formatted(name);
-    }
+    return "FUNCTION %s".formatted(name);
   }
 
   @Override
@@ -63,7 +59,7 @@ public final class AstFunction extends AstEntity {
   }
 
   public void makeLambdaType() {
-    var typeName = new QualifiedName("_lambda");
+    var typeName = QualifiedName.ofEntity("_lambda");
     var type = new AstFunctionType();
     type.name(typeName);
     type.header(header);

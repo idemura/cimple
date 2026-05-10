@@ -43,8 +43,8 @@ class CallResolutionTest extends AbstractSemanticsTest {
     var nameMap = semanticAnalyzer.nameMap();
     assertSame(
         module.findReceiverFunction("Duration", "toMillis"),
-        nameMap.lookupReceiverFunction(new QualifiedName("test", "Duration"), "toMillis"));
-    assertNull(nameMap.lookupEntity(new QualifiedName("toMillis")));
+        nameMap.lookupReceiverFunction(new QualifiedName("test", "Duration", "toMillis")));
+    assertNull(nameMap.lookupEntity(QualifiedName.ofEntity("toMillis")));
   }
 
   @Test
@@ -128,11 +128,11 @@ class CallResolutionTest extends AbstractSemanticsTest {
       var call = (AstCall) expr;
       var function = (AstEntityRef) call.function();
       assertSame(module.findReceiverFunction("Duration", "toMillis"), function.entity());
-      assertEquals(new QualifiedName("toMillis"), function.name());
+      assertEquals(new QualifiedName("test", "Duration", "toMillis"), function.name());
 
       assertEquals(1, call.arguments().size());
       var receiver = (AstEntityRef) call.arguments().get(0);
-      assertEquals(new QualifiedName("d"), receiver.name());
+      assertEquals(QualifiedName.ofEntity("d"), receiver.name());
       assertSame(module.findFunction("f").header().parameters().get(0), receiver.entity());
     }
     {
@@ -157,7 +157,7 @@ class CallResolutionTest extends AbstractSemanticsTest {
     {
       var block = module.findFunction("g").block();
       var local = (AstLocal) block.statements().get(0);
-      assertEquals(new QualifiedName("t"), local.variable().name());
+      assertEquals(QualifiedName.ofEntity("t"), local.variable().name());
       assertEquals(AstTypeRef.ofType(AstBuiltinType.STRING), local.variable().typeRef());
       var call = (AstCall) local.variable().expression();
       assertEquals(AstEntityRef.ofName("test", "f"), call.function());

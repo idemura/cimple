@@ -24,11 +24,11 @@ class NameResolutionTest extends AbstractSemanticsTest {
     semanticAnalyzer.analyze(module);
     assertEquals(List.of(), errorConsumer.errors());
     var nameMap = semanticAnalyzer.nameMap();
-    assertSame(module.findVariable("x"), nameMap.lookupEntity(new QualifiedName("x")));
-    assertSame(module.findVariable("y"), nameMap.lookupEntity(new QualifiedName("y")));
-    assertSame(module.findFunction("f"), nameMap.lookupEntity(new QualifiedName("f")));
-    assertSame(module.findFunction("g"), nameMap.lookupEntity(new QualifiedName("g")));
-    assertSame(module.findType("R"), nameMap.lookupType(new QualifiedName("R")));
+    assertSame(module.findVariable("x"), nameMap.lookupEntity(QualifiedName.ofEntity("x")));
+    assertSame(module.findVariable("y"), nameMap.lookupEntity(QualifiedName.ofEntity("y")));
+    assertSame(module.findFunction("f"), nameMap.lookupEntity(QualifiedName.ofEntity("f")));
+    assertSame(module.findFunction("g"), nameMap.lookupEntity(QualifiedName.ofEntity("g")));
+    assertSame(module.findType("R"), nameMap.lookupType(QualifiedName.ofType("R")));
   }
 
   @Test

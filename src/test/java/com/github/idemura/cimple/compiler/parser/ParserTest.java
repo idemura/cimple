@@ -42,16 +42,13 @@ class ParserTest {
     var code =
         """
         module test;
-
         var v0 int = 5;
         var v1 int;
         var v2 = 5;
         const c0 int = 7;
-
         function f0() {}
         function f1(x int) {}
         function f2(x int, y int) {}
-
         function rv() int {
           return 1;
         }
@@ -60,13 +57,13 @@ class ParserTest {
     assertEquals("test", module.name());
     {
       var f = module.findFunction("f0");
-      assertEquals(new QualifiedName("f0"), f.name());
+      assertEquals(QualifiedName.ofEntity("f0"), f.name());
       assertNull(f.header().resultType());
       assertEquals(ImmutableList.of(), f.header().parameters());
     }
     {
       var f = module.findFunction("f1");
-      assertEquals(new QualifiedName("f1"), f.name());
+      assertEquals(QualifiedName.ofEntity("f1"), f.name());
       assertNull(f.header().resultType());
       var params = f.header().parameters();
       assertEquals(1, params.size());
@@ -74,7 +71,7 @@ class ParserTest {
     }
     {
       var f = module.findFunction("f2");
-      assertEquals(new QualifiedName("f2"), f.name());
+      assertEquals(QualifiedName.ofEntity("f2"), f.name());
       assertNull(f.header().resultType());
       var params = f.header().parameters();
       assertEquals(2, params.size());
@@ -83,31 +80,31 @@ class ParserTest {
     }
     {
       var f = module.findFunction("rv");
-      assertEquals(new QualifiedName("rv"), f.name());
+      assertEquals(QualifiedName.ofEntity("rv"), f.name());
       assertEquals(AstTypeRef.ofName("int"), f.header().resultType());
       assertEquals(ImmutableList.of(), f.header().parameters());
     }
     {
       var v = module.findVariable("v0");
-      assertEquals(new QualifiedName("v0"), v.name());
+      assertEquals(QualifiedName.ofEntity("v0"), v.name());
       assertEquals(AstTypeRef.ofName("int"), v.typeRef());
       assertTrue(v.getBit(AstVariable.MUTABLE));
     }
     {
       var v = module.findVariable("v1");
-      assertEquals(new QualifiedName("v1"), v.name());
+      assertEquals(QualifiedName.ofEntity("v1"), v.name());
       assertEquals(AstTypeRef.ofName("int"), v.typeRef());
       assertTrue(v.getBit(AstVariable.MUTABLE));
     }
     {
       var v = module.findVariable("v2");
-      assertEquals(new QualifiedName("v2"), v.name());
+      assertEquals(QualifiedName.ofEntity("v2"), v.name());
       assertNull(v.typeRef());
       assertTrue(v.getBit(AstVariable.MUTABLE));
     }
     {
       var v = module.findVariable("c0");
-      assertEquals(new QualifiedName("c0"), v.name());
+      assertEquals(QualifiedName.ofEntity("c0"), v.name());
       assertEquals(AstTypeRef.ofName("int"), v.typeRef());
       assertFalse(v.getBit(AstVariable.MUTABLE));
     }
@@ -118,9 +115,7 @@ class ParserTest {
     var code =
         """
         module test;
-
         type record Empty {}
-
         type record Point {
           var x int;
           var y int;
@@ -131,30 +126,30 @@ class ParserTest {
     assertEquals("test", module.name());
     {
       var type = (AstRecordType) module.findType("Empty");
-      assertEquals(new QualifiedName("Empty"), type.name());
+      assertEquals(QualifiedName.ofType("Empty"), type.name());
       assertEquals(ImmutableList.of(), type.fields());
     }
     {
       var type = (AstRecordType) module.findType("Point");
-      assertEquals(new QualifiedName("Point"), type.name());
+      assertEquals(QualifiedName.ofType("Point"), type.name());
       var fields = type.fields();
       assertEquals(3, fields.size());
       int j = 0;
       {
         var f = fields.get(j++);
-        assertEquals(new QualifiedName("x"), f.name());
+        assertEquals(QualifiedName.ofEntity("x"), f.name());
         assertEquals(AstTypeRef.ofName("int"), f.typeRef());
         assertTrue(f.getBit(AstVariable.MUTABLE));
       }
       {
         var f = fields.get(j++);
-        assertEquals(new QualifiedName("y"), f.name());
+        assertEquals(QualifiedName.ofEntity("y"), f.name());
         assertEquals(AstTypeRef.ofName("int"), f.typeRef());
         assertTrue(f.getBit(AstVariable.MUTABLE));
       }
       {
         var f = fields.get(j++);
-        assertEquals(new QualifiedName("name"), f.name());
+        assertEquals(QualifiedName.ofEntity("name"), f.name());
         assertEquals(AstTypeRef.ofName("string"), f.typeRef());
         assertFalse(f.getBit(AstVariable.MUTABLE));
       }
@@ -166,15 +161,15 @@ class ParserTest {
     var code =
         """
         module test;
-        type union Option {
+        type union Maybe {
           None;
           Some(string);
         }
         """;
     var module = parseCode(code, makeErrorConsumer());
     assertEquals("test", module.name());
-    var type = (AstUnionType) module.findType("Option");
-    assertEquals(new QualifiedName("Option"), type.name());
+    var type = (AstUnionType) module.findType("Maybe");
+    assertEquals(QualifiedName.ofType("Maybe"), type.name());
     assertEquals(
         ImmutableList.of(unionVariant("None", null), unionVariant("Some", "string")),
         type.variants());
@@ -193,7 +188,7 @@ class ParserTest {
     assertEquals("test", module.name());
     {
       var type = (AstFunctionType) module.findType("Compare");
-      assertEquals(new QualifiedName("Compare"), type.name());
+      assertEquals(QualifiedName.ofType("Compare"), type.name());
       assertEquals(AstTypeRef.ofName("bool"), type.header().resultType());
       var params = type.header().parameters();
       assertEquals(2, params.size());
@@ -202,13 +197,13 @@ class ParserTest {
     }
     {
       var type = (AstFunctionType) module.findType("Supplier");
-      assertEquals(new QualifiedName("Supplier"), type.name());
+      assertEquals(QualifiedName.ofType("Supplier"), type.name());
       assertEquals(AstTypeRef.ofName("string"), type.header().resultType());
       assertEquals(ImmutableList.of(), type.header().parameters());
     }
     {
       var type = (AstFunctionType) module.findType("Consumer");
-      assertEquals(new QualifiedName("Consumer"), type.name());
+      assertEquals(QualifiedName.ofType("Consumer"), type.name());
       assertNull(type.header().resultType());
       assertEquals(ImmutableList.of(rawVariable("v", "string")), type.header().parameters());
     }
@@ -219,7 +214,6 @@ class ParserTest {
     var code =
         """
         module test;
-
         function Duration:toMillis(this) int {
           return 6;
         }
@@ -228,7 +222,8 @@ class ParserTest {
     var header = module.findReceiverFunction("Duration", "toMillis").header();
     assertEquals(AstTypeRef.ofName("Duration"), header.receiverType());
     assertEquals(
-        new QualifiedName("toMillis"), module.findReceiverFunction("Duration", "toMillis").name());
+        QualifiedName.ofTypeEntity("Duration", "toMillis"),
+        module.findReceiverFunction("Duration", "toMillis").name());
     assertEquals(AstTypeRef.ofName("int"), header.resultType());
     assertEquals(ImmutableList.of(rawVariable("this")), header.parameters());
   }
@@ -582,7 +577,7 @@ class ParserTest {
     {
       var stmt = (AstFor) statements.get(i++);
       var init = stmt.init();
-      assertEquals(new QualifiedName("i"), init.name());
+      assertEquals(QualifiedName.ofEntity("i"), init.name());
       assertNull(init.typeRef());
       assertEquals(AstNumberLiteral.of(0), init.expression());
       assertEquals(AstEntityRef.ofName("true"), stmt.condition());
@@ -592,7 +587,7 @@ class ParserTest {
     {
       var stmt = (AstFor) statements.get(i++);
       var init = stmt.init();
-      assertEquals(new QualifiedName("i"), init.name());
+      assertEquals(QualifiedName.ofEntity("i"), init.name());
       assertNull(init.typeRef());
       assertEquals(AstNumberLiteral.of(0), init.expression());
       assertEquals(AstEntityRef.ofName("true"), stmt.condition());

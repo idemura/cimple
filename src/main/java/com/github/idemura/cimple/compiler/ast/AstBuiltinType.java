@@ -16,10 +16,10 @@ public final class AstBuiltinType extends AstType {
   public static final AstBuiltinType CHAR = new AstBuiltinType("char");
   public static final AstBuiltinType STRING = new AstBuiltinType("string");
 
-  private QualifiedName name;
+  private final QualifiedName name;
 
   private AstBuiltinType(String name) {
-    this.name = QualifiedName.ofBuiltin(name);
+    this.name = QualifiedName.ofType(name).builtin();
   }
 
   public static AstBuiltinType lookup(String name) {

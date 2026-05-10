@@ -173,8 +173,8 @@ class PreprocessVisitorTest extends AbstractSemanticsTest {
     module.accept(new PreprocessVisitor(Keyword.valueList(), errorConsumer));
     assertEquals(
         List.of(
-            "Receiver function 'a': missing the receiver parameter",
-            "Receiver function 'b': multiple receiver parameters"),
+            "Receiver function 'Duration:a': missing the receiver parameter",
+            "Receiver function 'Duration:b': multiple receiver parameters"),
         errorConsumer.errors());
   }
 

@@ -30,7 +30,7 @@ public final class AstModule extends AstNode {
 
   public AstType findType(String name) {
     for (var definition : definitions) {
-      if (definition instanceof AstType type && type.name().baseName().equals(name)) {
+      if (definition instanceof AstType type && name.equals(type.name().typeName())) {
         return type;
       }
     }
@@ -39,7 +39,7 @@ public final class AstModule extends AstNode {
 
   public AstVariable findVariable(String name) {
     for (var definition : definitions) {
-      if (definition instanceof AstVariable variable && variable.name().baseName().equals(name)) {
+      if (definition instanceof AstVariable variable && name.equals(variable.name().entityName())) {
         return variable;
       }
     }
@@ -48,7 +48,7 @@ public final class AstModule extends AstNode {
 
   public AstFunction findFunction(String name) {
     for (var definition : definitions) {
-      if (definition instanceof AstFunction function && function.name().baseName().equals(name)) {
+      if (definition instanceof AstFunction function && name.equals(function.name().entityName())) {
         var receiverType = function.header().receiverType();
         if (receiverType == null) {
           return function;
@@ -60,9 +60,9 @@ public final class AstModule extends AstNode {
 
   public AstFunction findReceiverFunction(String receiverTypeName, String name) {
     for (var definition : definitions) {
-      if (definition instanceof AstFunction function && function.name().baseName().equals(name)) {
+      if (definition instanceof AstFunction function && function.name().entityName().equals(name)) {
         var receiverType = function.header().receiverType();
-        if (receiverType != null && receiverType.name().baseName().equals(receiverTypeName)) {
+        if (receiverType != null && receiverTypeName.equals(receiverType.name().typeName())) {
           return function;
         }
       }

@@ -32,12 +32,12 @@ public final class AstUtils {
   }
 
   public static AstFunction function(String receiverTypeName, String name) {
-    var function = new AstFunction();
-    function.name(new QualifiedName(name));
     var header = new AstFunctionHeader();
     if (receiverTypeName != null) {
       header.receiverType(AstTypeRef.ofName(receiverTypeName));
     }
+    var function = new AstFunction();
+    function.name(QualifiedName.ofTypeEntity(receiverTypeName, name));
     function.header(header);
     return function;
   }
@@ -74,7 +74,7 @@ public final class AstUtils {
   private static AstVariable variable(
       String moduleName, String name, long flags, AstTypeRef typeRef) {
     var variable = new AstVariable();
-    variable.name(new QualifiedName(moduleName, name));
+    variable.name(QualifiedName.ofEntity(name).withModule(moduleName));
     if (flags != 0) {
       variable.setBit(flags);
     }

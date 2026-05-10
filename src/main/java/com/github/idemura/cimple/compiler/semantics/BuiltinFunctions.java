@@ -18,7 +18,7 @@ public final class BuiltinFunctions {
 
   static AstVariable makeParameter(String name, AstBuiltinType type) {
     var parameter = new AstVariable();
-    parameter.name(new QualifiedName(name));
+    parameter.name(QualifiedName.ofEntity(name));
     parameter.typeRef(AstTypeRef.ofType(type));
     parameter.setBit(AstVariable.PARAMETER);
     return parameter;
@@ -30,7 +30,7 @@ public final class BuiltinFunctions {
     header.parameters(ImmutableList.of(makeParameter("_0", arg1), makeParameter("_1", arg2)));
     header.resultType(AstTypeRef.ofType(result));
     var function = new AstFunction();
-    function.name(QualifiedName.ofBuiltin(name));
+    function.name(QualifiedName.ofEntity(name).builtin());
     function.header(header);
     function.markResolved();
     return function;

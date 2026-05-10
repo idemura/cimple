@@ -46,7 +46,7 @@ public class SemanticAnalyzer {
     // First, collect types. They are used for receiver resolution.
     for (var def : module.definitions()) {
       if (def instanceof AstType type) {
-        type.name(type.name().withModuleName(module.name()));
+        type.name(type.name().withModule(module.name()));
         var existing = nameMap.addType(type);
         if (existing != null) {
           errorConsumer.errorAt(
@@ -61,22 +61,14 @@ public class SemanticAnalyzer {
     for (var def : module.definitions()) {
       switch (def) {
         case AstFunction function -> {
-          var header = function.header();
-          var receiverType = header.receiverType();
-          if (receiverType != null) {
-            // Receiver functions qualified with the receiver type.
-            receiverType.name(resolveTypeName(receiverType.name(), module.name()));
-          } else {
-            // Free functions qualified with the module name.
-            function.name(function.name().withModuleName(module.name()));
-          }
+          function.name(function.name().withModule(module.name()));
           var existing = nameMap.addFunction(function);
           if (existing != null) {
             errorEntityCollision(function, existing);
           }
         }
         case AstVariable variable -> {
-          variable.name(variable.name().withModuleName(module.name()));
+          variable.name(variable.name().withModule(module.name()));
           var existing = nameMap.addVariable(variable);
           if (existing != null) {
             errorEntityCollision(variable, existing);
@@ -90,7 +82,7 @@ public class SemanticAnalyzer {
 
   private QualifiedName resolveTypeName(QualifiedName typeName, String moduleName) {
     // TODO: Use imports to resolve.
-    return typeName.withModuleName(moduleName);
+    return typeName.withModule(moduleName);
   }
 
   private static String entityKind(AstEntity entity) {
@@ -105,7 +97,7 @@ public class SemanticAnalyzer {
         entity.location(),
         "Definition of %s '%s' has a name collision with %s defined at %s",
         entityKind(entity),
-        entity.name().baseName(),
+        entity.name().entityName(),
         entityKind(existing),
         existing.location());
   }

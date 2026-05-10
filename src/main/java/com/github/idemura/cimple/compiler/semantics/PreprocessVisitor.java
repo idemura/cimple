@@ -55,7 +55,7 @@ class PreprocessVisitor extends AstExpressionRewriteVisitor {
 
   @Override
   protected Object visit(AstFunction node) {
-    checkName(node.name().baseName(), node.location());
+    checkQualifiedName(node.name(), node.location());
     checkReceiverParameter(node.name(), node.header());
     return super.visit(node);
   }
@@ -104,7 +104,7 @@ class PreprocessVisitor extends AstExpressionRewriteVisitor {
 
   @Override
   protected Object visit(AstVariable node) {
-    checkName(node.name().baseName(), node.location());
+    checkQualifiedName(node.name(), node.location());
     if (!node.getBit(AstVariable.PARAMETER)
         && node.typeRef() == null
         && node.expression() == null) {
@@ -116,7 +116,7 @@ class PreprocessVisitor extends AstExpressionRewriteVisitor {
 
   @Override
   protected Object visit(AstTypeRef node) {
-    switch (node.name().baseName()) {
+    switch (node.name().typeName()) {
       case "int":
         node.name(AstBuiltinType.INT64.name());
         node.type(AstBuiltinType.INT64);
@@ -133,7 +133,7 @@ class PreprocessVisitor extends AstExpressionRewriteVisitor {
 
   @Override
   protected Object visit(AstFunctionType node) {
-    checkName(node.name().baseName(), node.location());
+    checkQualifiedName(node.name(), node.location());
     checkReceiverParameter(node.name(), node.header());
     return super.visit(node);
   }
@@ -146,15 +146,15 @@ class PreprocessVisitor extends AstExpressionRewriteVisitor {
 
   @Override
   protected Object visit(AstRecordType node) {
-    checkTypeName(node.name().baseName(), node.location());
+    checkQualifiedName(node.name(), node.location());
     var fieldMap = new HashMap<String, AstVariable>();
     for (var field : node.fields()) {
-      var existing = fieldMap.putIfAbsent(field.name().baseName(), field);
+      var existing = fieldMap.putIfAbsent(field.name().entityName(), field);
       if (existing != null) {
         errorConsumer.errorAt(
             field.location(),
             "Duplicate record field '%s'. First defined at %s.",
-            field.name().baseName(),
+            field.name().entityName(),
             existing.location());
       }
     }
@@ -163,7 +163,7 @@ class PreprocessVisitor extends AstExpressionRewriteVisitor {
 
   @Override
   protected Object visit(AstUnionType node) {
-    checkTypeName(node.name().baseName(), node.location());
+    checkQualifiedName(node.name(), node.location());
     var variantMap = new HashMap<String, AstUnionType.Variant>();
     for (var variant : node.variants()) {
       checkName(variant.tag(), variant.location());
@@ -223,7 +223,7 @@ class PreprocessVisitor extends AstExpressionRewriteVisitor {
   @Override
   protected Object visit(AstEntityRef node) {
     var newNode =
-        switch (node.name().baseName()) {
+        switch (node.name().entityName()) {
           case "true" -> {
             var literal = new AstBoolLiteral(true);
             literal.typeRef(AstTypeRef.ofType(AstBuiltinType.BOOL));
@@ -244,7 +244,7 @@ class PreprocessVisitor extends AstExpressionRewriteVisitor {
     if (newNode != node) {
       newNode.location(node.location());
     } else {
-      checkName(node.name().baseName(), node.location());
+      checkQualifiedName(node.name(), node.location());
     }
     return newNode;
   }
@@ -263,6 +263,18 @@ class PreprocessVisitor extends AstExpressionRewriteVisitor {
   private void checkTypeName(String name, Location location) {
     if (reservedWords.isReservedTypeName(name)) {
       errorConsumer.errorAt(location, "Reserved word '%s' cannot be used as a type name", name);
+    }
+  }
+
+  private void checkQualifiedName(QualifiedName name, Location location) {
+    if (name.moduleName() != null) {
+      checkName(name.moduleName(), location);
+    }
+    if (name.typeName() != null) {
+      checkTypeName(name.typeName(), location);
+    }
+    if (name.entityName() != null) {
+      checkName(name.entityName(), location);
     }
   }
 }

@@ -14,18 +14,11 @@ import java.util.List;
 import java.util.Map;
 
 public class NameMap {
-  private record ReceiverFunctionKey(QualifiedName receiverType, String name) {
-    @Override
-    public String toString() {
-      return receiverType.toString() + ":" + name;
-    }
-  }
-
   private final Map<QualifiedName, AstType> typeQualifiedNameMap = new HashMap<>();
   private final Map<String, AstType> typeNameMap = new HashMap<>();
   private final Map<QualifiedName, AstEntity> entityQualifiedNameMap = new HashMap<>();
   private final Map<String, AstEntity> entityNameMap = new HashMap<>();
-  private final Map<ReceiverFunctionKey, AstFunction> receiverFunctionMap = new HashMap<>();
+  private final Map<QualifiedName, AstFunction> receiverFunctionMap = new HashMap<>();
   private final List<AstEntity> shadowed = new ArrayList<>();
   private final List<String> localNames = new ArrayList<>();
 
@@ -37,15 +30,14 @@ public class NameMap {
     if (existing != null) {
       return existing;
     }
-    typeNameMap.put(name.baseName(), type);
+    typeNameMap.put(name.typeName(), type);
     return null;
   }
 
   public AstEntity addFunction(AstFunction function) {
-    var receiverType = function.header().receiverType();
-    if (receiverType != null) {
-      return receiverFunctionMap.putIfAbsent(
-          new ReceiverFunctionKey(receiverType.name(), function.name().baseName()), function);
+    var name = function.name();
+    if (name.typeName() != null) {
+      return receiverFunctionMap.putIfAbsent(name, function);
     }
     return addEntity(function);
   }
@@ -59,13 +51,13 @@ public class NameMap {
     if (existing != null) {
       return existing;
     }
-    entityNameMap.putIfAbsent(entity.name().baseName(), entity);
+    entityNameMap.putIfAbsent(entity.name().entityName(), entity);
     return null;
   }
 
   public AstEntity addLocal(AstVariable variable) {
     checkArgument(variable.isAnyOf(AstVariable.PARAMETER | AstVariable.LOCAL));
-    var name = variable.name().baseName();
+    var name = variable.name().entityName();
     var existing = entityNameMap.get(name);
     if (existing == null) {
       entityNameMap.put(name, variable);
@@ -90,30 +82,30 @@ public class NameMap {
     }
     localNames.clear();
     for (var entity : shadowed) {
-      entityNameMap.put(entity.name().baseName(), entity);
+      entityNameMap.put(entity.name().entityName(), entity);
     }
     shadowed.clear();
   }
 
   public AstType lookupType(QualifiedName name) {
-    var builtinType = AstBuiltinType.lookup(name.baseName());
+    var builtinType = AstBuiltinType.lookup(name.typeName());
     if (builtinType != null) {
       return builtinType;
     }
     if (name.moduleName() != null) {
       return typeQualifiedNameMap.get(name);
     }
-    return typeNameMap.get(name.baseName());
+    return typeNameMap.get(name.typeName());
   }
 
   public AstEntity lookupEntity(QualifiedName name) {
     if (name.moduleName() != null) {
       return entityQualifiedNameMap.get(name);
     }
-    return entityNameMap.get(name.baseName());
+    return entityNameMap.get(name.entityName());
   }
 
-  public AstFunction lookupReceiverFunction(QualifiedName receiverType, String name) {
-    return receiverFunctionMap.get(new ReceiverFunctionKey(receiverType, name));
+  public AstFunction lookupReceiverFunction(QualifiedName name) {
+    return receiverFunctionMap.get(name);
   }
 }

@@ -208,7 +208,7 @@ public class NameResolutionVisitor extends AstExpressionRewriteVisitor {
     // TODO: Select the builtin overload using the resolved argument types.
     var operatorRef = (AstEntityRef) node.function();
     var function =
-        switch (operatorRef.name().baseName()) {
+        switch (operatorRef.name().entityName()) {
           case "+" -> BuiltinFunctions.ADD_I64;
           case "*" -> BuiltinFunctions.MUL_I64;
           default ->
@@ -230,14 +230,11 @@ public class NameResolutionVisitor extends AstExpressionRewriteVisitor {
           receiverLookup.functionName());
       return;
     }
-    var function =
-        nameMap.lookupReceiverFunction(receiverType.name(), receiverLookup.functionName());
+    var receiverFunctionName = receiverType.name().withEntity(receiverLookup.functionName());
+    var function = nameMap.lookupReceiverFunction(receiverFunctionName);
     if (function == null) {
       errorConsumer.errorAt(
-          receiverLookup.location(),
-          "Undefined receiver function: '%s:%s'",
-          receiverType.name(),
-          receiverLookup.functionName());
+          receiverLookup.location(), "Undefined receiver function: '%s'", receiverFunctionName);
       return;
     }
 
