@@ -5,10 +5,10 @@ import java.util.List;
 import java.util.Objects;
 
 public final class AstFunctionHeader extends AstNode {
-  private AstTypeRef receiverType;
+  private AstType receiverType;
   private int receiverIndex = -1;
   private List<AstVariable> parameters;
-  private AstTypeRef resultType;
+  private AstType resultType;
 
   public AstFunctionHeader() {}
 
@@ -35,18 +35,18 @@ public final class AstFunctionHeader extends AstNode {
       return false;
     }
     for (var i = 0; i < a.size(); i++) {
-      if (!Objects.equals(a.get(i).typeRef(), b.get(i).typeRef())) {
+      if (!Objects.equals(a.get(i).type(), b.get(i).type())) {
         return false;
       }
     }
     return true;
   }
 
-  public AstTypeRef receiverType() {
+  public AstType receiverType() {
     return receiverType;
   }
 
-  public void receiverType(AstTypeRef receiverType) {
+  public void receiverType(AstType receiverType) {
     this.receiverType = receiverType;
   }
 
@@ -66,11 +66,11 @@ public final class AstFunctionHeader extends AstNode {
     this.parameters = ImmutableList.copyOf(parameters);
   }
 
-  public AstTypeRef resultType() {
+  public AstType resultType() {
     return resultType;
   }
 
-  public void resultType(AstTypeRef resultType) {
+  public void resultType(AstType resultType) {
     this.resultType = resultType;
   }
 }

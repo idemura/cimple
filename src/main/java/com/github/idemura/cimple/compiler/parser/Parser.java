@@ -174,7 +174,7 @@ public class Parser {
     variable.location(tokenizer.currentLocation());
     variable.name(Identifier.ofEntity(take(IDENTIFIER).value()));
     if (tokenizer.current().is(IDENTIFIER)) {
-      variable.typeRef(parseTypeRef());
+      variable.type(parseTypeRef());
     }
     if (tokenizer.takeIf(ASSIGN)) {
       variable.expression(parseExpression());
@@ -408,7 +408,7 @@ public class Parser {
   private AstNew parseNew() {
     var expr = new AstNew();
     expr.location(takeKeyword(NEW));
-    expr.typeRef(parseTypeRef());
+    expr.type(parseTypeRef());
     if (tokenizer.takeIf(LBRACKET)) {
       expr.size(parseExpression());
       take(RBRACKET);
@@ -431,7 +431,7 @@ public class Parser {
       var expr = new AstCast();
       expr.expression(parseExpression());
       takeKeyword(TYPE);
-      expr.typeRef(parseTypeRef());
+      expr.type(parseTypeRef());
       take(RBRACKET);
       return expr;
     }
@@ -519,7 +519,7 @@ public class Parser {
         variable.location(tokenizer.currentLocation());
         variable.name(Identifier.ofEntity(take(IDENTIFIER).value()));
         if (tokenizer.current().is(IDENTIFIER)) {
-          variable.typeRef(parseTypeRef());
+          variable.type(parseTypeRef());
         }
         parameters.add(variable);
       } while (tokenizer.takeIf(COMMA));

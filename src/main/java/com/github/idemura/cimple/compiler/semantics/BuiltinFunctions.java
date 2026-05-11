@@ -6,7 +6,6 @@ import com.github.idemura.cimple.compiler.Identifier;
 import com.github.idemura.cimple.compiler.ast.AstBuiltinType;
 import com.github.idemura.cimple.compiler.ast.AstFunction;
 import com.github.idemura.cimple.compiler.ast.AstFunctionHeader;
-import com.github.idemura.cimple.compiler.ast.AstTypeRef;
 import com.github.idemura.cimple.compiler.ast.AstVariable;
 import com.google.common.collect.ImmutableList;
 
@@ -19,7 +18,7 @@ public final class BuiltinFunctions {
   static AstVariable makeParameter(String name, AstBuiltinType type) {
     var parameter = new AstVariable();
     parameter.name(Identifier.ofEntity(name));
-    parameter.typeRef(AstTypeRef.ofType(type));
+    parameter.type(type);
     parameter.setBit(AstVariable.PARAMETER);
     return parameter;
   }
@@ -28,12 +27,11 @@ public final class BuiltinFunctions {
       String name, AstBuiltinType result, AstBuiltinType arg1, AstBuiltinType arg2) {
     var header = new AstFunctionHeader();
     header.parameters(ImmutableList.of(makeParameter("_0", arg1), makeParameter("_1", arg2)));
-    header.resultType(AstTypeRef.ofType(result));
+    header.resultType(result);
     var function = new AstFunction();
     function.name(Identifier.ofEntity(name).builtin());
     function.header(header);
     function.makeLambdaType();
-    function.markResolved();
     return function;
   }
 }

@@ -26,7 +26,6 @@ import com.github.idemura.cimple.compiler.ast.AstNumberLiteral;
 import com.github.idemura.cimple.compiler.ast.AstReceiverLookup;
 import com.github.idemura.cimple.compiler.ast.AstRecordType;
 import com.github.idemura.cimple.compiler.ast.AstReturn;
-import com.github.idemura.cimple.compiler.ast.AstTypeRef;
 import com.github.idemura.cimple.compiler.ast.AstUnionType;
 import com.github.idemura.cimple.compiler.ast.AstVariable;
 import com.google.common.collect.ImmutableList;
@@ -83,31 +82,31 @@ class ParserTest {
     {
       var f = module.findFunction("rv");
       assertEquals(Identifier.ofEntity("rv"), f.name());
-      assertEquals(AstTypeRef.ofName("int"), f.header().resultType());
+      assertEquals(newTypeRef("int"), f.header().resultType());
       assertEquals(ImmutableList.of(), f.header().parameters());
     }
     {
       var v = module.findVariable("v0");
       assertEquals(Identifier.ofEntity("v0"), v.name());
-      assertEquals(AstTypeRef.ofName("int"), v.typeRef());
+      assertEquals(newTypeRef("int"), v.type());
       assertTrue(v.getBit(AstVariable.MUTABLE));
     }
     {
       var v = module.findVariable("v1");
       assertEquals(Identifier.ofEntity("v1"), v.name());
-      assertEquals(AstTypeRef.ofName("int"), v.typeRef());
+      assertEquals(newTypeRef("int"), v.type());
       assertTrue(v.getBit(AstVariable.MUTABLE));
     }
     {
       var v = module.findVariable("v2");
       assertEquals(Identifier.ofEntity("v2"), v.name());
-      assertNull(v.typeRef());
+      assertNull(v.type());
       assertTrue(v.getBit(AstVariable.MUTABLE));
     }
     {
       var v = module.findVariable("c0");
       assertEquals(Identifier.ofEntity("c0"), v.name());
-      assertEquals(AstTypeRef.ofName("int"), v.typeRef());
+      assertEquals(newTypeRef("int"), v.type());
       assertFalse(v.getBit(AstVariable.MUTABLE));
     }
   }
@@ -140,19 +139,19 @@ class ParserTest {
       {
         var f = fields.get(j++);
         assertEquals(Identifier.ofEntity("x"), f.name());
-        assertEquals(AstTypeRef.ofName("int"), f.typeRef());
+        assertEquals(newTypeRef("int"), f.type());
         assertTrue(f.getBit(AstVariable.MUTABLE));
       }
       {
         var f = fields.get(j++);
         assertEquals(Identifier.ofEntity("y"), f.name());
-        assertEquals(AstTypeRef.ofName("int"), f.typeRef());
+        assertEquals(newTypeRef("int"), f.type());
         assertTrue(f.getBit(AstVariable.MUTABLE));
       }
       {
         var f = fields.get(j++);
         assertEquals(Identifier.ofEntity("name"), f.name());
-        assertEquals(AstTypeRef.ofName("string"), f.typeRef());
+        assertEquals(newTypeRef("string"), f.type());
         assertFalse(f.getBit(AstVariable.MUTABLE));
       }
     }
@@ -191,7 +190,7 @@ class ParserTest {
     {
       var type = (AstFunctionType) module.findType("Compare");
       assertEquals(Identifier.ofType("Compare"), type.name());
-      assertEquals(AstTypeRef.ofName("bool"), type.header().resultType());
+      assertEquals(newTypeRef("bool"), type.header().resultType());
       var params = type.header().parameters();
       assertEquals(2, params.size());
       assertEquals(rawVariable("a", "int"), params.get(0));
@@ -200,7 +199,7 @@ class ParserTest {
     {
       var type = (AstFunctionType) module.findType("Supplier");
       assertEquals(Identifier.ofType("Supplier"), type.name());
-      assertEquals(AstTypeRef.ofName("string"), type.header().resultType());
+      assertEquals(newTypeRef("string"), type.header().resultType());
       assertEquals(ImmutableList.of(), type.header().parameters());
     }
     {
@@ -222,11 +221,11 @@ class ParserTest {
         """;
     var module = parseCode(code, makeErrorConsumer());
     var header = module.findReceiverFunction("Duration", "toMillis").header();
-    assertEquals(AstTypeRef.ofName("Duration"), header.receiverType());
+    assertEquals(newTypeRef("Duration"), header.receiverType());
     assertEquals(
         Identifier.ofTypeEntity("Duration", "toMillis"),
         module.findReceiverFunction("Duration", "toMillis").name());
-    assertEquals(AstTypeRef.ofName("int"), header.resultType());
+    assertEquals(newTypeRef("int"), header.resultType());
     assertEquals(ImmutableList.of(rawVariable("this")), header.parameters());
   }
 
@@ -261,7 +260,7 @@ class ParserTest {
       var expr = ((AstLocal) statements.get(i++)).variable().expression();
       {
         var call = (AstCall) expr;
-        assertEquals(builtinEntityRef("+"), call.function());
+        assertEquals(newBuiltinEntityRef("+"), call.function());
         assertEquals(2, call.arguments().size());
         assertEquals(AstNumberLiteral.of(1), call.arguments().get(0));
         assertEquals(AstNumberLiteral.of(2), call.arguments().get(1));
@@ -271,11 +270,11 @@ class ParserTest {
       var expr = ((AstLocal) statements.get(i++)).variable().expression();
       {
         var callSub = (AstCall) expr;
-        assertEquals(builtinEntityRef("-"), callSub.function());
+        assertEquals(newBuiltinEntityRef("-"), callSub.function());
         assertEquals(2, callSub.arguments().size());
         {
           var callAdd = (AstCall) callSub.arguments().get(0);
-          assertEquals(builtinEntityRef("+"), callAdd.function());
+          assertEquals(newBuiltinEntityRef("+"), callAdd.function());
           assertEquals(2, callAdd.arguments().size());
           assertEquals(AstNumberLiteral.of(1), callAdd.arguments().get(0));
           assertEquals(AstNumberLiteral.of(2), callAdd.arguments().get(1));
@@ -287,7 +286,7 @@ class ParserTest {
       var expr = ((AstLocal) statements.get(i++)).variable().expression();
       {
         var callMul = (AstCall) expr;
-        assertEquals(builtinEntityRef("*"), callMul.function());
+        assertEquals(newBuiltinEntityRef("*"), callMul.function());
         assertEquals(2, callMul.arguments().size());
         assertEquals(AstNumberLiteral.of(1), callMul.arguments().get(0));
         assertEquals(AstNumberLiteral.of(2), callMul.arguments().get(1));
@@ -297,7 +296,7 @@ class ParserTest {
       var expr = ((AstLocal) statements.get(i++)).variable().expression();
       {
         var callDiv = (AstCall) expr;
-        assertEquals(builtinEntityRef("/"), callDiv.function());
+        assertEquals(newBuiltinEntityRef("/"), callDiv.function());
         assertEquals(2, callDiv.arguments().size());
         assertEquals(AstNumberLiteral.of(1), callDiv.arguments().get(0));
         assertEquals(AstNumberLiteral.of(2), callDiv.arguments().get(1));
@@ -307,7 +306,7 @@ class ParserTest {
       var expr = ((AstLocal) statements.get(i++)).variable().expression();
       {
         var callMod = (AstCall) expr;
-        assertEquals(builtinEntityRef("%"), callMod.function());
+        assertEquals(newBuiltinEntityRef("%"), callMod.function());
         assertEquals(2, callMod.arguments().size());
         assertEquals(AstNumberLiteral.of(1), callMod.arguments().get(0));
         assertEquals(AstNumberLiteral.of(2), callMod.arguments().get(1));
@@ -317,11 +316,11 @@ class ParserTest {
       var expr = ((AstLocal) statements.get(i++)).variable().expression();
       {
         var callMul = (AstCall) expr;
-        assertEquals(builtinEntityRef("*"), callMul.function());
+        assertEquals(newBuiltinEntityRef("*"), callMul.function());
         assertEquals(2, callMul.arguments().size());
         {
           var nestedCallMul = (AstCall) callMul.arguments().get(0);
-          assertEquals(builtinEntityRef("*"), nestedCallMul.function());
+          assertEquals(newBuiltinEntityRef("*"), nestedCallMul.function());
           assertEquals(2, nestedCallMul.arguments().size());
           assertEquals(AstNumberLiteral.of(1), nestedCallMul.arguments().get(0));
           assertEquals(AstNumberLiteral.of(2), nestedCallMul.arguments().get(1));
@@ -333,12 +332,12 @@ class ParserTest {
       var expr = ((AstLocal) statements.get(i++)).variable().expression();
       {
         var callAdd = (AstCall) expr;
-        assertEquals(builtinEntityRef("+"), callAdd.function());
+        assertEquals(newBuiltinEntityRef("+"), callAdd.function());
         assertEquals(2, callAdd.arguments().size());
         assertEquals(AstNumberLiteral.of(1), callAdd.arguments().get(0));
         {
           var callMul = (AstCall) callAdd.arguments().get(1);
-          assertEquals(builtinEntityRef("*"), callMul.function());
+          assertEquals(newBuiltinEntityRef("*"), callMul.function());
           assertEquals(2, callMul.arguments().size());
           assertEquals(AstNumberLiteral.of(2), callMul.arguments().get(0));
           assertEquals(AstNumberLiteral.of(3), callMul.arguments().get(1));
@@ -349,11 +348,11 @@ class ParserTest {
       var expr = ((AstLocal) statements.get(i++)).variable().expression();
       {
         var callAdd = (AstCall) expr;
-        assertEquals(builtinEntityRef("+"), callAdd.function());
+        assertEquals(newBuiltinEntityRef("+"), callAdd.function());
         assertEquals(2, callAdd.arguments().size());
         {
           var callMul = (AstCall) callAdd.arguments().get(0);
-          assertEquals(builtinEntityRef("*"), callMul.function());
+          assertEquals(newBuiltinEntityRef("*"), callMul.function());
           assertEquals(2, callMul.arguments().size());
           assertEquals(AstNumberLiteral.of(1), callMul.arguments().get(0));
           assertEquals(AstNumberLiteral.of(2), callMul.arguments().get(1));
@@ -365,7 +364,7 @@ class ParserTest {
       var expr = ((AstLocal) statements.get(i++)).variable().expression();
       {
         var call = (AstCall) expr;
-        assertEquals(builtinEntityRef("+"), call.function());
+        assertEquals(newBuiltinEntityRef("+"), call.function());
         assertEquals(2, call.arguments().size());
         assertEquals(AstNumberLiteral.of(1), call.arguments().get(0));
         assertEquals(AstNumberLiteral.of(2), call.arguments().get(1));
@@ -375,9 +374,9 @@ class ParserTest {
       var expr = ((AstLocal) statements.get(i++)).variable().expression();
       {
         var cast = (AstCast) expr;
-        assertEquals(AstTypeRef.ofName("int"), cast.typeRef());
+        assertEquals(newTypeRef("int"), cast.type());
         var callAdd = (AstCall) cast.expression();
-        assertEquals(builtinEntityRef("+"), callAdd.function());
+        assertEquals(newBuiltinEntityRef("+"), callAdd.function());
         assertEquals(2, callAdd.arguments().size());
         assertEquals(AstNumberLiteral.of(1), callAdd.arguments().get(0));
         assertEquals(AstNumberLiteral.of(2), callAdd.arguments().get(1));
@@ -387,10 +386,10 @@ class ParserTest {
       var expr = ((AstLocal) statements.get(i++)).variable().expression();
       {
         var call = (AstCall) expr;
-        assertEquals(builtinEntityRef("*"), call.function());
+        assertEquals(newBuiltinEntityRef("*"), call.function());
         {
           var fieldAccess = (AstFieldAccess) call.arguments().get(0);
-          assertEquals(AstEntityRef.ofName("p"), fieldAccess.object());
+          assertEquals(newEntityRef("p"), fieldAccess.object());
           assertEquals("t", fieldAccess.fieldName());
         }
         assertEquals(AstNumberLiteral.of(5), call.arguments().get(1));
@@ -419,24 +418,24 @@ class ParserTest {
     {
       var expr = ((AstLocal) statements.get(i++)).variable().expression();
       var entityRef = (AstEntityRef) expr;
-      assertEquals(AstEntityRef.ofName("foo", "bar"), entityRef);
+      assertEquals(newEntityRef("foo", "bar"), entityRef);
     }
     {
       var expr = ((AstLocal) statements.get(i++)).variable().expression();
       var call = (AstCall) expr;
-      assertEquals(AstEntityRef.ofName("foo"), call.function());
+      assertEquals(newEntityRef("foo"), call.function());
       assertEquals(ImmutableList.of(), call.arguments());
     }
     {
       var expr = ((AstLocal) statements.get(i++)).variable().expression();
       var call = (AstCall) expr;
-      assertEquals(AstEntityRef.ofName("foo"), call.function());
+      assertEquals(newEntityRef("foo"), call.function());
       assertEquals(ImmutableList.of(), call.arguments());
     }
     {
       var expr = ((AstLocal) statements.get(i++)).variable().expression();
       var call = (AstCall) expr;
-      assertEquals(AstEntityRef.ofName("foo"), call.function());
+      assertEquals(newEntityRef("foo"), call.function());
       assertEquals(2, call.arguments().size());
       assertEquals(AstNumberLiteral.of(1), call.arguments().get(0));
       assertEquals(AstNumberLiteral.of(2), call.arguments().get(1));
@@ -444,7 +443,7 @@ class ParserTest {
     {
       var expr = ((AstLocal) statements.get(i++)).variable().expression();
       var call = (AstCall) expr;
-      assertEquals(AstEntityRef.ofName("foo", "bar"), call.function());
+      assertEquals(newEntityRef("foo", "bar"), call.function());
       assertEquals(ImmutableList.of(), call.arguments());
     }
   }
@@ -467,19 +466,19 @@ class ParserTest {
     {
       var expr = ((AstLocal) statements.get(i++)).variable().expression();
       var field = (AstFieldAccess) expr;
-      assertEquals(AstEntityRef.ofName("foo"), field.object());
+      assertEquals(newEntityRef("foo"), field.object());
       assertEquals("bar", field.fieldName());
     }
     {
       var expr = ((AstLocal) statements.get(i++)).variable().expression();
       var receiverLookup = (AstReceiverLookup) expr;
-      assertEquals(AstEntityRef.ofName("foo"), receiverLookup.receiver());
+      assertEquals(newEntityRef("foo"), receiverLookup.receiver());
       assertEquals("bar", receiverLookup.functionName());
     }
     {
       var expr = ((AstLocal) statements.get(i++)).variable().expression();
       var index = (AstArrayAccess) expr;
-      assertEquals(AstEntityRef.ofName("foo"), index.array());
+      assertEquals(newEntityRef("foo"), index.array());
       assertEquals(AstNumberLiteral.of(1), index.index());
     }
     {
@@ -493,7 +492,7 @@ class ParserTest {
           var call = (AstCall) index.array();
           {
             var field = (AstFieldAccess) call.function();
-            assertEquals(AstEntityRef.ofName("foo"), field.object());
+            assertEquals(newEntityRef("foo"), field.object());
             assertEquals("bar", field.fieldName());
           }
           assertEquals(2, call.arguments().size());
@@ -520,18 +519,18 @@ class ParserTest {
     {
       var expr = ((AstLocal) statements.get(0)).variable().expression();
       var newExpr = (AstNew) expr;
-      assertEquals(AstTypeRef.ofName("Duration"), newExpr.typeRef());
+      assertEquals(newTypeRef("Duration"), newExpr.type());
       assertNull(newExpr.size());
     }
     {
       var expr = ((AstLocal) statements.get(1)).variable().expression();
       var newExpr = (AstNew) expr;
-      assertEquals(AstTypeRef.ofName("Duration"), newExpr.typeRef());
+      assertEquals(newTypeRef("Duration"), newExpr.type());
       assertEquals(AstNumberLiteral.of(5), newExpr.size());
     }
     {
       var stmt = (AstDelete) statements.get(2);
-      assertEquals(AstEntityRef.ofName("x"), stmt.expression());
+      assertEquals(newEntityRef("x"), stmt.expression());
     }
   }
 
@@ -559,22 +558,22 @@ class ParserTest {
       var stmt = (AstIf) statements.get(i++);
       assertEquals(1, stmt.conditions().size());
       assertEquals(1, stmt.thenBlocks().size());
-      assertEquals(AstEntityRef.ofName("a"), stmt.conditions().get(0));
+      assertEquals(newEntityRef("a"), stmt.conditions().get(0));
       assertNull(stmt.elseBlock());
     }
     {
       var stmt = (AstIf) statements.get(i++);
       assertEquals(1, stmt.conditions().size());
       assertEquals(1, stmt.thenBlocks().size());
-      assertEquals(AstEntityRef.ofName("a"), stmt.conditions().get(0));
+      assertEquals(newEntityRef("a"), stmt.conditions().get(0));
       assertNotNull(stmt.elseBlock());
     }
     {
       var stmt = (AstIf) statements.get(i++);
       assertEquals(2, stmt.conditions().size());
       assertEquals(2, stmt.thenBlocks().size());
-      assertEquals(AstEntityRef.ofName("a"), stmt.conditions().get(0));
-      assertEquals(AstEntityRef.ofName("b"), stmt.conditions().get(1));
+      assertEquals(newEntityRef("a"), stmt.conditions().get(0));
+      assertEquals(newEntityRef("b"), stmt.conditions().get(1));
       assertNotNull(stmt.elseBlock());
     }
   }
@@ -600,7 +599,7 @@ class ParserTest {
     {
       var stmt = (AstFor) statements.get(i++);
       assertNull(stmt.init());
-      assertEquals(AstEntityRef.ofName("true"), stmt.condition());
+      assertEquals(newEntityRef("true"), stmt.condition());
       assertNull(stmt.increment());
       var bodyStatements = stmt.block().statements();
       assertEquals(1, bodyStatements.size());
@@ -610,9 +609,9 @@ class ParserTest {
       var stmt = (AstFor) statements.get(i++);
       var init = stmt.init();
       assertEquals(Identifier.ofEntity("i"), init.name());
-      assertNull(init.typeRef());
+      assertNull(init.type());
       assertEquals(AstNumberLiteral.of(0), init.expression());
-      assertEquals(AstEntityRef.ofName("true"), stmt.condition());
+      assertEquals(newEntityRef("true"), stmt.condition());
       assertNull(stmt.increment());
       assertEquals(ImmutableList.of(), stmt.block().statements());
     }
@@ -620,10 +619,10 @@ class ParserTest {
       var stmt = (AstFor) statements.get(i++);
       var init = stmt.init();
       assertEquals(Identifier.ofEntity("i"), init.name());
-      assertNull(init.typeRef());
+      assertNull(init.type());
       assertEquals(AstNumberLiteral.of(0), init.expression());
-      assertEquals(AstEntityRef.ofName("true"), stmt.condition());
-      assertEquals(AstEntityRef.ofName("i"), stmt.increment());
+      assertEquals(newEntityRef("true"), stmt.condition());
+      assertEquals(newEntityRef("i"), stmt.increment());
       assertEquals(ImmutableList.of(), stmt.block().statements());
     }
   }
@@ -688,7 +687,7 @@ class ParserTest {
     var statements = module.findFunction("f").block().statements();
     {
       var stmt = (AstReturn) statements.get(0);
-      assertEquals(AstEntityRef.ofName("value"), stmt.expression());
+      assertEquals(newEntityRef("value"), stmt.expression());
     }
   }
 
@@ -710,13 +709,13 @@ class ParserTest {
       var stmt = (AstDefer) statements.get(0);
       assertEquals(1, stmt.block().statements().size());
       var exprStmt = (AstExpressionStatement) stmt.block().statements().get(0);
-      assertEquals(AstEntityRef.ofName("value"), exprStmt.expression());
+      assertEquals(newEntityRef("value"), exprStmt.expression());
     }
     {
       var stmt = (AstDefer) statements.get(1);
       assertEquals(1, stmt.block().statements().size());
       var exprStmt = (AstExpressionStatement) stmt.block().statements().get(0);
-      assertEquals(AstEntityRef.ofName("value"), exprStmt.expression());
+      assertEquals(newEntityRef("value"), exprStmt.expression());
     }
   }
 }

@@ -9,17 +9,6 @@ public final class AstEntityRef extends AstExpression {
   private Identifier name;
   private AstEntity entity;
 
-  // Test helper.
-  public static AstEntityRef ofName(String name) {
-    return ofName(null, name);
-  }
-
-  public static AstEntityRef ofName(String moduleName, String name) {
-    var ref = new AstEntityRef();
-    ref.name(Identifier.ofEntity(name).withModule(moduleName));
-    return ref;
-  }
-
   public AstEntityRef() {}
 
   @Override
@@ -44,11 +33,8 @@ public final class AstEntityRef extends AstExpression {
   }
 
   @Override
-  public AstTypeRef typeRef() {
-    return switch (entity) {
-      case AstVariable variable -> variable.typeRef();
-      case AstFunction function -> function.typeRef();
-    };
+  public AstType type() {
+    return entity.type();
   }
 
   public Identifier name() {
@@ -65,6 +51,10 @@ public final class AstEntityRef extends AstExpression {
 
   public void entity(AstEntity entity) {
     this.entity = checkNotNull(entity);
+  }
+
+  public boolean isResolved() {
+    return entity != null;
   }
 
   public boolean isBuiltin() {

@@ -12,7 +12,6 @@ import com.github.idemura.cimple.compiler.ast.AstIf;
 import com.github.idemura.cimple.compiler.ast.AstLocal;
 import com.github.idemura.cimple.compiler.ast.AstRecordType;
 import com.github.idemura.cimple.compiler.ast.AstReturn;
-import com.github.idemura.cimple.compiler.ast.AstTypeRef;
 import com.github.idemura.cimple.compiler.parser.Keyword;
 import com.google.common.collect.ImmutableList;
 import java.util.List;
@@ -93,47 +92,22 @@ class PreprocessVisitorTest extends AbstractSemanticsTest {
     assertEquals(List.of(), errorConsumer.errors());
     {
       var header = module.findReceiverFunction("Duration", "toMillis").header();
-      var receiverType = AstTypeRef.ofName("Duration");
+      var receiverType = newTypeRef("Duration");
       assertEquals(receiverType, header.receiverType());
       assertEquals(1, header.receiverIndex());
-      assertEquals(AstTypeRef.ofType(AstBuiltinType.INT64), header.parameters().get(0).typeRef());
-      assertEquals(receiverType, header.parameters().get(1).typeRef());
-      assertEquals(AstTypeRef.ofType(AstBuiltinType.VOID), header.resultType());
+      assertEquals(newBuiltinTypeRef("int64"), header.parameters().get(0).type());
+      assertEquals(receiverType, header.parameters().get(1).type());
+      assertEquals(AstBuiltinType.VOID, header.resultType());
     }
     {
       var header = module.findFunction("f").header();
       assertEquals(-1, header.receiverIndex());
-      assertEquals(AstTypeRef.ofType(AstBuiltinType.VOID), header.resultType());
+      assertEquals(AstBuiltinType.VOID, header.resultType());
     }
   }
 
   @Test
-  void testNormalizeIntAndFloatTypeRefs() {
-    var code =
-        """
-        module test;
-        type record R {
-          var y float;
-        }
-        var x int;
-        function f(a int) float {}
-        """;
-    var module = parseCode(code, errorConsumer);
-    module.accept(new PreprocessVisitor(Keyword.valueList(), errorConsumer));
-    assertEquals(List.of(), errorConsumer.errors());
-    assertEquals(AstTypeRef.ofType(AstBuiltinType.INT64), module.findVariable("x").typeRef());
-    assertEquals(
-        AstTypeRef.ofType(AstBuiltinType.FLOAT64),
-        ((AstRecordType) module.findType("R")).fields().get(0).typeRef());
-    assertEquals(
-        AstTypeRef.ofType(AstBuiltinType.INT64),
-        module.findFunction("f").header().parameters().get(0).typeRef());
-    assertEquals(
-        AstTypeRef.ofType(AstBuiltinType.FLOAT64), module.findFunction("f").header().resultType());
-  }
-
-  @Test
-  void testNormalizeAliases() {
+  void testNormalizeTypeAliases() {
     var code =
         """
         module test;
@@ -148,47 +122,35 @@ class PreprocessVisitorTest extends AbstractSemanticsTest {
     var module = parseCode(code, errorConsumer);
     module.accept(new PreprocessVisitor(Keyword.valueList(), errorConsumer));
     assertEquals(List.of(), errorConsumer.errors());
-    assertEquals(AstTypeRef.ofType(AstBuiltinType.INT64), module.findVariable("g").typeRef());
+    assertEquals(newBuiltinTypeRef("int64"), module.findVariable("g").type());
     assertEquals(
-        AstTypeRef.ofType(AstBuiltinType.FLOAT64),
-        ((AstRecordType) module.findType("R")).fields().get(0).typeRef());
+        newBuiltinTypeRef("float64"),
+        ((AstRecordType) module.findType("R")).fields().get(0).type());
     assertEquals(
-        AstTypeRef.ofType(AstBuiltinType.INT64),
-        module.findFunction("f").header().parameters().get(0).typeRef());
+        newBuiltinTypeRef("int64"), module.findFunction("f").header().parameters().get(0).type());
     assertEquals(
-        AstTypeRef.ofType(AstBuiltinType.FLOAT64),
-        ((AstLocal) module.findFunction("f").block().statements().get(0)).variable().typeRef());
+        newBuiltinTypeRef("float64"),
+        ((AstLocal) module.findFunction("f").block().statements().get(0)).variable().type());
   }
 
   @Test
-  void testReceiverFunctionMustHaveExactlyOneUntypedParameter() {
+  void testFunctionParameterErrors() {
     var code =
         """
         module test;
         type record Duration {}
-        function Duration:a(x int) {}
+        function Duration:a(x bool) {}
         function Duration:b(x, y) {}
+        function f(x) {}
         """;
     var module = parseCode(code, errorConsumer);
     module.accept(new PreprocessVisitor(Keyword.valueList(), errorConsumer));
     assertEquals(
         List.of(
             "Receiver function 'Duration:a': missing the receiver parameter",
-            "Receiver function 'Duration:b': multiple receiver parameters"),
+            "Receiver function 'Duration:b': multiple receiver parameters",
+            "Free function 'f' cannot have a receiver parameter 'x'"),
         errorConsumer.errors());
-  }
-
-  @Test
-  void testFreeFunctionCannotHaveUntypedParameter() {
-    var code =
-        """
-        module test;
-        function f(x) {}
-        """;
-    var module = parseCode(code, errorConsumer);
-    module.accept(new PreprocessVisitor(Keyword.valueList(), errorConsumer));
-    assertEquals(
-        List.of("Free function 'f' cannot have a receiver parameter 'x'"), errorConsumer.errors());
   }
 
   @Test

@@ -10,7 +10,7 @@ public final class AstArrayAccess extends AstExpression {
   }
 
   @Override
-  public AstTypeRef typeRef() {
+  public AstType type() {
     throw new UnsupportedOperationException();
   }
 

@@ -1,30 +1,9 @@
 package com.github.idemura.cimple.compiler.ast;
 
 import com.github.idemura.cimple.compiler.Identifier;
-import java.util.Objects;
 
-public final class AstTypeRef extends AstNode {
+public final class AstTypeRef extends AstType {
   private Identifier name;
-  private AstType type;
-
-  // Test helper.
-  public static AstTypeRef ofName(String name) {
-    return ofName(null, name);
-  }
-
-  public static AstTypeRef ofName(String moduleName, String name) {
-    var ref = new AstTypeRef();
-    ref.name(Identifier.ofType(name).withModule(moduleName));
-    return ref;
-  }
-
-  public static AstTypeRef ofType(AstType type) {
-    var ref = new AstTypeRef();
-    ref.name(type.name());
-    ref.type(type);
-    ref.markResolved();
-    return ref;
-  }
 
   @Override
   public Object accept(AstVisitor visitor) {
@@ -32,34 +11,17 @@ public final class AstTypeRef extends AstNode {
   }
 
   @Override
-  public int hashCode() {
-    return name.hashCode();
-  }
-
-  @Override
-  public boolean equals(Object object) {
-    return this == object
-        || (object instanceof AstTypeRef other && Objects.equals(name, other.name));
-  }
-
-  @Override
   public String toString() {
     return "TYPE_REF(%s)".formatted(name);
   }
 
+  @Override
   public Identifier name() {
     return name;
   }
 
+  @Override
   public void name(Identifier name) {
     this.name = name;
-  }
-
-  public AstType type() {
-    return type;
-  }
-
-  public void type(AstType type) {
-    this.type = type;
   }
 }

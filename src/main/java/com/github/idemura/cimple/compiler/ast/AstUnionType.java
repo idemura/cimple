@@ -10,7 +10,7 @@ public final class AstUnionType extends AstType {
   public static final class Variant {
     private String tag;
     private Location location;
-    private AstTypeRef valueType;
+    private AstType valueType;
 
     @Override
     public int hashCode() {
@@ -38,11 +38,11 @@ public final class AstUnionType extends AstType {
       this.tag = tag;
     }
 
-    public AstTypeRef valueType() {
+    public AstType valueType() {
       return valueType;
     }
 
-    public void valueType(AstTypeRef valueType) {
+    public void valueType(AstType valueType) {
       this.valueType = valueType;
     }
   }

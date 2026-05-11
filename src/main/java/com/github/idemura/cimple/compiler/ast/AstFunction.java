@@ -7,14 +7,33 @@ public final class AstFunction extends AstEntity {
   private Identifier name;
   private AstFunctionHeader header;
   private AstBlock block;
-  private AstTypeRef typeRef;
+  private AstType type;
 
+  @Override
   public Identifier name() {
     return name;
   }
 
+  @Override
   public void name(Identifier name) {
     this.name = name;
+  }
+
+  public void makeLambdaType() {
+    var typeName = Identifier.ofEntity("_lambda").builtin();
+    var type = new AstFunctionType();
+    type.name(typeName);
+    type.header(header);
+    this.type = type;
+  }
+
+  @Override
+  public AstType type() {
+    return type;
+  }
+
+  public void type(AstType type) {
+    this.type = type;
   }
 
   @Override
@@ -56,21 +75,6 @@ public final class AstFunction extends AstEntity {
 
   public void header(AstFunctionHeader header) {
     this.header = header;
-  }
-
-  public void makeLambdaType() {
-    var typeName = Identifier.ofEntity("_lambda").builtin();
-    var type = new AstFunctionType();
-    type.name(typeName);
-    type.header(header);
-    typeRef = new AstTypeRef();
-    typeRef.name(typeName);
-    typeRef.type(type);
-    typeRef.markResolved();
-  }
-
-  public AstTypeRef typeRef() {
-    return typeRef;
   }
 
   public AstBlock block() {

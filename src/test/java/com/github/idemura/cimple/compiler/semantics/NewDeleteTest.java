@@ -5,7 +5,6 @@ import static com.github.idemura.cimple.compiler.parser.Parser.parseCode;
 import static org.junit.jupiter.api.Assertions.*;
 
 import com.github.idemura.cimple.compiler.ast.AstNew;
-import com.github.idemura.cimple.compiler.ast.AstTypeRef;
 import java.util.List;
 import org.junit.jupiter.api.Test;
 
@@ -27,8 +26,8 @@ class NewDeleteTest extends AbstractSemanticsTest {
     assertEquals(List.of(), errorConsumer.errors());
     {
       var expr = (AstNew) extractReturnExpression(module.findFunction("f"));
-      assertEquals(AstTypeRef.ofName("test", "Duration"), expr.typeRef());
-      assertSame(module.findType("Duration"), expr.typeRef().type());
+      assertEquals(newRecordType("test", "Duration"), expr.type());
+      assertSame(module.findType("Duration"), expr.type());
       assertNull(expr.size());
     }
   }

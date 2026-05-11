@@ -1,25 +1,57 @@
 package com.github.idemura.cimple.compiler.ast;
 
-import static com.github.idemura.cimple.compiler.Constants.BUILTIN_MODULE;
-
 import com.github.idemura.cimple.compiler.Identifier;
 
 public final class AstUtils {
   private AstUtils() {}
 
-  public static AstEntityRef builtinEntityRef(String symbol) {
-    return AstEntityRef.ofName(BUILTIN_MODULE, symbol);
+  public static AstTypeRef newTypeRef(String name) {
+    return newTypeRef(null, name);
+  }
+
+  public static AstTypeRef newTypeRef(String moduleName, String name) {
+    var ref = new AstTypeRef();
+    ref.name(Identifier.ofType(name).withModule(moduleName));
+    return ref;
+  }
+
+  public static AstTypeRef newBuiltinTypeRef(String name) {
+    var ref = new AstTypeRef();
+    ref.name(Identifier.ofType(name).builtin());
+    return ref;
+  }
+
+  public static AstEntityRef newEntityRef(String name) {
+    return newEntityRef(null, name);
+  }
+
+  public static AstEntityRef newEntityRef(String moduleName, String name) {
+    var ref = new AstEntityRef();
+    ref.name(Identifier.ofEntity(name).withModule(moduleName));
+    return ref;
+  }
+
+  public static AstEntityRef newBuiltinEntityRef(String name) {
+    var ref = new AstEntityRef();
+    ref.name(Identifier.ofEntity(name).builtin());
+    return ref;
+  }
+
+  public static AstRecordType newRecordType(String moduleName, String name) {
+    var type = new AstRecordType();
+    type.name(Identifier.ofType(name).withModule(moduleName));
+    return type;
   }
 
   public static AstBoolLiteral boolLiteral(boolean value) {
     var literal = new AstBoolLiteral(value);
-    literal.typeRef(AstTypeRef.ofType(AstBuiltinType.BOOL));
+    literal.type(AstBuiltinType.BOOL);
     return literal;
   }
 
   public static AstNullLiteral nullLiteral() {
     var literal = new AstNullLiteral();
-    literal.typeRef(AstTypeRef.ofType(AstBuiltinType.NULL));
+    literal.type(AstBuiltinType.NULL);
     return literal;
   }
 
@@ -34,7 +66,7 @@ public final class AstUtils {
   public static AstFunction function(String receiverTypeName, String name) {
     var header = new AstFunctionHeader();
     if (receiverTypeName != null) {
-      header.receiverType(AstTypeRef.ofName(receiverTypeName));
+      header.receiverType(newTypeRef(receiverTypeName));
     }
     var function = new AstFunction();
     function.name(Identifier.ofTypeEntity(receiverTypeName, name));
@@ -43,7 +75,7 @@ public final class AstUtils {
   }
 
   public static AstVariable rawVariable(String name, String typeName) {
-    return variable(null, name, 0, AstTypeRef.ofName(typeName));
+    return variable(null, name, 0, newTypeRef(typeName));
   }
 
   public static AstVariable rawVariable(String name) {
@@ -66,19 +98,18 @@ public final class AstUtils {
     var unionVariant = new AstUnionType.Variant();
     unionVariant.tag(name);
     if (typeName != null) {
-      unionVariant.valueType(AstTypeRef.ofName(typeName));
+      unionVariant.valueType(newTypeRef(typeName));
     }
     return unionVariant;
   }
 
-  private static AstVariable variable(
-      String moduleName, String name, long flags, AstTypeRef typeRef) {
+  private static AstVariable variable(String moduleName, String name, long flags, AstType type) {
     var variable = new AstVariable();
     variable.name(Identifier.ofEntity(name).withModule(moduleName));
     if (flags != 0) {
       variable.setBit(flags);
     }
-    variable.typeRef(typeRef);
+    variable.type(type);
     return variable;
   }
 }

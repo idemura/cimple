@@ -33,7 +33,6 @@ public final class AstBuiltinType extends AstType {
       case "int16" -> INT16;
       case "int32" -> INT32;
       case "int64" -> INT64;
-      case "null" -> NULL;
       case "string" -> STRING;
       case "void" -> VOID;
       default -> null;

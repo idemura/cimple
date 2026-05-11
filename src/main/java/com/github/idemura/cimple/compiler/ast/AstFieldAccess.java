@@ -11,8 +11,8 @@ public final class AstFieldAccess extends AstExpression {
   }
 
   @Override
-  public AstTypeRef typeRef() {
-    return field == null ? null : field.typeRef();
+  public AstType type() {
+    return field == null ? null : field.type();
   }
 
   public AstExpression object() {

@@ -48,7 +48,7 @@ class PreprocessVisitor extends AstExpressionRewriteVisitor {
     }
     // Default the result type to void when it is omitted.
     if (node.resultType() == null) {
-      node.resultType(AstTypeRef.ofType(AstBuiltinType.VOID));
+      node.resultType(AstBuiltinType.VOID);
     }
     return super.visit(node);
   }
@@ -68,7 +68,7 @@ class PreprocessVisitor extends AstExpressionRewriteVisitor {
       var receiverIndex = -1;
       var invalid = false;
       for (int i = 0; i < parameters.size(); i++) {
-        if (parameters.get(i).typeRef() == null) {
+        if (parameters.get(i).type() == null) {
           if (receiverIndex >= 0) {
             errorConsumer.errorAt(
                 header.location(),
@@ -87,11 +87,11 @@ class PreprocessVisitor extends AstExpressionRewriteVisitor {
             functionName);
       } else {
         header.receiverIndex(receiverIndex);
-        parameters.get(receiverIndex).typeRef(header.receiverType());
+        parameters.get(receiverIndex).type(header.receiverType());
       }
     } else {
       for (var parameter : parameters) {
-        if (parameter.typeRef() == null) {
+        if (parameter.type() == null) {
           errorConsumer.errorAt(
               parameter.location(),
               "Free function '%s' cannot have a receiver parameter '%s'",
@@ -105,9 +105,7 @@ class PreprocessVisitor extends AstExpressionRewriteVisitor {
   @Override
   protected Object visit(AstVariable node) {
     checkQualifiedName(node.name(), node.location());
-    if (!node.getBit(AstVariable.PARAMETER)
-        && node.typeRef() == null
-        && node.expression() == null) {
+    if (!node.getBit(AstVariable.PARAMETER) && node.type() == null && node.expression() == null) {
       errorConsumer.errorAt(
           node.location(), "Variable '%s' must have a type or an initializer", node.name());
     }
@@ -119,11 +117,9 @@ class PreprocessVisitor extends AstExpressionRewriteVisitor {
     switch (node.name().typeName()) {
       case "int":
         node.name(AstBuiltinType.INT64.name());
-        node.type(AstBuiltinType.INT64);
         break;
       case "float":
         node.name(AstBuiltinType.FLOAT64.name());
-        node.type(AstBuiltinType.FLOAT64);
         break;
       default:
         break;
@@ -181,19 +177,19 @@ class PreprocessVisitor extends AstExpressionRewriteVisitor {
 
   @Override
   protected Object visit(AstNullLiteral node) {
-    node.typeRef(AstTypeRef.ofType(AstBuiltinType.NULL));
+    node.type(AstBuiltinType.NULL);
     return node;
   }
 
   @Override
   protected Object visit(AstBoolLiteral node) {
-    node.typeRef(AstTypeRef.ofType(AstBuiltinType.BOOL));
+    node.type(AstBuiltinType.BOOL);
     return node;
   }
 
   @Override
   protected Object visit(AstNumberLiteral node) {
-    if (node.typeRef() != null) {
+    if (node.type() != null) {
       return node;
     }
     AstNumberLiteral number;
@@ -201,10 +197,10 @@ class PreprocessVisitor extends AstExpressionRewriteVisitor {
     try {
       if (value.contains(".")) {
         number = new AstNumberLiteral(parseDouble(value));
-        number.typeRef(AstTypeRef.ofType(AstBuiltinType.FLOAT64));
+        number.type(AstBuiltinType.FLOAT64);
       } else {
         number = new AstNumberLiteral(parseLong(value));
-        number.typeRef(AstTypeRef.ofType(AstBuiltinType.INT64));
+        number.type(AstBuiltinType.INT64);
       }
       number.location(node.location());
       return number;
@@ -216,7 +212,7 @@ class PreprocessVisitor extends AstExpressionRewriteVisitor {
 
   @Override
   protected Object visit(AstStringLiteral node) {
-    node.typeRef(AstTypeRef.ofType(AstBuiltinType.STRING));
+    node.type(AstBuiltinType.STRING);
     return node;
   }
 
@@ -226,17 +222,17 @@ class PreprocessVisitor extends AstExpressionRewriteVisitor {
         switch (node.name().entityName()) {
           case "true" -> {
             var literal = new AstBoolLiteral(true);
-            literal.typeRef(AstTypeRef.ofType(AstBuiltinType.BOOL));
+            literal.type(AstBuiltinType.BOOL);
             yield literal;
           }
           case "false" -> {
             var literal = new AstBoolLiteral(false);
-            literal.typeRef(AstTypeRef.ofType(AstBuiltinType.BOOL));
+            literal.type(AstBuiltinType.BOOL);
             yield literal;
           }
           case "null" -> {
             var literal = new AstNullLiteral();
-            literal.typeRef(AstTypeRef.ofType(AstBuiltinType.NULL));
+            literal.type(AstBuiltinType.NULL);
             yield literal;
           }
           default -> node;

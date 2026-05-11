@@ -1,7 +1,7 @@
 package com.github.idemura.cimple.compiler.ast;
 
 public final class AstNew extends AstExpression {
-  private AstTypeRef typeRef;
+  private AstType type;
   private AstExpression size;
 
   @Override
@@ -10,12 +10,12 @@ public final class AstNew extends AstExpression {
   }
 
   @Override
-  public AstTypeRef typeRef() {
-    return typeRef;
+  public AstType type() {
+    return type;
   }
 
-  public void typeRef(AstTypeRef typeRef) {
-    this.typeRef = typeRef;
+  public void type(AstType type) {
+    this.type = type;
   }
 
   public AstExpression size() {

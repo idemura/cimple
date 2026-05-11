@@ -8,4 +8,6 @@ public abstract sealed class AstEntity extends AstNode permits AstFunction, AstV
   public abstract Identifier name();
 
   public abstract void name(Identifier name);
+
+  public abstract AstType type();
 }

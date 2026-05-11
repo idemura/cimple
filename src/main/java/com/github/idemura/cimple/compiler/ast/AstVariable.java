@@ -11,7 +11,7 @@ public final class AstVariable extends AstEntity {
   public static final long GLOBAL = 0x10L;
 
   private Identifier name;
-  private AstTypeRef typeRef;
+  private AstType type;
   private AstExpression expression;
   private long flags;
 
@@ -32,8 +32,27 @@ public final class AstVariable extends AstEntity {
     return this == object
         || (object instanceof AstVariable other
             && Objects.equals(name, other.name)
-            && Objects.equals(typeRef, other.typeRef)
+            && Objects.equals(type, other.type)
             && flags == other.flags);
+  }
+
+  @Override
+  public Identifier name() {
+    return name;
+  }
+
+  @Override
+  public void name(Identifier name) {
+    this.name = name;
+  }
+
+  @Override
+  public AstType type() {
+    return type;
+  }
+
+  public void type(AstType type) {
+    this.type = type;
   }
 
   public boolean getBit(long mask) {
@@ -46,22 +65,6 @@ public final class AstVariable extends AstEntity {
 
   public void setBit(long mask) {
     flags |= mask;
-  }
-
-  public Identifier name() {
-    return name;
-  }
-
-  public void name(Identifier name) {
-    this.name = name;
-  }
-
-  public AstTypeRef typeRef() {
-    return typeRef;
-  }
-
-  public void typeRef(AstTypeRef typeRef) {
-    this.typeRef = typeRef;
   }
 
   public AstExpression expression() {

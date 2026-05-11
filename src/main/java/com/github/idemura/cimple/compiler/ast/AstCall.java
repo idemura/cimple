@@ -15,8 +15,8 @@ public final class AstCall extends AstExpression {
   }
 
   @Override
-  public AstTypeRef typeRef() {
-    return ((AstFunctionType) function.typeRef().type()).header().resultType();
+  public AstType type() {
+    return ((AstFunctionType) function.type()).header().resultType();
   }
 
   public AstExpression function() {

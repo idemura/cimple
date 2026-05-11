@@ -9,7 +9,6 @@ import com.github.idemura.cimple.compiler.ast.AstBuiltinType;
 import com.github.idemura.cimple.compiler.ast.AstCall;
 import com.github.idemura.cimple.compiler.ast.AstEntityRef;
 import com.github.idemura.cimple.compiler.ast.AstLocal;
-import com.github.idemura.cimple.compiler.ast.AstTypeRef;
 import java.util.List;
 import org.junit.jupiter.api.Test;
 
@@ -29,16 +28,16 @@ class CallResolutionTest extends AbstractSemanticsTest {
     assertEquals(List.of(), errorConsumer.errors());
     {
       var header = module.findReceiverFunction("Duration", "toMillis").header();
-      var receiverType = AstTypeRef.ofName("test", "Duration");
+      var receiverType = newRecordType("test", "Duration");
       assertEquals(receiverType, header.receiverType());
       assertEquals(1, header.receiverIndex());
-      assertEquals(receiverType, header.parameters().get(1).typeRef());
-      assertEquals(AstTypeRef.ofType(AstBuiltinType.VOID), header.resultType());
+      assertEquals(receiverType, header.parameters().get(1).type());
+      assertEquals(AstBuiltinType.VOID, header.resultType());
     }
     {
       var header = module.findFunction("f").header();
       assertEquals(-1, header.receiverIndex());
-      assertEquals(AstTypeRef.ofType(AstBuiltinType.VOID), header.resultType());
+      assertEquals(AstBuiltinType.VOID, header.resultType());
     }
     var nameMap = semanticAnalyzer.nameMap();
     assertSame(
@@ -129,7 +128,6 @@ class CallResolutionTest extends AbstractSemanticsTest {
       var function = (AstEntityRef) call.function();
       assertSame(module.findReceiverFunction("Duration", "toMillis"), function.entity());
       assertEquals(new Identifier("test", "Duration", "toMillis"), function.name());
-
       assertEquals(1, call.arguments().size());
       var receiver = (AstEntityRef) call.arguments().get(0);
       assertEquals(Identifier.ofEntity("d"), receiver.name());
@@ -137,7 +135,7 @@ class CallResolutionTest extends AbstractSemanticsTest {
     }
     {
       var function = module.findReceiverFunction("Duration", "toMillis");
-      assertEquals(AstTypeRef.ofName("test", "Duration"), function.header().receiverType());
+      assertEquals(newRecordType("test", "Duration"), function.header().receiverType());
     }
   }
 
@@ -158,10 +156,10 @@ class CallResolutionTest extends AbstractSemanticsTest {
       var block = module.findFunction("g").block();
       var local = (AstLocal) block.statements().get(0);
       assertEquals(Identifier.ofEntity("t"), local.variable().name());
-      assertEquals(AstTypeRef.ofType(AstBuiltinType.STRING), local.variable().typeRef());
+      assertEquals(AstBuiltinType.STRING, local.variable().type());
       var call = (AstCall) local.variable().expression();
-      assertEquals(AstEntityRef.ofName("test", "f"), call.function());
-      assertEquals(AstBuiltinType.STRING, call.typeRef().type());
+      assertEquals(newEntityRef("test", "f"), call.function());
+      assertEquals(AstBuiltinType.STRING, call.type());
     }
   }
 

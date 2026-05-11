@@ -5,7 +5,7 @@ public class AstExpressionRewriteVisitor extends AstVisitor {
 
   @Override
   protected void visitChildren(AstVariable node) {
-    acceptSafe(node.typeRef());
+    acceptSafe(node.type());
     node.expression(rewrite(node.expression()));
   }
 
@@ -93,7 +93,7 @@ public class AstExpressionRewriteVisitor extends AstVisitor {
 
   @Override
   protected void visitChildren(AstNew node) {
-    acceptSafe(node.typeRef());
+    acceptSafe(node.type());
     node.size(rewrite(node.size()));
   }
 

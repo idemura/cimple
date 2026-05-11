@@ -35,22 +35,18 @@ public class NameResolutionVisitor extends AstExpressionRewriteVisitor {
 
   @Override
   protected Object visit(AstModule node) {
-    try {
-      // Named function types are structural:
-      //   type function foo(int x) bool;
-      //   type function bar(int x) bool;
-      // Values of types `foo` and `bar` are assignment-compatible because the signatures are the
-      // same. Functions therefore need an explicit lambda type derived from their headers. Assign
-      // those types to all module-level functions before resolving names inside function bodies.
-      for (var entity : node.definitions()) {
-        if (entity instanceof AstFunction function) {
-          function.makeLambdaType();
-        }
+    // Named function types are structural:
+    //   type function foo(int x) bool;
+    //   type function bar(int x) bool;
+    // Values of types `foo` and `bar` are assignment-compatible because the signatures are the
+    // same. Functions therefore need an explicit lambda type derived from their headers. Assign
+    // those types to all module-level functions before resolving names inside function bodies.
+    for (var entity : node.definitions()) {
+      if (entity instanceof AstFunction function) {
+        function.makeLambdaType();
       }
-      return super.visit(node);
-    } finally {
-      node.markResolved();
     }
+    return super.visit(node);
   }
 
   @Override
@@ -61,7 +57,6 @@ public class NameResolutionVisitor extends AstExpressionRewriteVisitor {
   @Override
   protected Object visit(AstFunction node) {
     try {
-      resolveHeader(node.header());
       nameMap.beginScope();
       for (var parameter : node.header().parameters()) {
         registerLocal(parameter);
@@ -69,22 +64,17 @@ public class NameResolutionVisitor extends AstExpressionRewriteVisitor {
       return super.visit(node);
     } finally {
       nameMap.endScope();
-      node.markResolved();
     }
   }
 
   @Override
   protected Object visit(AstVariable node) {
-    try {
-      super.visit(node);
-      // Preprocessor has checked that we have typeRef or expression.
-      if (node.typeRef() == null) {
-        node.typeRef(node.expression().typeRef());
-      }
-      return null;
-    } finally {
-      node.markResolved();
+    super.visit(node);
+    // Preprocessor has checked that we have typeRef or expression.
+    if (node.type() == null) {
+      node.type(node.expression().type());
     }
+    return null;
   }
 
   @Override
@@ -94,7 +84,6 @@ public class NameResolutionVisitor extends AstExpressionRewriteVisitor {
 
   @Override
   protected Object visit(AstFunctionType node) {
-    resolveHeader(node.header());
     return super.visit(node);
   }
 
@@ -128,95 +117,60 @@ public class NameResolutionVisitor extends AstExpressionRewriteVisitor {
     if (node.isBuiltin()) {
       return node;
     }
-    try {
-      var entity = nameMap.lookupEntity(node.name());
-      if (entity == null) {
-        errorConsumer.errorAt(node.location(), "Undefined name: '%s'", node.name());
-        return node;
-      }
-      node.name(entity.name());
-      node.entity(entity);
+    var entity = nameMap.lookupEntity(node.name());
+    if (entity == null) {
+      errorConsumer.errorAt(node.location(), "Undefined name: '%s'", node.name());
       return node;
-    } finally {
-      node.markResolved();
     }
+    node.name(entity.name());
+    node.entity(entity);
+    return node;
   }
 
   @Override
   protected Object visit(AstFieldAccess node) {
-    try {
-      super.visit(node);
-      var objectTypeRef = checkNotNull(node.object().typeRef());
-      var objectType = objectTypeRef.type();
-      if (!(objectType instanceof AstRecordType recordType)) {
-        errorConsumer.errorAt(
-            node.location(), "Field access requires a record, got '%s'", objectTypeRef.name());
+    super.visit(node);
+    var objectType = checkNotNull(node.object().type());
+    if (!(objectType instanceof AstRecordType recordType)) {
+      errorConsumer.errorAt(
+          node.location(), "Field access requires a record, got '%s'", objectType.name());
+      return node;
+    }
+    for (var field : recordType.fields()) {
+      if (field.name().entityName().equals(node.fieldName())) {
+        node.field(field);
         return node;
       }
-      for (var field : recordType.fields()) {
-        if (field.name().entityName().equals(node.fieldName())) {
-          node.field(field);
-          return node;
-        }
-      }
-      errorConsumer.errorAt(
-          node.location(),
-          "Undefined field '%s' in record '%s'",
-          node.fieldName(),
-          recordType.name());
-      return node;
-    } finally {
-      node.markResolved();
     }
+    errorConsumer.errorAt(
+        node.location(),
+        "Undefined field '%s' in record '%s'",
+        node.fieldName(),
+        recordType.name());
+    return node;
   }
 
   @Override
   protected Object visit(AstCall node) {
-    try {
-      // Resolve the callee expression and all argument expressions first.
-      super.visit(node);
-      var function = node.function();
-      if (function instanceof AstReceiverLookup receiverLookup) {
-        resolveReceiverCall(node, receiverLookup);
-      }
-      // Builtin calls are selected here, once argument expressions are available.
-      if (function instanceof AstEntityRef ref && ref.isBuiltin()) {
-        checkState(!ref.isResolved());
-        resolveBuiltinCall(node);
-      }
-      // Receiver lookup and builtin resolution may replace the callee expression.
-      checkCallParameters(node);
-      return node;
-    } finally {
-      node.markResolved();
+    // Resolve the callee expression and all argument expressions first.
+    super.visit(node);
+    var function = node.function();
+    if (function instanceof AstReceiverLookup receiverLookup) {
+      resolveReceiverCall(node, receiverLookup);
     }
+    // Builtin calls are selected here, once argument expressions are available.
+    if (function instanceof AstEntityRef ref && ref.isBuiltin()) {
+      checkState(!ref.isResolved());
+      resolveBuiltinCall(node);
+    }
+    // Receiver lookup and builtin resolution may replace the callee expression.
+    checkCallParameters(node);
+    return node;
   }
 
   @Override
   protected Object visit(AstCast node) {
     return super.visit(node);
-  }
-
-  private void resolveHeader(AstFunctionHeader header) {
-    if (header.receiverType() != null) {
-      resolveTypeRef(header.receiverType());
-    }
-    resolveTypeRef(header.resultType());
-  }
-
-  // TODO: Remove
-  private void resolveTypeRef(AstTypeRef typeRef) {
-    try {
-      var type = nameMap.lookupType(typeRef.name());
-      if (type == null) {
-        errorConsumer.errorAt(typeRef.location(), "Undefined type: '%s'", typeRef.name());
-        return;
-      }
-      typeRef.name(type.name());
-      typeRef.type(type);
-    } finally {
-      typeRef.markResolved();
-    }
   }
 
   private void resolveBuiltinCall(AstCall node) {
@@ -235,10 +189,9 @@ public class NameResolutionVisitor extends AstExpressionRewriteVisitor {
   }
 
   private void resolveReceiverCall(AstCall node, AstReceiverLookup receiverLookup) {
-    var receiverType = receiverLookup.receiver().typeRef();
+    var receiverType = receiverLookup.receiver().type();
     checkState(receiverType != null);
-    checkState(receiverType.isResolved());
-    if (receiverType.type() == AstBuiltinType.NULL) {
+    if (receiverType == AstBuiltinType.NULL) {
       errorConsumer.errorAt(
           receiverLookup.location(),
           "Cannot resolve receiver function '%s' for null receiver",
@@ -257,7 +210,6 @@ public class NameResolutionVisitor extends AstExpressionRewriteVisitor {
     functionRef.name(function.name());
     functionRef.entity(function);
     functionRef.location(receiverLookup.location());
-    functionRef.markResolved();
 
     var arguments = new ArrayList<>(node.arguments());
     arguments.add(function.header().receiverIndex(), receiverLookup.receiver());
@@ -266,8 +218,7 @@ public class NameResolutionVisitor extends AstExpressionRewriteVisitor {
   }
 
   private void checkCallParameters(AstCall call) {
-    var functionTypeRef = checkNotNull(call.function().typeRef());
-    var type = functionTypeRef.type();
+    var type = checkNotNull(call.function().type());
     if (type instanceof AstFunctionType functionType) {
       var parameters = functionType.header().parameters();
       var arguments = call.arguments();
@@ -281,21 +232,9 @@ public class NameResolutionVisitor extends AstExpressionRewriteVisitor {
         return;
       }
       for (int i = 0; i < arguments.size(); i++) {
-        var argumentType = checkNotNull(arguments.get(i).typeRef());
-        var parameterType = checkNotNull(parameters.get(i).typeRef());
-        var argumentResolvedType =
-            argumentType.type() != null
-                ? argumentType.type()
-                : nameMap.lookupType(argumentType.name());
-        var parameterResolvedType =
-            parameterType.type() != null
-                ? parameterType.type()
-                : nameMap.lookupType(parameterType.name());
-        var sameType =
-            argumentResolvedType != null && parameterResolvedType != null
-                ? parameterResolvedType.equals(argumentResolvedType)
-                : parameterType.equals(argumentType);
-        if (!sameType) {
+        var argumentType = checkNotNull(arguments.get(i).type());
+        var parameterType = checkNotNull(parameters.get(i).type());
+        if (!argumentType.equals(parameterType)) {
           errorConsumer.errorAt(
               arguments.get(i).location(),
               "Argument %d of function '%s' has type '%s', expected '%s'",

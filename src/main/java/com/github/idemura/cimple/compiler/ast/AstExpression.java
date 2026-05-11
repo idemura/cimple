@@ -11,5 +11,5 @@ public abstract sealed class AstExpression extends AstNode
         AstCast {
   protected AstExpression() {}
 
-  public abstract AstTypeRef typeRef();
+  public abstract AstType type();
 }

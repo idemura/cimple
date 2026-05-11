@@ -34,7 +34,7 @@ public abstract class AstVisitor {
 
   protected void visitChildren(AstFunction node) {
     node.header().accept(this);
-    acceptSafe(node.typeRef());
+    acceptSafe(node.type());
     node.block().accept(this);
   }
 
@@ -44,7 +44,7 @@ public abstract class AstVisitor {
   }
 
   protected void visitChildren(AstVariable node) {
-    acceptSafe(node.typeRef());
+    acceptSafe(node.type());
     acceptSafe(node.expression());
   }
 
@@ -180,7 +180,7 @@ public abstract class AstVisitor {
   }
 
   protected void visitChildren(AstNullLiteral node) {
-    acceptSafe(node.typeRef());
+    acceptSafe(node.type());
   }
 
   protected Object visit(AstBoolLiteral node) {
@@ -189,7 +189,7 @@ public abstract class AstVisitor {
   }
 
   protected void visitChildren(AstBoolLiteral node) {
-    acceptSafe(node.typeRef());
+    acceptSafe(node.type());
   }
 
   protected Object visit(AstNumberLiteral node) {
@@ -198,7 +198,7 @@ public abstract class AstVisitor {
   }
 
   protected void visitChildren(AstNumberLiteral node) {
-    acceptSafe(node.typeRef());
+    acceptSafe(node.type());
   }
 
   protected Object visit(AstStringLiteral node) {
@@ -207,7 +207,7 @@ public abstract class AstVisitor {
   }
 
   protected void visitChildren(AstStringLiteral node) {
-    acceptSafe(node.typeRef());
+    acceptSafe(node.type());
   }
 
   protected Object visit(AstEntityRef node) {
@@ -220,7 +220,7 @@ public abstract class AstVisitor {
   }
 
   protected void visitChildren(AstNew node) {
-    acceptSafe(node.typeRef());
+    acceptSafe(node.type());
     acceptSafe(node.size());
   }
 
@@ -271,7 +271,7 @@ public abstract class AstVisitor {
 
   protected void visitChildren(AstCast node) {
     node.expression().accept(this);
-    acceptSafe(node.typeRef());
+    acceptSafe(node.type());
   }
 
   protected void acceptSafe(AstNode node) {
