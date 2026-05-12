@@ -157,7 +157,7 @@ class CallResolutionTest extends AbstractSemanticsTest {
       var local = (AstLocal) block.statements().get(0);
       assertEquals(Identifier.ofEntity("t"), local.variable().name());
       assertEquals(AstBuiltinType.STRING, local.variable().type());
-      var call = (AstCall) local.variable().expression();
+      var call = (AstCall) local.variable().expression().root();
       assertEquals(newEntityRef("test", "f"), call.function());
       assertEquals(AstBuiltinType.STRING, call.type());
     }

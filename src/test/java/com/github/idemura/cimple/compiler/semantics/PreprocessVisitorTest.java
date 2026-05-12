@@ -37,21 +37,21 @@ class PreprocessVisitorTest extends AbstractSemanticsTest {
     module.accept(new PreprocessVisitor(Keyword.valueList(), errorConsumer));
     var statements = module.findFunction("f").block().statements();
     int i = 0;
-    assertEquals(boolLiteral(true), ((AstIf) statements.get(i++)).conditions().get(0));
+    assertEquals(boolLiteral(true), ((AstIf) statements.get(i++)).conditions().get(0).root());
     {
       var stmt = (AstDefer) statements.get(i++);
       var deferStatements = stmt.block().statements();
       assertEquals(1, deferStatements.size());
-      assertEquals(nullLiteral(), ((AstExpressionStatement) deferStatements.get(0)).expression());
+      assertEquals(nullLiteral(), ((AstExpressionStatement) deferStatements.get(0)).expression().root());
     }
-    assertEquals(boolLiteral(false), ((AstLocal) statements.get(i++)).variable().expression());
+    assertEquals(boolLiteral(false), ((AstLocal) statements.get(i++)).variable().expression().root());
     {
       var stmt = (AstFor) statements.get(i++);
-      assertEquals(nullLiteral(), stmt.init().expression());
-      assertEquals(boolLiteral(true), stmt.condition());
-      assertEquals(boolLiteral(true), stmt.increment());
+      assertEquals(nullLiteral(), stmt.init().expression().root());
+      assertEquals(boolLiteral(true), stmt.condition().root());
+      assertEquals(boolLiteral(true), stmt.increment().root());
     }
-    assertEquals(boolLiteral(true), ((AstReturn) statements.get(i++)).expression());
+    assertEquals(boolLiteral(true), ((AstReturn) statements.get(i++)).expression().root());
   }
 
   @Test

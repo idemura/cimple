@@ -4,8 +4,8 @@ import java.util.Objects;
 
 public final class AstFor extends AstStatement {
   private AstVariable init;
-  private AstExpression condition;
-  private AstExpression increment;
+  private AstExpressionRoot condition;
+  private AstExpressionRoot increment;
   private AstBlock block;
 
   public AstFor() {}
@@ -13,21 +13,6 @@ public final class AstFor extends AstStatement {
   @Override
   public Object accept(AstVisitor visitor) {
     return visitor.visit(this);
-  }
-
-  @Override
-  public int hashCode() {
-    return Objects.hash(init, condition, increment, block);
-  }
-
-  @Override
-  public boolean equals(Object object) {
-    return this == object
-        || (object instanceof AstFor other
-            && Objects.equals(init, other.init)
-            && Objects.equals(condition, other.condition)
-            && Objects.equals(increment, other.increment)
-            && Objects.equals(block, other.block));
   }
 
   public AstVariable init() {
@@ -38,19 +23,19 @@ public final class AstFor extends AstStatement {
     this.init = init;
   }
 
-  public AstExpression condition() {
+  public AstExpressionRoot condition() {
     return condition;
   }
 
-  public void condition(AstExpression condition) {
+  public void condition(AstExpressionRoot condition) {
     this.condition = condition;
   }
 
-  public AstExpression increment() {
+  public AstExpressionRoot increment() {
     return increment;
   }
 
-  public void increment(AstExpression increment) {
+  public void increment(AstExpressionRoot increment) {
     this.increment = increment;
   }
 

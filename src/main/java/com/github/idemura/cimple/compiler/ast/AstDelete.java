@@ -1,18 +1,18 @@
 package com.github.idemura.cimple.compiler.ast;
 
 public final class AstDelete extends AstStatement {
-  private AstExpression expression;
+  private AstExpressionRoot expression;
 
   @Override
   public Object accept(AstVisitor visitor) {
     return visitor.visit(this);
   }
 
-  public AstExpression expression() {
+  public AstExpressionRoot expression() {
     return expression;
   }
 
-  public void expression(AstExpression expression) {
+  public void expression(AstExpressionRoot expression) {
     this.expression = expression;
   }
 }

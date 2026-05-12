@@ -4,7 +4,7 @@ import com.google.common.collect.ImmutableList;
 import java.util.List;
 
 public final class AstIf extends AstStatement {
-  private List<AstExpression> conditions;
+  private List<AstExpressionRoot> conditions;
   private List<AstBlock> thenBlocks;
   private AstBlock elseBlock;
 
@@ -15,11 +15,11 @@ public final class AstIf extends AstStatement {
     return visitor.visit(this);
   }
 
-  public List<AstExpression> conditions() {
+  public List<AstExpressionRoot> conditions() {
     return conditions;
   }
 
-  public void conditions(List<AstExpression> conditions) {
+  public void conditions(List<AstExpressionRoot> conditions) {
     this.conditions = ImmutableList.copyOf(conditions);
   }
 

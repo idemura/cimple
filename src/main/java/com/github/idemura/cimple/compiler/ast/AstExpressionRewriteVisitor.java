@@ -61,6 +61,12 @@ public class AstExpressionRewriteVisitor extends AstVisitor {
   }
 
   @Override
+  protected Object visit(AstExpressionRoot node) {
+    node.root(rewrite(node.root()));
+    return node;
+  }
+
+  @Override
   protected Object visit(AstNullLiteral node) {
     return node;
   }
@@ -159,5 +165,12 @@ public class AstExpressionRewriteVisitor extends AstVisitor {
       return (AstExpression) expression.accept(this);
     }
     return null;
+  }
+
+  private AstExpressionRoot rewrite(AstExpressionRoot expression) {
+    if (expression != null) {
+      expression.accept(this);
+    }
+    return expression;
   }
 }

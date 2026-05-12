@@ -15,6 +15,7 @@ import com.github.idemura.cimple.compiler.ast.AstDefer;
 import com.github.idemura.cimple.compiler.ast.AstDelete;
 import com.github.idemura.cimple.compiler.ast.AstEntityRef;
 import com.github.idemura.cimple.compiler.ast.AstExpression;
+import com.github.idemura.cimple.compiler.ast.AstExpressionRoot;
 import com.github.idemura.cimple.compiler.ast.AstExpressionStatement;
 import com.github.idemura.cimple.compiler.ast.AstFieldAccess;
 import com.github.idemura.cimple.compiler.ast.AstFor;
@@ -177,7 +178,7 @@ public class Parser {
       variable.type(parseTypeRef());
     }
     if (tokenizer.takeIf(ASSIGN)) {
-      variable.expression(parseExpression());
+      variable.expression(parseExpressionRoot());
     }
     take(SEMICOLON);
     return variable;
@@ -221,7 +222,7 @@ public class Parser {
   private AstStatement parseReturn() {
     var stmt = new AstReturn();
     stmt.location(takeKeyword(RETURN));
-    stmt.expression(parseExpression());
+    stmt.expression(parseExpressionRoot());
     take(SEMICOLON);
     return stmt;
   }
@@ -229,7 +230,7 @@ public class Parser {
   private AstStatement parseDelete() {
     var stmt = new AstDelete();
     stmt.location(takeKeyword(DELETE));
-    stmt.expression(parseExpression());
+    stmt.expression(parseExpressionRoot());
     take(SEMICOLON);
     return stmt;
   }
@@ -237,13 +238,13 @@ public class Parser {
   private AstStatement parseIf() {
     var stmt = new AstIf();
     stmt.location(takeKeyword(IF));
-    var conditions = new ImmutableList.Builder<AstExpression>();
+    var conditions = new ImmutableList.Builder<AstExpressionRoot>();
     var thenBlocks = new ImmutableList.Builder<AstBlock>();
-    conditions.add(parseExpression());
+    conditions.add(parseExpressionRoot());
     thenBlocks.add(parseBlock());
     while (takeKeywordIf(ELSE)) {
       if (takeKeywordIf(IF)) {
-        conditions.add(parseExpression());
+        conditions.add(parseExpressionRoot());
         thenBlocks.add(parseBlock());
       } else {
         stmt.elseBlock(parseBlock());
@@ -262,9 +263,9 @@ public class Parser {
       stmt.init(parseVariable(true));
     }
     // The loop condition is required, even for an infinite loop such as `for ; true; ...`.
-    stmt.condition(parseExpression());
+    stmt.condition(parseExpressionRoot());
     if (tokenizer.takeIf(SEMICOLON)) {
-      stmt.increment(parseExpression());
+      stmt.increment(parseExpressionRoot());
     }
     stmt.block(parseBlock());
     return stmt;
@@ -286,7 +287,7 @@ public class Parser {
     } else {
       var exprStmt = new AstExpressionStatement();
       exprStmt.location(tokenizer.currentLocation());
-      exprStmt.expression(parseExpression());
+      exprStmt.expression(parseExpressionRoot());
       take(SEMICOLON);
       var block = new AstBlock();
       block.statements().add(exprStmt);
@@ -298,9 +299,13 @@ public class Parser {
   private AstStatement parseExpressionStatement() {
     var stmt = new AstExpressionStatement();
     stmt.location(tokenizer.currentLocation());
-    stmt.expression(parseExpression());
+    stmt.expression(parseExpressionRoot());
     take(SEMICOLON);
     return stmt;
+  }
+
+  private AstExpressionRoot parseExpressionRoot() {
+    return new AstExpressionRoot(parseExpression());
   }
 
   private AstExpression parseExpression() {

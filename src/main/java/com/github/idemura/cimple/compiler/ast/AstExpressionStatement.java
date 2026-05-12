@@ -1,11 +1,11 @@
 package com.github.idemura.cimple.compiler.ast;
 
 public final class AstExpressionStatement extends AstStatement {
-  private AstExpression expression;
+  private AstExpressionRoot expression;
 
   public static AstExpressionStatement of(AstExpression expression) {
     var stmt = new AstExpressionStatement();
-    stmt.expression(expression);
+    stmt.expression(new AstExpressionRoot(expression));
     return stmt;
   }
 
@@ -16,11 +16,11 @@ public final class AstExpressionStatement extends AstStatement {
     return visitor.visit(this);
   }
 
-  public AstExpression expression() {
+  public AstExpressionRoot expression() {
     return expression;
   }
 
-  public void expression(AstExpression expression) {
+  public void expression(AstExpressionRoot expression) {
     this.expression = expression;
   }
 }

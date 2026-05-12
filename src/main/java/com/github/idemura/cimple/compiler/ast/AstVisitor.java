@@ -174,6 +174,15 @@ public abstract class AstVisitor {
     return null;
   }
 
+  protected Object visit(AstExpressionRoot node) {
+    visitChildren(node);
+    return null;
+  }
+
+  private void visitChildren(AstExpressionRoot node) {
+    node.root().accept(this);
+  }
+
   protected Object visit(AstNullLiteral node) {
     visitChildren(node);
     return null;
