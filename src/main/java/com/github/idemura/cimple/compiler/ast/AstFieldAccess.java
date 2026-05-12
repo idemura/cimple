@@ -11,6 +11,12 @@ public final class AstFieldAccess extends AstExpression {
   }
 
   @Override
+  public AstExpression acceptRewriter(AstExpressionRewriter rewriter) {
+    object = object.acceptRewriter(rewriter);
+    return rewriter.rewrite(this);
+  }
+
+  @Override
   public AstType type() {
     return field == null ? null : field.type();
   }

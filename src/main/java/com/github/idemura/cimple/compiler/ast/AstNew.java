@@ -10,6 +10,14 @@ public final class AstNew extends AstExpression {
   }
 
   @Override
+  public AstExpression acceptRewriter(AstExpressionRewriter rewriter) {
+    if (size != null) {
+      size = size.acceptRewriter(rewriter);
+    }
+    return rewriter.rewrite(this);
+  }
+
+  @Override
   public AstType type() {
     return type;
   }

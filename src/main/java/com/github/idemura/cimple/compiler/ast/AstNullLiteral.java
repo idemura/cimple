@@ -9,4 +9,9 @@ public final class AstNullLiteral extends AstLiteral {
   public Object accept(AstVisitor visitor) {
     return visitor.visit(this);
   }
+
+  @Override
+  public AstExpression acceptRewriter(AstExpressionRewriter rewriter) {
+    return rewriter.rewrite(this);
+  }
 }

@@ -8,9 +8,10 @@ import com.github.idemura.cimple.compiler.Identifier;
 import com.github.idemura.cimple.compiler.Location;
 import com.github.idemura.cimple.compiler.ast.AstBoolLiteral;
 import com.github.idemura.cimple.compiler.ast.AstBuiltinType;
-import com.github.idemura.cimple.compiler.ast.AstCall;
 import com.github.idemura.cimple.compiler.ast.AstEntityRef;
+import com.github.idemura.cimple.compiler.ast.AstExpression;
 import com.github.idemura.cimple.compiler.ast.AstExpressionRewriteVisitor;
+import com.github.idemura.cimple.compiler.ast.AstExpressionRewriter;
 import com.github.idemura.cimple.compiler.ast.AstFunction;
 import com.github.idemura.cimple.compiler.ast.AstFunctionHeader;
 import com.github.idemura.cimple.compiler.ast.AstFunctionType;
@@ -31,7 +32,12 @@ class PreprocessVisitor extends AstExpressionRewriteVisitor {
   private final ErrorConsumer errorConsumer;
 
   PreprocessVisitor(List<String> reservedWords, ErrorConsumer errorConsumer) {
-    this.reservedWords = new ReservedWords(reservedWords);
+    this(new ReservedWords(reservedWords), errorConsumer);
+  }
+
+  private PreprocessVisitor(ReservedWords reservedWords, ErrorConsumer errorConsumer) {
+    super(new ExpressionRewriter(reservedWords, errorConsumer));
+    this.reservedWords = reservedWords;
     this.errorConsumer = errorConsumer;
   }
 
@@ -175,79 +181,84 @@ class PreprocessVisitor extends AstExpressionRewriteVisitor {
     return super.visit(node);
   }
 
-  @Override
-  protected Object visit(AstNullLiteral node) {
-    node.type(AstBuiltinType.NULL);
-    return node;
-  }
+  private static class ExpressionRewriter extends AstExpressionRewriter {
+    private final ReservedWords reservedWords;
+    private final ErrorConsumer errorConsumer;
 
-  @Override
-  protected Object visit(AstBoolLiteral node) {
-    node.type(AstBuiltinType.BOOL);
-    return node;
-  }
+    ExpressionRewriter(ReservedWords reservedWords, ErrorConsumer errorConsumer) {
+      this.reservedWords = reservedWords;
+      this.errorConsumer = errorConsumer;
+    }
 
-  @Override
-  protected Object visit(AstNumberLiteral node) {
-    if (node.type() != null) {
+    @Override
+    public AstExpression rewrite(AstNullLiteral node) {
+      node.type(AstBuiltinType.NULL);
       return node;
     }
-    AstNumberLiteral number;
-    var value = (String) node.value();
-    try {
-      if (value.contains(".")) {
-        number = new AstNumberLiteral(parseDouble(value));
-        number.type(AstBuiltinType.FLOAT64);
-      } else {
-        number = new AstNumberLiteral(parseLong(value));
-        number.type(AstBuiltinType.INT64);
+
+    @Override
+    public AstExpression rewrite(AstBoolLiteral node) {
+      node.type(AstBuiltinType.BOOL);
+      return node;
+    }
+
+    @Override
+    public AstExpression rewrite(AstNumberLiteral node) {
+      if (node.type() != null) {
+        return node;
       }
-      number.location(node.location());
-      return number;
-    } catch (NumberFormatException e) {
-      errorConsumer.errorAt(node.location(), "Invalid number '%s': %s", value, e.getMessage());
+      AstNumberLiteral number;
+      var value = (String) node.value();
+      try {
+        if (value.contains(".")) {
+          number = new AstNumberLiteral(parseDouble(value));
+          number.type(AstBuiltinType.FLOAT64);
+        } else {
+          number = new AstNumberLiteral(parseLong(value));
+          number.type(AstBuiltinType.INT64);
+        }
+        number.location(node.location());
+        return number;
+      } catch (NumberFormatException e) {
+        errorConsumer.errorAt(node.location(), "Invalid number '%s': %s", value, e.getMessage());
+        return node;
+      }
+    }
+
+    @Override
+    public AstExpression rewrite(AstStringLiteral node) {
+      node.type(AstBuiltinType.STRING);
       return node;
     }
-  }
 
-  @Override
-  protected Object visit(AstStringLiteral node) {
-    node.type(AstBuiltinType.STRING);
-    return node;
-  }
-
-  @Override
-  protected Object visit(AstEntityRef node) {
-    var newNode =
-        switch (node.name().entityName()) {
-          case "true" -> {
-            var literal = new AstBoolLiteral(true);
-            literal.type(AstBuiltinType.BOOL);
-            yield literal;
-          }
-          case "false" -> {
-            var literal = new AstBoolLiteral(false);
-            literal.type(AstBuiltinType.BOOL);
-            yield literal;
-          }
-          case "null" -> {
-            var literal = new AstNullLiteral();
-            literal.type(AstBuiltinType.NULL);
-            yield literal;
-          }
-          default -> node;
-        };
-    if (newNode != node) {
-      newNode.location(node.location());
-    } else {
-      checkQualifiedName(node.name(), node.location());
+    @Override
+    public AstExpression rewrite(AstEntityRef node) {
+      var newNode =
+          switch (node.name().entityName()) {
+            case "true" -> {
+              var literal = new AstBoolLiteral(true);
+              literal.type(AstBuiltinType.BOOL);
+              yield literal;
+            }
+            case "false" -> {
+              var literal = new AstBoolLiteral(false);
+              literal.type(AstBuiltinType.BOOL);
+              yield literal;
+            }
+            case "null" -> {
+              var literal = new AstNullLiteral();
+              literal.type(AstBuiltinType.NULL);
+              yield literal;
+            }
+            default -> node;
+          };
+      if (newNode != node) {
+        newNode.location(node.location());
+      } else {
+        checkQualifiedName(reservedWords, errorConsumer, node.name(), node.location());
+      }
+      return newNode;
     }
-    return newNode;
-  }
-
-  @Override
-  protected Object visit(AstCall node) {
-    return super.visit(node);
   }
 
   private void checkName(String name, Location location) {
@@ -263,14 +274,27 @@ class PreprocessVisitor extends AstExpressionRewriteVisitor {
   }
 
   private void checkQualifiedName(Identifier name, Location location) {
-    if (name.moduleName() != null) {
-      checkName(name.moduleName(), location);
+    checkQualifiedName(reservedWords, errorConsumer, name, location);
+  }
+
+  private static void checkQualifiedName(
+      ReservedWords reservedWords, ErrorConsumer errorConsumer, Identifier name, Location location) {
+    checkName(reservedWords, errorConsumer, name.moduleName(), location);
+    checkTypeName(reservedWords, errorConsumer, name.typeName(), location);
+    checkName(reservedWords, errorConsumer, name.entityName(), location);
+  }
+
+  private static void checkName(
+      ReservedWords reservedWords, ErrorConsumer errorConsumer, String name, Location location) {
+    if (name != null && reservedWords.isReservedName(name)) {
+      errorConsumer.errorAt(location, "Reserved word '%s' cannot be used as a name", name);
     }
-    if (name.typeName() != null) {
-      checkTypeName(name.typeName(), location);
-    }
-    if (name.entityName() != null) {
-      checkName(name.entityName(), location);
+  }
+
+  private static void checkTypeName(
+      ReservedWords reservedWords, ErrorConsumer errorConsumer, String name, Location location) {
+    if (name != null && reservedWords.isReservedTypeName(name)) {
+      errorConsumer.errorAt(location, "Reserved word '%s' cannot be used as a type name", name);
     }
   }
 }

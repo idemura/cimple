@@ -10,6 +10,13 @@ public final class AstArrayAccess extends AstExpression {
   }
 
   @Override
+  public AstExpression acceptRewriter(AstExpressionRewriter rewriter) {
+    array = array.acceptRewriter(rewriter);
+    index = index.acceptRewriter(rewriter);
+    return rewriter.rewrite(this);
+  }
+
+  @Override
   public AstType type() {
     throw new UnsupportedOperationException();
   }

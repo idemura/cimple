@@ -17,6 +17,11 @@ public final class AstEntityRef extends AstExpression {
   }
 
   @Override
+  public AstExpression acceptRewriter(AstExpressionRewriter rewriter) {
+    return rewriter.rewrite(this);
+  }
+
+  @Override
   public int hashCode() {
     return name.hashCode();
   }

@@ -1,5 +1,7 @@
 package com.github.idemura.cimple.compiler.ast;
 
+import static com.google.common.collect.ImmutableList.toImmutableList;
+
 import com.google.common.collect.ImmutableList;
 import java.util.List;
 
@@ -12,6 +14,13 @@ public final class AstCall extends AstExpression {
   @Override
   public Object accept(AstVisitor visitor) {
     return visitor.visit(this);
+  }
+
+  @Override
+  public AstExpression acceptRewriter(AstExpressionRewriter rewriter) {
+    function = function.acceptRewriter(rewriter);
+    arguments = arguments.stream().map(a -> a.acceptRewriter(rewriter)).collect(toImmutableList());
+    return rewriter.rewrite(this);
   }
 
   @Override

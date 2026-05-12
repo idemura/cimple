@@ -10,6 +10,12 @@ public final class AstCast extends AstExpression {
   }
 
   @Override
+  public AstExpression acceptRewriter(AstExpressionRewriter rewriter) {
+    expression = expression.acceptRewriter(rewriter);
+    return rewriter.rewrite(this);
+  }
+
+  @Override
   public AstType type() {
     return type;
   }

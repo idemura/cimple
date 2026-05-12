@@ -10,6 +10,12 @@ public final class AstReceiverLookup extends AstExpression {
   }
 
   @Override
+  public AstExpression acceptRewriter(AstExpressionRewriter rewriter) {
+    receiver = receiver.acceptRewriter(rewriter);
+    return rewriter.rewrite(this);
+  }
+
+  @Override
   public AstType type() {
     return receiver.type();
   }
