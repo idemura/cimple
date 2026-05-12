@@ -3,7 +3,12 @@ package com.github.idemura.cimple.compiler.ast;
 import com.github.idemura.cimple.compiler.Identifier;
 
 public abstract sealed class AstType extends AstNode
-    permits AstTypeRef, AstBuiltinType, AstFunctionType, AstRecordType, AstUnionType {
+    permits AstTypeRef,
+        AstPointerType,
+        AstBuiltinType,
+        AstFunctionType,
+        AstRecordType,
+        AstUnionType {
   protected AstType() {}
 
   public abstract Identifier name();

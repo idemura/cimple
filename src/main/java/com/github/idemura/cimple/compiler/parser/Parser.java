@@ -28,6 +28,7 @@ import com.github.idemura.cimple.compiler.ast.AstLocal;
 import com.github.idemura.cimple.compiler.ast.AstModule;
 import com.github.idemura.cimple.compiler.ast.AstNew;
 import com.github.idemura.cimple.compiler.ast.AstNumberLiteral;
+import com.github.idemura.cimple.compiler.ast.AstPointerType;
 import com.github.idemura.cimple.compiler.ast.AstReceiverLookup;
 import com.github.idemura.cimple.compiler.ast.AstRecordType;
 import com.github.idemura.cimple.compiler.ast.AstReturn;
@@ -337,7 +338,7 @@ public class Parser {
     if (expr == null) {
       return null;
     }
-    while (tokenizer.current().is(OP_ADD) || tokenizer.current().is(OP_SUB)) {
+    while (tokenizer.current().is(PLUS) || tokenizer.current().is(MINUS)) {
       var operator = tokenizer.take();
       var m = parseMultiplicativeChain();
       if (m == null) {
@@ -357,9 +358,9 @@ public class Parser {
     if (expr == null) {
       return null;
     }
-    while (tokenizer.current().is(OP_MUL)
-        || tokenizer.current().is(OP_DIV)
-        || tokenizer.current().is(OP_MOD)) {
+    while (tokenizer.current().is(STAR)
+        || tokenizer.current().is(SLASH)
+        || tokenizer.current().is(PERCENT)) {
       var operator = tokenizer.take();
       var m = parseFieldArrayCallChain();
       if (m == null) {
@@ -533,13 +534,17 @@ public class Parser {
     return parameters;
   }
 
-  private AstTypeRef parseTypeRef() {
+  private AstType parseTypeRef() {
     var current = tokenizer.current();
     var ref = new AstTypeRef();
     ref.name(Identifier.ofType(current.value()));
     ref.location(current.location());
     tokenizer.step();
-    return ref;
+    AstType type = ref;
+    while (tokenizer.takeIf(STAR)) {
+      type = new AstPointerType(type);
+    }
+    return type;
   }
 
   private AstEntityRef parseOperator(Token token) {

@@ -73,11 +73,11 @@ public class Tokenizer {
           case '.' -> tokens.add(take1CharToken(context, PERIOD));
           case '=' -> tokens.add(take1CharToken(context, ASSIGN));
           case ';' -> tokens.add(take1CharToken(context, SEMICOLON));
-          case '+' -> tokens.add(take1CharToken(context, OP_ADD));
-          case '-' -> tokens.add(take1CharToken(context, OP_SUB));
-          case '*' -> tokens.add(take1CharToken(context, OP_MUL));
-          case '/' -> tokens.add(take1CharToken(context, OP_DIV));
-          case '%' -> tokens.add(take1CharToken(context, OP_MOD));
+          case '+' -> tokens.add(take1CharToken(context, PLUS));
+          case '-' -> tokens.add(take1CharToken(context, MINUS));
+          case '*' -> tokens.add(take1CharToken(context, STAR));
+          case '/' -> tokens.add(take1CharToken(context, SLASH));
+          case '%' -> tokens.add(take1CharToken(context, PERCENT));
           case '<' -> tokens.add(take1CharToken(context, CMP_GT));
           case '>' -> tokens.add(take1CharToken(context, CMP_LT));
           case '"' -> tokens.add(takeString(context));

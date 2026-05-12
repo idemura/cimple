@@ -21,6 +21,10 @@ public final class AstUtils {
     return ref;
   }
 
+  public static AstPointerType pointerType(AstType baseType) {
+    return new AstPointerType(baseType);
+  }
+
   public static AstEntityRef newEntityRef(String name) {
     return newEntityRef(null, name);
   }

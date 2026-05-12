@@ -9,6 +9,7 @@ import com.github.idemura.cimple.compiler.ast.AstFunctionHeader;
 import com.github.idemura.cimple.compiler.ast.AstNew;
 import com.github.idemura.cimple.compiler.ast.AstNullLiteral;
 import com.github.idemura.cimple.compiler.ast.AstNumberLiteral;
+import com.github.idemura.cimple.compiler.ast.AstPointerType;
 import com.github.idemura.cimple.compiler.ast.AstStringLiteral;
 import com.github.idemura.cimple.compiler.ast.AstType;
 import com.github.idemura.cimple.compiler.ast.AstTypeRef;
@@ -44,6 +45,11 @@ public class TypeResolutionVisitor extends AstVisitor {
   @Override
   protected void visit(AstTypeRef node) {
     throw new IllegalStateException("AstTypeRef must be replaced at this point");
+  }
+
+  protected void visit(AstPointerType node) {
+    node.baseType(resolveTypeRefSafe(node.baseType()));
+    super.visit(node);
   }
 
   protected void visit(AstUnionType node) {
@@ -91,6 +97,9 @@ public class TypeResolutionVisitor extends AstVisitor {
         return AstBuiltinType.VOID;
       }
       return resolvedType;
+    }
+    if (type instanceof AstPointerType pointerType) {
+      pointerType.baseType(resolveTypeRefSafe(pointerType.baseType()));
     }
     return type;
   }

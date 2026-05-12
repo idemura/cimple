@@ -46,6 +46,14 @@ public abstract class AstVisitor {
 
   protected void visit(AstTypeRef node) {}
 
+  protected void visit(AstPointerType node) {
+    visitChildren(node);
+  }
+
+  protected void visitChildren(AstPointerType node) {
+    node.baseType().accept(this);
+  }
+
   protected void visit(AstBuiltinType node) {}
 
   protected void visit(AstFunctionType node) {

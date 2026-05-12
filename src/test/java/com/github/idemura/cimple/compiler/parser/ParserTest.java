@@ -46,6 +46,8 @@ class ParserTest {
         var v0 int = 5;
         var v1 int;
         var v2 = 5;
+        var p int*;
+        var pp int**;
         const c0 int = 7;
         function f0() {}
         function f1(x int) {}
@@ -101,6 +103,18 @@ class ParserTest {
       var v = module.findVariable("v2");
       assertEquals(Identifier.ofEntity("v2"), v.name());
       assertNull(v.type());
+      assertTrue(v.getBit(AstVariable.MUTABLE));
+    }
+    {
+      var v = module.findVariable("p");
+      assertEquals(Identifier.ofEntity("p"), v.name());
+      assertEquals(pointerType(newTypeRef("int")), v.type());
+      assertTrue(v.getBit(AstVariable.MUTABLE));
+    }
+    {
+      var v = module.findVariable("pp");
+      assertEquals(Identifier.ofEntity("pp"), v.name());
+      assertEquals(pointerType(pointerType(newTypeRef("int"))), v.type());
       assertTrue(v.getBit(AstVariable.MUTABLE));
     }
     {
