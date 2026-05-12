@@ -10,5 +10,6 @@ public class AstExpressionRewriteVisitor extends AstVisitor {
   @Override
   protected void visit(AstExpressionHolder node) {
     node.root(node.root().acceptRewriter(rewriter));
+    // Do not visit children. Rewriter will do this.
   }
 }
