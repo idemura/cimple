@@ -33,7 +33,7 @@ class PreprocessVisitorTest extends AbstractSemanticsTest {
           return true;
         }
         """;
-    var module = parseCode(code, errorConsumer);
+    var module = parseCode(code);
     module.accept(new PreprocessVisitor(Keyword.valueList(), errorConsumer));
     var statements = module.findFunction("f").block().statements();
     int i = 0;
@@ -67,7 +67,7 @@ class PreprocessVisitorTest extends AbstractSemanticsTest {
         type record int {}
         type union byte {}
         """;
-    var module = parseCode(code, errorConsumer);
+    var module = parseCode(code);
     module.accept(new PreprocessVisitor(Keyword.valueList(), errorConsumer));
     assertEquals(
         ImmutableList.of(
@@ -89,7 +89,7 @@ class PreprocessVisitorTest extends AbstractSemanticsTest {
         function Duration:toMillis(x int, this) {}
         function f(x int) {}
         """;
-    var module = parseCode(code, errorConsumer);
+    var module = parseCode(code);
     module.accept(new PreprocessVisitor(Keyword.valueList(), errorConsumer));
     assertEquals(List.of(), errorConsumer.errors());
     {
@@ -121,7 +121,7 @@ class PreprocessVisitorTest extends AbstractSemanticsTest {
           var l float;
         }
         """;
-    var module = parseCode(code, errorConsumer);
+    var module = parseCode(code);
     module.accept(new PreprocessVisitor(Keyword.valueList(), errorConsumer));
     assertEquals(List.of(), errorConsumer.errors());
     assertEquals(newBuiltinTypeRef("int64"), module.findVariable("g").type());
@@ -145,7 +145,7 @@ class PreprocessVisitorTest extends AbstractSemanticsTest {
         function Duration:b(x, y) {}
         function f(x) {}
         """;
-    var module = parseCode(code, errorConsumer);
+    var module = parseCode(code);
     module.accept(new PreprocessVisitor(Keyword.valueList(), errorConsumer));
     assertEquals(
         List.of(
@@ -168,7 +168,7 @@ class PreprocessVisitorTest extends AbstractSemanticsTest {
           const z;
         }
         """;
-    var module = parseCode(code, errorConsumer);
+    var module = parseCode(code);
     module.accept(new PreprocessVisitor(Keyword.valueList(), errorConsumer));
     assertEquals(
         List.of(
@@ -188,7 +188,7 @@ class PreprocessVisitorTest extends AbstractSemanticsTest {
           const x int;
         }
         """;
-    var module = parseCode(code, errorConsumer);
+    var module = parseCode(code);
     module.accept(new PreprocessVisitor(Keyword.valueList(), errorConsumer));
     assertEquals(
         List.of("Duplicate record field 'x'. First defined at 3,7."), errorConsumer.errors());
@@ -204,7 +204,7 @@ class PreprocessVisitorTest extends AbstractSemanticsTest {
           A(int);
         }
         """;
-    var module = parseCode(code, errorConsumer);
+    var module = parseCode(code);
     module.accept(new PreprocessVisitor(Keyword.valueList(), errorConsumer));
     assertEquals(
         List.of("Duplicate union variant 'A'. First defined at 3,3."), errorConsumer.errors());

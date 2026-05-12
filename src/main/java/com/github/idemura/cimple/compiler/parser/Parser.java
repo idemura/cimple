@@ -306,7 +306,8 @@ public class Parser {
   }
 
   private AstExpressionHolder parseExpressionHolder() {
-    return new AstExpressionHolder(parseExpression());
+    var expression = parseExpression();
+    return expression == null ? null : new AstExpressionHolder(expression);
   }
 
   private AstExpression parseExpression() {

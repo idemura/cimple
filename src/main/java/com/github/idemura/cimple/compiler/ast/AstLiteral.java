@@ -39,10 +39,12 @@ public abstract sealed class AstLiteral extends AstExpression
     this.type = type;
   }
 
+  @Override
   public Location location() {
     return location;
   }
 
+  @Override
   public void location(Location location) {
     this.location = location;
   }

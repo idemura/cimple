@@ -1,10 +1,9 @@
 package com.github.idemura.cimple.compiler.semantics;
 
 import static com.github.idemura.cimple.compiler.ast.AstUtils.*;
-import static com.github.idemura.cimple.compiler.parser.Parser.parseCode;
 import static org.junit.jupiter.api.Assertions.*;
 
-import com.github.idemura.cimple.compiler.ast.AstNew;
+import com.github.idemura.cimple.compiler.ast.AstLocal;
 import java.util.List;
 import org.junit.jupiter.api.Test;
 
@@ -18,17 +17,17 @@ class NewDeleteTest extends AbstractSemanticsTest {
           var seconds int;
         }
         function f() {
-          return new Duration;
+          var d = new Duration;
         }
         """;
-    var module = parseCode(code, errorConsumer);
-    new SemanticAnalyzer(errorConsumer).analyze(module);
+    var module = parseCode(code);
+    var sa = new SemanticAnalyzer(errorConsumer);
+    sa.analyze(module);
     assertEquals(List.of(), errorConsumer.errors());
+    var statements = module.findFunction("f").block().statements();
     {
-      var expr = (AstNew) extractReturnExpression(module.findFunction("f"));
-      assertEquals(newRecordType("test", "Duration"), expr.type());
-      assertSame(module.findType("Duration"), expr.type());
-      assertNull(expr.size());
+      var stmt = (AstLocal) statements.get(0);
+      assertEquals(pointerType(newRecordType("test", "Duration")), stmt.variable().type());
     }
   }
 }

@@ -19,7 +19,7 @@ class NameResolutionTest extends AbstractSemanticsTest {
         function f() {}
         function g() {}
         """;
-    var module = parseCode(code, errorConsumer);
+    var module = parseCode(code);
     var semanticAnalyzer = new SemanticAnalyzer(errorConsumer);
     semanticAnalyzer.analyze(module);
     assertEquals(List.of(), errorConsumer.errors());
@@ -39,8 +39,9 @@ class NameResolutionTest extends AbstractSemanticsTest {
         var x int;
         const x int;
         """;
-    var module = parseCode(code, errorConsumer);
-    new SemanticAnalyzer(errorConsumer).analyze(module);
+    var module = parseCode(code);
+    var sa = new SemanticAnalyzer(errorConsumer);
+    sa.analyze(module);
     assertEquals(
         List.of("Definition of variable 'x' has a name collision with variable defined at 2,5"),
         errorConsumer.errors());
@@ -54,8 +55,9 @@ class NameResolutionTest extends AbstractSemanticsTest {
         function f() {}
         function f() {}
         """;
-    var module = parseCode(code, errorConsumer);
-    new SemanticAnalyzer(errorConsumer).analyze(module);
+    var module = parseCode(code);
+    var sa = new SemanticAnalyzer(errorConsumer);
+    sa.analyze(module);
     assertEquals(
         List.of("Definition of function 'f' has a name collision with function defined at 2,10"),
         errorConsumer.errors());
@@ -69,8 +71,9 @@ class NameResolutionTest extends AbstractSemanticsTest {
         var f int;
         function f() {}
         """;
-    var module = parseCode(code, errorConsumer);
-    new SemanticAnalyzer(errorConsumer).analyze(module);
+    var module = parseCode(code);
+    var sa = new SemanticAnalyzer(errorConsumer);
+    sa.analyze(module);
     assertEquals(
         List.of("Definition of function 'f' has a name collision with variable defined at 2,5"),
         errorConsumer.errors());
@@ -84,8 +87,9 @@ class NameResolutionTest extends AbstractSemanticsTest {
         type record R {}
         type record R {}
         """;
-    var module = parseCode(code, errorConsumer);
-    new SemanticAnalyzer(errorConsumer).analyze(module);
+    var module = parseCode(code);
+    var sa = new SemanticAnalyzer(errorConsumer);
+    sa.analyze(module);
     assertEquals(List.of("Duplicate type: 'test~R'. Defined at 2,13."), errorConsumer.errors());
   }
 }

@@ -1,6 +1,5 @@
 package com.github.idemura.cimple.compiler.ast;
 
-
 public final class AstFor extends AstStatement {
   private AstVariable init;
   private AstExpressionHolder condition;

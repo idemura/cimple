@@ -22,7 +22,7 @@ class CallResolutionTest extends AbstractSemanticsTest {
         function Duration:toMillis(x int, this) {}
         function f(x int) {}
         """;
-    var module = parseCode(code, errorConsumer);
+    var module = parseCode(code);
     var semanticAnalyzer = new SemanticAnalyzer(errorConsumer);
     semanticAnalyzer.analyze(module);
     assertEquals(List.of(), errorConsumer.errors());
@@ -59,8 +59,9 @@ class CallResolutionTest extends AbstractSemanticsTest {
           return f();
         }
         """;
-    var module = parseCode(code, errorConsumer);
-    new SemanticAnalyzer(errorConsumer).analyze(module);
+    var module = parseCode(code);
+    var sa = new SemanticAnalyzer(errorConsumer);
+    sa.analyze(module);
     assertEquals(List.of(), errorConsumer.errors());
     {
       var expr = extractReturnExpression(module.findFunction("f"));
@@ -88,8 +89,9 @@ class CallResolutionTest extends AbstractSemanticsTest {
         }
         var x int;
         """;
-    var module = parseCode(code, errorConsumer);
-    new SemanticAnalyzer(errorConsumer).analyze(module);
+    var module = parseCode(code);
+    var sa = new SemanticAnalyzer(errorConsumer);
+    sa.analyze(module);
     assertEquals(List.of(), errorConsumer.errors());
     {
       var expr = extractReturnExpression(module.findFunction("g"));
@@ -119,8 +121,9 @@ class CallResolutionTest extends AbstractSemanticsTest {
           return d:toMillis();
         }
         """;
-    var module = parseCode(code, errorConsumer);
-    new SemanticAnalyzer(errorConsumer).analyze(module);
+    var module = parseCode(code);
+    var sa = new SemanticAnalyzer(errorConsumer);
+    sa.analyze(module);
     assertEquals(List.of(), errorConsumer.errors());
     {
       var expr = extractReturnExpression(module.findFunction("f"));
@@ -149,8 +152,9 @@ class CallResolutionTest extends AbstractSemanticsTest {
           var t = f(5);
         }
         """;
-    var module = parseCode(code, errorConsumer);
-    new SemanticAnalyzer(errorConsumer).analyze(module);
+    var module = parseCode(code);
+    var sa = new SemanticAnalyzer(errorConsumer);
+    sa.analyze(module);
     assertEquals(List.of(), errorConsumer.errors());
     {
       var block = module.findFunction("g").block();
@@ -173,8 +177,9 @@ class CallResolutionTest extends AbstractSemanticsTest {
           f();
         }
         """;
-    var module = parseCode(code, errorConsumer);
-    new SemanticAnalyzer(errorConsumer).analyze(module);
+    var module = parseCode(code);
+    var sa = new SemanticAnalyzer(errorConsumer);
+    sa.analyze(module);
     assertEquals(List.of("Function 'test~f' expects 1 arguments, got 0"), errorConsumer.errors());
   }
 
@@ -188,8 +193,9 @@ class CallResolutionTest extends AbstractSemanticsTest {
           f(true);
         }
         """;
-    var module = parseCode(code, errorConsumer);
-    new SemanticAnalyzer(errorConsumer).analyze(module);
+    var module = parseCode(code);
+    var sa = new SemanticAnalyzer(errorConsumer);
+    sa.analyze(module);
     assertEquals(
         List.of("Argument 0 of function 'test~f' has type 'bool', expected 'int64'"),
         errorConsumer.errors());

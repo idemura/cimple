@@ -20,8 +20,9 @@ class ExpressionTest extends AbstractSemanticsTest {
           var y = d.seconds;
         }
         """;
-    var module = parseCode(code, errorConsumer);
-    new SemanticAnalyzer(errorConsumer).analyze(module);
+    var module = parseCode(code);
+    var sa = new SemanticAnalyzer(errorConsumer);
+    sa.analyze(module);
     assertEquals(List.of(), errorConsumer.errors());
   }
 
@@ -39,8 +40,9 @@ class ExpressionTest extends AbstractSemanticsTest {
           var y = d.millis;
         }
         """;
-    var module = parseCode(code, errorConsumer);
-    new SemanticAnalyzer(errorConsumer).analyze(module);
+    var module = parseCode(code);
+    var sa = new SemanticAnalyzer(errorConsumer);
+    sa.analyze(module);
     assertEquals(
         List.of(
             "Field access requires a record, got 'int64'",

@@ -28,7 +28,7 @@ public final class AstPointerType extends AstType {
   @Override
   public Identifier name() {
     var baseName = baseType.name();
-    return baseName.withEntity(baseName.entityName() + "*");
+    return baseName.withType(baseName.typeName() + "*");
   }
 
   @Override

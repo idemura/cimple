@@ -27,6 +27,7 @@ public final class AstFunctionType extends AstType {
     return name;
   }
 
+  @Override
   public void name(Identifier name) {
     this.name = name;
   }

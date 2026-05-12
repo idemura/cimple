@@ -26,67 +26,79 @@ public class TypeResolutionVisitor extends AstVisitor {
     this.errorConsumer = errorConsumer;
   }
 
+  @Override
   protected void visit(AstFunctionHeader node) {
+    super.visit(node);
     node.receiverType(resolveTypeRefSafe(node.receiverType()));
     node.resultType(resolveTypeRefSafe(node.resultType()));
-    super.visit(node);
   }
 
+  @Override
   protected void visit(AstFunction node) {
-    node.type(resolveTypeRefSafe(node.type()));
     super.visit(node);
+    node.type(resolveTypeRefSafe(node.type()));
   }
 
+  @Override
   protected void visit(AstVariable node) {
-    node.type(resolveTypeRefSafe(node.type()));
     super.visit(node);
+    node.type(resolveTypeRefSafe(node.type()));
   }
 
   @Override
   protected void visit(AstTypeRef node) {
-    throw new IllegalStateException("AstTypeRef must be replaced at this point");
+    // throw new IllegalStateException("AstTypeRef must be replaced at this point");
+    return;
   }
 
+  @Override
   protected void visit(AstPointerType node) {
-    node.baseType(resolveTypeRefSafe(node.baseType()));
     super.visit(node);
+    node.baseType(resolveTypeRefSafe(node.baseType()));
   }
 
+  @Override
   protected void visit(AstUnionType node) {
+    super.visit(node);
     for (var variant : node.variants()) {
       variant.valueType(resolveTypeRefSafe(variant.valueType()));
     }
-    super.visit(node);
   }
 
+  @Override
   protected void visit(AstNullLiteral node) {
-    node.type(resolveTypeRefSafe(node.type()));
     super.visit(node);
+    node.type(resolveTypeRefSafe(node.type()));
   }
 
+  @Override
   protected void visit(AstBoolLiteral node) {
-    node.type(resolveTypeRefSafe(node.type()));
     super.visit(node);
+    node.type(resolveTypeRefSafe(node.type()));
   }
 
+  @Override
   protected void visit(AstNumberLiteral node) {
-    node.type(resolveTypeRefSafe(node.type()));
     super.visit(node);
+    node.type(resolveTypeRefSafe(node.type()));
   }
 
+  @Override
   protected void visit(AstStringLiteral node) {
-    node.type(resolveTypeRefSafe(node.type()));
     super.visit(node);
+    node.type(resolveTypeRefSafe(node.type()));
   }
 
+  @Override
   protected void visit(AstNew node) {
-    node.type(resolveTypeRefSafe(node.type()));
     super.visit(node);
+    node.type(new AstPointerType(resolveTypeRefSafe(node.type())));
   }
 
+  @Override
   protected void visit(AstCast node) {
-    node.type(resolveTypeRefSafe(node.type()));
     super.visit(node);
+    node.type(resolveTypeRefSafe(node.type()));
   }
 
   private AstType resolveTypeRefSafe(AstType type) {

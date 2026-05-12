@@ -99,12 +99,12 @@ public final class AstUtils {
   }
 
   public static AstUnionType.Variant unionVariant(String name, String typeName) {
-    var unionVariant = new AstUnionType.Variant();
-    unionVariant.tag(name);
+    var variant = new AstUnionType.Variant();
+    variant.tag(name);
     if (typeName != null) {
-      unionVariant.valueType(newTypeRef(typeName));
+      variant.valueType(newTypeRef(typeName));
     }
-    return unionVariant;
+    return variant;
   }
 
   private static AstVariable variable(String moduleName, String name, long flags, AstType type) {

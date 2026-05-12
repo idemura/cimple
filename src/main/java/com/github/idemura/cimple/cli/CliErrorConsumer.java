@@ -13,6 +13,7 @@ public class CliErrorConsumer extends ErrorConsumer {
     errorCount++;
   }
 
+  @Override
   public int errorCount() {
     return errorCount;
   }

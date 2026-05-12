@@ -29,10 +29,6 @@ public enum TokenType {
 
   private final String symbolName;
 
-  TokenType() {
-    this.symbolName = name();
-  }
-
   TokenType(String symbolName) {
     this.symbolName = symbolName;
   }
