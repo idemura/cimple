@@ -5,7 +5,7 @@ public final class AstExpressionStatement extends AstStatement {
 
   public static AstExpressionStatement of(AstExpression expression) {
     var stmt = new AstExpressionStatement();
-    stmt.expression(new AstExpressionHolder(expression));
+    stmt.expression(AstExpressionHolder.of(expression));
     return stmt;
   }
 

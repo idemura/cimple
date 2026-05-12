@@ -1,7 +1,7 @@
 package com.github.idemura.cimple.compiler.ast;
 
 public final class AstNew extends AstExpression {
-  private AstType type;
+  private AstTypeHolder type;
   private AstExpression size;
 
   @Override
@@ -19,11 +19,15 @@ public final class AstNew extends AstExpression {
 
   @Override
   public AstType type() {
-    return type;
+    return type == null ? null : type.type();
   }
 
   public void type(AstType type) {
-    this.type = type;
+    this.type = AstTypeHolder.of(type);
+  }
+
+  public AstTypeHolder typeHolder() {
+    return type;
   }
 
   public AstExpression size() {

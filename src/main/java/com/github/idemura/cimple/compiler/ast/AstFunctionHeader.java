@@ -5,10 +5,10 @@ import java.util.List;
 import java.util.Objects;
 
 public final class AstFunctionHeader extends AstNode {
-  private AstType receiverType;
+  private AstTypeHolder receiverType;
   private int receiverIndex = -1;
   private List<AstVariable> parameters;
-  private AstType resultType;
+  private AstTypeHolder resultType;
 
   public AstFunctionHeader() {}
 
@@ -19,7 +19,7 @@ public final class AstFunctionHeader extends AstNode {
 
   @Override
   public int hashCode() {
-    return Objects.hash(receiverType, parameters, resultType);
+    return Objects.hash(receiverType(), parameters, resultType());
   }
 
   @Override
@@ -27,7 +27,7 @@ public final class AstFunctionHeader extends AstNode {
     return this == object
         || (object instanceof AstFunctionHeader other
             && parameterListsEqual(parameters, other.parameters)
-            && Objects.equals(resultType, other.resultType));
+            && Objects.equals(resultType(), other.resultType()));
   }
 
   public static boolean parameterListsEqual(List<AstVariable> a, List<AstVariable> b) {
@@ -43,11 +43,15 @@ public final class AstFunctionHeader extends AstNode {
   }
 
   public AstType receiverType() {
-    return receiverType;
+    return receiverType == null ? null : receiverType.type();
   }
 
   public void receiverType(AstType receiverType) {
-    this.receiverType = receiverType;
+    this.receiverType = AstTypeHolder.of(receiverType);
+  }
+
+  public AstTypeHolder receiverTypeHolder() {
+    return receiverType;
   }
 
   public int receiverIndex() {
@@ -67,10 +71,14 @@ public final class AstFunctionHeader extends AstNode {
   }
 
   public AstType resultType() {
-    return resultType;
+    return resultType == null ? null : resultType.type();
   }
 
   public void resultType(AstType resultType) {
-    this.resultType = resultType;
+    this.resultType = AstTypeHolder.of(resultType);
+  }
+
+  public AstTypeHolder resultTypeHolder() {
+    return resultType;
   }
 }

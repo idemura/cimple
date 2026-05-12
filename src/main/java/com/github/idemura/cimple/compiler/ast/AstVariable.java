@@ -11,7 +11,7 @@ public final class AstVariable extends AstEntity {
   public static final long GLOBAL = 0x10L;
 
   private Identifier name;
-  private AstType type;
+  private AstTypeHolder type;
   private AstExpressionHolder expression;
   private long flags;
 
@@ -32,7 +32,7 @@ public final class AstVariable extends AstEntity {
     return this == object
         || (object instanceof AstVariable other
             && Objects.equals(name, other.name)
-            && Objects.equals(type, other.type)
+            && Objects.equals(type(), other.type())
             && flags == other.flags);
   }
 
@@ -48,11 +48,15 @@ public final class AstVariable extends AstEntity {
 
   @Override
   public AstType type() {
-    return type;
+    return type == null ? null : type.type();
   }
 
   public void type(AstType type) {
-    this.type = type;
+    this.type = AstTypeHolder.of(type);
+  }
+
+  public AstTypeHolder typeHolder() {
+    return type;
   }
 
   public boolean getBit(long mask) {

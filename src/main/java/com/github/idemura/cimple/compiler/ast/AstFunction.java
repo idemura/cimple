@@ -7,7 +7,7 @@ public final class AstFunction extends AstEntity {
   private Identifier name;
   private AstFunctionHeader header;
   private AstBlock block;
-  private AstType type;
+  private AstTypeHolder type;
 
   @Override
   public Identifier name() {
@@ -24,16 +24,20 @@ public final class AstFunction extends AstEntity {
     var type = new AstFunctionType();
     type.name(typeName);
     type.header(header);
-    this.type = type;
+    this.type = AstTypeHolder.of(type);
   }
 
   @Override
   public AstType type() {
-    return type;
+    return type == null ? null : type.type();
   }
 
   public void type(AstType type) {
-    this.type = type;
+    this.type = AstTypeHolder.of(type);
+  }
+
+  public AstTypeHolder typeHolder() {
+    return type;
   }
 
   @Override

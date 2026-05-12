@@ -1,20 +1,13 @@
 package com.github.idemura.cimple.compiler.semantics;
 
 import com.github.idemura.cimple.compiler.ErrorConsumer;
-import com.github.idemura.cimple.compiler.ast.AstBoolLiteral;
 import com.github.idemura.cimple.compiler.ast.AstBuiltinType;
-import com.github.idemura.cimple.compiler.ast.AstCast;
-import com.github.idemura.cimple.compiler.ast.AstFunction;
-import com.github.idemura.cimple.compiler.ast.AstFunctionHeader;
 import com.github.idemura.cimple.compiler.ast.AstNew;
-import com.github.idemura.cimple.compiler.ast.AstNullLiteral;
-import com.github.idemura.cimple.compiler.ast.AstNumberLiteral;
 import com.github.idemura.cimple.compiler.ast.AstPointerType;
-import com.github.idemura.cimple.compiler.ast.AstStringLiteral;
 import com.github.idemura.cimple.compiler.ast.AstType;
+import com.github.idemura.cimple.compiler.ast.AstTypeHolder;
 import com.github.idemura.cimple.compiler.ast.AstTypeRef;
 import com.github.idemura.cimple.compiler.ast.AstUnionType;
-import com.github.idemura.cimple.compiler.ast.AstVariable;
 import com.github.idemura.cimple.compiler.ast.AstVisitor;
 
 public class TypeResolutionVisitor extends AstVisitor {
@@ -27,35 +20,13 @@ public class TypeResolutionVisitor extends AstVisitor {
   }
 
   @Override
-  protected void visit(AstFunctionHeader node) {
-    super.visit(node);
-    node.receiverType(resolveTypeRefSafe(node.receiverType()));
-    node.resultType(resolveTypeRefSafe(node.resultType()));
-  }
-
-  @Override
-  protected void visit(AstFunction node) {
-    super.visit(node);
+  protected void visit(AstTypeHolder node) {
     node.type(resolveTypeRefSafe(node.type()));
-  }
-
-  @Override
-  protected void visit(AstVariable node) {
     super.visit(node);
-    node.type(resolveTypeRefSafe(node.type()));
   }
 
   @Override
-  protected void visit(AstTypeRef node) {
-    // throw new IllegalStateException("AstTypeRef must be replaced at this point");
-    return;
-  }
-
-  @Override
-  protected void visit(AstPointerType node) {
-    super.visit(node);
-    node.baseType(resolveTypeRefSafe(node.baseType()));
-  }
+  protected void visit(AstTypeRef node) {}
 
   @Override
   protected void visit(AstUnionType node) {
@@ -66,39 +37,9 @@ public class TypeResolutionVisitor extends AstVisitor {
   }
 
   @Override
-  protected void visit(AstNullLiteral node) {
-    super.visit(node);
-    node.type(resolveTypeRefSafe(node.type()));
-  }
-
-  @Override
-  protected void visit(AstBoolLiteral node) {
-    super.visit(node);
-    node.type(resolveTypeRefSafe(node.type()));
-  }
-
-  @Override
-  protected void visit(AstNumberLiteral node) {
-    super.visit(node);
-    node.type(resolveTypeRefSafe(node.type()));
-  }
-
-  @Override
-  protected void visit(AstStringLiteral node) {
-    super.visit(node);
-    node.type(resolveTypeRefSafe(node.type()));
-  }
-
-  @Override
   protected void visit(AstNew node) {
     super.visit(node);
     node.type(new AstPointerType(resolveTypeRefSafe(node.type())));
-  }
-
-  @Override
-  protected void visit(AstCast node) {
-    super.visit(node);
-    node.type(resolveTypeRefSafe(node.type()));
   }
 
   private AstType resolveTypeRefSafe(AstType type) {

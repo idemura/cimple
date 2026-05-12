@@ -22,7 +22,8 @@ public abstract class AstVisitor {
     for (var parameter : node.parameters()) {
       parameter.accept(this);
     }
-    acceptSafe(node.resultType());
+    acceptSafe(node.receiverTypeHolder());
+    acceptSafe(node.resultTypeHolder());
   }
 
   protected void visit(AstFunction node) {
@@ -31,7 +32,7 @@ public abstract class AstVisitor {
 
   protected void visitChildren(AstFunction node) {
     node.header().accept(this);
-    acceptSafe(node.type());
+    acceptSafe(node.typeHolder());
     node.block().accept(this);
   }
 
@@ -40,8 +41,16 @@ public abstract class AstVisitor {
   }
 
   protected void visitChildren(AstVariable node) {
-    acceptSafe(node.type());
+    acceptSafe(node.typeHolder());
     acceptSafe(node.expression());
+  }
+
+  protected void visit(AstTypeHolder node) {
+    visitChildren(node);
+  }
+
+  protected void visitChildren(AstTypeHolder node) {
+    node.type().accept(this);
   }
 
   protected void visit(AstTypeRef node) {}
@@ -174,7 +183,7 @@ public abstract class AstVisitor {
   }
 
   protected void visitChildren(AstNullLiteral node) {
-    acceptSafe(node.type());
+    acceptSafe(node.typeHolder());
   }
 
   protected void visit(AstBoolLiteral node) {
@@ -182,7 +191,7 @@ public abstract class AstVisitor {
   }
 
   protected void visitChildren(AstBoolLiteral node) {
-    acceptSafe(node.type());
+    acceptSafe(node.typeHolder());
   }
 
   protected void visit(AstNumberLiteral node) {
@@ -190,7 +199,7 @@ public abstract class AstVisitor {
   }
 
   protected void visitChildren(AstNumberLiteral node) {
-    acceptSafe(node.type());
+    acceptSafe(node.typeHolder());
   }
 
   protected void visit(AstStringLiteral node) {
@@ -198,7 +207,7 @@ public abstract class AstVisitor {
   }
 
   protected void visitChildren(AstStringLiteral node) {
-    acceptSafe(node.type());
+    acceptSafe(node.typeHolder());
   }
 
   protected void visit(AstEntityRef node) {}
@@ -208,7 +217,7 @@ public abstract class AstVisitor {
   }
 
   protected void visitChildren(AstNew node) {
-    acceptSafe(node.type());
+    acceptSafe(node.typeHolder());
     acceptSafe(node.size());
   }
 
@@ -254,7 +263,7 @@ public abstract class AstVisitor {
 
   protected void visitChildren(AstCast node) {
     node.expression().accept(this);
-    acceptSafe(node.type());
+    acceptSafe(node.typeHolder());
   }
 
   protected void acceptSafe(AstNode node) {
