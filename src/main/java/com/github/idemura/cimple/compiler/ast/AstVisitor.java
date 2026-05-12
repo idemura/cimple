@@ -174,12 +174,12 @@ public abstract class AstVisitor {
     return null;
   }
 
-  protected Object visit(AstExpressionRoot node) {
+  protected Object visit(AstExpressionHolder node) {
     visitChildren(node);
     return null;
   }
 
-  private void visitChildren(AstExpressionRoot node) {
+  private void visitChildren(AstExpressionHolder node) {
     node.root().accept(this);
   }
 

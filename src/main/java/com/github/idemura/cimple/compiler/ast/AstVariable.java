@@ -12,7 +12,7 @@ public final class AstVariable extends AstEntity {
 
   private Identifier name;
   private AstType type;
-  private AstExpressionRoot expression;
+  private AstExpressionHolder expression;
   private long flags;
 
   public AstVariable() {}
@@ -67,11 +67,11 @@ public final class AstVariable extends AstEntity {
     flags |= mask;
   }
 
-  public AstExpressionRoot expression() {
+  public AstExpressionHolder expression() {
     return expression;
   }
 
-  public void expression(AstExpressionRoot expression) {
+  public void expression(AstExpressionHolder expression) {
     this.expression = expression;
   }
 }

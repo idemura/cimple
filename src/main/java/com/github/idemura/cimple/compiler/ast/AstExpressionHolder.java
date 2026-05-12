@@ -2,10 +2,10 @@ package com.github.idemura.cimple.compiler.ast;
 
 import static com.google.common.base.Preconditions.checkNotNull;
 
-public class AstExpressionRoot extends AstNode {
+public class AstExpressionHolder extends AstNode {
   private AstExpression root;
 
-  public AstExpressionRoot(AstExpression root) {
+  public AstExpressionHolder(AstExpression root) {
     this.root = checkNotNull(root);
   }
 

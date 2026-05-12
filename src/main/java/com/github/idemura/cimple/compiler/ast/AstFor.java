@@ -4,8 +4,8 @@ import java.util.Objects;
 
 public final class AstFor extends AstStatement {
   private AstVariable init;
-  private AstExpressionRoot condition;
-  private AstExpressionRoot increment;
+  private AstExpressionHolder condition;
+  private AstExpressionHolder increment;
   private AstBlock block;
 
   public AstFor() {}
@@ -23,19 +23,19 @@ public final class AstFor extends AstStatement {
     this.init = init;
   }
 
-  public AstExpressionRoot condition() {
+  public AstExpressionHolder condition() {
     return condition;
   }
 
-  public void condition(AstExpressionRoot condition) {
+  public void condition(AstExpressionHolder condition) {
     this.condition = condition;
   }
 
-  public AstExpressionRoot increment() {
+  public AstExpressionHolder increment() {
     return increment;
   }
 
-  public void increment(AstExpressionRoot increment) {
+  public void increment(AstExpressionHolder increment) {
     this.increment = increment;
   }
 
