@@ -21,6 +21,7 @@ import com.github.idemura.cimple.compiler.ast.AstNullLiteral;
 import com.github.idemura.cimple.compiler.ast.AstNumberLiteral;
 import com.github.idemura.cimple.compiler.ast.AstRecordType;
 import com.github.idemura.cimple.compiler.ast.AstStringLiteral;
+import com.github.idemura.cimple.compiler.ast.AstStringType;
 import com.github.idemura.cimple.compiler.ast.AstTypeRef;
 import com.github.idemura.cimple.compiler.ast.AstUnionType;
 import com.github.idemura.cimple.compiler.ast.AstVariable;
@@ -227,7 +228,7 @@ class PreprocessVisitor extends AstExpressionRewriteVisitor {
 
     @Override
     public AstExpression rewrite(AstStringLiteral node) {
-      node.type(AstBuiltinType.STRING);
+      node.type(AstStringType.STRING);
       return node;
     }
 

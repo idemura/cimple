@@ -60,7 +60,7 @@ public final class AstUtils {
   }
 
   public static AstExpression extractReturnExpression(AstFunction function) {
-    return ((AstReturn) function.block().statements().get(0)).expression().root();
+    return ((AstReturn) function.block().statements().get(0)).expression().value();
   }
 
   public static AstFunction function(String name) {

@@ -7,25 +7,25 @@ import java.util.Objects;
 // Marks the ownership boundary for a type tree. Type resolution replaces the holder type, so
 // declarations and expressions do not need custom code for each type field.
 public class AstTypeHolder extends AstHolder {
-  private AstType type;
+  private AstType value;
 
   public static AstTypeHolder of(AstType type) {
     return type == null ? null : new AstTypeHolder(type);
   }
 
-  public AstTypeHolder(AstType type) {
-    this.type = checkNotNull(type);
+  public AstTypeHolder(AstType value) {
+    this.value = checkNotNull(value);
   }
 
   @Override
   public int hashCode() {
-    return type.hashCode();
+    return value.hashCode();
   }
 
   @Override
   public boolean equals(Object object) {
     return this == object
-        || (object instanceof AstTypeHolder other && Objects.equals(type, other.type));
+        || (object instanceof AstTypeHolder other && Objects.equals(value, other.value));
   }
 
   @Override
@@ -35,14 +35,14 @@ public class AstTypeHolder extends AstHolder {
 
   @Override
   public void acceptChildren(AstVisitor visitor) {
-    type.accept(visitor);
+    value.accept(visitor);
   }
 
-  public AstType type() {
-    return type;
+  public AstType value() {
+    return value;
   }
 
-  public void type(AstType type) {
-    this.type = checkNotNull(type);
+  public void value(AstType type) {
+    this.value = checkNotNull(type);
   }
 }

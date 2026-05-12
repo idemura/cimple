@@ -21,7 +21,7 @@ public class TypeResolutionVisitor extends AstVisitor {
 
   @Override
   protected void visit(AstTypeHolder node) {
-    node.type(resolveTypeRefSafe(node.type()));
+    node.value(resolveTypeRefSafe(node.value()));
     super.visit(node);
   }
 

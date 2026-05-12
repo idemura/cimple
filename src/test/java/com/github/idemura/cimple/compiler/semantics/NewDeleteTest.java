@@ -18,6 +18,7 @@ class NewDeleteTest extends AbstractSemanticsTest {
         }
         function f() {
           var d = new Duration;
+          delete d;
         }
         """;
     var module = parseCode(code);
@@ -29,5 +30,31 @@ class NewDeleteTest extends AbstractSemanticsTest {
       var stmt = (AstLocal) statements.get(0);
       assertEquals(pointerType(newRecordType("test", "Duration")), stmt.variable().type());
     }
+  }
+
+  @Test
+  void testDeleteNotAPointer() {
+    var code =
+        """
+        module test;
+        type record Duration {
+          var seconds int;
+        }
+        function f(n int) {
+          delete n;
+          delete 1;
+          var r Duration;
+          delete r;
+        }
+        """;
+    var module = parseCode(code);
+    var sa = new SemanticAnalyzer(errorConsumer);
+    sa.analyze(module);
+    assertEquals(
+        List.of(
+            "Delete expression of type 'int64', expected pointer",
+            "Delete expression of type 'int64', expected pointer",
+            "Delete expression of type 'test~Duration', expected pointer"),
+        errorConsumer.errors());
   }
 }

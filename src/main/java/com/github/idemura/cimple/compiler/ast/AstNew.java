@@ -25,7 +25,7 @@ public final class AstNew extends AstExpression {
 
   @Override
   public AstType type() {
-    return type == null ? null : type.type();
+    return type == null ? null : type.value();
   }
 
   public void type(AstType type) {

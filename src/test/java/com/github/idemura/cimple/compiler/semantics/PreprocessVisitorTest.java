@@ -1,7 +1,6 @@
 package com.github.idemura.cimple.compiler.semantics;
 
 import static com.github.idemura.cimple.compiler.ast.AstUtils.*;
-import static com.github.idemura.cimple.compiler.parser.Parser.parseCode;
 import static org.junit.jupiter.api.Assertions.*;
 
 import com.github.idemura.cimple.compiler.ast.AstBuiltinType;
@@ -37,23 +36,23 @@ class PreprocessVisitorTest extends AbstractSemanticsTest {
     module.accept(new PreprocessVisitor(Keyword.valueList(), errorConsumer));
     var statements = module.findFunction("f").block().statements();
     int i = 0;
-    assertEquals(boolLiteral(true), ((AstIf) statements.get(i++)).conditions().get(0).root());
+    assertEquals(boolLiteral(true), ((AstIf) statements.get(i++)).conditions().get(0).value());
     {
       var stmt = (AstDefer) statements.get(i++);
       var deferStatements = stmt.block().statements();
       assertEquals(1, deferStatements.size());
       assertEquals(
-          nullLiteral(), ((AstExpressionStatement) deferStatements.get(0)).expression().root());
+          nullLiteral(), ((AstExpressionStatement) deferStatements.get(0)).expression().value());
     }
     assertEquals(
-        boolLiteral(false), ((AstLocal) statements.get(i++)).variable().expression().root());
+        boolLiteral(false), ((AstLocal) statements.get(i++)).variable().expression().value());
     {
       var stmt = (AstFor) statements.get(i++);
-      assertEquals(nullLiteral(), stmt.init().expression().root());
-      assertEquals(boolLiteral(true), stmt.condition().root());
-      assertEquals(boolLiteral(true), stmt.increment().root());
+      assertEquals(nullLiteral(), stmt.init().expression().value());
+      assertEquals(boolLiteral(true), stmt.condition().value());
+      assertEquals(boolLiteral(true), stmt.increment().value());
     }
-    assertEquals(boolLiteral(true), ((AstReturn) statements.get(i++)).expression().root());
+    assertEquals(boolLiteral(true), ((AstReturn) statements.get(i++)).expression().value());
   }
 
   @Test

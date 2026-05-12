@@ -6,6 +6,7 @@ public abstract sealed class AstType extends AstNode
     permits AstTypeRef,
         AstPointerType,
         AstBuiltinType,
+        AstStringType,
         AstFunctionType,
         AstRecordType,
         AstUnionType {
@@ -36,6 +37,6 @@ public abstract sealed class AstType extends AstNode
 
   @Override
   public String toString() {
-    return "%s(%s)".formatted(getClass().getSimpleName(), name());
+    return name().toString();
   }
 }

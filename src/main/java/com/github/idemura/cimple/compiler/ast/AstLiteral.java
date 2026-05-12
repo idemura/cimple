@@ -32,7 +32,7 @@ public abstract sealed class AstLiteral extends AstExpression
 
   @Override
   public AstType type() {
-    return type == null ? null : type.type();
+    return type == null ? null : type.value();
   }
 
   @Override

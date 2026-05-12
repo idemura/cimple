@@ -6,6 +6,7 @@ import com.github.idemura.cimple.compiler.Identifier;
 import com.github.idemura.cimple.compiler.ast.AstBuiltinType;
 import com.github.idemura.cimple.compiler.ast.AstEntity;
 import com.github.idemura.cimple.compiler.ast.AstFunction;
+import com.github.idemura.cimple.compiler.ast.AstStringType;
 import com.github.idemura.cimple.compiler.ast.AstType;
 import com.github.idemura.cimple.compiler.ast.AstVariable;
 import java.util.ArrayList;
@@ -88,6 +89,9 @@ public class NameMap {
   }
 
   public AstType lookupType(Identifier name) {
+    if ("string".equals(name.typeName())) {
+      return AstStringType.STRING;
+    }
     var builtinType = AstBuiltinType.lookup(name.typeName());
     if (builtinType != null) {
       return builtinType;

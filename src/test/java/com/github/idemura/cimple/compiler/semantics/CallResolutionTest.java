@@ -1,7 +1,6 @@
 package com.github.idemura.cimple.compiler.semantics;
 
 import static com.github.idemura.cimple.compiler.ast.AstUtils.*;
-import static com.github.idemura.cimple.compiler.parser.Parser.parseCode;
 import static org.junit.jupiter.api.Assertions.*;
 
 import com.github.idemura.cimple.compiler.Identifier;
@@ -9,6 +8,7 @@ import com.github.idemura.cimple.compiler.ast.AstBuiltinType;
 import com.github.idemura.cimple.compiler.ast.AstCall;
 import com.github.idemura.cimple.compiler.ast.AstEntityRef;
 import com.github.idemura.cimple.compiler.ast.AstLocal;
+import com.github.idemura.cimple.compiler.ast.AstStringType;
 import java.util.List;
 import org.junit.jupiter.api.Test;
 
@@ -160,10 +160,10 @@ class CallResolutionTest extends AbstractSemanticsTest {
       var block = module.findFunction("g").block();
       var local = (AstLocal) block.statements().get(0);
       assertEquals(Identifier.ofEntity("t"), local.variable().name());
-      assertEquals(AstBuiltinType.STRING, local.variable().type());
-      var call = (AstCall) local.variable().expression().root();
+      assertEquals(AstStringType.STRING, local.variable().type());
+      var call = (AstCall) local.variable().expression().value();
       assertEquals(newEntityRef("test", "f"), call.function());
-      assertEquals(AstBuiltinType.STRING, call.type());
+      assertEquals(AstStringType.STRING, call.type());
     }
   }
 

@@ -53,7 +53,7 @@ public final class AstFunctionHeader extends AstNode {
   }
 
   public AstType receiverType() {
-    return receiverType == null ? null : receiverType.type();
+    return receiverType == null ? null : receiverType.value();
   }
 
   public void receiverType(AstType receiverType) {
@@ -81,7 +81,7 @@ public final class AstFunctionHeader extends AstNode {
   }
 
   public AstType resultType() {
-    return resultType == null ? null : resultType.type();
+    return resultType == null ? null : resultType.value();
   }
 
   public void resultType(AstType resultType) {

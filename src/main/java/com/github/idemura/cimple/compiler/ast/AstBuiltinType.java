@@ -14,7 +14,6 @@ public final class AstBuiltinType extends AstType {
   public static final AstBuiltinType FLOAT32 = new AstBuiltinType("float32");
   public static final AstBuiltinType FLOAT64 = new AstBuiltinType("float64");
   public static final AstBuiltinType CHAR = new AstBuiltinType("char");
-  public static final AstBuiltinType STRING = new AstBuiltinType("string");
 
   private final Identifier name;
 
@@ -33,7 +32,6 @@ public final class AstBuiltinType extends AstType {
       case "int16" -> INT16;
       case "int32" -> INT32;
       case "int64" -> INT64;
-      case "string" -> STRING;
       case "void" -> VOID;
       default -> null;
     };
@@ -55,5 +53,10 @@ public final class AstBuiltinType extends AstType {
   @Override
   public void name(Identifier name) {
     throw new UnsupportedOperationException();
+  }
+
+  @Override
+  public String toString() {
+    return name.toString();
   }
 }

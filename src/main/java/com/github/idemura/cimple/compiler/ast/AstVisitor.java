@@ -35,6 +35,10 @@ public abstract class AstVisitor {
     node.acceptChildren(this);
   }
 
+  protected void visit(AstStringType node) {
+    node.acceptChildren(this);
+  }
+
   protected void visit(AstFunctionType node) {
     node.acceptChildren(this);
   }

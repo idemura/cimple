@@ -7,6 +7,7 @@ import com.github.idemura.cimple.compiler.ErrorConsumer;
 import com.github.idemura.cimple.compiler.ast.AstBlock;
 import com.github.idemura.cimple.compiler.ast.AstBuiltinType;
 import com.github.idemura.cimple.compiler.ast.AstCall;
+import com.github.idemura.cimple.compiler.ast.AstDelete;
 import com.github.idemura.cimple.compiler.ast.AstEntityRef;
 import com.github.idemura.cimple.compiler.ast.AstExpression;
 import com.github.idemura.cimple.compiler.ast.AstExpressionRewriteVisitor;
@@ -17,6 +18,7 @@ import com.github.idemura.cimple.compiler.ast.AstFunctionHeader;
 import com.github.idemura.cimple.compiler.ast.AstFunctionType;
 import com.github.idemura.cimple.compiler.ast.AstLocal;
 import com.github.idemura.cimple.compiler.ast.AstModule;
+import com.github.idemura.cimple.compiler.ast.AstPointerType;
 import com.github.idemura.cimple.compiler.ast.AstReceiverLookup;
 import com.github.idemura.cimple.compiler.ast.AstRecordType;
 import com.github.idemura.cimple.compiler.ast.AstTypeRef;
@@ -119,6 +121,27 @@ public class NameResolutionVisitor extends AstExpressionRewriteVisitor {
     }
   }
 
+  protected void visit(AstDelete node) {
+    super.visit(node);
+    var expression = node.expression().value();
+    switch (expression.type()) {
+      case AstPointerType pointerType -> {
+        // TODO: Generate defer call.
+      }
+      // case AstStringType stringType -> {
+      //   // TODO: Free string
+      // }
+      // case AstArrayType arrayType -> {
+      //   // TODO: Free array. Call defer.
+      //
+      // }
+      default -> {
+        errorConsumer.errorAt(
+            node.location(), "Delete expression of type '%s', expected pointer", expression.type());
+      }
+    }
+  }
+
   private static class ExpressionRewriter extends AstExpressionRewriter {
     private final NameMap nameMap;
     private final ErrorConsumer errorConsumer;
@@ -205,11 +228,16 @@ public class NameResolutionVisitor extends AstExpressionRewriteVisitor {
     private void resolveReceiverCall(AstCall node, AstReceiverLookup receiverLookup) {
       var receiverType = receiverLookup.receiver().type();
       checkState(receiverType != null);
-      if (receiverType == AstBuiltinType.NULL) {
+      if (receiverType == AstBuiltinType.VOID) {
         errorConsumer.errorAt(
             receiverLookup.location(),
             "Cannot resolve receiver function '%s' for null receiver",
             receiverLookup.functionName());
+        return;
+      }
+      if (receiverType instanceof AstPointerType) {
+        errorConsumer.errorAt(
+            receiverLookup.location(), "Receiver of pointer is not allowed", receiverType.name());
         return;
       }
       var receiverFunctionName = receiverType.name().withEntity(receiverLookup.functionName());
