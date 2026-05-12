@@ -10,8 +10,8 @@ public class AstExpressionHolder extends AstNode {
   }
 
   @Override
-  public Object accept(AstVisitor visitor) {
-    return visitor.visit(this);
+  public void accept(AstVisitor visitor) {
+    visitor.visit(this);
   }
 
   public AstExpression root() {

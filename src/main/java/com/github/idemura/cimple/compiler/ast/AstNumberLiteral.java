@@ -12,8 +12,8 @@ public final class AstNumberLiteral extends AstLiteral {
   }
 
   @Override
-  public Object accept(AstVisitor visitor) {
-    return visitor.visit(this);
+  public void accept(AstVisitor visitor) {
+    visitor.visit(this);
   }
 
   @Override

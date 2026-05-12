@@ -12,8 +12,8 @@ public final class AstGoto extends AstStatement {
   }
 
   @Override
-  public Object accept(AstVisitor visitor) {
-    return visitor.visit(this);
+  public void accept(AstVisitor visitor) {
+    visitor.visit(this);
   }
 
   @Override

@@ -9,20 +9,17 @@ class CCodeGeneratorVisitor extends AstVisitor {
   CCodeGeneratorVisitor() {}
 
   @Override
-  protected Object visit(AstModule node) {
+  protected void visit(AstModule node) {
     // TODO: Emit C definitions for the module body.
-    return null;
   }
 
   @Override
-  protected Object visit(AstFunction node) {
+  protected void visit(AstFunction node) {
     // TODO: Emit a C function definition.
-    return null;
   }
 
   @Override
-  protected Object visit(AstVariable node) {
+  protected void visit(AstVariable node) {
     // TODO: Emit a C global variable definition.
-    return null;
   }
 }

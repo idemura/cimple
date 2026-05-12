@@ -8,8 +8,7 @@ public class AstExpressionRewriteVisitor extends AstVisitor {
   }
 
   @Override
-  protected Object visit(AstExpressionHolder node) {
+  protected void visit(AstExpressionHolder node) {
     node.root(node.root().acceptRewriter(rewriter));
-    return node;
   }
 }

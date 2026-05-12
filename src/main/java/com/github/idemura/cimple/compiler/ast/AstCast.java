@@ -5,8 +5,8 @@ public final class AstCast extends AstExpression {
   private AstType type;
 
   @Override
-  public Object accept(AstVisitor visitor) {
-    return visitor.visit(this);
+  public void accept(AstVisitor visitor) {
+    visitor.visit(this);
   }
 
   @Override

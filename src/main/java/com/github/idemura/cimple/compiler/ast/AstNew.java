@@ -5,8 +5,8 @@ public final class AstNew extends AstExpression {
   private AstExpression size;
 
   @Override
-  public Object accept(AstVisitor visitor) {
-    return visitor.visit(this);
+  public void accept(AstVisitor visitor) {
+    visitor.visit(this);
   }
 
   @Override

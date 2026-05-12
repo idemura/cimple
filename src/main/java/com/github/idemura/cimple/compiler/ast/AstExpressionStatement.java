@@ -12,8 +12,8 @@ public final class AstExpressionStatement extends AstStatement {
   public AstExpressionStatement() {}
 
   @Override
-  public Object accept(AstVisitor visitor) {
-    return visitor.visit(this);
+  public void accept(AstVisitor visitor) {
+    visitor.visit(this);
   }
 
   public AstExpressionHolder expression() {

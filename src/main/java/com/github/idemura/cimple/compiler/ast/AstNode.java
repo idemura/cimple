@@ -5,7 +5,7 @@ import com.github.idemura.cimple.compiler.Location;
 public abstract class AstNode {
   private Location location;
 
-  public abstract Object accept(AstVisitor visitor);
+  public abstract void accept(AstVisitor visitor);
 
   public Location location() {
     return location;

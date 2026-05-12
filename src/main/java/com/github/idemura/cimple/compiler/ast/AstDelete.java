@@ -4,8 +4,8 @@ public final class AstDelete extends AstStatement {
   private AstExpressionHolder expression;
 
   @Override
-  public Object accept(AstVisitor visitor) {
-    return visitor.visit(this);
+  public void accept(AstVisitor visitor) {
+    visitor.visit(this);
   }
 
   public AstExpressionHolder expression() {

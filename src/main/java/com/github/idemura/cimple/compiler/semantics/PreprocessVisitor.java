@@ -42,13 +42,13 @@ class PreprocessVisitor extends AstExpressionRewriteVisitor {
   }
 
   @Override
-  protected Object visit(AstModule node) {
+  protected void visit(AstModule node) {
     checkName(node.name(), node.location());
-    return super.visit(node);
+    super.visit(node);
   }
 
   @Override
-  protected Object visit(AstFunctionHeader node) {
+  protected void visit(AstFunctionHeader node) {
     for (var parameter : node.parameters()) {
       parameter.setBit(AstVariable.PARAMETER);
     }
@@ -56,14 +56,14 @@ class PreprocessVisitor extends AstExpressionRewriteVisitor {
     if (node.resultType() == null) {
       node.resultType(AstBuiltinType.VOID);
     }
-    return super.visit(node);
+    super.visit(node);
   }
 
   @Override
-  protected Object visit(AstFunction node) {
+  protected void visit(AstFunction node) {
     checkQualifiedName(node.name(), node.location());
     checkReceiverParameter(node.name(), node.header());
-    return super.visit(node);
+    super.visit(node);
   }
 
   private void checkReceiverParameter(Identifier functionName, AstFunctionHeader header) {
@@ -109,17 +109,17 @@ class PreprocessVisitor extends AstExpressionRewriteVisitor {
   }
 
   @Override
-  protected Object visit(AstVariable node) {
+  protected void visit(AstVariable node) {
     checkQualifiedName(node.name(), node.location());
     if (!node.getBit(AstVariable.PARAMETER) && node.type() == null && node.expression() == null) {
       errorConsumer.errorAt(
           node.location(), "Variable '%s' must have a type or an initializer", node.name());
     }
-    return super.visit(node);
+    super.visit(node);
   }
 
   @Override
-  protected Object visit(AstTypeRef node) {
+  protected void visit(AstTypeRef node) {
     switch (node.name().typeName()) {
       case "int":
         node.name(AstBuiltinType.INT64.name());
@@ -130,24 +130,24 @@ class PreprocessVisitor extends AstExpressionRewriteVisitor {
       default:
         break;
     }
-    return super.visit(node);
+    super.visit(node);
   }
 
   @Override
-  protected Object visit(AstFunctionType node) {
+  protected void visit(AstFunctionType node) {
     checkQualifiedName(node.name(), node.location());
     checkReceiverParameter(node.name(), node.header());
-    return super.visit(node);
+    super.visit(node);
   }
 
   @Override
-  protected Object visit(AstLocal node) {
+  protected void visit(AstLocal node) {
     node.variable().setBit(AstVariable.LOCAL);
-    return super.visit(node);
+    super.visit(node);
   }
 
   @Override
-  protected Object visit(AstRecordType node) {
+  protected void visit(AstRecordType node) {
     checkQualifiedName(node.name(), node.location());
     var fieldMap = new HashMap<String, AstVariable>();
     for (var field : node.fields()) {
@@ -160,11 +160,11 @@ class PreprocessVisitor extends AstExpressionRewriteVisitor {
             existing.location());
       }
     }
-    return super.visit(node);
+    super.visit(node);
   }
 
   @Override
-  protected Object visit(AstUnionType node) {
+  protected void visit(AstUnionType node) {
     checkQualifiedName(node.name(), node.location());
     var variantMap = new HashMap<String, AstUnionType.Variant>();
     for (var variant : node.variants()) {
@@ -178,7 +178,7 @@ class PreprocessVisitor extends AstExpressionRewriteVisitor {
             existing.location());
       }
     }
-    return super.visit(node);
+    super.visit(node);
   }
 
   private static class ExpressionRewriter extends AstExpressionRewriter {

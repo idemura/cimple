@@ -7,8 +7,8 @@ public final class AstFunctionType extends AstType {
   private AstFunctionHeader header;
 
   @Override
-  public Object accept(AstVisitor visitor) {
-    return visitor.visit(this);
+  public void accept(AstVisitor visitor) {
+    visitor.visit(this);
   }
 
   @Override

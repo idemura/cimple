@@ -3,9 +3,8 @@ package com.github.idemura.cimple.compiler.ast;
 public abstract class AstVisitor {
   protected AstVisitor() {}
 
-  protected Object visit(AstModule node) {
+  protected void visit(AstModule node) {
     visitChildren(node);
-    return null;
   }
 
   protected void visitChildren(AstModule node) {
@@ -14,9 +13,8 @@ public abstract class AstVisitor {
     }
   }
 
-  protected Object visit(AstFunctionHeader node) {
+  protected void visit(AstFunctionHeader node) {
     visitChildren(node);
-    return null;
   }
 
   protected void visitChildren(AstFunctionHeader node) {
@@ -27,9 +25,8 @@ public abstract class AstVisitor {
     acceptSafe(node.resultType());
   }
 
-  protected Object visit(AstFunction node) {
+  protected void visit(AstFunction node) {
     visitChildren(node);
-    return null;
   }
 
   protected void visitChildren(AstFunction node) {
@@ -38,9 +35,8 @@ public abstract class AstVisitor {
     node.block().accept(this);
   }
 
-  protected Object visit(AstVariable node) {
+  protected void visit(AstVariable node) {
     visitChildren(node);
-    return null;
   }
 
   protected void visitChildren(AstVariable node) {
@@ -48,26 +44,22 @@ public abstract class AstVisitor {
     acceptSafe(node.expression());
   }
 
-  protected Object visit(AstTypeRef node) {
-    return null;
+  protected void visit(AstTypeRef node) {
   }
 
-  protected Object visit(AstBuiltinType node) {
-    return null;
+  protected void visit(AstBuiltinType node) {
   }
 
-  protected Object visit(AstFunctionType node) {
+  protected void visit(AstFunctionType node) {
     visitChildren(node);
-    return null;
   }
 
   protected void visitChildren(AstFunctionType node) {
     node.header().accept(this);
   }
 
-  protected Object visit(AstRecordType node) {
+  protected void visit(AstRecordType node) {
     visitChildren(node);
-    return null;
   }
 
   protected void visitChildren(AstRecordType node) {
@@ -76,9 +68,8 @@ public abstract class AstVisitor {
     }
   }
 
-  protected Object visit(AstUnionType node) {
+  protected void visit(AstUnionType node) {
     visitChildren(node);
-    return null;
   }
 
   protected void visitChildren(AstUnionType node) {
@@ -87,9 +78,8 @@ public abstract class AstVisitor {
     }
   }
 
-  protected Object visit(AstBlock node) {
+  protected void visit(AstBlock node) {
     visitChildren(node);
-    return null;
   }
 
   protected void visitChildren(AstBlock node) {
@@ -98,27 +88,24 @@ public abstract class AstVisitor {
     }
   }
 
-  protected Object visit(AstExpressionStatement node) {
+  protected void visit(AstExpressionStatement node) {
     visitChildren(node);
-    return null;
   }
 
   protected void visitChildren(AstExpressionStatement node) {
     node.expression().accept(this);
   }
 
-  protected Object visit(AstLocal node) {
+  protected void visit(AstLocal node) {
     visitChildren(node);
-    return null;
   }
 
   protected void visitChildren(AstLocal node) {
     node.variable().accept(this);
   }
 
-  protected Object visit(AstIf node) {
+  protected void visit(AstIf node) {
     visitChildren(node);
-    return null;
   }
 
   protected void visitChildren(AstIf node) {
@@ -131,9 +118,8 @@ public abstract class AstVisitor {
     acceptSafe(node.elseBlock());
   }
 
-  protected Object visit(AstFor node) {
+  protected void visit(AstFor node) {
     visitChildren(node);
-    return null;
   }
 
   protected void visitChildren(AstFor node) {
@@ -143,89 +129,78 @@ public abstract class AstVisitor {
     node.block().accept(this);
   }
 
-  protected Object visit(AstReturn node) {
+  protected void visit(AstReturn node) {
     visitChildren(node);
-    return null;
   }
 
   protected void visitChildren(AstReturn node) {
     acceptSafe(node.expression());
   }
 
-  protected Object visit(AstDelete node) {
+  protected void visit(AstDelete node) {
     visitChildren(node);
-    return null;
   }
 
   protected void visitChildren(AstDelete node) {
     acceptSafe(node.expression());
   }
 
-  protected Object visit(AstDefer node) {
+  protected void visit(AstDefer node) {
     visitChildren(node);
-    return null;
   }
 
   protected void visitChildren(AstDefer node) {
     node.block().accept(this);
   }
 
-  protected Object visit(AstGoto node) {
-    return null;
+  protected void visit(AstGoto node) {
   }
 
-  protected Object visit(AstExpressionHolder node) {
+  protected void visit(AstExpressionHolder node) {
     visitChildren(node);
-    return null;
   }
 
   private void visitChildren(AstExpressionHolder node) {
     node.root().accept(this);
   }
 
-  protected Object visit(AstNullLiteral node) {
+  protected void visit(AstNullLiteral node) {
     visitChildren(node);
-    return null;
   }
 
   protected void visitChildren(AstNullLiteral node) {
     acceptSafe(node.type());
   }
 
-  protected Object visit(AstBoolLiteral node) {
+  protected void visit(AstBoolLiteral node) {
     visitChildren(node);
-    return null;
   }
 
   protected void visitChildren(AstBoolLiteral node) {
     acceptSafe(node.type());
   }
 
-  protected Object visit(AstNumberLiteral node) {
+  protected void visit(AstNumberLiteral node) {
     visitChildren(node);
-    return null;
   }
 
   protected void visitChildren(AstNumberLiteral node) {
     acceptSafe(node.type());
   }
 
-  protected Object visit(AstStringLiteral node) {
+  protected void visit(AstStringLiteral node) {
     visitChildren(node);
-    return null;
   }
 
   protected void visitChildren(AstStringLiteral node) {
     acceptSafe(node.type());
   }
 
-  protected Object visit(AstEntityRef node) {
-    return null;
+  protected void visit(AstEntityRef node) {
   }
 
-  protected Object visit(AstNew node) {
+  protected void visit(AstNew node) {
     visitChildren(node);
-    return null;
   }
 
   protected void visitChildren(AstNew node) {
@@ -233,9 +208,8 @@ public abstract class AstVisitor {
     acceptSafe(node.size());
   }
 
-  protected Object visit(AstCall node) {
+  protected void visit(AstCall node) {
     visitChildren(node);
-    return null;
   }
 
   protected void visitChildren(AstCall node) {
@@ -245,9 +219,8 @@ public abstract class AstVisitor {
     }
   }
 
-  protected Object visit(AstArrayAccess node) {
+  protected void visit(AstArrayAccess node) {
     visitChildren(node);
-    return null;
   }
 
   protected void visitChildren(AstArrayAccess node) {
@@ -255,27 +228,24 @@ public abstract class AstVisitor {
     node.index().accept(this);
   }
 
-  protected Object visit(AstFieldAccess node) {
+  protected void visit(AstFieldAccess node) {
     visitChildren(node);
-    return null;
   }
 
   protected void visitChildren(AstFieldAccess node) {
     node.object().accept(this);
   }
 
-  protected Object visit(AstReceiverLookup node) {
+  protected void visit(AstReceiverLookup node) {
     visitChildren(node);
-    return null;
   }
 
   protected void visitChildren(AstReceiverLookup node) {
     node.receiver().accept(this);
   }
 
-  protected Object visit(AstCast node) {
+  protected void visit(AstCast node) {
     visitChildren(node);
-    return null;
   }
 
   protected void visitChildren(AstCast node) {

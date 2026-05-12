@@ -51,8 +51,8 @@ public final class AstUnionType extends AstType {
   private List<Variant> variants;
 
   @Override
-  public Object accept(AstVisitor visitor) {
-    return visitor.visit(this);
+  public void accept(AstVisitor visitor) {
+    visitor.visit(this);
   }
 
   @Override

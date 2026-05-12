@@ -14,22 +14,21 @@ public class PrintAstVisitor extends AstVisitor {
   }
 
   @Override
-  protected Object visit(AstModule node) {
+  protected void visit(AstModule node) {
     output.writeLine("MODULE %s".formatted(node.name()));
     output.indent();
     visitChildren(node);
     output.unindent();
     output.writeLine("END");
-    return null;
   }
 
   @Override
-  protected Object visit(AstFunctionHeader node) {
-    return super.visit(node);
+  protected void visit(AstFunctionHeader node) {
+    super.visit(node);
   }
 
   @Override
-  protected Object visit(AstFunction node) {
+  protected void visit(AstFunction node) {
     var header = node.header();
     printEntity("FUNCTION", node.name(), header.resultType());
     output.indent();
@@ -39,33 +38,30 @@ public class PrintAstVisitor extends AstVisitor {
     node.block().accept(this);
     output.unindent();
     output.writeLine("END");
-    return null;
   }
 
   @Override
-  protected Object visit(AstVariable node) {
+  protected void visit(AstVariable node) {
     printEntity(node.getBit(AstVariable.MUTABLE) ? "VAR" : "CONST", node.name(), node.type());
     output.indent();
     if (node.expression() != null) {
       node.expression().accept(this);
     }
     output.unindent();
-    return null;
   }
 
   @Override
-  protected Object visit(AstTypeRef node) {
-    return super.visit(node);
+  protected void visit(AstTypeRef node) {
+    super.visit(node);
   }
 
   @Override
-  protected Object visit(AstBuiltinType node) {
+  protected void visit(AstBuiltinType node) {
     output.writeLine("TYPE BUILTIN %s".formatted(node.name()));
-    return null;
   }
 
   @Override
-  protected Object visit(AstFunctionType node) {
+  protected void visit(AstFunctionType node) {
     var header = node.header();
     printEntity("TYPE FUNCTION", node.name(), header.resultType());
     output.indent();
@@ -73,21 +69,19 @@ public class PrintAstVisitor extends AstVisitor {
       printEntity("ARG", parameter.name(), parameter.type());
     }
     output.unindent();
-    return null;
   }
 
   @Override
-  protected Object visit(AstRecordType node) {
+  protected void visit(AstRecordType node) {
     output.writeLine("TYPE RECORD %s".formatted(node.name()));
     output.indent();
     visitChildren(node);
     output.unindent();
     output.writeLine("END");
-    return null;
   }
 
   @Override
-  protected Object visit(AstUnionType node) {
+  protected void visit(AstUnionType node) {
     output.writeLine("TYPE UNION %s".formatted(node.name()));
     output.indent();
     for (var variant : node.variants()) {
@@ -99,35 +93,32 @@ public class PrintAstVisitor extends AstVisitor {
     }
     output.unindent();
     output.writeLine("END");
-    return null;
   }
 
   @Override
-  protected Object visit(AstBlock node) {
+  protected void visit(AstBlock node) {
     output.writeLine("BLOCK");
     output.indent();
     visitChildren(node);
     output.unindent();
     output.writeLine("END");
-    return null;
   }
 
   @Override
-  protected Object visit(AstExpressionStatement node) {
+  protected void visit(AstExpressionStatement node) {
     output.writeLine("EXPR");
     output.indent();
     node.expression().accept(this);
     output.unindent();
-    return null;
   }
 
   @Override
-  protected Object visit(AstLocal node) {
-    return super.visit(node);
+  protected void visit(AstLocal node) {
+    super.visit(node);
   }
 
   @Override
-  protected Object visit(AstIf node) {
+  protected void visit(AstIf node) {
     var conditions = node.conditions();
     var thenBlocks = node.thenBlocks();
     for (var i = 0; i < conditions.size(); i++) {
@@ -147,11 +138,10 @@ public class PrintAstVisitor extends AstVisitor {
       output.unindent();
     }
     output.writeLine("END");
-    return null;
   }
 
   @Override
-  protected Object visit(AstFor node) {
+  protected void visit(AstFor node) {
     output.writeLine("FOR");
     output.indent();
     if (node.init() != null) {
@@ -172,127 +162,111 @@ public class PrintAstVisitor extends AstVisitor {
     node.block().accept(this);
     output.unindent();
     output.writeLine("END");
-    return null;
   }
 
   @Override
-  protected Object visit(AstReturn node) {
+  protected void visit(AstReturn node) {
     output.writeLine("RETURN");
     output.indent();
     visitChildren(node);
     output.unindent();
-    return null;
   }
 
   @Override
-  protected Object visit(AstDelete node) {
+  protected void visit(AstDelete node) {
     output.writeLine("DELETE");
     output.indent();
     visitChildren(node);
     output.unindent();
-    return null;
   }
 
   @Override
-  protected Object visit(AstDefer node) {
+  protected void visit(AstDefer node) {
     output.writeLine("DEFER");
     output.indent();
     node.block().accept(this);
     output.unindent();
-    return null;
   }
 
   @Override
-  protected Object visit(AstGoto node) {
+  protected void visit(AstGoto node) {
     output.writeLine("GOTO %s".formatted(node.label()));
-    return null;
   }
 
   @Override
-  protected Object visit(AstNullLiteral node) {
+  protected void visit(AstNullLiteral node) {
     printLiteral(node);
-    return null;
   }
 
   @Override
-  protected Object visit(AstBoolLiteral node) {
+  protected void visit(AstBoolLiteral node) {
     printLiteral(node);
-    return null;
   }
 
   @Override
-  protected Object visit(AstNumberLiteral node) {
+  protected void visit(AstNumberLiteral node) {
     printLiteral(node);
-    return null;
   }
 
   @Override
-  protected Object visit(AstStringLiteral node) {
+  protected void visit(AstStringLiteral node) {
     printLiteral(node);
-    return null;
   }
 
   @Override
-  protected Object visit(AstEntityRef node) {
+  protected void visit(AstEntityRef node) {
     output.writeLine("IDENTIFIER %s".formatted(node.name()));
-    return null;
   }
 
   @Override
-  protected Object visit(AstNew node) {
+  protected void visit(AstNew node) {
     output.writeLine("NEW %s".formatted(node.type()));
     output.indent();
     if (node.size() != null) {
       node.size().accept(this);
     }
     output.unindent();
-    return null;
   }
 
   @Override
-  protected Object visit(AstCall node) {
+  protected void visit(AstCall node) {
     output.writeLine("CALL");
     output.indent();
     visitChildren(node);
     output.unindent();
-    return null;
   }
 
   @Override
-  protected Object visit(AstArrayAccess node) {
+  protected void visit(AstArrayAccess node) {
     output.writeLine("INDEX");
     output.indent();
     node.array().accept(this);
     node.index().accept(this);
     output.unindent();
-    return null;
   }
 
   @Override
-  protected Object visit(AstFieldAccess node) {
+  protected void visit(AstFieldAccess node) {
     output.writeLine("FIELD %s".formatted(node.fieldName()));
     output.indent();
     node.object().accept(this);
     output.unindent();
-    return null;
   }
 
   @Override
-  protected Object visit(AstReceiverLookup node) {
+  protected void visit(AstReceiverLookup node) {
     output.writeLine("RECEIVEaR %s".formatted(node.functionName()));
     output.indent();
     node.receiver().accept(this);
     output.unindent();
-    return null;
   }
 
   @Override
-  protected Object visit(AstCast node) {
+  protected void visit(AstCast node) {
     output.writeLine("CAST %s".formatted(node.type()));
     output.indent();
     node.expression().accept(this);
     output.unindent();
-    return null;
   }
 
   private void printLiteral(AstLiteral node) {

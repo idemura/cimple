@@ -6,8 +6,8 @@ public final class AstLocal extends AstStatement {
   public AstLocal() {}
 
   @Override
-  public Object accept(AstVisitor visitor) {
-    return visitor.visit(this);
+  public void accept(AstVisitor visitor) {
+    visitor.visit(this);
   }
 
   public AstVariable variable() {

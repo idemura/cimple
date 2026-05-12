@@ -11,8 +11,8 @@ public final class AstFor extends AstStatement {
   public AstFor() {}
 
   @Override
-  public Object accept(AstVisitor visitor) {
-    return visitor.visit(this);
+  public void accept(AstVisitor visitor) {
+    visitor.visit(this);
   }
 
   public AstVariable init() {

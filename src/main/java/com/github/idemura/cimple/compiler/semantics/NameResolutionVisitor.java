@@ -36,7 +36,7 @@ public class NameResolutionVisitor extends AstExpressionRewriteVisitor {
   }
 
   @Override
-  protected Object visit(AstModule node) {
+  protected void visit(AstModule node) {
     // Named function types are structural:
     //   type function foo(int x) bool;
     //   type function bar(int x) bool;
@@ -48,66 +48,65 @@ public class NameResolutionVisitor extends AstExpressionRewriteVisitor {
         function.makeLambdaType();
       }
     }
-    return super.visit(node);
+    super.visit(node);
   }
 
   @Override
-  protected Object visit(AstFunctionHeader node) {
-    return super.visit(node);
+  protected void visit(AstFunctionHeader node) {
+    super.visit(node);
   }
 
   @Override
-  protected Object visit(AstFunction node) {
+  protected void visit(AstFunction node) {
     try {
       nameMap.beginScope();
       for (var parameter : node.header().parameters()) {
         registerLocal(parameter);
       }
-      return super.visit(node);
+      super.visit(node);
     } finally {
       nameMap.endScope();
     }
   }
 
   @Override
-  protected Object visit(AstVariable node) {
+  protected void visit(AstVariable node) {
     super.visit(node);
     // Preprocessor has checked that we have typeRef or expression.
     if (node.type() == null) {
       node.type(node.expression().type());
     }
-    return null;
   }
 
   @Override
-  protected Object visit(AstTypeRef node) {
-    return super.visit(node);
+  protected void visit(AstTypeRef node) {
+    super.visit(node);
   }
 
   @Override
-  protected Object visit(AstFunctionType node) {
-    return super.visit(node);
+  protected void visit(AstFunctionType node) {
+    super.visit(node);
   }
 
   @Override
-  protected Object visit(AstRecordType node) {
-    return super.visit(node);
+  protected void visit(AstRecordType node) {
+    super.visit(node);
   }
 
   @Override
-  protected Object visit(AstUnionType node) {
-    return super.visit(node);
+  protected void visit(AstUnionType node) {
+    super.visit(node);
   }
 
   @Override
-  protected Object visit(AstBlock node) {
-    return super.visit(node);
+  protected void visit(AstBlock node) {
+    super.visit(node);
   }
 
   @Override
-  protected Object visit(AstLocal node) {
+  protected void visit(AstLocal node) {
     registerLocal(node.variable());
-    return super.visit(node);
+    super.visit(node);
   }
 
   private void registerLocal(AstVariable variable) {
