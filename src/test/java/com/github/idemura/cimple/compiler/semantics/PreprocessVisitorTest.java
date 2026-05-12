@@ -42,9 +42,11 @@ class PreprocessVisitorTest extends AbstractSemanticsTest {
       var stmt = (AstDefer) statements.get(i++);
       var deferStatements = stmt.block().statements();
       assertEquals(1, deferStatements.size());
-      assertEquals(nullLiteral(), ((AstExpressionStatement) deferStatements.get(0)).expression().root());
+      assertEquals(
+          nullLiteral(), ((AstExpressionStatement) deferStatements.get(0)).expression().root());
     }
-    assertEquals(boolLiteral(false), ((AstLocal) statements.get(i++)).variable().expression().root());
+    assertEquals(
+        boolLiteral(false), ((AstLocal) statements.get(i++)).variable().expression().root());
     {
       var stmt = (AstFor) statements.get(i++);
       assertEquals(nullLiteral(), stmt.init().expression().root());

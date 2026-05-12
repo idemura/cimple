@@ -44,11 +44,9 @@ public abstract class AstVisitor {
     acceptSafe(node.expression());
   }
 
-  protected void visit(AstTypeRef node) {
-  }
+  protected void visit(AstTypeRef node) {}
 
-  protected void visit(AstBuiltinType node) {
-  }
+  protected void visit(AstBuiltinType node) {}
 
   protected void visit(AstFunctionType node) {
     visitChildren(node);
@@ -153,8 +151,7 @@ public abstract class AstVisitor {
     node.block().accept(this);
   }
 
-  protected void visit(AstGoto node) {
-  }
+  protected void visit(AstGoto node) {}
 
   protected void visit(AstExpressionHolder node) {
     visitChildren(node);
@@ -196,8 +193,7 @@ public abstract class AstVisitor {
     acceptSafe(node.type());
   }
 
-  protected void visit(AstEntityRef node) {
-  }
+  protected void visit(AstEntityRef node) {}
 
   protected void visit(AstNew node) {
     visitChildren(node);

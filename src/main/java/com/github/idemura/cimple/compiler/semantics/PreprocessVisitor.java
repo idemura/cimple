@@ -278,7 +278,10 @@ class PreprocessVisitor extends AstExpressionRewriteVisitor {
   }
 
   private static void checkQualifiedName(
-      ReservedWords reservedWords, ErrorConsumer errorConsumer, Identifier name, Location location) {
+      ReservedWords reservedWords,
+      ErrorConsumer errorConsumer,
+      Identifier name,
+      Location location) {
     checkName(reservedWords, errorConsumer, name.moduleName(), location);
     checkTypeName(reservedWords, errorConsumer, name.typeName(), location);
     checkName(reservedWords, errorConsumer, name.entityName(), location);
