@@ -19,6 +19,7 @@ class NewDeleteTest extends AbstractSemanticsTest {
         function f() {
           var d = new Duration;
           delete d;
+          delete new Duration;
         }
         """;
     var module = parseCode(code);
