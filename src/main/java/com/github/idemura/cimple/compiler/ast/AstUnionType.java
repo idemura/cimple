@@ -56,6 +56,13 @@ public final class AstUnionType extends AstType {
   }
 
   @Override
+  public void acceptChildren(AstVisitor visitor) {
+    for (var variant : variants) {
+      acceptSafe(variant.valueType(), visitor);
+    }
+  }
+
+  @Override
   public Identifier name() {
     return name;
   }

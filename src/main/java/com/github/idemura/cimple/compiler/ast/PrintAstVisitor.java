@@ -17,7 +17,7 @@ public class PrintAstVisitor extends AstVisitor {
   protected void visit(AstModule node) {
     output.writeLine("MODULE %s".formatted(node.name()));
     output.indent();
-    visitChildren(node);
+    node.acceptChildren(this);
     output.unindent();
     output.writeLine("END");
   }
@@ -75,7 +75,7 @@ public class PrintAstVisitor extends AstVisitor {
   protected void visit(AstRecordType node) {
     output.writeLine("TYPE RECORD %s".formatted(node.name()));
     output.indent();
-    visitChildren(node);
+    node.acceptChildren(this);
     output.unindent();
     output.writeLine("END");
   }
@@ -99,7 +99,7 @@ public class PrintAstVisitor extends AstVisitor {
   protected void visit(AstBlock node) {
     output.writeLine("BLOCK");
     output.indent();
-    visitChildren(node);
+    node.acceptChildren(this);
     output.unindent();
     output.writeLine("END");
   }
@@ -168,7 +168,7 @@ public class PrintAstVisitor extends AstVisitor {
   protected void visit(AstReturn node) {
     output.writeLine("RETURN");
     output.indent();
-    visitChildren(node);
+    node.acceptChildren(this);
     output.unindent();
   }
 
@@ -176,7 +176,7 @@ public class PrintAstVisitor extends AstVisitor {
   protected void visit(AstDelete node) {
     output.writeLine("DELETE");
     output.indent();
-    visitChildren(node);
+    node.acceptChildren(this);
     output.unindent();
   }
 
@@ -232,7 +232,7 @@ public class PrintAstVisitor extends AstVisitor {
   protected void visit(AstCall node) {
     output.writeLine("CALL");
     output.indent();
-    visitChildren(node);
+    node.acceptChildren(this);
     output.unindent();
   }
 

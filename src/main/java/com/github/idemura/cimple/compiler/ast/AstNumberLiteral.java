@@ -17,7 +17,12 @@ public final class AstNumberLiteral extends AstLiteral {
   }
 
   @Override
-  public AstExpression acceptRewriter(AstExpressionRewriter rewriter) {
+  public void acceptChildren(AstVisitor visitor) {
+    super.acceptChildren(visitor);
+  }
+
+  @Override
+  public AstExpression rewrite(AstExpressionRewriter rewriter) {
     return rewriter.rewrite(this);
   }
 }

@@ -17,6 +17,9 @@ public final class AstGoto extends AstStatement {
   }
 
   @Override
+  public void acceptChildren(AstVisitor visitor) {}
+
+  @Override
   public int hashCode() {
     return label.hashCode();
   }

@@ -20,6 +20,11 @@ public class AstExpressionHolder extends AstHolder {
     visitor.visit(this);
   }
 
+  @Override
+  public void acceptChildren(AstVisitor visitor) {
+    root.accept(visitor);
+  }
+
   public AstExpression root() {
     return root;
   }

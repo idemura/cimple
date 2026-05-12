@@ -35,6 +35,11 @@ public abstract sealed class AstLiteral extends AstExpression
     return type == null ? null : type.type();
   }
 
+  @Override
+  public void acceptChildren(AstVisitor visitor) {
+    acceptSafe(type, visitor);
+  }
+
   public void type(AstType type) {
     this.type = AstTypeHolder.of(type);
   }

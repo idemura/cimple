@@ -13,6 +13,13 @@ public final class AstBlock extends AstNode {
     visitor.visit(this);
   }
 
+  @Override
+  public void acceptChildren(AstVisitor visitor) {
+    for (var statement : statements) {
+      statement.accept(visitor);
+    }
+  }
+
   public List<AstStatement> statements() {
     return statements;
   }

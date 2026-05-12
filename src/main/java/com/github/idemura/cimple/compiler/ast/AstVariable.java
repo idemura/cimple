@@ -23,6 +23,12 @@ public final class AstVariable extends AstEntity {
   }
 
   @Override
+  public void acceptChildren(AstVisitor visitor) {
+    acceptSafe(type, visitor);
+    acceptSafe(expression, visitor);
+  }
+
+  @Override
   public int hashCode() {
     return name.hashCode();
   }

@@ -15,6 +15,11 @@ public final class AstPointerType extends AstType {
   }
 
   @Override
+  public void acceptChildren(AstVisitor visitor) {
+    baseType.accept(visitor);
+  }
+
+  @Override
   public int hashCode() {
     return baseType.hashCode();
   }

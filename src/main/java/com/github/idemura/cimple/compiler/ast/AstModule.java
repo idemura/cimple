@@ -24,6 +24,13 @@ public final class AstModule extends AstNode {
     visitor.visit(this);
   }
 
+  @Override
+  public void acceptChildren(AstVisitor visitor) {
+    for (var definition : definitions) {
+      definition.accept(visitor);
+    }
+  }
+
   public List<AstNode> definitions() {
     return definitions;
   }

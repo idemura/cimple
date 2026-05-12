@@ -24,12 +24,18 @@ public class AstTypeHolder extends AstHolder {
 
   @Override
   public boolean equals(Object object) {
-    return this == object || (object instanceof AstTypeHolder other && Objects.equals(type, other.type));
+    return this == object
+        || (object instanceof AstTypeHolder other && Objects.equals(type, other.type));
   }
 
   @Override
   public void accept(AstVisitor visitor) {
     visitor.visit(this);
+  }
+
+  @Override
+  public void acceptChildren(AstVisitor visitor) {
+    type.accept(visitor);
   }
 
   public AstType type() {

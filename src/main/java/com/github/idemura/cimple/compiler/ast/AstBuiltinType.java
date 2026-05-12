@@ -45,6 +45,9 @@ public final class AstBuiltinType extends AstType {
   }
 
   @Override
+  public void acceptChildren(AstVisitor visitor) {}
+
+  @Override
   public Identifier name() {
     return name;
   }

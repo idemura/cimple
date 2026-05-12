@@ -13,5 +13,5 @@ public abstract sealed class AstExpression extends AstNode
 
   public abstract AstType type();
 
-  public abstract AstExpression acceptRewriter(AstExpressionRewriter rewriter);
+  public abstract AstExpression rewrite(AstExpressionRewriter rewriter);
 }

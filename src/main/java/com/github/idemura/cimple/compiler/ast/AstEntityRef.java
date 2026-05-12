@@ -17,7 +17,10 @@ public final class AstEntityRef extends AstExpression {
   }
 
   @Override
-  public AstExpression acceptRewriter(AstExpressionRewriter rewriter) {
+  public void acceptChildren(AstVisitor visitor) {}
+
+  @Override
+  public AstExpression rewrite(AstExpressionRewriter rewriter) {
     return rewriter.rewrite(this);
   }
 

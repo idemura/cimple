@@ -10,8 +10,13 @@ public final class AstReceiverLookup extends AstExpression {
   }
 
   @Override
-  public AstExpression acceptRewriter(AstExpressionRewriter rewriter) {
-    receiver = receiver.acceptRewriter(rewriter);
+  public void acceptChildren(AstVisitor visitor) {
+    receiver.accept(visitor);
+  }
+
+  @Override
+  public AstExpression rewrite(AstExpressionRewriter rewriter) {
+    receiver = receiver.rewrite(rewriter);
     return rewriter.rewrite(this);
   }
 

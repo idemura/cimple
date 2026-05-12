@@ -13,6 +13,14 @@ public final class AstFor extends AstStatement {
     visitor.visit(this);
   }
 
+  @Override
+  public void acceptChildren(AstVisitor visitor) {
+    acceptSafe(init, visitor);
+    acceptSafe(condition, visitor);
+    acceptSafe(increment, visitor);
+    block.accept(visitor);
+  }
+
   public AstVariable init() {
     return init;
   }

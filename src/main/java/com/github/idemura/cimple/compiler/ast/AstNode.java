@@ -7,11 +7,19 @@ public abstract class AstNode {
 
   public abstract void accept(AstVisitor visitor);
 
+  public abstract void acceptChildren(AstVisitor visitor);
+
   public Location location() {
     return location;
   }
 
   public void location(Location location) {
     this.location = location;
+  }
+
+  protected void acceptSafe(AstNode node, AstVisitor visitor) {
+    if (node != null) {
+      node.accept(visitor);
+    }
   }
 }

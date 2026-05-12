@@ -16,6 +16,11 @@ public final class AstExpressionStatement extends AstStatement {
     visitor.visit(this);
   }
 
+  @Override
+  public void acceptChildren(AstVisitor visitor) {
+    expression.accept(visitor);
+  }
+
   public AstExpressionHolder expression() {
     return expression;
   }

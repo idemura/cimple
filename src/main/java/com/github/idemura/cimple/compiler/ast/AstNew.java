@@ -10,9 +10,15 @@ public final class AstNew extends AstExpression {
   }
 
   @Override
-  public AstExpression acceptRewriter(AstExpressionRewriter rewriter) {
+  public void acceptChildren(AstVisitor visitor) {
+    acceptSafe(type, visitor);
+    acceptSafe(size, visitor);
+  }
+
+  @Override
+  public AstExpression rewrite(AstExpressionRewriter rewriter) {
     if (size != null) {
-      size = size.acceptRewriter(rewriter);
+      size = size.rewrite(rewriter);
     }
     return rewriter.rewrite(this);
   }

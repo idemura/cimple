@@ -12,6 +12,11 @@ public final class AstFunctionType extends AstType {
   }
 
   @Override
+  public void acceptChildren(AstVisitor visitor) {
+    header.accept(visitor);
+  }
+
+  @Override
   public int hashCode() {
     return name.hashCode();
   }

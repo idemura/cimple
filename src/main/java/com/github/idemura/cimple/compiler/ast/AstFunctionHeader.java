@@ -18,6 +18,16 @@ public final class AstFunctionHeader extends AstNode {
   }
 
   @Override
+  public void acceptChildren(AstVisitor visitor) {
+    // Receiver type ref is also assigned to the receiver parameter during preprocessing.
+    for (var parameter : parameters) {
+      parameter.accept(visitor);
+    }
+    acceptSafe(receiverType, visitor);
+    acceptSafe(resultType, visitor);
+  }
+
+  @Override
   public int hashCode() {
     return Objects.hash(receiverType(), parameters, resultType());
   }

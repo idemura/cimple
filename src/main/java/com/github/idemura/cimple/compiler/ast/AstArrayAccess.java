@@ -10,9 +10,15 @@ public final class AstArrayAccess extends AstExpression {
   }
 
   @Override
-  public AstExpression acceptRewriter(AstExpressionRewriter rewriter) {
-    array = array.acceptRewriter(rewriter);
-    index = index.acceptRewriter(rewriter);
+  public void acceptChildren(AstVisitor visitor) {
+    array.accept(visitor);
+    index.accept(visitor);
+  }
+
+  @Override
+  public AstExpression rewrite(AstExpressionRewriter rewriter) {
+    array = array.rewrite(rewriter);
+    index = index.rewrite(rewriter);
     return rewriter.rewrite(this);
   }
 

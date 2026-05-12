@@ -8,6 +8,11 @@ public final class AstReturn extends AstStatement {
     visitor.visit(this);
   }
 
+  @Override
+  public void acceptChildren(AstVisitor visitor) {
+    acceptSafe(expression, visitor);
+  }
+
   public AstExpressionHolder expression() {
     return expression;
   }

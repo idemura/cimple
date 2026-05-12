@@ -11,6 +11,9 @@ public final class AstTypeRef extends AstType {
   }
 
   @Override
+  public void acceptChildren(AstVisitor visitor) {}
+
+  @Override
   public String toString() {
     return "TYPE_REF(%s)".formatted(name);
   }

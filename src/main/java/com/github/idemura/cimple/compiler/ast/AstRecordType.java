@@ -16,6 +16,13 @@ public final class AstRecordType extends AstType {
   }
 
   @Override
+  public void acceptChildren(AstVisitor visitor) {
+    for (var field : fields) {
+      field.accept(visitor);
+    }
+  }
+
+  @Override
   public Identifier name() {
     return name;
   }

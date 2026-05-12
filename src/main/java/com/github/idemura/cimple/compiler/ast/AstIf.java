@@ -15,6 +15,17 @@ public final class AstIf extends AstStatement {
     visitor.visit(this);
   }
 
+  @Override
+  public void acceptChildren(AstVisitor visitor) {
+    for (var condition : conditions) {
+      condition.accept(visitor);
+    }
+    for (var thenBlock : thenBlocks) {
+      thenBlock.accept(visitor);
+    }
+    acceptSafe(elseBlock, visitor);
+  }
+
   public List<AstExpressionHolder> conditions() {
     return conditions;
   }

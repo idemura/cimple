@@ -11,8 +11,13 @@ public final class AstFieldAccess extends AstExpression {
   }
 
   @Override
-  public AstExpression acceptRewriter(AstExpressionRewriter rewriter) {
-    object = object.acceptRewriter(rewriter);
+  public void acceptChildren(AstVisitor visitor) {
+    object.accept(visitor);
+  }
+
+  @Override
+  public AstExpression rewrite(AstExpressionRewriter rewriter) {
+    object = object.rewrite(rewriter);
     return rewriter.rewrite(this);
   }
 

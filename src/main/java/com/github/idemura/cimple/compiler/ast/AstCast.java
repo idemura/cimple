@@ -10,8 +10,14 @@ public final class AstCast extends AstExpression {
   }
 
   @Override
-  public AstExpression acceptRewriter(AstExpressionRewriter rewriter) {
-    expression = expression.acceptRewriter(rewriter);
+  public void acceptChildren(AstVisitor visitor) {
+    expression.accept(visitor);
+    acceptSafe(type, visitor);
+  }
+
+  @Override
+  public AstExpression rewrite(AstExpressionRewriter rewriter) {
+    expression = expression.rewrite(rewriter);
     return rewriter.rewrite(this);
   }
 

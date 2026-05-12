@@ -73,6 +73,13 @@ public final class AstFunction extends AstEntity {
     visitor.visit(this);
   }
 
+  @Override
+  public void acceptChildren(AstVisitor visitor) {
+    header.accept(visitor);
+    acceptSafe(type, visitor);
+    block.accept(visitor);
+  }
+
   public AstFunctionHeader header() {
     return header;
   }

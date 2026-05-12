@@ -10,6 +10,11 @@ public final class AstDefer extends AstStatement {
     visitor.visit(this);
   }
 
+  @Override
+  public void acceptChildren(AstVisitor visitor) {
+    block.accept(visitor);
+  }
+
   public AstBlock block() {
     return block;
   }

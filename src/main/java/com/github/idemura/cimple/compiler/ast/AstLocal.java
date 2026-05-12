@@ -10,6 +10,11 @@ public final class AstLocal extends AstStatement {
     visitor.visit(this);
   }
 
+  @Override
+  public void acceptChildren(AstVisitor visitor) {
+    variable.accept(visitor);
+  }
+
   public AstVariable variable() {
     return variable;
   }
