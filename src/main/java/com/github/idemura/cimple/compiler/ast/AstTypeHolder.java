@@ -6,7 +6,7 @@ import java.util.Objects;
 
 // Marks the ownership boundary for a type tree. Type resolution replaces the holder type, so
 // declarations and expressions do not need custom code for each type field.
-public class AstTypeHolder extends AstHolder {
+public final class AstTypeHolder extends AstHolder {
   private AstType value;
 
   public static AstTypeHolder of(AstType type) {

@@ -4,7 +4,7 @@ import static com.google.common.base.Preconditions.checkNotNull;
 
 // Marks the ownership boundary for an expression tree. Rewrites replace the holder root, so
 // statements and declarations do not need custom code for each expression field.
-public class AstExpressionHolder extends AstHolder {
+public final class AstExpressionHolder extends AstHolder {
   private AstExpression value;
 
   public static AstExpressionHolder of(AstExpression root) {
