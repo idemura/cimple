@@ -216,7 +216,10 @@ public class NameResolutionVisitor extends AstExpressionRewriteVisitor {
       var function =
           switch (operatorRef.name().entityName()) {
             case "+" -> BuiltinFunctions.ADD_I64;
+            case "-" -> BuiltinFunctions.SUB_I64;
             case "*" -> BuiltinFunctions.MUL_I64;
+            case "/" -> BuiltinFunctions.DIV_I64;
+            case "%" -> BuiltinFunctions.MOD_I64;
             default ->
                 throw new IllegalStateException(
                     "Unknown builtin entity '%s'".formatted(operatorRef.name()));
