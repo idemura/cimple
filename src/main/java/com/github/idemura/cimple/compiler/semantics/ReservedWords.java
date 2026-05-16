@@ -1,30 +1,15 @@
 package com.github.idemura.cimple.compiler.semantics;
 
 import com.google.common.collect.ImmutableSet;
-import java.util.List;
+import java.util.Set;
 
 class ReservedWords {
-  private final ImmutableSet<String> reservedNames;
+  private final Set<String> reservedNames;
+  private final Set<String> reservedTypeNames;
 
-  ReservedWords(List<String> keywords) {
-    this.reservedNames =
-        new ImmutableSet.Builder<String>()
-            .addAll(keywords)
-            .add("true")
-            .add("false")
-            .add("null")
-            .add("bool")
-            .add("byte")
-            .add("char")
-            .add("float")
-            .add("float32")
-            .add("float64")
-            .add("int")
-            .add("int32")
-            .add("int64")
-            .add("string")
-            .add("void")
-            .build();
+  ReservedWords(Set<String> reservedNames, Set<String> reservedTypeNames) {
+    this.reservedNames = ImmutableSet.copyOf(reservedNames);
+    this.reservedTypeNames = ImmutableSet.copyOf(reservedTypeNames);
   }
 
   public boolean isReservedName(String name) {
@@ -32,6 +17,6 @@ class ReservedWords {
   }
 
   public boolean isReservedTypeName(String name) {
-    return reservedNames.contains(name);
+    return reservedTypeNames.contains(name);
   }
 }

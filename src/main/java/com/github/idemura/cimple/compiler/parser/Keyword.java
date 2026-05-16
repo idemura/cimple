@@ -1,8 +1,8 @@
 package com.github.idemura.cimple.compiler.parser;
 
 import com.google.common.collect.ImmutableMap;
-import java.util.Arrays;
-import java.util.List;
+import com.google.common.collect.ImmutableSet;
+import java.util.Set;
 
 public enum Keyword {
   CASE("case"),
@@ -53,7 +53,30 @@ public enum Keyword {
     return builder.build();
   }
 
-  public static List<String> valueList() {
-    return Arrays.stream(Keyword.values()).map(Keyword::toString).toList();
+  public static Set<String> reservedNames() {
+    var builder = new ImmutableSet.Builder<String>();
+    for (var keyword : values()) {
+      builder.add(keyword.symbolName);
+    }
+    return builder
+        .add("true")
+        .add("false")
+        .add("null")
+        .add("bool")
+        .add("byte")
+        .add("char")
+        .add("float")
+        .add("float32")
+        .add("float64")
+        .add("int")
+        .add("int32")
+        .add("int64")
+        .add("string")
+        .add("void")
+        .build();
+  }
+
+  public static Set<String> reservedTypeNames() {
+    return reservedNames();
   }
 }

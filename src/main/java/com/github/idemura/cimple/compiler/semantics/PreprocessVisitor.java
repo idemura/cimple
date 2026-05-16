@@ -27,17 +27,12 @@ import com.github.idemura.cimple.compiler.ast.AstTypeRef;
 import com.github.idemura.cimple.compiler.ast.AstUnionType;
 import com.github.idemura.cimple.compiler.ast.AstVariable;
 import java.util.HashMap;
-import java.util.List;
 
 class PreprocessVisitor extends AstExpressionRewriteVisitor {
   private final ReservedWords reservedWords;
   private final ErrorConsumer errorConsumer;
 
-  PreprocessVisitor(List<String> reservedWords, ErrorConsumer errorConsumer) {
-    this(new ReservedWords(reservedWords), errorConsumer);
-  }
-
-  private PreprocessVisitor(ReservedWords reservedWords, ErrorConsumer errorConsumer) {
+  PreprocessVisitor(ReservedWords reservedWords, ErrorConsumer errorConsumer) {
     super(new ExpressionRewriter(reservedWords, errorConsumer));
     this.reservedWords = reservedWords;
     this.errorConsumer = errorConsumer;
@@ -45,7 +40,7 @@ class PreprocessVisitor extends AstExpressionRewriteVisitor {
 
   @Override
   protected void visit(AstModule node) {
-    checkName(node.name(), node.location());
+    checkName(reservedWords, errorConsumer, node.name(), node.location());
     super.visit(node);
   }
 
@@ -63,7 +58,7 @@ class PreprocessVisitor extends AstExpressionRewriteVisitor {
 
   @Override
   protected void visit(AstFunction node) {
-    checkQualifiedName(node.name(), node.location());
+    checkQualifiedName(reservedWords, errorConsumer, node.name(), node.location());
     checkReceiverParameter(node.name(), node.header());
     super.visit(node);
   }
@@ -112,7 +107,7 @@ class PreprocessVisitor extends AstExpressionRewriteVisitor {
 
   @Override
   protected void visit(AstVariable node) {
-    checkQualifiedName(node.name(), node.location());
+    checkQualifiedName(reservedWords, errorConsumer, node.name(), node.location());
     if (!node.getBit(AstVariable.PARAMETER) && node.type() == null && node.expression() == null) {
       errorConsumer.errorAt(
           node.location(), "Variable '%s' must have a type or an initializer", node.name());
@@ -137,7 +132,7 @@ class PreprocessVisitor extends AstExpressionRewriteVisitor {
 
   @Override
   protected void visit(AstFunctionType node) {
-    checkQualifiedName(node.name(), node.location());
+    checkQualifiedName(reservedWords, errorConsumer, node.name(), node.location());
     checkReceiverParameter(node.name(), node.header());
     super.visit(node);
   }
@@ -150,7 +145,7 @@ class PreprocessVisitor extends AstExpressionRewriteVisitor {
 
   @Override
   protected void visit(AstRecordType node) {
-    checkQualifiedName(node.name(), node.location());
+    checkQualifiedName(reservedWords, errorConsumer, node.name(), node.location());
     var fieldMap = new HashMap<String, AstVariable>();
     for (var field : node.fields()) {
       var existing = fieldMap.putIfAbsent(field.name().entityName(), field);
@@ -167,10 +162,10 @@ class PreprocessVisitor extends AstExpressionRewriteVisitor {
 
   @Override
   protected void visit(AstUnionType node) {
-    checkQualifiedName(node.name(), node.location());
+    checkQualifiedName(reservedWords, errorConsumer, node.name(), node.location());
     var variantMap = new HashMap<String, AstUnionType.Variant>();
     for (var variant : node.variants()) {
-      checkName(variant.tag(), variant.location());
+      checkName(reservedWords, errorConsumer, variant.tag(), variant.location());
       var existing = variantMap.putIfAbsent(variant.tag(), variant);
       if (existing != null) {
         errorConsumer.errorAt(
@@ -270,16 +265,6 @@ class PreprocessVisitor extends AstExpressionRewriteVisitor {
       }
       return newNode;
     }
-  }
-
-  private void checkName(String name, Location location) {
-    if (reservedWords.isReservedName(name)) {
-      errorConsumer.errorAt(location, "Reserved word '%s' cannot be used as a name", name);
-    }
-  }
-
-  private void checkQualifiedName(Identifier name, Location location) {
-    checkQualifiedName(reservedWords, errorConsumer, name, location);
   }
 
   private static void checkQualifiedName(

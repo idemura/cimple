@@ -17,6 +17,9 @@ import java.util.List;
 import org.junit.jupiter.api.Test;
 
 class PreprocessVisitorTest extends AbstractSemanticsTest {
+  private final ReservedWords reservedWords =
+      new ReservedWords(Keyword.reservedNames(), Keyword.reservedTypeNames());
+
   @Test
   void testRewriteTrueFalseNullLiterals() {
     var code =
@@ -33,7 +36,7 @@ class PreprocessVisitorTest extends AbstractSemanticsTest {
         }
         """;
     var module = parseCode(code);
-    module.accept(new PreprocessVisitor(Keyword.valueList(), errorConsumer));
+    module.accept(new PreprocessVisitor(reservedWords, errorConsumer));
     var statements = module.findFunction("f").block().statements();
     int i = 0;
     assertEquals(boolLiteral(true), ((AstIf) statements.get(i++)).conditions().get(0).value());
@@ -65,7 +68,7 @@ class PreprocessVisitorTest extends AbstractSemanticsTest {
         }
         """;
     var module = parseCode(code);
-    module.accept(new PreprocessVisitor(Keyword.valueList(), errorConsumer));
+    module.accept(new PreprocessVisitor(reservedWords, errorConsumer));
     assertEquals(List.of(), errorConsumer.errors());
   }
 
@@ -81,7 +84,7 @@ class PreprocessVisitorTest extends AbstractSemanticsTest {
         }
         """;
     var module = parseCode(code);
-    module.accept(new PreprocessVisitor(Keyword.valueList(), errorConsumer));
+    module.accept(new PreprocessVisitor(reservedWords, errorConsumer));
     assertEquals(
         List.of(
             "Assignment is only allowed at the root of an expression",
@@ -102,7 +105,7 @@ class PreprocessVisitorTest extends AbstractSemanticsTest {
         type union byte {}
         """;
     var module = parseCode(code);
-    module.accept(new PreprocessVisitor(Keyword.valueList(), errorConsumer));
+    module.accept(new PreprocessVisitor(reservedWords, errorConsumer));
     assertEquals(
         ImmutableList.of(
             "Reserved word 'if' cannot be used as a name",
@@ -124,7 +127,7 @@ class PreprocessVisitorTest extends AbstractSemanticsTest {
         function f(x int) {}
         """;
     var module = parseCode(code);
-    module.accept(new PreprocessVisitor(Keyword.valueList(), errorConsumer));
+    module.accept(new PreprocessVisitor(reservedWords, errorConsumer));
     assertEquals(List.of(), errorConsumer.errors());
     {
       var header = module.findReceiverFunction("Duration", "toMillis").header();
@@ -156,7 +159,7 @@ class PreprocessVisitorTest extends AbstractSemanticsTest {
         }
         """;
     var module = parseCode(code);
-    module.accept(new PreprocessVisitor(Keyword.valueList(), errorConsumer));
+    module.accept(new PreprocessVisitor(reservedWords, errorConsumer));
     assertEquals(List.of(), errorConsumer.errors());
     assertEquals(newBuiltinTypeRef("int64"), module.findVariable("g").type());
     assertEquals(
@@ -180,7 +183,7 @@ class PreprocessVisitorTest extends AbstractSemanticsTest {
         function f(x) {}
         """;
     var module = parseCode(code);
-    module.accept(new PreprocessVisitor(Keyword.valueList(), errorConsumer));
+    module.accept(new PreprocessVisitor(reservedWords, errorConsumer));
     assertEquals(
         List.of(
             "Receiver function 'Duration:a': missing the receiver parameter",
@@ -203,7 +206,7 @@ class PreprocessVisitorTest extends AbstractSemanticsTest {
         }
         """;
     var module = parseCode(code);
-    module.accept(new PreprocessVisitor(Keyword.valueList(), errorConsumer));
+    module.accept(new PreprocessVisitor(reservedWords, errorConsumer));
     assertEquals(
         List.of(
             "Variable 'x' must have a type or an initializer",
@@ -223,7 +226,7 @@ class PreprocessVisitorTest extends AbstractSemanticsTest {
         }
         """;
     var module = parseCode(code);
-    module.accept(new PreprocessVisitor(Keyword.valueList(), errorConsumer));
+    module.accept(new PreprocessVisitor(reservedWords, errorConsumer));
     assertEquals(
         List.of("Duplicate record field 'x'. First defined at 3,7."), errorConsumer.errors());
   }
@@ -239,7 +242,7 @@ class PreprocessVisitorTest extends AbstractSemanticsTest {
         }
         """;
     var module = parseCode(code);
-    module.accept(new PreprocessVisitor(Keyword.valueList(), errorConsumer));
+    module.accept(new PreprocessVisitor(reservedWords, errorConsumer));
     assertEquals(
         List.of("Duplicate union variant 'A'. First defined at 3,3."), errorConsumer.errors());
   }

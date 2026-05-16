@@ -18,7 +18,10 @@ public class SemanticAnalyzer {
   }
 
   public boolean analyze(AstModule module) {
-    module.accept(new PreprocessVisitor(Keyword.valueList(), errorConsumer));
+    module.accept(
+        new PreprocessVisitor(
+            new ReservedWords(Keyword.reservedNames(), Keyword.reservedTypeNames()),
+            errorConsumer));
     if (hasErrors()) {
       return false;
     }
