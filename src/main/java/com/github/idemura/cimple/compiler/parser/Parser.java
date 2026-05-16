@@ -7,6 +7,7 @@ import com.github.idemura.cimple.compiler.CompilerException;
 import com.github.idemura.cimple.compiler.ErrorConsumer;
 import com.github.idemura.cimple.compiler.Identifier;
 import com.github.idemura.cimple.compiler.Location;
+import com.github.idemura.cimple.compiler.ast.AstAssign;
 import com.github.idemura.cimple.compiler.ast.AstArrayAccess;
 import com.github.idemura.cimple.compiler.ast.AstBlock;
 import com.github.idemura.cimple.compiler.ast.AstCall;
@@ -310,7 +311,27 @@ public class Parser {
   }
 
   private AstExpression parseExpression() {
-    return parseComparisonChain();
+    return parseAssignment();
+  }
+
+  private AstExpression parseAssignment() {
+    var target = parseComparisonChain();
+    if (target == null) {
+      return null;
+    }
+    var current = tokenizer.current();
+    if (!tokenizer.takeIf(ASSIGN)) {
+      return target;
+    }
+    var value = parseAssignment();
+    if (value == null) {
+      throw errorConsumer.fatalAt(current.location(), "Expected expression after %s", current);
+    }
+    var expr = new AstAssign();
+    expr.target(target);
+    expr.value(value);
+    expr.location(current.location());
+    return expr;
   }
 
   private AstExpression parseComparisonChain() {

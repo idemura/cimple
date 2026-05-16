@@ -8,6 +8,7 @@ import com.github.idemura.cimple.compiler.CompilerException;
 import com.github.idemura.cimple.compiler.ErrorConsumer;
 import com.github.idemura.cimple.compiler.Identifier;
 import com.github.idemura.cimple.compiler.InMemoryErrorConsumer;
+import com.github.idemura.cimple.compiler.ast.AstAssign;
 import com.github.idemura.cimple.compiler.ast.AstArrayAccess;
 import com.github.idemura.cimple.compiler.ast.AstCall;
 import com.github.idemura.cimple.compiler.ast.AstCast;
@@ -513,6 +514,53 @@ class ParserTest {
           assertEquals(AstNumberLiteral.of(1), call.arguments().get(0));
           assertEquals(AstNumberLiteral.of(2), call.arguments().get(1));
         }
+      }
+    }
+  }
+
+  @Test
+  void testAssignmentExpressionParsing() {
+    var code =
+        """
+        module test;
+        function f() {
+          a = b = c;
+          var x = a + (b = c);
+          foo(a = b);
+        }
+        """;
+    var module = parseCode(code, makeErrorConsumer());
+    var statements = module.findFunction("f").block().statements();
+    assertEquals(3, statements.size());
+    {
+      var expr = ((AstExpressionStatement) statements.get(0)).expression().value();
+      var assign = (AstAssign) expr;
+      assertEquals(newEntityRef("a"), assign.target());
+      {
+        var nestedAssign = (AstAssign) assign.value();
+        assertEquals(newEntityRef("b"), nestedAssign.target());
+        assertEquals(newEntityRef("c"), nestedAssign.value());
+      }
+    }
+    {
+      var expr = ((AstLocal) statements.get(1)).variable().expression().value();
+      var call = (AstCall) expr;
+      assertEquals(newBuiltinEntityRef("+"), call.function());
+      assertEquals(newEntityRef("a"), call.arguments().get(0));
+      {
+        var assign = (AstAssign) call.arguments().get(1);
+        assertEquals(newEntityRef("b"), assign.target());
+        assertEquals(newEntityRef("c"), assign.value());
+      }
+    }
+    {
+      var expr = ((AstExpressionStatement) statements.get(2)).expression().value();
+      var call = (AstCall) expr;
+      assertEquals(newEntityRef("foo"), call.function());
+      {
+        var assign = (AstAssign) call.arguments().get(0);
+        assertEquals(newEntityRef("a"), assign.target());
+        assertEquals(newEntityRef("b"), assign.value());
       }
     }
   }

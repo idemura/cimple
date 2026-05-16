@@ -6,6 +6,7 @@ import static java.lang.Long.parseLong;
 import com.github.idemura.cimple.compiler.ErrorConsumer;
 import com.github.idemura.cimple.compiler.Identifier;
 import com.github.idemura.cimple.compiler.Location;
+import com.github.idemura.cimple.compiler.ast.AstAssign;
 import com.github.idemura.cimple.compiler.ast.AstBoolLiteral;
 import com.github.idemura.cimple.compiler.ast.AstBuiltinType;
 import com.github.idemura.cimple.compiler.ast.AstEntityRef;
@@ -189,6 +190,15 @@ class PreprocessVisitor extends AstExpressionRewriteVisitor {
     ExpressionRewriter(ReservedWords reservedWords, ErrorConsumer errorConsumer) {
       this.reservedWords = reservedWords;
       this.errorConsumer = errorConsumer;
+    }
+
+    @Override
+    public AstExpression rewrite(AstAssign node) {
+      if (node != root()) {
+        errorConsumer.errorAt(
+            node.location(), "Assignment is only allowed at the root of an expression");
+      }
+      return node;
     }
 
     @Override

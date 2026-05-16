@@ -56,6 +56,41 @@ class PreprocessVisitorTest extends AbstractSemanticsTest {
   }
 
   @Test
+  void testAssignmentAtExpressionRoot() {
+    var code =
+        """
+        module test;
+        function f() {
+          a = b;
+        }
+        """;
+    var module = parseCode(code);
+    module.accept(new PreprocessVisitor(Keyword.valueList(), errorConsumer));
+    assertEquals(List.of(), errorConsumer.errors());
+  }
+
+  @Test
+  void testAssignmentPlacementFailures() {
+    var code =
+        """
+        module test;
+        function f() {
+          a = b = c;
+          var x = a + (b = c);
+          foo(a = b);
+        }
+        """;
+    var module = parseCode(code);
+    module.accept(new PreprocessVisitor(Keyword.valueList(), errorConsumer));
+    assertEquals(
+        List.of(
+            "Assignment is only allowed at the root of an expression",
+            "Assignment is only allowed at the root of an expression",
+            "Assignment is only allowed at the root of an expression"),
+        errorConsumer.errors());
+  }
+
+  @Test
   void testReservedNameFailures() {
     var code =
         """

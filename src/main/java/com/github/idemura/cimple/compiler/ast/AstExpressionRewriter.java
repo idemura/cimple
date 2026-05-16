@@ -1,6 +1,22 @@
 package com.github.idemura.cimple.compiler.ast;
 
 public class AstExpressionRewriter {
+  private AstExpression root;
+
+  public final AstExpression rewriteRoot(AstExpression root) {
+    var previous = this.root;
+    try {
+      this.root = root;
+      return root.rewrite(this);
+    } finally {
+      this.root = previous;
+    }
+  }
+
+  protected AstExpression root() {
+    return root;
+  }
+
   public AstExpression rewrite(AstNullLiteral node) {
     return node;
   }
@@ -18,6 +34,10 @@ public class AstExpressionRewriter {
   }
 
   public AstExpression rewrite(AstEntityRef node) {
+    return node;
+  }
+
+  public AstExpression rewrite(AstAssign node) {
     return node;
   }
 
