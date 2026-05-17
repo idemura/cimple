@@ -4,6 +4,8 @@ import static com.google.common.base.Preconditions.checkNotNull;
 import static com.google.common.base.Preconditions.checkState;
 
 import com.github.idemura.cimple.compiler.ErrorConsumer;
+import com.github.idemura.cimple.compiler.Location;
+import com.github.idemura.cimple.compiler.ast.AstCompoundAssign;
 import com.github.idemura.cimple.compiler.ast.AstBlock;
 import com.github.idemura.cimple.compiler.ast.AstBuiltinType;
 import com.github.idemura.cimple.compiler.ast.AstCall;
@@ -25,6 +27,7 @@ import com.github.idemura.cimple.compiler.ast.AstTypeRef;
 import com.github.idemura.cimple.compiler.ast.AstUnionType;
 import com.github.idemura.cimple.compiler.ast.AstVariable;
 import java.util.ArrayList;
+import java.util.List;
 
 public class NameResolutionVisitor extends AstExpressionRewriteVisitor {
   private final NameMap nameMap;
@@ -203,16 +206,23 @@ public class NameResolutionVisitor extends AstExpressionRewriteVisitor {
       // Builtin calls are selected here, once argument expressions are available.
       if (function instanceof AstEntityRef ref && ref.isBuiltin()) {
         checkState(!ref.isResolved());
-        resolveBuiltinCall(node);
+        resolveBuiltinFunction(ref);
       }
       // Receiver lookup and builtin resolution may replace the callee expression.
       checkCallParameters(node);
       return node;
     }
 
-    private void resolveBuiltinCall(AstCall node) {
+    @Override
+    public AstExpression rewrite(AstCompoundAssign node) {
+      resolveBuiltinFunction(node.operation());
+      checkBinaryOperatorArguments(
+          node.operation(), List.of(node.target(), node.value()), node.location());
+      return node;
+    }
+
+    private void resolveBuiltinFunction(AstEntityRef operatorRef) {
       // TODO: Select the builtin overload using the resolved argument types.
-      var operatorRef = (AstEntityRef) node.function();
       var function =
           switch (operatorRef.name().entityName()) {
             case "+" -> BuiltinFunctions.ADD_I64;
@@ -265,35 +275,57 @@ public class NameResolutionVisitor extends AstExpressionRewriteVisitor {
     private void checkCallParameters(AstCall call) {
       var type = checkNotNull(call.function().type());
       if (type instanceof AstFunctionType functionType) {
-        var parameters = functionType.header().parameters();
-        var arguments = call.arguments();
-        if (arguments.size() != parameters.size()) {
-          errorConsumer.errorAt(
-              call.location(),
-              "Function '%s' expects %d arguments, got %d",
-              calleeExpressionMessage(call.function()),
-              parameters.size(),
-              arguments.size());
-          return;
-        }
-        for (int i = 0; i < arguments.size(); i++) {
-          var argumentType = checkNotNull(arguments.get(i).type());
-          var parameterType = checkNotNull(parameters.get(i).type());
-          if (!argumentType.equals(parameterType)) {
-            errorConsumer.errorAt(
-                arguments.get(i).location(),
-                "Argument %d of function '%s' has type '%s', expected '%s'",
-                i,
-                calleeExpressionMessage(call.function()),
-                argumentType.name(),
-                parameterType.name());
-          }
-        }
+        checkFunctionArguments(
+            functionType,
+            call.arguments(),
+            call.location(),
+            calleeExpressionMessage(call.function()));
       } else {
         errorConsumer.errorAt(
             call.function().location(),
             "Calling expression of type '%s', function expected.",
             type);
+      }
+    }
+
+    private void checkBinaryOperatorArguments(
+        AstEntityRef operation, List<AstExpression> arguments, Location location) {
+      var type = checkNotNull(operation.type());
+      if (type instanceof AstFunctionType functionType) {
+        checkFunctionArguments(functionType, arguments, location, operation.name().toString());
+      } else {
+        errorConsumer.errorAt(
+            operation.location(), "Operator expression of type '%s', function expected.", type);
+      }
+    }
+
+    private void checkFunctionArguments(
+        AstFunctionType functionType,
+        List<AstExpression> arguments,
+        Location location,
+        String functionName) {
+      var parameters = functionType.header().parameters();
+      if (arguments.size() != parameters.size()) {
+        errorConsumer.errorAt(
+            location,
+            "Function '%s' expects %d arguments, got %d",
+            functionName,
+            parameters.size(),
+            arguments.size());
+        return;
+      }
+      for (int i = 0; i < arguments.size(); i++) {
+        var argumentType = checkNotNull(arguments.get(i).type());
+        var parameterType = checkNotNull(parameters.get(i).type());
+        if (!argumentType.equals(parameterType)) {
+          errorConsumer.errorAt(
+              arguments.get(i).location(),
+              "Argument %d of function '%s' has type '%s', expected '%s'",
+              i,
+              functionName,
+              argumentType.name(),
+              parameterType.name());
+        }
       }
     }
 

@@ -73,11 +73,11 @@ public class Tokenizer {
           case '.' -> tokens.add(take1CharToken(context, PERIOD));
           case '=' -> tokens.add(take1CharToken(context, ASSIGN));
           case ';' -> tokens.add(take1CharToken(context, SEMICOLON));
-          case '+' -> tokens.add(take1CharToken(context, PLUS));
-          case '-' -> tokens.add(take1CharToken(context, MINUS));
-          case '*' -> tokens.add(take1CharToken(context, STAR));
-          case '/' -> tokens.add(take1CharToken(context, SLASH));
-          case '%' -> tokens.add(take1CharToken(context, PERCENT));
+          case '+' -> tokens.add(takeAssignmentOrSingleToken(context, PLUS_ASSIGN, PLUS));
+          case '-' -> tokens.add(takeAssignmentOrSingleToken(context, MINUS_ASSIGN, MINUS));
+          case '*' -> tokens.add(takeAssignmentOrSingleToken(context, STAR_ASSIGN, STAR));
+          case '/' -> tokens.add(takeAssignmentOrSingleToken(context, SLASH_ASSIGN, SLASH));
+          case '%' -> tokens.add(takeAssignmentOrSingleToken(context, PERCENT_ASSIGN, PERCENT));
           case '<' -> tokens.add(take1CharToken(context, CMP_GT));
           case '>' -> tokens.add(take1CharToken(context, CMP_LT));
           case '"' -> tokens.add(takeString(context));
@@ -195,6 +195,17 @@ public class Tokenizer {
     var location = currentLocation(context);
     next(context);
     return new Token(tokenType, null, location);
+  }
+
+  private Token takeAssignmentOrSingleToken(
+      SplitContext context, TokenType assignmentType, TokenType singleType) {
+    var location = currentLocation(context);
+    next(context);
+    if (context.index < context.code.length() && context.code.charAt(context.index) == '=') {
+      next(context);
+      return new Token(assignmentType, null, location);
+    }
+    return new Token(singleType, null, location);
   }
 
   private Location currentLocation(SplitContext context) {

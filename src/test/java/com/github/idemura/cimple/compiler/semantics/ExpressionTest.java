@@ -3,9 +3,11 @@ package com.github.idemura.cimple.compiler.semantics;
 import static com.github.idemura.cimple.compiler.parser.Parser.parseCode;
 import static org.junit.jupiter.api.Assertions.*;
 
+import com.github.idemura.cimple.compiler.ast.AstCompoundAssign;
 import com.github.idemura.cimple.compiler.ast.AstBuiltinType;
 import com.github.idemura.cimple.compiler.ast.AstCall;
 import com.github.idemura.cimple.compiler.ast.AstEntityRef;
+import com.github.idemura.cimple.compiler.ast.AstExpressionStatement;
 import com.github.idemura.cimple.compiler.ast.AstFunction;
 import com.github.idemura.cimple.compiler.ast.AstLocal;
 import com.github.idemura.cimple.compiler.ast.AstStatement;
@@ -60,6 +62,34 @@ class ExpressionTest extends AbstractSemanticsTest {
   }
 
   @Test
+  void testCompoundAssignmentOperatorsResolveToI64Builtins() {
+    var code =
+        """
+        module test;
+        function f() {
+          var x = 1;
+          x += 2;
+          x -= 3;
+          x *= 4;
+          x /= 5;
+          x %= 6;
+        }
+        """;
+    var module = parseCode(code);
+    var sa = new SemanticAnalyzer(errorConsumer);
+    sa.analyze(module);
+    assertEquals(List.of(), errorConsumer.errors());
+
+    var statements = module.findFunction("f").block().statements();
+    assertEquals(6, statements.size());
+    assertCompoundOperator(statements.get(1), BuiltinFunctions.ADD_I64);
+    assertCompoundOperator(statements.get(2), BuiltinFunctions.SUB_I64);
+    assertCompoundOperator(statements.get(3), BuiltinFunctions.MUL_I64);
+    assertCompoundOperator(statements.get(4), BuiltinFunctions.DIV_I64);
+    assertCompoundOperator(statements.get(5), BuiltinFunctions.MOD_I64);
+  }
+
+  @Test
   void testInvalidFieldAccess() {
     var code =
         """
@@ -88,5 +118,12 @@ class ExpressionTest extends AbstractSemanticsTest {
     var functionRef = (AstEntityRef) call.function();
     assertSame(function, functionRef.entity());
     assertEquals(AstBuiltinType.INT64, call.type());
+  }
+
+  private static void assertCompoundOperator(Object statement, AstFunction function) {
+    var expr = ((AstExpressionStatement) statement).expression().value();
+    var assign = (AstCompoundAssign) expr;
+    assertSame(function, assign.operation().entity());
+    assertEquals(AstBuiltinType.INT64, assign.type());
   }
 }

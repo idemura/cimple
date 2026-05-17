@@ -9,6 +9,7 @@ import com.github.idemura.cimple.compiler.ErrorConsumer;
 import com.github.idemura.cimple.compiler.Identifier;
 import com.github.idemura.cimple.compiler.InMemoryErrorConsumer;
 import com.github.idemura.cimple.compiler.ast.AstAssign;
+import com.github.idemura.cimple.compiler.ast.AstCompoundAssign;
 import com.github.idemura.cimple.compiler.ast.AstArrayAccess;
 import com.github.idemura.cimple.compiler.ast.AstCall;
 import com.github.idemura.cimple.compiler.ast.AstCast;
@@ -562,6 +563,65 @@ class ParserTest {
         assertEquals(newEntityRef("a"), assign.target());
         assertEquals(newEntityRef("b"), assign.value());
       }
+    }
+  }
+
+  @Test
+  void testCompoundAssignmentExpressionParsing() {
+    var code =
+        """
+        module test;
+        function f() {
+          a += b -= c;
+          var x = a + (b *= c);
+          foo(a /= b);
+          a %= b;
+        }
+        """;
+    var module = parseCode(code, makeErrorConsumer());
+    var statements = module.findFunction("f").block().statements();
+    assertEquals(4, statements.size());
+    {
+      var expr = ((AstExpressionStatement) statements.get(0)).expression().value();
+      var assign = (AstCompoundAssign) expr;
+      assertEquals(newEntityRef("a"), assign.target());
+      assertEquals(newBuiltinEntityRef("+"), assign.operation());
+      {
+        var nestedAssign = (AstCompoundAssign) assign.value();
+        assertEquals(newEntityRef("b"), nestedAssign.target());
+        assertEquals(newBuiltinEntityRef("-"), nestedAssign.operation());
+        assertEquals(newEntityRef("c"), nestedAssign.value());
+      }
+    }
+    {
+      var expr = ((AstLocal) statements.get(1)).variable().expression().value();
+      var call = (AstCall) expr;
+      assertEquals(newBuiltinEntityRef("+"), call.function());
+      assertEquals(newEntityRef("a"), call.arguments().get(0));
+      {
+        var assign = (AstCompoundAssign) call.arguments().get(1);
+        assertEquals(newEntityRef("b"), assign.target());
+        assertEquals(newBuiltinEntityRef("*"), assign.operation());
+        assertEquals(newEntityRef("c"), assign.value());
+      }
+    }
+    {
+      var expr = ((AstExpressionStatement) statements.get(2)).expression().value();
+      var call = (AstCall) expr;
+      assertEquals(newEntityRef("foo"), call.function());
+      {
+        var assign = (AstCompoundAssign) call.arguments().get(0);
+        assertEquals(newEntityRef("a"), assign.target());
+        assertEquals(newBuiltinEntityRef("/"), assign.operation());
+        assertEquals(newEntityRef("b"), assign.value());
+      }
+    }
+    {
+      var expr = ((AstExpressionStatement) statements.get(3)).expression().value();
+      var assign = (AstCompoundAssign) expr;
+      assertEquals(newEntityRef("a"), assign.target());
+      assertEquals(newBuiltinEntityRef("%"), assign.operation());
+      assertEquals(newEntityRef("b"), assign.value());
     }
   }
 

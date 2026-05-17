@@ -115,6 +115,10 @@ public abstract class AstVisitor {
     node.acceptChildren(this);
   }
 
+  protected void visit(AstCompoundAssign node) {
+    node.acceptChildren(this);
+  }
+
   protected void visit(AstNew node) {
     node.acceptChildren(this);
   }

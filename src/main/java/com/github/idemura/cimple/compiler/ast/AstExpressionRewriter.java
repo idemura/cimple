@@ -41,6 +41,10 @@ public class AstExpressionRewriter {
     return node;
   }
 
+  public AstExpression rewrite(AstCompoundAssign node) {
+    return node;
+  }
+
   public AstExpression rewrite(AstNew node) {
     return node;
   }

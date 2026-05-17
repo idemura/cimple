@@ -65,6 +65,7 @@ class PreprocessVisitorTest extends AbstractSemanticsTest {
         module test;
         function f() {
           a = b;
+          a += b;
         }
         """;
     var module = parseCode(code);
@@ -81,6 +82,27 @@ class PreprocessVisitorTest extends AbstractSemanticsTest {
           a = b = c;
           var x = a + (b = c);
           foo(a = b);
+        }
+        """;
+    var module = parseCode(code);
+    module.accept(new PreprocessVisitor(reservedWords, errorConsumer));
+    assertEquals(
+        List.of(
+            "Assignment is only allowed at the root of an expression",
+            "Assignment is only allowed at the root of an expression",
+            "Assignment is only allowed at the root of an expression"),
+        errorConsumer.errors());
+  }
+
+  @Test
+  void testCompoundAssignmentPlacementFailures() {
+    var code =
+        """
+        module test;
+        function f() {
+          a += b += c;
+          var x = a + (b *= c);
+          foo(a /= b);
         }
         """;
     var module = parseCode(code);

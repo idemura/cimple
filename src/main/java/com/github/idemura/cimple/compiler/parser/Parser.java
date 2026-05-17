@@ -9,6 +9,7 @@ import com.github.idemura.cimple.compiler.Identifier;
 import com.github.idemura.cimple.compiler.Location;
 import com.github.idemura.cimple.compiler.ast.AstArrayAccess;
 import com.github.idemura.cimple.compiler.ast.AstAssign;
+import com.github.idemura.cimple.compiler.ast.AstCompoundAssign;
 import com.github.idemura.cimple.compiler.ast.AstBlock;
 import com.github.idemura.cimple.compiler.ast.AstCall;
 import com.github.idemura.cimple.compiler.ast.AstCast;
@@ -320,18 +321,52 @@ public class Parser {
       return null;
     }
     var current = tokenizer.current();
-    if (!tokenizer.takeIf(ASSIGN)) {
-      return target;
+    if (tokenizer.takeIf(ASSIGN)) {
+      var value = parseAssignment();
+      if (value == null) {
+        throw errorConsumer.fatalAt(current.location(), "Expected expression after %s", current);
+      }
+      var expr = new AstAssign();
+      expr.target(target);
+      expr.value(value);
+      expr.location(current.location());
+      return expr;
     }
-    var value = parseAssignment();
-    if (value == null) {
-      throw errorConsumer.fatalAt(current.location(), "Expected expression after %s", current);
+    if (isCompoundAssignment(current.type())) {
+      tokenizer.step();
+      var value = parseAssignment();
+      if (value == null) {
+        throw errorConsumer.fatalAt(current.location(), "Expected expression after %s", current);
+      }
+      var expr = new AstCompoundAssign();
+      expr.target(target);
+      expr.operation(parseCompoundAssignmentOperator(current));
+      expr.value(value);
+      expr.location(current.location());
+      return expr;
     }
-    var expr = new AstAssign();
-    expr.target(target);
-    expr.value(value);
-    expr.location(current.location());
-    return expr;
+    return target;
+  }
+
+  private static boolean isCompoundAssignment(TokenType type) {
+    return type == PLUS_ASSIGN
+        || type == MINUS_ASSIGN
+        || type == STAR_ASSIGN
+        || type == SLASH_ASSIGN
+        || type == PERCENT_ASSIGN;
+  }
+
+  private AstEntityRef parseCompoundAssignmentOperator(Token token) {
+    var operator =
+        switch (token.type()) {
+          case PLUS_ASSIGN -> PLUS;
+          case MINUS_ASSIGN -> MINUS;
+          case STAR_ASSIGN -> STAR;
+          case SLASH_ASSIGN -> SLASH;
+          case PERCENT_ASSIGN -> PERCENT;
+          default -> throw new IllegalArgumentException("Not a compound assignment: " + token);
+        };
+    return parseOperator(new Token(operator, null, token.location()));
   }
 
   private AstExpression parseComparisonChain() {
