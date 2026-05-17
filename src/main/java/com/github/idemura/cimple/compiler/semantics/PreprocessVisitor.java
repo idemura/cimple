@@ -282,22 +282,45 @@ class PreprocessVisitor extends AstExpressionRewriteVisitor {
       ErrorConsumer errorConsumer,
       Identifier name,
       Location location) {
-    checkName(reservedWords, errorConsumer, name.moduleName(), location);
-    checkTypeName(reservedWords, errorConsumer, name.typeName(), location);
-    checkName(reservedWords, errorConsumer, name.entityName(), location);
+    if (!name.isBuiltin()) {
+      checkName(reservedWords, errorConsumer, name.moduleName(), location);
+      checkTypeName(reservedWords, errorConsumer, name.typeName(), location);
+      checkName(reservedWords, errorConsumer, name.entityName(), location);
+    }
   }
 
   private static void checkName(
       ReservedWords reservedWords, ErrorConsumer errorConsumer, String name, Location location) {
-    if (name != null && reservedWords.isReservedName(name)) {
+    if (name == null) {
+      return;
+    }
+    checkUnderscoreRules(errorConsumer, name, location);
+    if (reservedWords.isReservedName(name)) {
       errorConsumer.errorAt(location, "Reserved word '%s' cannot be used as a name", name);
     }
   }
 
   private static void checkTypeName(
       ReservedWords reservedWords, ErrorConsumer errorConsumer, String name, Location location) {
-    if (name != null && reservedWords.isReservedTypeName(name)) {
+    if (name == null) {
+      return;
+    }
+    checkUnderscoreRules(errorConsumer, name, location);
+    if (reservedWords.isReservedTypeName(name)) {
       errorConsumer.errorAt(location, "Reserved word '%s' cannot be used as a type name", name);
+    }
+  }
+
+  private static void checkUnderscoreRules(
+      ErrorConsumer errorConsumer, String name, Location location) {
+    if (name.startsWith("_")) {
+      errorConsumer.errorAt(location, "Identifier '%s' cannot start with '_'", name);
+    }
+    if (name.endsWith("_")) {
+      errorConsumer.errorAt(location, "Identifier '%s' cannot end with '_'", name);
+    }
+    if (name.contains("__")) {
+      errorConsumer.errorAt(location, "Identifier '%s' cannot contain '__'", name);
     }
   }
 }

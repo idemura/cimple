@@ -140,6 +140,40 @@ class PreprocessVisitorTest extends AbstractSemanticsTest {
   }
 
   @Test
+  void testUnderscoreNameFailures() {
+    var code =
+        """
+        module bad__module;
+        var _leading int;
+        var trailing_ int;
+        var bad__variable int;
+        function bad__function() {}
+        type record bad__record {
+          var bad__field int;
+        }
+        type union bad__union {
+          bad__variant;
+        }
+        type function bad__function_type();
+        """;
+    var module = parseCode(code);
+    module.accept(new PreprocessVisitor(reservedWords, errorConsumer));
+    assertEquals(
+        List.of(
+            "Identifier 'bad__module' cannot contain '__'",
+            "Identifier '_leading' cannot start with '_'",
+            "Identifier 'trailing_' cannot end with '_'",
+            "Identifier 'bad__variable' cannot contain '__'",
+            "Identifier 'bad__function' cannot contain '__'",
+            "Identifier 'bad__record' cannot contain '__'",
+            "Identifier 'bad__field' cannot contain '__'",
+            "Identifier 'bad__union' cannot contain '__'",
+            "Identifier 'bad__variant' cannot contain '__'",
+            "Identifier 'bad__function_type' cannot contain '__'"),
+        errorConsumer.errors());
+  }
+
+  @Test
   void testNormalizeFunctionHeader() {
     var code =
         """
