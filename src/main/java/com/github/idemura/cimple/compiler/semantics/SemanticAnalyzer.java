@@ -30,6 +30,10 @@ public class SemanticAnalyzer {
       return false;
     }
     module.accept(new TypeResolutionVisitor(nameMap, errorConsumer));
+    new TypeRecursionChecker(errorConsumer).check(module);
+    if (hasErrors()) {
+      return false;
+    }
     module.accept(new NameResolutionVisitor(nameMap, errorConsumer));
     if (hasErrors()) {
       return false;

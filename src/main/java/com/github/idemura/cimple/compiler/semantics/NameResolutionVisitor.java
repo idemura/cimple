@@ -23,6 +23,7 @@ import com.github.idemura.cimple.compiler.ast.AstModule;
 import com.github.idemura.cimple.compiler.ast.AstPointerType;
 import com.github.idemura.cimple.compiler.ast.AstReceiverLookup;
 import com.github.idemura.cimple.compiler.ast.AstRecordType;
+import com.github.idemura.cimple.compiler.ast.AstTypeHolder;
 import com.github.idemura.cimple.compiler.ast.AstTypeRef;
 import com.github.idemura.cimple.compiler.ast.AstUnionType;
 import com.github.idemura.cimple.compiler.ast.AstVariable;
@@ -81,6 +82,9 @@ public class NameResolutionVisitor extends AstExpressionRewriteVisitor {
       node.type(node.expression().type());
     }
   }
+
+  @Override
+  protected void visit(AstTypeHolder node) {}
 
   @Override
   protected void visit(AstTypeRef node) {

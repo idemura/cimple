@@ -23,7 +23,9 @@ public class TypeResolutionVisitor extends AstVisitor {
   @Override
   protected void visit(AstTypeHolder node) {
     node.value(resolveTypeRefSafe(node.value()));
-    super.visit(node);
+    // Stop here: after resolution, the holder points at a shared type definition, not an owned
+    // child subtree. Walking into it would revisit definitions through references and can recurse
+    // forever for valid shapes such as `record T { var next T*; }`.
   }
 
   @Override
