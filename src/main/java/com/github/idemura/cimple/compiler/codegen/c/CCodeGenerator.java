@@ -1,7 +1,7 @@
 package com.github.idemura.cimple.compiler.codegen.c;
 
 import com.github.idemura.cimple.compiler.IndentWriter;
-import com.github.idemura.cimple.compiler.ast.AstNode;
+import com.github.idemura.cimple.compiler.ast.AstModule;
 import com.github.idemura.cimple.compiler.codegen.CodeGenerator;
 
 public class CCodeGenerator extends CodeGenerator {
@@ -12,9 +12,9 @@ public class CCodeGenerator extends CodeGenerator {
   }
 
   @Override
-  public void generateCode(AstNode root) {
+  public void generateCode(AstModule module) {
     emitPrologue();
-    root.accept(new CCodeGeneratorVisitor());
+    module.accept(new CCodeGeneratorVisitor());
     emitEpilogue();
   }
 
