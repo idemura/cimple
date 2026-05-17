@@ -5,10 +5,10 @@ import static com.google.common.base.Preconditions.checkState;
 
 import com.github.idemura.cimple.compiler.ErrorConsumer;
 import com.github.idemura.cimple.compiler.Location;
-import com.github.idemura.cimple.compiler.ast.AstCompoundAssign;
 import com.github.idemura.cimple.compiler.ast.AstBlock;
 import com.github.idemura.cimple.compiler.ast.AstBuiltinType;
 import com.github.idemura.cimple.compiler.ast.AstCall;
+import com.github.idemura.cimple.compiler.ast.AstCompoundAssign;
 import com.github.idemura.cimple.compiler.ast.AstDelete;
 import com.github.idemura.cimple.compiler.ast.AstEntityRef;
 import com.github.idemura.cimple.compiler.ast.AstExpression;

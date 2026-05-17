@@ -31,6 +31,10 @@ public abstract class AstVisitor {
     node.acceptChildren(this);
   }
 
+  protected void visit(AstArrayType node) {
+    node.acceptChildren(this);
+  }
+
   protected void visit(AstBuiltinType node) {
     node.acceptChildren(this);
   }

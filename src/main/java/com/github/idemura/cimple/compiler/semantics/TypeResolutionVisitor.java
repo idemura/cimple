@@ -1,6 +1,7 @@
 package com.github.idemura.cimple.compiler.semantics;
 
 import com.github.idemura.cimple.compiler.ErrorConsumer;
+import com.github.idemura.cimple.compiler.ast.AstArrayType;
 import com.github.idemura.cimple.compiler.ast.AstBuiltinType;
 import com.github.idemura.cimple.compiler.ast.AstNew;
 import com.github.idemura.cimple.compiler.ast.AstPointerType;
@@ -53,6 +54,9 @@ public class TypeResolutionVisitor extends AstVisitor {
     }
     if (type instanceof AstPointerType pointerType) {
       pointerType.baseType(resolveTypeRefSafe(pointerType.baseType()));
+    }
+    if (type instanceof AstArrayType arrayType) {
+      arrayType.baseType(resolveTypeRefSafe(arrayType.baseType()));
     }
     return type;
   }

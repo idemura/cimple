@@ -3,9 +3,9 @@ package com.github.idemura.cimple.compiler.semantics;
 import static com.github.idemura.cimple.compiler.parser.Parser.parseCode;
 import static org.junit.jupiter.api.Assertions.*;
 
-import com.github.idemura.cimple.compiler.ast.AstCompoundAssign;
 import com.github.idemura.cimple.compiler.ast.AstBuiltinType;
 import com.github.idemura.cimple.compiler.ast.AstCall;
+import com.github.idemura.cimple.compiler.ast.AstCompoundAssign;
 import com.github.idemura.cimple.compiler.ast.AstEntityRef;
 import com.github.idemura.cimple.compiler.ast.AstExpressionStatement;
 import com.github.idemura.cimple.compiler.ast.AstFunction;

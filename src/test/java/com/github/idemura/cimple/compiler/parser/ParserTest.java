@@ -8,11 +8,11 @@ import com.github.idemura.cimple.compiler.CompilerException;
 import com.github.idemura.cimple.compiler.ErrorConsumer;
 import com.github.idemura.cimple.compiler.Identifier;
 import com.github.idemura.cimple.compiler.InMemoryErrorConsumer;
-import com.github.idemura.cimple.compiler.ast.AstAssign;
-import com.github.idemura.cimple.compiler.ast.AstCompoundAssign;
 import com.github.idemura.cimple.compiler.ast.AstArrayAccess;
+import com.github.idemura.cimple.compiler.ast.AstAssign;
 import com.github.idemura.cimple.compiler.ast.AstCall;
 import com.github.idemura.cimple.compiler.ast.AstCast;
+import com.github.idemura.cimple.compiler.ast.AstCompoundAssign;
 import com.github.idemura.cimple.compiler.ast.AstDefer;
 import com.github.idemura.cimple.compiler.ast.AstDelete;
 import com.github.idemura.cimple.compiler.ast.AstEntityRef;
@@ -50,6 +50,9 @@ class ParserTest {
         var v2 = 5;
         var p int*;
         var pp int**;
+        var a int[];
+        var ap int[]*;
+        var apa int[]*[];
         const c0 int = 7;
         function f0() {}
         function f1(x int) {}
@@ -117,6 +120,24 @@ class ParserTest {
       var v = module.findVariable("pp");
       assertEquals(Identifier.ofEntity("pp"), v.name());
       assertEquals(pointerType(pointerType(newTypeRef("int"))), v.type());
+      assertTrue(v.getBit(AstVariable.MUTABLE));
+    }
+    {
+      var v = module.findVariable("a");
+      assertEquals(Identifier.ofEntity("a"), v.name());
+      assertEquals(arrayType(newTypeRef("int")), v.type());
+      assertTrue(v.getBit(AstVariable.MUTABLE));
+    }
+    {
+      var v = module.findVariable("ap");
+      assertEquals(Identifier.ofEntity("ap"), v.name());
+      assertEquals(arrayType(pointerType(newTypeRef("int"))), v.type());
+      assertTrue(v.getBit(AstVariable.MUTABLE));
+    }
+    {
+      var v = module.findVariable("apa");
+      assertEquals(Identifier.ofEntity("apa"), v.name());
+      assertEquals(arrayType(pointerType(arrayType(newTypeRef("int")))), v.type());
       assertTrue(v.getBit(AstVariable.MUTABLE));
     }
     {

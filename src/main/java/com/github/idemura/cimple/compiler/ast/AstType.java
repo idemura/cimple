@@ -5,6 +5,7 @@ import com.github.idemura.cimple.compiler.Identifier;
 public abstract sealed class AstType extends AstNode
     permits AstTypeRef,
         AstPointerType,
+        AstArrayType,
         AstBuiltinType,
         AstStringType,
         AstFunctionType,

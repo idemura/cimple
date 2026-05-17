@@ -8,11 +8,12 @@ import com.github.idemura.cimple.compiler.ErrorConsumer;
 import com.github.idemura.cimple.compiler.Identifier;
 import com.github.idemura.cimple.compiler.Location;
 import com.github.idemura.cimple.compiler.ast.AstArrayAccess;
+import com.github.idemura.cimple.compiler.ast.AstArrayType;
 import com.github.idemura.cimple.compiler.ast.AstAssign;
-import com.github.idemura.cimple.compiler.ast.AstCompoundAssign;
 import com.github.idemura.cimple.compiler.ast.AstBlock;
 import com.github.idemura.cimple.compiler.ast.AstCall;
 import com.github.idemura.cimple.compiler.ast.AstCast;
+import com.github.idemura.cimple.compiler.ast.AstCompoundAssign;
 import com.github.idemura.cimple.compiler.ast.AstDefer;
 import com.github.idemura.cimple.compiler.ast.AstDelete;
 import com.github.idemura.cimple.compiler.ast.AstEntityRef;
@@ -597,8 +598,25 @@ public class Parser {
     ref.location(current.location());
     tokenizer.step();
     AstType type = ref;
-    while (tokenizer.takeIf(STAR)) {
-      type = new AstPointerType(type);
+    var suffixes = new ArrayList<TokenType>();
+    while (true) {
+      if (tokenizer.takeIf(STAR)) {
+        suffixes.add(STAR);
+      } else if (tokenizer.current().is(LBRACKET) && tokenizer.next().is(RBRACKET)) {
+        tokenizer.step();
+        suffixes.add(LBRACKET);
+        take(RBRACKET);
+      } else {
+        break;
+      }
+    }
+    for (var i = suffixes.size() - 1; i >= 0; i--) {
+      type =
+          switch (suffixes.get(i)) {
+            case STAR -> new AstPointerType(type);
+            case LBRACKET -> new AstArrayType(type);
+            default -> throw new IllegalStateException("Unknown type suffix: " + suffixes.get(i));
+          };
     }
     return type;
   }
