@@ -13,7 +13,7 @@ import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.List;
 
-public class CliDriver implements CompilerParams {
+public class CliDriver extends CompilerParams {
   @Parameter() List<String> files = new ArrayList<>();
 
   @Parameter(names = {"--codegen"})
@@ -23,22 +23,17 @@ public class CliDriver implements CompilerParams {
   boolean debug;
 
   @Parameter(names = {"--debug_print_tokens"})
-  boolean printTokens = CompilerParams.super.printTokens();
+  boolean printTokens;
 
   @Parameter(names = {"--debug_print_ast"})
-  boolean printAst = CompilerParams.super.printAst();
+  boolean printAst;
 
   @Parameter(names = {"--indent"})
-  int indent = CompilerParams.super.indent();
-
-  @Override
-  public Appendable debugOutput() {
-    return System.err;
-  }
+  int indent;
 
   @Override
   public int indent() {
-    return indent == 0 ? CompilerParams.super.indent() : indent;
+    return indent == 0 ? super.indent() : indent;
   }
 
   @Override
@@ -62,7 +57,7 @@ public class CliDriver implements CompilerParams {
     var errorConsumer = new CliErrorConsumer();
     errorConsumer.enable(Mode.PRINT_LEVEL);
     errorConsumer.enable(Mode.PRINT_LOCATION);
-    var compiler = new Compiler(this, System.out, errorConsumer, new NoopCodeGenerator());
+    var compiler = new Compiler(this, errorConsumer, new NoopCodeGenerator());
     for (var fileName : files) {
       var code = readCodeFromFile(fileName);
       if (!compiler.compile(fileName, code)) {

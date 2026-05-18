@@ -1,17 +1,19 @@
 package com.github.idemura.cimple.compiler;
 
-public interface CompilerParams {
-  Appendable debugOutput();
+public class CompilerParams {
+  public Appendable debugOutput() {
+    return System.err;
+  }
 
-  default boolean printTokens() {
+  public boolean printTokens() {
     return false;
   }
 
-  default boolean printAst() {
+  public boolean printAst() {
     return false;
   }
 
-  default int indent() {
+  public int indent() {
     return 2;
   }
 }

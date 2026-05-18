@@ -15,11 +15,10 @@ public class Compiler {
 
   public Compiler(
       CompilerParams params,
-      Appendable debugOutput,
       ErrorConsumer errorConsumer,
       CodeGenerator codeGenerator) {
     this.params = params;
-    this.debugOutput = new IndentWriter(debugOutput, params.indent());
+    this.debugOutput = new IndentWriter(params.debugOutput(), params.indent());
     this.errorConsumer = errorConsumer;
     this.codeGenerator = codeGenerator;
   }
