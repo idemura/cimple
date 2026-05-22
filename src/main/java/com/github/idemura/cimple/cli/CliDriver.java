@@ -5,7 +5,11 @@ import com.beust.jcommander.Parameter;
 import com.github.idemura.cimple.compiler.Compiler;
 import com.github.idemura.cimple.compiler.CompilerParams;
 import com.github.idemura.cimple.compiler.ErrorConsumer.Mode;
+import com.github.idemura.cimple.compiler.codegen.CodeGenerator;
 import com.github.idemura.cimple.compiler.codegen.NoopCodeGenerator;
+import com.github.idemura.cimple.compiler.codegen.c.CCodeGenerator;
+import com.github.idemura.cimple.compiler.codegen.c.CCodeGeneratorParams;
+import com.github.idemura.cimple.compiler.codegen.c.CStandard;
 import java.io.IOException;
 import java.io.UncheckedIOException;
 import java.nio.file.Files;
@@ -18,6 +22,14 @@ public class CliDriver {
 
   @Parameter(names = {"--codegen"})
   String codeGen = "none";
+
+  @Parameter(names = {"--c_standard"})
+  CStandard cStandard = CStandard.C11;
+
+  @Parameter(
+      names = {"--c_mangle_module_name"},
+      arity = 1)
+  boolean cMangleModuleName = true;
 
   @Parameter(names = {"--debug"})
   boolean debug;
@@ -42,7 +54,7 @@ public class CliDriver {
     var errorConsumer = new CliErrorConsumer();
     errorConsumer.enable(Mode.PRINT_LEVEL);
     errorConsumer.enable(Mode.PRINT_LOCATION);
-    var compiler = new Compiler(compilerParams(), errorConsumer, new NoopCodeGenerator());
+    var compiler = new Compiler(compilerParams(), errorConsumer, codeGenerator());
     for (var fileName : files) {
       var code = readCodeFromFile(fileName);
       if (!compiler.compile(fileName, code)) {
@@ -58,6 +70,20 @@ public class CliDriver {
         .printTokens(debug && printTokens)
         .printAst(debug && printAst)
         .build();
+  }
+
+  private CodeGenerator codeGenerator() {
+    return switch (codeGen) {
+      case "none" -> new NoopCodeGenerator();
+      case "c" ->
+          new CCodeGenerator(
+              CCodeGeneratorParams.builder()
+                  .standard(cStandard)
+                  .mangleModuleName(cMangleModuleName)
+                  .build(),
+              System.out);
+      default -> throw new IllegalArgumentException("Unknown code generator: " + codeGen);
+    };
   }
 
   static String readCodeFromFile(String fileName) {
