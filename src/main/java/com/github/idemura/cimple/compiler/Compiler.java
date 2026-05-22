@@ -13,10 +13,7 @@ public class Compiler {
   private final ErrorConsumer errorConsumer;
   private final CodeGenerator codeGenerator;
 
-  public Compiler(
-      CompilerParams params,
-      ErrorConsumer errorConsumer,
-      CodeGenerator codeGenerator) {
+  public Compiler(CompilerParams params, ErrorConsumer errorConsumer, CodeGenerator codeGenerator) {
     this.params = params;
     this.debugOutput = new IndentWriter(params.debugOutput(), params.indent());
     this.errorConsumer = errorConsumer;

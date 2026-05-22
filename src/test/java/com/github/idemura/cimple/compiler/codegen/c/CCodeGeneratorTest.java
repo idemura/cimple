@@ -8,11 +8,14 @@ import com.github.idemura.cimple.compiler.InMemoryErrorConsumer;
 import org.junit.jupiter.api.Test;
 
 class CCodeGeneratorTest {
-  private static String compile(String code) {
-    var errorConsumer = new InMemoryErrorConsumer();
+  private final InMemoryErrorConsumer errorConsumer = new InMemoryErrorConsumer();
+  private final CCodeGeneratorParams.Builder codegenParamsBuilder = CCodeGeneratorParams.builder();
+
+  private String compile(String code) {
     var output = new StringBuilder();
+    var codegen = new CCodeGenerator(codegenParamsBuilder.build(), output);
     var compilerParams = CompilerParams.builder().build();
-    var compiler = new Compiler(compilerParams, errorConsumer, new CCodeGenerator(output));
+    var compiler = new Compiler(compilerParams, errorConsumer, codegen);
     assertTrue(compiler.compile("test.ci", code));
     assertEquals(0, errorConsumer.errorCount());
     return output.toString();
@@ -38,6 +41,27 @@ class CCodeGeneratorTest {
               int64_t x;
               int64_t y;
               char* name;
+            };
+            """));
+  }
+
+  @Test
+  void testGenerateRecordTypeWithoutModuleNameMangle() {
+    var code =
+        """
+        module test;
+        type record Point {
+          var x int;
+        }
+        """;
+    codegenParamsBuilder.mangleModuleName(false);
+    var output = compile(code);
+    assertTrue(output.contains("struct Point;"));
+    assertTrue(
+        output.contains(
+            """
+            struct Point {
+              int64_t x;
             };
             """));
   }

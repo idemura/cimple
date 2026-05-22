@@ -1,5 +1,6 @@
 package com.github.idemura.cimple.compiler.codegen.c;
 
+import com.github.idemura.cimple.compiler.Identifier;
 import com.github.idemura.cimple.compiler.IndentWriter;
 import com.github.idemura.cimple.compiler.ast.AstArrayType;
 import com.github.idemura.cimple.compiler.ast.AstBuiltinType;
@@ -18,9 +19,11 @@ import java.util.List;
 
 class CCodeGeneratorVisitor extends AstVisitor {
   private final IndentWriter out;
+  private final CCodeGeneratorParams params;
 
-  CCodeGeneratorVisitor(IndentWriter out) {
+  CCodeGeneratorVisitor(IndentWriter out, CCodeGeneratorParams params) {
     this.out = out;
+    this.params = params;
   }
 
   @Override
@@ -66,7 +69,7 @@ class CCodeGeneratorVisitor extends AstVisitor {
 
   private void emitRecordForwardDeclarations(List<AstRecordType> records) {
     for (var record : records) {
-      out.writeLine("struct %s;".formatted(cTypeName(record)));
+      out.writeLine("struct %s;".formatted(cTypeName(record.name())));
     }
     if (!records.isEmpty()) {
       out.writeLine("");
@@ -75,7 +78,7 @@ class CCodeGeneratorVisitor extends AstVisitor {
 
   private void emitRecordDefinitions(List<AstRecordType> records) {
     for (var record : records) {
-      var name = cTypeName(record);
+      var name = cTypeName(record.name());
       out.writeLine("struct %s {".formatted(name));
       out.indent();
       for (var field : record.fields()) {
@@ -92,14 +95,14 @@ class CCodeGeneratorVisitor extends AstVisitor {
       if (hasPayload(union)) {
         emitTaggedUnionDefinition(union);
       } else {
-        emitEnumDefinition(cTypeName(union), union);
+        emitEnumDefinition(cTypeName(union.name()), union);
       }
       out.writeLine("");
     }
   }
 
   private void emitTaggedUnionDefinition(AstUnionType union) {
-    var name = cTypeName(union);
+    var name = cTypeName(union.name());
     emitEnumDefinition(name + "_tag_", union);
     out.writeLine("struct %s {".formatted(name));
     out.indent();
@@ -121,7 +124,7 @@ class CCodeGeneratorVisitor extends AstVisitor {
     out.writeLine("enum %s {".formatted(enumName));
     out.indent();
     for (var variant : union.variants()) {
-      out.writeLine("%s_%s,".formatted(cTypeName(union), variant.tag()));
+      out.writeLine("%s_%s,".formatted(cTypeName(union.name()), variant.tag()));
     }
     out.unindent();
     out.writeLine("};");
@@ -136,11 +139,11 @@ class CCodeGeneratorVisitor extends AstVisitor {
     return false;
   }
 
-  private static String cType(AstType type) {
+  private String cType(AstType type) {
     return switch (type) {
       case AstBuiltinType builtinType -> cBuiltinType(builtinType);
       case AstStringType ignored -> "char*";
-      case AstRecordType recordType -> "struct " + cTypeName(recordType);
+      case AstRecordType recordType -> "struct " + cTypeName(recordType.name());
       case AstPointerType pointerType -> cType(pointerType.baseType()) + "*";
       case AstArrayType ignored ->
           throw new UnsupportedOperationException("C array type emission is not implemented yet");
@@ -149,8 +152,8 @@ class CCodeGeneratorVisitor extends AstVisitor {
               "C function type emission is not implemented yet");
       case AstUnionType unionType ->
           hasPayload(unionType)
-              ? "struct " + cTypeName(unionType) + "_TaggedUnion"
-              : "enum " + cTypeName(unionType);
+              ? "struct " + cTypeName(unionType.name()) + "_TaggedUnion"
+              : "enum " + cTypeName(unionType.name());
       default -> throw new UnsupportedOperationException("Unsupported C type: " + type);
     };
   }
@@ -186,11 +189,10 @@ class CCodeGeneratorVisitor extends AstVisitor {
     throw new UnsupportedOperationException("Unsupported builtin C type: " + type);
   }
 
-  private static String cTypeName(AstRecordType recordType) {
-    return "%s__%s".formatted(recordType.name().moduleName(), recordType.name().typeName());
-  }
-
-  private static String cTypeName(AstUnionType unionType) {
-    return "%s__%s".formatted(unionType.name().moduleName(), unionType.name().typeName());
+  private String cTypeName(Identifier name) {
+    if (params.mangleModuleName()) {
+      return "%s__%s".formatted(name.moduleName(), name.typeName());
+    }
+    return name.typeName();
   }
 }
