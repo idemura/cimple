@@ -26,8 +26,10 @@ class CCodeGeneratorVisitor extends AstVisitor {
   @Override
   protected void visit(AstModule node) {
     var records = collectRecords(node);
+    var unions = collectUnions(node);
     emitRecordForwardDeclarations(records);
     emitRecordDefinitions(records);
+    emitUnionDefinitions(unions);
     // TODO: Emit global variables.
     // TODO: Emit functions.
   }
@@ -50,6 +52,16 @@ class CCodeGeneratorVisitor extends AstVisitor {
       }
     }
     return records;
+  }
+
+  private static List<AstUnionType> collectUnions(AstModule module) {
+    var unions = new ArrayList<AstUnionType>();
+    for (var definition : module.definitions()) {
+      if (definition instanceof AstUnionType unionType) {
+        unions.add(unionType);
+      }
+    }
+    return unions;
   }
 
   private void emitRecordForwardDeclarations(List<AstRecordType> records) {
@@ -75,6 +87,55 @@ class CCodeGeneratorVisitor extends AstVisitor {
     }
   }
 
+  private void emitUnionDefinitions(List<AstUnionType> unions) {
+    for (var union : unions) {
+      if (hasPayload(union)) {
+        emitTaggedUnionDefinition(union);
+      } else {
+        emitEnumDefinition(cTypeName(union), union);
+      }
+      out.writeLine("");
+    }
+  }
+
+  private void emitTaggedUnionDefinition(AstUnionType union) {
+    var name = cTypeName(union);
+    emitEnumDefinition(name + "_tag_", union);
+    out.writeLine("struct %s {".formatted(name));
+    out.indent();
+    out.writeLine("enum %s_tag_ tag;".formatted(name));
+    out.writeLine("union {");
+    out.indent();
+    for (var variant : union.variants()) {
+      if (variant.valueType() != null) {
+        out.writeLine("%s %s;".formatted(cType(variant.valueType()), variant.tag()));
+      }
+    }
+    out.unindent();
+    out.writeLine("} u;");
+    out.unindent();
+    out.writeLine("};");
+  }
+
+  private void emitEnumDefinition(String enumName, AstUnionType union) {
+    out.writeLine("enum %s {".formatted(enumName));
+    out.indent();
+    for (var variant : union.variants()) {
+      out.writeLine("%s_%s,".formatted(cTypeName(union), variant.tag()));
+    }
+    out.unindent();
+    out.writeLine("};");
+  }
+
+  private static boolean hasPayload(AstUnionType union) {
+    for (var variant : union.variants()) {
+      if (variant.valueType() != null) {
+        return true;
+      }
+    }
+    return false;
+  }
+
   private static String cType(AstType type) {
     return switch (type) {
       case AstBuiltinType builtinType -> cBuiltinType(builtinType);
@@ -86,8 +147,10 @@ class CCodeGeneratorVisitor extends AstVisitor {
       case AstFunctionType ignored ->
           throw new UnsupportedOperationException(
               "C function type emission is not implemented yet");
-      case AstUnionType ignored ->
-          throw new UnsupportedOperationException("C union type emission is not implemented yet");
+      case AstUnionType unionType ->
+          hasPayload(unionType)
+              ? "struct " + cTypeName(unionType) + "_TaggedUnion"
+              : "enum " + cTypeName(unionType);
       default -> throw new UnsupportedOperationException("Unsupported C type: " + type);
     };
   }
@@ -125,5 +188,9 @@ class CCodeGeneratorVisitor extends AstVisitor {
 
   private static String cTypeName(AstRecordType recordType) {
     return "%s__%s".formatted(recordType.name().moduleName(), recordType.name().typeName());
+  }
+
+  private static String cTypeName(AstUnionType unionType) {
+    return "%s__%s".formatted(unionType.name().moduleName(), unionType.name().typeName());
   }
 }

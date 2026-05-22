@@ -11,7 +11,8 @@ class CCodeGeneratorTest {
   private static String compile(String code) {
     var errorConsumer = new InMemoryErrorConsumer();
     var output = new StringBuilder();
-    var compiler = new Compiler(new CompilerParams(), errorConsumer, new CCodeGenerator(output));
+    var compilerParams = CompilerParams.builder().build();
+    var compiler = new Compiler(compilerParams, errorConsumer, new CCodeGenerator(output));
     assertTrue(compiler.compile("test.ci", code));
     assertEquals(0, errorConsumer.errorCount());
     return output.toString();
@@ -29,7 +30,6 @@ class CCodeGeneratorTest {
         }
         """;
     var output = compile(code);
-    System.out.println(output);
     assertTrue(output.contains("struct test__Point;"));
     assertTrue(
         output.contains(
@@ -52,13 +52,69 @@ class CCodeGeneratorTest {
         }
         """;
     var output = compile(code);
-    System.out.println(output);
     assertTrue(output.contains("struct test__Node;"));
     assertTrue(
         output.contains(
             """
             struct test__Node {
               struct test__Node* next;
+            };
+            """));
+  }
+
+  @Test
+  void testGenerateDataLessUnionType() {
+    var code =
+        """
+        module test;
+        type union Color {
+          Red;
+          Green;
+          Blue;
+        }
+        """;
+    var output = compile(code);
+    assertTrue(
+        output.contains(
+            """
+            enum test__Color {
+              test__Color_Red,
+              test__Color_Green,
+              test__Color_Blue,
+            };
+            """));
+  }
+
+  @Test
+  void testGenerateTaggedUnionType() {
+    var code =
+        """
+        module test;
+        type union Maybe {
+          None;
+          Some(int);
+          Error(string);
+        }
+        """;
+    var output = compile(code);
+    assertTrue(
+        output.contains(
+            """
+            enum test__Maybe_tag_ {
+              test__Maybe_None,
+              test__Maybe_Some,
+              test__Maybe_Error,
+            };
+            """));
+    assertTrue(
+        output.contains(
+            """
+            struct test__Maybe {
+              enum test__Maybe_tag_ tag;
+              union {
+                int64_t Some;
+                char* Error;
+              } u;
             };
             """));
   }

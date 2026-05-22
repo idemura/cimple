@@ -13,7 +13,7 @@ import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.List;
 
-public class CliDriver extends CompilerParams {
+public class CliDriver {
   @Parameter() List<String> files = new ArrayList<>();
 
   @Parameter(names = {"--codegen"})
@@ -31,21 +31,6 @@ public class CliDriver extends CompilerParams {
   @Parameter(names = {"--indent"})
   int indent;
 
-  @Override
-  public int indent() {
-    return indent == 0 ? super.indent() : indent;
-  }
-
-  @Override
-  public boolean printTokens() {
-    return debug && printTokens;
-  }
-
-  @Override
-  public boolean printAst() {
-    return debug && printAst;
-  }
-
   CliDriver() {}
 
   void parseCmdLine(String[] args) {
@@ -57,7 +42,7 @@ public class CliDriver extends CompilerParams {
     var errorConsumer = new CliErrorConsumer();
     errorConsumer.enable(Mode.PRINT_LEVEL);
     errorConsumer.enable(Mode.PRINT_LOCATION);
-    var compiler = new Compiler(this, errorConsumer, new NoopCodeGenerator());
+    var compiler = new Compiler(compilerParams(), errorConsumer, new NoopCodeGenerator());
     for (var fileName : files) {
       var code = readCodeFromFile(fileName);
       if (!compiler.compile(fileName, code)) {
@@ -65,6 +50,14 @@ public class CliDriver extends CompilerParams {
       }
     }
     return success;
+  }
+
+  private CompilerParams compilerParams() {
+    return CompilerParams.builder()
+        .indent(indent == 0 ? 2 : indent)
+        .printTokens(debug && printTokens)
+        .printAst(debug && printAst)
+        .build();
   }
 
   static String readCodeFromFile(String fileName) {
