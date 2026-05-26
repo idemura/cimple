@@ -9,7 +9,8 @@ import org.junit.jupiter.api.Test;
 
 class CCodeGeneratorTest {
   private final InMemoryErrorConsumer errorConsumer = new InMemoryErrorConsumer();
-  private final CCodeGeneratorParams.Builder codegenParamsBuilder = CCodeGeneratorParams.builder();
+  private final CCodeGeneratorParams.Builder codegenParamsBuilder =
+      CCodeGeneratorParams.builder().outputPreamble(false);
 
   private String compile(String code) {
     var output = new StringBuilder();
@@ -33,16 +34,18 @@ class CCodeGeneratorTest {
         }
         """;
     var output = compile(code);
-    assertTrue(output.contains("struct test__Point;"));
-    assertTrue(
-        output.contains(
-            """
-            struct test__Point {
-              int64_t x;
-              int64_t y;
-              char* name;
-            };
-            """));
+    assertEquals(
+        """
+        struct test__Point;
+
+        struct test__Point {
+          int64_t x;
+          int64_t y;
+          char* name;
+        };
+
+        """,
+        output);
   }
 
   @Test
@@ -56,14 +59,16 @@ class CCodeGeneratorTest {
         """;
     codegenParamsBuilder.mangleModuleName(false);
     var output = compile(code);
-    assertTrue(output.contains("struct Point;"));
-    assertTrue(
-        output.contains(
-            """
-            struct Point {
-              int64_t x;
-            };
-            """));
+    assertEquals(
+        """
+        struct Point;
+
+        struct Point {
+          int64_t x;
+        };
+
+        """,
+        output);
   }
 
   @Test
@@ -76,14 +81,16 @@ class CCodeGeneratorTest {
         }
         """;
     var output = compile(code);
-    assertTrue(output.contains("struct test__Node;"));
-    assertTrue(
-        output.contains(
-            """
-            struct test__Node {
-              struct test__Node* next;
-            };
-            """));
+    assertEquals(
+        """
+        struct test__Node;
+
+        struct test__Node {
+          struct test__Node* next;
+        };
+
+        """,
+        output);
   }
 
   @Test
@@ -98,15 +105,16 @@ class CCodeGeneratorTest {
         }
         """;
     var output = compile(code);
-    assertTrue(
-        output.contains(
-            """
-            enum test__Color {
-              test__Color_Red,
-              test__Color_Green,
-              test__Color_Blue,
-            };
-            """));
+    assertEquals(
+        """
+        enum test__Color {
+          test__Color_Red,
+          test__Color_Green,
+          test__Color_Blue,
+        };
+
+        """,
+        output);
   }
 
   @Test
@@ -121,25 +129,22 @@ class CCodeGeneratorTest {
         }
         """;
     var output = compile(code);
-    assertTrue(
-        output.contains(
-            """
-            enum test__Maybe_tag_ {
-              test__Maybe_None,
-              test__Maybe_Some,
-              test__Maybe_Error,
-            };
-            """));
-    assertTrue(
-        output.contains(
-            """
-            struct test__Maybe {
-              enum test__Maybe_tag_ tag;
-              union {
-                int64_t Some;
-                char* Error;
-              } u;
-            };
-            """));
+    assertEquals(
+        """
+        enum test__Maybe_tag_ {
+          test__Maybe_None,
+          test__Maybe_Some,
+          test__Maybe_Error,
+        };
+        struct test__Maybe {
+          enum test__Maybe_tag_ tag;
+          union {
+            int64_t Some;
+            char* Error;
+          } u;
+        };
+
+        """,
+        output);
   }
 }

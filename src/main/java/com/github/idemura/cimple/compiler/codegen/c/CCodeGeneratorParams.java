@@ -1,9 +1,11 @@
 package com.github.idemura.cimple.compiler.codegen.c;
 
-public record CCodeGeneratorParams(CStandard standard, boolean mangleModuleName) {
+public record CCodeGeneratorParams(
+    CStandard standard, boolean mangleModuleName, boolean outputPreamble) {
   public static final class Builder {
     private CStandard standard = CStandard.C11;
     private boolean mangleModuleName = true;
+    private boolean outputPreamble = true;
 
     private Builder() {}
 
@@ -17,8 +19,13 @@ public record CCodeGeneratorParams(CStandard standard, boolean mangleModuleName)
       return this;
     }
 
+    public Builder outputPreamble(boolean outputPreamble) {
+      this.outputPreamble = outputPreamble;
+      return this;
+    }
+
     public CCodeGeneratorParams build() {
-      return new CCodeGeneratorParams(standard, mangleModuleName);
+      return new CCodeGeneratorParams(standard, mangleModuleName, outputPreamble);
     }
   }
 

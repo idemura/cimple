@@ -31,6 +31,11 @@ public class CliDriver {
       arity = 1)
   boolean cMangleModuleName = true;
 
+  @Parameter(
+      names = {"--c_output_preamble"},
+      arity = 1)
+  boolean cOutputPreamble = true;
+
   @Parameter(names = {"--debug"})
   boolean debug;
 
@@ -80,6 +85,7 @@ public class CliDriver {
               CCodeGeneratorParams.builder()
                   .standard(cStandard)
                   .mangleModuleName(cMangleModuleName)
+                  .outputPreamble(cOutputPreamble)
                   .build(),
               System.out);
       default -> throw new IllegalArgumentException("Unknown code generator: " + codeGen);

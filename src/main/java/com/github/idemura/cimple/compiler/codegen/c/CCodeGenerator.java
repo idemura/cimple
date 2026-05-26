@@ -15,9 +15,13 @@ public class CCodeGenerator extends CodeGenerator {
 
   @Override
   public void generateCode(AstModule module) {
-    emitPrologue();
+    if (params.outputPreamble()) {
+      emitPrologue();
+    }
     module.accept(new CCodeGeneratorVisitor(out, params));
-    emitEpilogue();
+    if (params.outputPreamble()) {
+      emitEpilogue();
+    }
   }
 
   private void emitPrologue() {

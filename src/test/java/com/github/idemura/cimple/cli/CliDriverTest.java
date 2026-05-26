@@ -14,11 +14,13 @@ class CliDriverTest {
           "--codegen", "c",
           "--c_standard", "C17",
           "--c_mangle_module_name", "false",
+          "--c_output_preamble", "false",
           "test.ci"
         });
     assertEquals("c", cli.codeGen);
     assertEquals(CStandard.C17, cli.cStandard);
     assertFalse(cli.cMangleModuleName);
+    assertFalse(cli.cOutputPreamble);
     assertEquals("test.ci", cli.files.get(0));
   }
 }
