@@ -142,7 +142,8 @@ class CCodeGeneratorVisitor extends AstVisitor {
           throw new UnsupportedOperationException(
               "C function type emission is not implemented yet");
       case AstUnionType unionType ->
-          "%s %s".formatted(unionType.hasPayload() ? "struct" : "enum", cTypeName(unionType.name()));
+          "%s %s"
+              .formatted(unionType.hasPayload() ? "struct" : "enum", cTypeName(unionType.name()));
       default -> throw new UnsupportedOperationException("Unsupported C type: " + type);
     };
   }

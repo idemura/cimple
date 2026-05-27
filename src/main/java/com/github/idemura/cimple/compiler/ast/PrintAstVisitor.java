@@ -222,9 +222,7 @@ public class PrintAstVisitor extends AstVisitor {
   protected void visit(AstNew node) {
     output.writeLine("NEW %s".formatted(node.type()));
     output.indent();
-    if (node.size() != null) {
-      node.size().accept(this);
-    }
+    node.acceptChildren(this);
     output.unindent();
   }
 

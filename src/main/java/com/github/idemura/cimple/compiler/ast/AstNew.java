@@ -1,8 +1,13 @@
 package com.github.idemura.cimple.compiler.ast;
 
+import static com.google.common.collect.ImmutableList.toImmutableList;
+
+import com.google.common.collect.ImmutableList;
+import java.util.List;
+
 public final class AstNew extends AstExpression {
   private AstTypeHolder type;
-  private AstExpression size;
+  private List<AstExpression> arguments;
 
   @Override
   public void accept(AstVisitor visitor) {
@@ -12,14 +17,14 @@ public final class AstNew extends AstExpression {
   @Override
   public void acceptChildren(AstVisitor visitor) {
     acceptSafe(type, visitor);
-    acceptSafe(size, visitor);
+    for (var argument : arguments) {
+      argument.accept(visitor);
+    }
   }
 
   @Override
   public AstExpression rewrite(AstExpressionRewriter rewriter) {
-    if (size != null) {
-      size = size.rewrite(rewriter);
-    }
+    arguments = arguments.stream().map(a -> a.rewrite(rewriter)).collect(toImmutableList());
     return rewriter.rewrite(this);
   }
 
@@ -32,15 +37,11 @@ public final class AstNew extends AstExpression {
     this.type = AstTypeHolder.of(type);
   }
 
-  public AstTypeHolder typeHolder() {
-    return type;
+  public List<AstExpression> arguments() {
+    return arguments;
   }
 
-  public AstExpression size() {
-    return size;
-  }
-
-  public void size(AstExpression size) {
-    this.size = size;
+  public void arguments(List<AstExpression> arguments) {
+    this.arguments = ImmutableList.copyOf(arguments);
   }
 }

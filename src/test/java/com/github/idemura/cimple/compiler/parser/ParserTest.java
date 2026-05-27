@@ -9,6 +9,7 @@ import com.github.idemura.cimple.compiler.ErrorConsumer;
 import com.github.idemura.cimple.compiler.Identifier;
 import com.github.idemura.cimple.compiler.InMemoryErrorConsumer;
 import com.github.idemura.cimple.compiler.ast.AstArrayAccess;
+import com.github.idemura.cimple.compiler.ast.AstArrayType;
 import com.github.idemura.cimple.compiler.ast.AstAssign;
 import com.github.idemura.cimple.compiler.ast.AstCall;
 import com.github.idemura.cimple.compiler.ast.AstCast;
@@ -31,6 +32,7 @@ import com.github.idemura.cimple.compiler.ast.AstReturn;
 import com.github.idemura.cimple.compiler.ast.AstUnionType;
 import com.github.idemura.cimple.compiler.ast.AstVariable;
 import com.google.common.collect.ImmutableList;
+import java.util.List;
 import org.junit.jupiter.api.Test;
 
 class ParserTest {
@@ -652,8 +654,8 @@ class ParserTest {
         """
         module test;
         function f() {
-          var x = new Duration;
-          var y = new Duration[5];
+          var x = new Duration();
+          var y = new Duration[](5);
           delete x;
         }
         """;
@@ -663,13 +665,13 @@ class ParserTest {
       var expr = ((AstLocal) statements.get(0)).variable().expression().value();
       var newExpr = (AstNew) expr;
       assertEquals(newTypeRef("Duration"), newExpr.type());
-      assertNull(newExpr.size());
+      assertEquals(List.of(), newExpr.arguments());
     }
     {
       var expr = ((AstLocal) statements.get(1)).variable().expression().value();
       var newExpr = (AstNew) expr;
-      assertEquals(newTypeRef("Duration"), newExpr.type());
-      assertEquals(AstNumberLiteral.of(5), newExpr.size());
+      assertEquals(new AstArrayType(newTypeRef("Duration")), newExpr.type());
+      assertEquals(List.of(AstNumberLiteral.of(5)), newExpr.arguments());
     }
     {
       var stmt = (AstDelete) statements.get(2);

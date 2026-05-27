@@ -44,6 +44,7 @@ import com.github.idemura.cimple.compiler.ast.AstVariable;
 import com.google.common.collect.ImmutableList;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.function.Function;
 
 // Parses the token stream and builds the AST. Semantic analysis runs later.
 public class Parser {
@@ -472,10 +473,7 @@ public class Parser {
     var expr = new AstNew();
     expr.location(takeKeyword(NEW));
     expr.type(parseTypeRef());
-    if (tokenizer.takeIf(LBRACKET)) {
-      expr.size(parseExpression());
-      take(RBRACKET);
-    }
+    expr.arguments(parseExpressionList());
     return expr;
   }
 
@@ -598,25 +596,20 @@ public class Parser {
     ref.location(current.location());
     tokenizer.step();
     AstType type = ref;
-    var suffixes = new ArrayList<TokenType>();
+    var suffixes = new ArrayList<Function<AstType, AstType>>();
     while (true) {
       if (tokenizer.takeIf(STAR)) {
-        suffixes.add(STAR);
-      } else if (tokenizer.current().is(LBRACKET) && tokenizer.next().is(RBRACKET)) {
+        suffixes.add(AstPointerType::new);
+      } else if (tokenizer.current().is(LBRACKET)) {
         tokenizer.step();
-        suffixes.add(LBRACKET);
         take(RBRACKET);
+        suffixes.add(AstArrayType::new);
       } else {
         break;
       }
     }
-    for (var i = suffixes.size() - 1; i >= 0; i--) {
-      type =
-          switch (suffixes.get(i)) {
-            case STAR -> new AstPointerType(type);
-            case LBRACKET -> new AstArrayType(type);
-            default -> throw new IllegalStateException("Unknown type suffix: " + suffixes.get(i));
-          };
+    while (!suffixes.isEmpty()) {
+      type = suffixes.removeLast().apply(type);
     }
     return type;
   }
