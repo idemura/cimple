@@ -92,7 +92,7 @@ class CCodeGeneratorVisitor extends AstVisitor {
 
   private void emitUnionDefinitions(List<AstUnionType> unions) {
     for (var union : unions) {
-      if (hasPayload(union)) {
+      if (union.hasPayload()) {
         emitTaggedUnionDefinition(union);
       } else {
         emitEnumDefinition(cTypeName(union.name()), union);
@@ -130,15 +130,6 @@ class CCodeGeneratorVisitor extends AstVisitor {
     out.writeLine("};");
   }
 
-  private static boolean hasPayload(AstUnionType union) {
-    for (var variant : union.variants()) {
-      if (variant.valueType() != null) {
-        return true;
-      }
-    }
-    return false;
-  }
-
   private String cType(AstType type) {
     return switch (type) {
       case AstBuiltinType builtinType -> cBuiltinType(builtinType);
@@ -151,7 +142,7 @@ class CCodeGeneratorVisitor extends AstVisitor {
           throw new UnsupportedOperationException(
               "C function type emission is not implemented yet");
       case AstUnionType unionType ->
-          "%s %s".formatted(hasPayload(unionType) ? "struct" : "enum", cTypeName(unionType.name()));
+          "%s %s".formatted(unionType.hasPayload() ? "struct" : "enum", cTypeName(unionType.name()));
       default -> throw new UnsupportedOperationException("Unsupported C type: " + type);
     };
   }

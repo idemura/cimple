@@ -79,4 +79,13 @@ public final class AstUnionType extends AstType {
   public void variants(List<Variant> variants) {
     this.variants = ImmutableList.copyOf(variants);
   }
+
+  public boolean hasPayload() {
+    for (var variant : variants) {
+      if (variant.valueType() != null) {
+        return true;
+      }
+    }
+    return false;
+  }
 }
