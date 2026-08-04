@@ -71,7 +71,7 @@ public class Tokenizer {
           case '~' -> tokens.add(takeSingleCharToken(context, TILDE));
           case ',' -> tokens.add(takeSingleCharToken(context, COMMA));
           case '.' -> tokens.add(takeSingleCharToken(context, PERIOD));
-          case '=' -> tokens.add(takeSingleCharToken(context, ASSIGN));
+          case '=' -> tokens.add(takeSuffixToken(context, ASSIGN, CMP_EQ));
           case ';' -> tokens.add(takeSingleCharToken(context, SEMICOLON));
           case '+' -> tokens.add(takeSuffixToken(context, PLUS, PLUS_ASSIGN));
           case '-' -> tokens.add(takeSuffixToken(context, MINUS, MINUS_ASSIGN));
