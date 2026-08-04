@@ -436,6 +436,55 @@ class ParserTest {
   }
 
   @Test
+  void testComparisonExpressionParsing() {
+    var code =
+        """
+        module test;
+        function f() {
+          var x = 1 < 2;
+          var x = 1 <= 2;
+          var x = 1 > 2;
+          var x = 1 >= 2;
+        }
+        """;
+    var module = parseCode(code, makeErrorConsumer());
+    var statements = module.findFunction("f").block().statements();
+    int i = 0;
+    {
+      var expr = ((AstLocal) statements.get(i++)).variable().expression().value();
+      var call = (AstCall) expr;
+      assertEquals(newBuiltinEntityRef("<"), call.function());
+      assertEquals(2, call.arguments().size());
+      assertEquals(AstNumberLiteral.of(1), call.arguments().get(0));
+      assertEquals(AstNumberLiteral.of(2), call.arguments().get(1));
+    }
+    {
+      var expr = ((AstLocal) statements.get(i++)).variable().expression().value();
+      var call = (AstCall) expr;
+      assertEquals(newBuiltinEntityRef("<="), call.function());
+      assertEquals(2, call.arguments().size());
+      assertEquals(AstNumberLiteral.of(1), call.arguments().get(0));
+      assertEquals(AstNumberLiteral.of(2), call.arguments().get(1));
+    }
+    {
+      var expr = ((AstLocal) statements.get(i++)).variable().expression().value();
+      var call = (AstCall) expr;
+      assertEquals(newBuiltinEntityRef(">"), call.function());
+      assertEquals(2, call.arguments().size());
+      assertEquals(AstNumberLiteral.of(1), call.arguments().get(0));
+      assertEquals(AstNumberLiteral.of(2), call.arguments().get(1));
+    }
+    {
+      var expr = ((AstLocal) statements.get(i++)).variable().expression().value();
+      var call = (AstCall) expr;
+      assertEquals(newBuiltinEntityRef(">="), call.function());
+      assertEquals(2, call.arguments().size());
+      assertEquals(AstNumberLiteral.of(1), call.arguments().get(0));
+      assertEquals(AstNumberLiteral.of(2), call.arguments().get(1));
+    }
+  }
+
+  @Test
   void testInvokeExpression() {
     // We allow `(foo)()` because there is no ambiguity with type casts in Ci.
     // Casts use the dedicated form `[<expression> type <cast-type>]`.

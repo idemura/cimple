@@ -86,4 +86,37 @@ class TokenizerTest {
             new Token(SEMICOLON, null, new Location(5, 7))),
         tokenizer.tokenList());
   }
+
+  @Test
+  void testComparisonTokens() {
+    var code =
+        """
+        a < b;
+        a <= b;
+        a > b;
+        a >= b;
+        """;
+    var errorConsumer = new InMemoryErrorConsumer();
+    var tokenizer = new Tokenizer(errorConsumer);
+    tokenizer.split(code, null);
+    assertEquals(
+        ImmutableList.of(
+            new Token(IDENTIFIER, "a", new Location(1, 1)),
+            new Token(CMP_LT, null, new Location(1, 3)),
+            new Token(IDENTIFIER, "b", new Location(1, 5)),
+            new Token(SEMICOLON, null, new Location(1, 6)),
+            new Token(IDENTIFIER, "a", new Location(2, 1)),
+            new Token(CMP_LE, null, new Location(2, 3)),
+            new Token(IDENTIFIER, "b", new Location(2, 6)),
+            new Token(SEMICOLON, null, new Location(2, 7)),
+            new Token(IDENTIFIER, "a", new Location(3, 1)),
+            new Token(CMP_GT, null, new Location(3, 3)),
+            new Token(IDENTIFIER, "b", new Location(3, 5)),
+            new Token(SEMICOLON, null, new Location(3, 6)),
+            new Token(IDENTIFIER, "a", new Location(4, 1)),
+            new Token(CMP_GE, null, new Location(4, 3)),
+            new Token(IDENTIFIER, "b", new Location(4, 6)),
+            new Token(SEMICOLON, null, new Location(4, 7))),
+        tokenizer.tokenList());
+  }
 }

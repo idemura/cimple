@@ -61,25 +61,25 @@ public class Tokenizer {
       } else {
         switch (c) {
           case '#' -> skipComment(context);
-          case '(' -> tokens.add(take1CharToken(context, LPAREN));
-          case ')' -> tokens.add(take1CharToken(context, RPAREN));
-          case '[' -> tokens.add(take1CharToken(context, LBRACKET));
-          case ']' -> tokens.add(take1CharToken(context, RBRACKET));
-          case '{' -> tokens.add(take1CharToken(context, LCURLY));
-          case '}' -> tokens.add(take1CharToken(context, RCURLY));
-          case ':' -> tokens.add(take1CharToken(context, COLON));
-          case '~' -> tokens.add(take1CharToken(context, TILDE));
-          case ',' -> tokens.add(take1CharToken(context, COMMA));
-          case '.' -> tokens.add(take1CharToken(context, PERIOD));
-          case '=' -> tokens.add(take1CharToken(context, ASSIGN));
-          case ';' -> tokens.add(take1CharToken(context, SEMICOLON));
-          case '+' -> tokens.add(takeAssignmentOrSingleToken(context, PLUS_ASSIGN, PLUS));
-          case '-' -> tokens.add(takeAssignmentOrSingleToken(context, MINUS_ASSIGN, MINUS));
-          case '*' -> tokens.add(takeAssignmentOrSingleToken(context, STAR_ASSIGN, STAR));
-          case '/' -> tokens.add(takeAssignmentOrSingleToken(context, SLASH_ASSIGN, SLASH));
-          case '%' -> tokens.add(takeAssignmentOrSingleToken(context, PERCENT_ASSIGN, PERCENT));
-          case '<' -> tokens.add(take1CharToken(context, CMP_GT));
-          case '>' -> tokens.add(take1CharToken(context, CMP_LT));
+          case '(' -> tokens.add(takeSingleCharToken(context, LPAREN));
+          case ')' -> tokens.add(takeSingleCharToken(context, RPAREN));
+          case '[' -> tokens.add(takeSingleCharToken(context, LBRACKET));
+          case ']' -> tokens.add(takeSingleCharToken(context, RBRACKET));
+          case '{' -> tokens.add(takeSingleCharToken(context, LCURLY));
+          case '}' -> tokens.add(takeSingleCharToken(context, RCURLY));
+          case ':' -> tokens.add(takeSingleCharToken(context, COLON));
+          case '~' -> tokens.add(takeSingleCharToken(context, TILDE));
+          case ',' -> tokens.add(takeSingleCharToken(context, COMMA));
+          case '.' -> tokens.add(takeSingleCharToken(context, PERIOD));
+          case '=' -> tokens.add(takeSingleCharToken(context, ASSIGN));
+          case ';' -> tokens.add(takeSingleCharToken(context, SEMICOLON));
+          case '+' -> tokens.add(takeSuffixToken(context, PLUS, PLUS_ASSIGN));
+          case '-' -> tokens.add(takeSuffixToken(context, MINUS, MINUS_ASSIGN));
+          case '*' -> tokens.add(takeSuffixToken(context, STAR, STAR_ASSIGN));
+          case '/' -> tokens.add(takeSuffixToken(context, SLASH, SLASH_ASSIGN));
+          case '%' -> tokens.add(takeSuffixToken(context, PERCENT, PERCENT_ASSIGN));
+          case '<' -> tokens.add(takeSuffixToken(context, CMP_LT, CMP_LE));
+          case '>' -> tokens.add(takeSuffixToken(context, CMP_GT, CMP_GE));
           case '"' -> tokens.add(takeString(context));
           default ->
               throw errorConsumer.fatalAt(currentLocation(context), "Invalid character: %s", c);
@@ -191,21 +191,20 @@ public class Tokenizer {
     return new Token(STRING, context.code.substring(first + 1, context.index - 1), location);
   }
 
-  private Token take1CharToken(SplitContext context, TokenType tokenType) {
+  private Token takeSingleCharToken(SplitContext context, TokenType tokenType) {
     var location = currentLocation(context);
     next(context);
     return new Token(tokenType, null, location);
   }
 
-  private Token takeAssignmentOrSingleToken(
-      SplitContext context, TokenType assignmentType, TokenType singleType) {
+  private Token takeSuffixToken(SplitContext context, TokenType baseToken, TokenType suffixToken) {
     var location = currentLocation(context);
     next(context);
     if (context.index < context.code.length() && context.code.charAt(context.index) == '=') {
       next(context);
-      return new Token(assignmentType, null, location);
+      return new Token(suffixToken, null, location);
     }
-    return new Token(singleType, null, location);
+    return new Token(baseToken, null, location);
   }
 
   private Location currentLocation(SplitContext context) {

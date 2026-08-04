@@ -30,7 +30,9 @@ public enum TokenType {
   CMP_EQ("=="),
   CMP_NE("!="),
   CMP_LT("<"),
-  CMP_GT(">");
+  CMP_GT(">"),
+  CMP_LE("<="),
+  CMP_GE(">=");
 
   private final String symbolName;
 

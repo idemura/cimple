@@ -266,7 +266,7 @@ public class Parser {
     if (keywordOrNull(tokenizer.current()) == VAR) {
       stmt.init(parseVariable(true));
     }
-    // The loop condition is required, even for an infinite loop such as `for ; true; ...`.
+    // The loop condition is required, even for an infinite loop such as `for true ...`.
     stmt.condition(parseExpressionHolder());
     if (tokenizer.takeIf(SEMICOLON)) {
       stmt.increment(parseExpressionHolder());
@@ -375,7 +375,7 @@ public class Parser {
     if (expr == null) {
       return null;
     }
-    while (tokenizer.current().is(CMP_LT) || tokenizer.current().is(CMP_GT)) {
+    while (isComparisonOperator(tokenizer.current().type())) {
       var operator = tokenizer.take();
       var m = parseAdditiveChain();
       if (m == null) {
@@ -388,6 +388,10 @@ public class Parser {
       expr = call;
     }
     return expr;
+  }
+
+  private static boolean isComparisonOperator(TokenType type) {
+    return type == CMP_LT || type == CMP_GT || type == CMP_LE || type == CMP_GE;
   }
 
   private AstExpression parseAdditiveChain() {
