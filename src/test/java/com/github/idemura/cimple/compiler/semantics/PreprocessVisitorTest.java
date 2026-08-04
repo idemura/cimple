@@ -3,6 +3,7 @@ package com.github.idemura.cimple.compiler.semantics;
 import static com.github.idemura.cimple.compiler.ast.AstUtils.*;
 import static org.junit.jupiter.api.Assertions.*;
 
+import com.github.idemura.cimple.compiler.ast.AstArrayType;
 import com.github.idemura.cimple.compiler.ast.AstCall;
 import com.github.idemura.cimple.compiler.ast.AstBuiltinType;
 import com.github.idemura.cimple.compiler.ast.AstDefer;
@@ -11,6 +12,7 @@ import com.github.idemura.cimple.compiler.ast.AstFieldAccess;
 import com.github.idemura.cimple.compiler.ast.AstFor;
 import com.github.idemura.cimple.compiler.ast.AstIf;
 import com.github.idemura.cimple.compiler.ast.AstLocal;
+import com.github.idemura.cimple.compiler.ast.AstNew;
 import com.github.idemura.cimple.compiler.ast.AstRecordType;
 import com.github.idemura.cimple.compiler.ast.AstReturn;
 import com.github.idemura.cimple.compiler.parser.Keyword;
@@ -255,6 +257,24 @@ class PreprocessVisitorTest extends AbstractSemanticsTest {
     assertEquals(
         newBuiltinTypeRef("float64"),
         ((AstLocal) module.findFunction("f").block().statements().get(0)).variable().type());
+  }
+
+  @Test
+  void testNormalizeNewArrayTypeAlias() {
+    var code =
+        """
+        module test;
+        function f() {
+          var a = new int[](2);
+        }
+        """;
+    var module = parseCode(code);
+    module.accept(new PreprocessVisitor(reservedWords, errorConsumer));
+    assertEquals(List.of(), errorConsumer.errors());
+
+    var local = (AstLocal) module.findFunction("f").block().statements().get(0);
+    var newExpr = (AstNew) local.variable().expression().value();
+    assertEquals(new AstArrayType(newBuiltinTypeRef("int64")), newExpr.type());
   }
 
   @Test

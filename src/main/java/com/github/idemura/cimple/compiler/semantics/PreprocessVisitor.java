@@ -21,6 +21,7 @@ import com.github.idemura.cimple.compiler.ast.AstFunctionHeader;
 import com.github.idemura.cimple.compiler.ast.AstFunctionType;
 import com.github.idemura.cimple.compiler.ast.AstLocal;
 import com.github.idemura.cimple.compiler.ast.AstModule;
+import com.github.idemura.cimple.compiler.ast.AstNew;
 import com.github.idemura.cimple.compiler.ast.AstNullLiteral;
 import com.github.idemura.cimple.compiler.ast.AstNumberLiteral;
 import com.github.idemura.cimple.compiler.ast.AstRecordType;
@@ -34,6 +35,7 @@ import java.util.HashMap;
 class PreprocessVisitor extends AstExpressionRewriteVisitor {
   private final ReservedWords reservedWords;
   private final ErrorConsumer errorConsumer;
+  private final NormalizeTypeNameVisitor normalizeTypeNameVisitor = new NormalizeTypeNameVisitor();
 
   PreprocessVisitor(ReservedWords reservedWords, ErrorConsumer errorConsumer) {
     super(new ExpressionRewriter(reservedWords, errorConsumer));
@@ -120,16 +122,7 @@ class PreprocessVisitor extends AstExpressionRewriteVisitor {
 
   @Override
   protected void visit(AstTypeRef node) {
-    switch (node.name().typeName()) {
-      case "int":
-        node.name(AstBuiltinType.INT64.name());
-        break;
-      case "float":
-        node.name(AstBuiltinType.FLOAT64.name());
-        break;
-      default:
-        break;
-    }
+    normalizeTypeNameVisitor.normalize(node);
     super.visit(node);
   }
 
@@ -184,6 +177,7 @@ class PreprocessVisitor extends AstExpressionRewriteVisitor {
   private static class ExpressionRewriter extends AstExpressionRewriter {
     private final ReservedWords reservedWords;
     private final ErrorConsumer errorConsumer;
+    private final NormalizeTypeNameVisitor normalizeTypeNameVisitor = new NormalizeTypeNameVisitor();
 
     ExpressionRewriter(ReservedWords reservedWords, ErrorConsumer errorConsumer) {
       this.reservedWords = reservedWords;
@@ -215,6 +209,12 @@ class PreprocessVisitor extends AstExpressionRewriteVisitor {
         // function using the receiver object's type.
         fieldAccess.method(true);
       }
+      return node;
+    }
+
+    @Override
+    public AstExpression rewrite(AstNew node) {
+      normalizeTypeNameVisitor.normalize(node.type());
       return node;
     }
 
