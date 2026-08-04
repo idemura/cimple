@@ -9,11 +9,13 @@ import com.github.idemura.cimple.compiler.Location;
 import com.github.idemura.cimple.compiler.ast.AstAssign;
 import com.github.idemura.cimple.compiler.ast.AstBoolLiteral;
 import com.github.idemura.cimple.compiler.ast.AstBuiltinType;
+import com.github.idemura.cimple.compiler.ast.AstCall;
 import com.github.idemura.cimple.compiler.ast.AstCompoundAssign;
 import com.github.idemura.cimple.compiler.ast.AstEntityRef;
 import com.github.idemura.cimple.compiler.ast.AstExpression;
 import com.github.idemura.cimple.compiler.ast.AstExpressionRewriteVisitor;
 import com.github.idemura.cimple.compiler.ast.AstExpressionRewriter;
+import com.github.idemura.cimple.compiler.ast.AstFieldAccess;
 import com.github.idemura.cimple.compiler.ast.AstFunction;
 import com.github.idemura.cimple.compiler.ast.AstFunctionHeader;
 import com.github.idemura.cimple.compiler.ast.AstFunctionType;
@@ -202,6 +204,16 @@ class PreprocessVisitor extends AstExpressionRewriteVisitor {
       if (node != root()) {
         errorConsumer.errorAt(
             node.location(), "Assignment is only allowed at the root of an expression");
+      }
+      return node;
+    }
+
+    @Override
+    public AstExpression rewrite(AstCall node) {
+      if (node.function() instanceof AstFieldAccess fieldAccess) {
+        // Method call syntax starts as field access; later resolution binds it to a receiver
+        // function using the receiver object's type.
+        fieldAccess.method(true);
       }
       return node;
     }

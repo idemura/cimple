@@ -7,6 +7,7 @@ import com.github.idemura.cimple.compiler.Identifier;
 import com.github.idemura.cimple.compiler.ast.AstBuiltinType;
 import com.github.idemura.cimple.compiler.ast.AstCall;
 import com.github.idemura.cimple.compiler.ast.AstEntityRef;
+import com.github.idemura.cimple.compiler.ast.AstFieldAccess;
 import com.github.idemura.cimple.compiler.ast.AstLocal;
 import com.github.idemura.cimple.compiler.ast.AstStringType;
 import java.util.List;
@@ -118,7 +119,7 @@ class CallResolutionTest extends AbstractSemanticsTest {
           return this.seconds * 1000;
         }
         function f(d Duration) {
-          return d:toMillis();
+          return d.toMillis();
         }
         """;
     var module = parseCode(code);
@@ -140,6 +141,31 @@ class CallResolutionTest extends AbstractSemanticsTest {
       var function = module.findReceiverFunction("Duration", "toMillis");
       assertEquals(newRecordType("test", "Duration"), function.header().receiverType());
     }
+  }
+
+  @Test
+  void testFunctionValueCallResolution() {
+    var code =
+        """
+        module test;
+        type function IntFn(x int) string;
+        type record Holder {
+          var func_ptr IntFn;
+        }
+        function f(h Holder) {
+          return h.func_ptr.call(5);
+        }
+        """;
+    var module = parseCode(code);
+    var sa = new SemanticAnalyzer(errorConsumer);
+    sa.analyze(module);
+    assertEquals(List.of(), errorConsumer.errors());
+
+    var call = (AstCall) extractReturnExpression(module.findFunction("f"));
+    var function = (AstFieldAccess) call.function();
+    assertEquals("func_ptr", function.fieldName());
+    assertFalse(function.method());
+    assertEquals(AstStringType.STRING, call.type());
   }
 
   @Test

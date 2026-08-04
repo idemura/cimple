@@ -26,7 +26,6 @@ import com.github.idemura.cimple.compiler.ast.AstIf;
 import com.github.idemura.cimple.compiler.ast.AstLocal;
 import com.github.idemura.cimple.compiler.ast.AstNew;
 import com.github.idemura.cimple.compiler.ast.AstNumberLiteral;
-import com.github.idemura.cimple.compiler.ast.AstReceiverLookup;
 import com.github.idemura.cimple.compiler.ast.AstRecordType;
 import com.github.idemura.cimple.compiler.ast.AstReturn;
 import com.github.idemura.cimple.compiler.ast.AstUnionType;
@@ -494,9 +493,9 @@ class ParserTest {
         module test;
         function f() {
           var x = foo.bar;
-          var x = foo:bar;
+          var x = foo.bar();
           var x = foo[1];
-          var x = foo.bar(1, 2)[3]:baz;
+          var x = foo.bar(1, 2)[3].baz();
         }
         """;
     var module = parseCode(code, makeErrorConsumer());
@@ -507,12 +506,15 @@ class ParserTest {
       var field = (AstFieldAccess) expr;
       assertEquals(newEntityRef("foo"), field.object());
       assertEquals("bar", field.fieldName());
+      assertFalse(field.method());
     }
     {
       var expr = ((AstLocal) statements.get(i++)).variable().expression().value();
-      var receiverLookup = (AstReceiverLookup) expr;
-      assertEquals(newEntityRef("foo"), receiverLookup.receiver());
-      assertEquals("bar", receiverLookup.functionName());
+      var call = (AstCall) expr;
+      var field = (AstFieldAccess) call.function();
+      assertEquals(newEntityRef("foo"), field.object());
+      assertEquals("bar", field.fieldName());
+      assertFalse(field.method());
     }
     {
       var expr = ((AstLocal) statements.get(i++)).variable().expression().value();
@@ -522,10 +524,12 @@ class ParserTest {
     }
     {
       var expr = ((AstLocal) statements.get(i++)).variable().expression().value();
-      var receiverLookup = (AstReceiverLookup) expr;
-      assertEquals("baz", receiverLookup.functionName());
+      var receiverCall = (AstCall) expr;
+      var receiverField = (AstFieldAccess) receiverCall.function();
+      assertEquals("baz", receiverField.fieldName());
+      assertFalse(receiverField.method());
       {
-        var index = (AstArrayAccess) receiverLookup.receiver();
+        var index = (AstArrayAccess) receiverField.object();
         assertEquals(AstNumberLiteral.of(3), index.index());
         {
           var call = (AstCall) index.array();

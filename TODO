@@ -1,1 +1,6 @@
-* Function overload: different number of arguments or only differ on the last parameter type(?).
+* Lambdas: function (x, y) {}
+* Function without body declaration (external): function c_func(s string);
+* Imports
+* Exports
+* For each loop
+

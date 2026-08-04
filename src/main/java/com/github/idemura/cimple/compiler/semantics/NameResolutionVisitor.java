@@ -21,7 +21,6 @@ import com.github.idemura.cimple.compiler.ast.AstFunctionType;
 import com.github.idemura.cimple.compiler.ast.AstLocal;
 import com.github.idemura.cimple.compiler.ast.AstModule;
 import com.github.idemura.cimple.compiler.ast.AstPointerType;
-import com.github.idemura.cimple.compiler.ast.AstReceiverLookup;
 import com.github.idemura.cimple.compiler.ast.AstRecordType;
 import com.github.idemura.cimple.compiler.ast.AstTypeHolder;
 import com.github.idemura.cimple.compiler.ast.AstTypeRef;
@@ -179,6 +178,9 @@ public class NameResolutionVisitor extends AstExpressionRewriteVisitor {
 
     @Override
     public AstExpression rewrite(AstFieldAccess node) {
+      if (node.method()) {
+        return node;
+      }
       var objectType = checkNotNull(node.object().type());
       if (!(objectType instanceof AstRecordType recordType)) {
         errorConsumer.errorAt(
@@ -203,8 +205,8 @@ public class NameResolutionVisitor extends AstExpressionRewriteVisitor {
     public AstExpression rewrite(AstCall node) {
       // Callee and argument expressions have already been rewritten by AstCall.acceptRewriter.
       var function = node.function();
-      if (function instanceof AstReceiverLookup receiverLookup) {
-        resolveReceiverCall(node, receiverLookup);
+      if (function instanceof AstFieldAccess fieldAccess && fieldAccess.method()) {
+        resolveReceiverCall(node, fieldAccess);
       }
       function = node.function();
       // Builtin calls are selected here, once argument expressions are available.
@@ -242,36 +244,41 @@ public class NameResolutionVisitor extends AstExpressionRewriteVisitor {
       operatorRef.entity(function);
     }
 
-    private void resolveReceiverCall(AstCall node, AstReceiverLookup receiverLookup) {
-      var receiverType = receiverLookup.receiver().type();
+    private void resolveReceiverCall(AstCall node, AstFieldAccess fieldAccess) {
+      var receiverType = fieldAccess.object().type();
       checkState(receiverType != null);
+      if (receiverType instanceof AstFunctionType && fieldAccess.fieldName().equals("call")) {
+        // Function values reserve `.call(...)` as explicit invocation syntax.
+        node.function(fieldAccess.object());
+        return;
+      }
       if (receiverType == AstBuiltinType.VOID) {
         errorConsumer.errorAt(
-            receiverLookup.location(),
+            fieldAccess.location(),
             "Cannot resolve receiver function '%s' for null receiver",
-            receiverLookup.functionName());
+            fieldAccess.fieldName());
         return;
       }
       if (receiverType instanceof AstPointerType) {
         errorConsumer.errorAt(
-            receiverLookup.location(), "Receiver of pointer is not allowed", receiverType.name());
+            fieldAccess.location(), "Receiver of pointer is not allowed", receiverType.name());
         return;
       }
-      var receiverFunctionName = receiverType.name().withEntity(receiverLookup.functionName());
+      var receiverFunctionName = receiverType.name().withEntity(fieldAccess.fieldName());
       var function = nameMap.lookupReceiverFunction(receiverFunctionName);
       if (function == null) {
         errorConsumer.errorAt(
-            receiverLookup.location(), "Undefined receiver function: '%s'", receiverFunctionName);
+            fieldAccess.location(), "Undefined receiver function: '%s'", receiverFunctionName);
         return;
       }
 
       var functionRef = new AstEntityRef();
       functionRef.name(function.name());
       functionRef.entity(function);
-      functionRef.location(receiverLookup.location());
+      functionRef.location(fieldAccess.location());
 
       var arguments = new ArrayList<>(node.arguments());
-      arguments.add(function.header().receiverIndex(), receiverLookup.receiver());
+      arguments.add(function.header().receiverIndex(), fieldAccess.object());
       node.arguments(arguments);
       node.function(functionRef);
     }

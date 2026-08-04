@@ -32,7 +32,6 @@ import com.github.idemura.cimple.compiler.ast.AstModule;
 import com.github.idemura.cimple.compiler.ast.AstNew;
 import com.github.idemura.cimple.compiler.ast.AstNumberLiteral;
 import com.github.idemura.cimple.compiler.ast.AstPointerType;
-import com.github.idemura.cimple.compiler.ast.AstReceiverLookup;
 import com.github.idemura.cimple.compiler.ast.AstRecordType;
 import com.github.idemura.cimple.compiler.ast.AstReturn;
 import com.github.idemura.cimple.compiler.ast.AstStatement;
@@ -445,11 +444,6 @@ public class Parser {
         fieldAccess.object(expr);
         fieldAccess.fieldName(take(IDENTIFIER).value());
         expr = fieldAccess;
-      } else if (tokenizer.takeIf(COLON)) {
-        var receiverLookup = new AstReceiverLookup();
-        receiverLookup.receiver(expr);
-        receiverLookup.functionName(take(IDENTIFIER).value());
-        expr = receiverLookup;
       } else if (tokenizer.takeIf(LBRACKET)) {
         var arrayAccess = new AstArrayAccess();
         arrayAccess.array(expr);
@@ -538,7 +532,7 @@ public class Parser {
       return false;
     } else {
       throw errorConsumer.fatalAt(
-          tokenizer.currentLocation(), "Invalid function call: : or ) expected");
+          tokenizer.currentLocation(), "Invalid function call: , or ) expected");
     }
   }
 

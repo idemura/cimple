@@ -61,10 +61,6 @@ public class AstExpressionRewriter {
     return node;
   }
 
-  public AstExpression rewrite(AstReceiverLookup node) {
-    return node;
-  }
-
   public AstExpression rewrite(AstCast node) {
     return node;
   }

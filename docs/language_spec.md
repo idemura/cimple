@@ -177,7 +177,7 @@ From highest to lowest:
 | Operators                 | Associativity |
 |---------------------------|---------------|
 | `(e)` `[e type t]`        | Left-to-right |
-| `new` `.` `:` `[]` `f(x)` | Left-to-right |
+| `new` `.` `[]` `f(x)`     | Left-to-right |
 | `*` `/` `%`               | Left-to-right |
 | `+` `-`                   | Left-to-right |
 | `<` `>` `>=` `<=`         | Left-to-right |

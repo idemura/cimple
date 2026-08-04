@@ -139,10 +139,6 @@ public abstract class AstVisitor {
     node.acceptChildren(this);
   }
 
-  protected void visit(AstReceiverLookup node) {
-    node.acceptChildren(this);
-  }
-
   protected void visit(AstCast node) {
     node.acceptChildren(this);
   }

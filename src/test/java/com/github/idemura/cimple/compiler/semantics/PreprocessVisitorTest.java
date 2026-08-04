@@ -3,9 +3,11 @@ package com.github.idemura.cimple.compiler.semantics;
 import static com.github.idemura.cimple.compiler.ast.AstUtils.*;
 import static org.junit.jupiter.api.Assertions.*;
 
+import com.github.idemura.cimple.compiler.ast.AstCall;
 import com.github.idemura.cimple.compiler.ast.AstBuiltinType;
 import com.github.idemura.cimple.compiler.ast.AstDefer;
 import com.github.idemura.cimple.compiler.ast.AstExpressionStatement;
+import com.github.idemura.cimple.compiler.ast.AstFieldAccess;
 import com.github.idemura.cimple.compiler.ast.AstFor;
 import com.github.idemura.cimple.compiler.ast.AstIf;
 import com.github.idemura.cimple.compiler.ast.AstLocal;
@@ -92,6 +94,33 @@ class PreprocessVisitorTest extends AbstractSemanticsTest {
             "Assignment is only allowed at the root of an expression",
             "Assignment is only allowed at the root of an expression"),
         errorConsumer.errors());
+  }
+
+  @Test
+  void testReceiverCallMarking() {
+    var code =
+        """
+        module test;
+        function f(m M) {
+          var x = m.f;
+          var y = m.f(1);
+        }
+        """;
+    var module = parseCode(code);
+    module.accept(new PreprocessVisitor(reservedWords, errorConsumer));
+    assertEquals(List.of(), errorConsumer.errors());
+
+    var statements = module.findFunction("f").block().statements();
+    {
+      var field =
+          (AstFieldAccess) ((AstLocal) statements.get(0)).variable().expression().value();
+      assertFalse(field.method());
+    }
+    {
+      var call = (AstCall) ((AstLocal) statements.get(1)).variable().expression().value();
+      var field = (AstFieldAccess) call.function();
+      assertTrue(field.method());
+    }
   }
 
   @Test
