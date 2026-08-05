@@ -55,7 +55,7 @@ class PreprocessVisitorTest extends AbstractSemanticsTest {
         boolLiteral(false), ((AstLocal) statements.get(i++)).variable().expression().value());
     {
       var stmt = (AstFor) statements.get(i++);
-      assertEquals(nullLiteral(), stmt.init().expression().value());
+      assertEquals(nullLiteral(), stmt.init().variable().expression().value());
       assertEquals(boolLiteral(true), stmt.condition().value());
       assertEquals(boolLiteral(true), stmt.increment().value());
     }

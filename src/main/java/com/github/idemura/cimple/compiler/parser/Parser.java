@@ -264,7 +264,7 @@ public class Parser {
     var stmt = new AstFor();
     stmt.location(takeKeyword(FOR));
     if (keywordOrNull(tokenizer.current()) == VAR) {
-      stmt.init(parseVariable(true));
+      stmt.init(parseVariableStatement(true));
     }
     // The loop condition is required, even for an infinite loop such as `for true ...`.
     stmt.condition(parseExpressionHolder());

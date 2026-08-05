@@ -814,7 +814,7 @@ class ParserTest {
     }
     {
       var stmt = (AstFor) statements.get(i++);
-      var init = stmt.init();
+      var init = stmt.init().variable();
       assertEquals(Identifier.ofEntity("i"), init.name());
       assertNull(init.type());
       assertEquals(AstNumberLiteral.of(0), init.expression().value());
@@ -824,7 +824,7 @@ class ParserTest {
     }
     {
       var stmt = (AstFor) statements.get(i++);
-      var init = stmt.init();
+      var init = stmt.init().variable();
       assertEquals(Identifier.ofEntity("i"), init.name());
       assertNull(init.type());
       assertEquals(AstNumberLiteral.of(0), init.expression().value());

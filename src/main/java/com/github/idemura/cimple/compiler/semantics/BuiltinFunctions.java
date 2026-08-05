@@ -1,5 +1,6 @@
 package com.github.idemura.cimple.compiler.semantics;
 
+import static com.github.idemura.cimple.compiler.ast.AstBuiltinType.BOOL;
 import static com.github.idemura.cimple.compiler.ast.AstBuiltinType.INT64;
 
 import com.github.idemura.cimple.compiler.Identifier;
@@ -15,6 +16,8 @@ public final class BuiltinFunctions {
   public static final AstFunction MUL_I64 = makeBinaryOperator("_mul_i64", INT64, INT64, INT64);
   public static final AstFunction DIV_I64 = makeBinaryOperator("_div_i64", INT64, INT64, INT64);
   public static final AstFunction MOD_I64 = makeBinaryOperator("_mod_i64", INT64, INT64, INT64);
+  public static final AstFunction LT_I64 = makeBinaryOperator("_lt_i64", BOOL, INT64, INT64);
+  public static final AstFunction GT_I64 = makeBinaryOperator("_gt_i64", BOOL, INT64, INT64);
 
   private BuiltinFunctions() {}
 

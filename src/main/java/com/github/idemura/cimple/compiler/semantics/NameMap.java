@@ -11,6 +11,7 @@ import com.github.idemura.cimple.compiler.ast.AstType;
 import com.github.idemura.cimple.compiler.ast.AstVariable;
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 
@@ -20,8 +21,7 @@ public class NameMap {
   private final Map<Identifier, AstEntity> entityQualifiedNameMap = new HashMap<>();
   private final Map<String, AstEntity> entityNameMap = new HashMap<>();
   private final Map<Identifier, AstFunction> receiverFunctionMap = new HashMap<>();
-  private final List<AstEntity> shadowed = new ArrayList<>();
-  private final List<String> localNames = new ArrayList<>();
+  private final List<Scope> scopes = new ArrayList<>();
 
   public NameMap() {}
 
@@ -62,30 +62,30 @@ public class NameMap {
     var existing = entityNameMap.get(name);
     if (existing == null) {
       entityNameMap.put(name, variable);
-      localNames.add(name);
+      currentScope().localNames.add(name);
       return null;
     }
-    if (existing instanceof AstVariable existingVariable
-        && existingVariable.isAnyOf(AstVariable.PARAMETER | AstVariable.LOCAL)) {
+    // Java-style rule: a local or parameter in any active scope blocks redeclaration in nested
+    // scopes. Module-level variables and functions may still be shadowed by locals.
+    if (isLocalOrParameter(existing)) {
       return existing;
     }
-    shadowed.add(existing);
+    currentScope().shadowed.put(name, existing);
     entityNameMap.put(name, variable);
-    localNames.add(name);
+    currentScope().localNames.add(name);
     return null;
   }
 
-  public void beginScope() {}
+  public void beginScope() {
+    scopes.add(new Scope());
+  }
 
   public void endScope() {
-    for (var name : localNames) {
+    var scope = scopes.remove(scopes.size() - 1);
+    for (var name : scope.localNames) {
       entityNameMap.remove(name);
     }
-    localNames.clear();
-    for (var entity : shadowed) {
-      entityNameMap.put(entity.name().entityName(), entity);
-    }
-    shadowed.clear();
+    entityNameMap.putAll(scope.shadowed);
   }
 
   public AstType lookupType(Identifier name) {
@@ -111,5 +111,24 @@ public class NameMap {
 
   public AstFunction lookupReceiverFunction(Identifier name) {
     return receiverFunctionMap.get(name);
+  }
+
+  private Scope currentScope() {
+    if (scopes.isEmpty()) {
+      beginScope();
+    }
+    return scopes.getLast();
+  }
+
+  private static boolean isLocalOrParameter(AstEntity entity) {
+    return entity instanceof AstVariable variable
+        && variable.isAnyOf(AstVariable.PARAMETER | AstVariable.LOCAL);
+  }
+
+  // Scope frames track temporary unqualified bindings introduced by parameters and locals.
+  // Qualified module-level maps are stable and do not participate in local scope cleanup.
+  private static final class Scope {
+    private final List<String> localNames = new ArrayList<>();
+    private final Map<String, AstEntity> shadowed = new LinkedHashMap<>();
   }
 }

@@ -15,6 +15,7 @@ import com.github.idemura.cimple.compiler.ast.AstExpression;
 import com.github.idemura.cimple.compiler.ast.AstExpressionRewriteVisitor;
 import com.github.idemura.cimple.compiler.ast.AstExpressionRewriter;
 import com.github.idemura.cimple.compiler.ast.AstFieldAccess;
+import com.github.idemura.cimple.compiler.ast.AstFor;
 import com.github.idemura.cimple.compiler.ast.AstFunction;
 import com.github.idemura.cimple.compiler.ast.AstFunctionHeader;
 import com.github.idemura.cimple.compiler.ast.AstFunctionType;
@@ -114,6 +115,16 @@ public class NameResolutionVisitor extends AstExpressionRewriteVisitor {
   protected void visit(AstLocal node) {
     registerLocal(node.variable());
     super.visit(node);
+  }
+
+  @Override
+  protected void visit(AstFor node) {
+    try {
+      nameMap.beginScope();
+      super.visit(node);
+    } finally {
+      nameMap.endScope();
+    }
   }
 
   private void registerLocal(AstVariable variable) {
@@ -236,6 +247,8 @@ public class NameResolutionVisitor extends AstExpressionRewriteVisitor {
             case "*" -> BuiltinFunctions.MUL_I64;
             case "/" -> BuiltinFunctions.DIV_I64;
             case "%" -> BuiltinFunctions.MOD_I64;
+            case "<" -> BuiltinFunctions.LT_I64;
+            case ">" -> BuiltinFunctions.GT_I64;
             default ->
                 throw new IllegalStateException(
                     "Unknown builtin entity '%s'".formatted(operatorRef.name()));

@@ -1,7 +1,7 @@
 package com.github.idemura.cimple.compiler.ast;
 
 public final class AstFor extends AstStatement {
-  private AstVariable init;
+  private AstLocal init;
   private AstExpressionHolder condition;
   private AstExpressionHolder increment;
   private AstBlock block;
@@ -21,11 +21,11 @@ public final class AstFor extends AstStatement {
     block.accept(visitor);
   }
 
-  public AstVariable init() {
+  public AstLocal init() {
     return init;
   }
 
-  public void init(AstVariable init) {
+  public void init(AstLocal init) {
     this.init = init;
   }
 
