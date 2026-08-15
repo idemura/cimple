@@ -99,7 +99,7 @@ class PreprocessVisitorTest extends AbstractSemanticsTest {
   }
 
   @Test
-  void testReceiverCallMarking() {
+  void testMethodCallMarking() {
     var code =
         """
         module test;
@@ -216,7 +216,7 @@ class PreprocessVisitorTest extends AbstractSemanticsTest {
     module.accept(new PreprocessVisitor(reservedWords, errorConsumer));
     assertEquals(List.of(), errorConsumer.errors());
     {
-      var header = module.findReceiverFunction("Duration", "toMillis").header();
+      var header = module.findMethod("Duration", "toMillis").header();
       var objectType = newTypeRef("Duration");
       assertEquals(objectType, header.objectType());
       assertEquals(1, header.objectIndex());
@@ -290,9 +290,9 @@ class PreprocessVisitorTest extends AbstractSemanticsTest {
     module.accept(new PreprocessVisitor(reservedWords, errorConsumer));
     assertEquals(
         List.of(
-            "Receiver function 'Duration:a': missing the receiver parameter",
-            "Receiver function 'Duration:b': multiple receiver parameters",
-            "Free function 'f' cannot have a receiver parameter 'x'"),
+            "Method 'Duration:a': missing the object parameter",
+            "Method 'Duration:b': multiple object parameters",
+            "Function 'f' cannot have object parameter 'x'"),
         errorConsumer.errors());
   }
 

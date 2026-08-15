@@ -218,7 +218,7 @@ public class NameResolutionVisitor extends AstExpressionRewriteVisitor {
       // Callee and argument expressions have already been rewritten by AstCall.acceptRewriter.
       var function = node.function();
       if (function instanceof AstFieldAccess field && field.method()) {
-        resolveReceiverCall(node, field);
+        resolveMethodCall(node, field);
       }
       function = node.function();
       // Builtin calls are selected here, once argument expressions are available.
@@ -229,7 +229,7 @@ public class NameResolutionVisitor extends AstExpressionRewriteVisitor {
         checkState(!ref.isResolved());
         resolveBuiltinFunction(ref);
       }
-      // Receiver lookup and builtin resolution may replace the callee expression.
+      // Method lookup and builtin resolution may replace the callee expression.
       checkCallParameters(node);
       return node;
     }
@@ -261,7 +261,7 @@ public class NameResolutionVisitor extends AstExpressionRewriteVisitor {
       operatorRef.entity(function);
     }
 
-    private void resolveReceiverCall(AstCall node, AstFieldAccess fieldAccess) {
+    private void resolveMethodCall(AstCall node, AstFieldAccess fieldAccess) {
       var objectType = fieldAccess.object().type();
       checkState(objectType != null);
       if (objectType instanceof AstFunctionType && fieldAccess.fieldName().equals("call")) {
@@ -276,20 +276,19 @@ public class NameResolutionVisitor extends AstExpressionRewriteVisitor {
       if (objectType == AstBuiltinType.VOID) {
         errorConsumer.errorAt(
             fieldAccess.location(),
-            "Cannot resolve receiver function '%s' for null receiver",
+            "Cannot resolve method '%s' for null object",
             fieldAccess.fieldName());
         return;
       }
       if (objectType instanceof AstPointerType) {
         errorConsumer.errorAt(
-            fieldAccess.location(), "Receiver of pointer is not allowed", objectType.name());
+            fieldAccess.location(), "Method of pointer is not allowed", objectType.name());
         return;
       }
-      var receiverFunctionName = objectType.name().withEntity(fieldAccess.fieldName());
-      var function = nameMap.lookupReceiverFunction(receiverFunctionName);
+      var methodName = objectType.name().withEntity(fieldAccess.fieldName());
+      var function = nameMap.lookupMethod(methodName);
       if (function == null) {
-        errorConsumer.errorAt(
-            fieldAccess.location(), "Undefined receiver function: '%s'", receiverFunctionName);
+        errorConsumer.errorAt(fieldAccess.location(), "Undefined method: '%s'", methodName);
         return;
       }
 

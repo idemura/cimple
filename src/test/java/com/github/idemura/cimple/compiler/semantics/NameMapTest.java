@@ -86,12 +86,11 @@ class NameMapTest {
   }
 
   @Test
-  void testReceiverFunctionHasSeparateMap() {
+  void testMethodHasSeparateMap() {
     var nameMap = new NameMap();
     var function = function("Duration", "toMillis");
     assertNull(nameMap.addFunction(function));
     assertNull(nameMap.lookupEntity(Identifier.ofEntity("toMillis")));
-    assertSame(
-        function, nameMap.lookupReceiverFunction(Identifier.ofTypeEntity("Duration", "toMillis")));
+    assertSame(function, nameMap.lookupMethod(Identifier.ofTypeEntity("Duration", "toMillis")));
   }
 }

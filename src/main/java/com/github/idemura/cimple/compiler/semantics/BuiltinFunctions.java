@@ -54,7 +54,7 @@ public final class BuiltinFunctions {
   }
 
   private static AstFunction makeArrayMethod(String name, AstBuiltinType resultType) {
-    // The synthetic receiver parameter is type-checked by NameResolutionVisitor because the AST
+    // The synthetic object parameter is type-checked by NameResolutionVisitor because the AST
     // does not yet have a way to express "array of any element type" as a concrete parameter type.
     return makeBuiltinFunction(name, resultType, ImmutableList.of(makePolymorphicParameter("_0")));
   }

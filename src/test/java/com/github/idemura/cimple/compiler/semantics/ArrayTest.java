@@ -23,9 +23,9 @@ class ArrayTest extends AbstractSemanticsTest {
     assertEquals(AstBuiltinType.INT64, call.type());
 
     assertEquals(1, call.arguments().size());
-    var receiver = (AstEntityRef) call.arguments().get(0);
-    assertSame(function.header().parameters().get(0), receiver.entity());
-    assertEquals(expectedObjectType, receiver.type());
+    var object = (AstEntityRef) call.arguments().get(0);
+    assertSame(function.header().parameters().get(0), object.entity());
+    assertEquals(expectedObjectType, object.type());
   }
 
   @Test

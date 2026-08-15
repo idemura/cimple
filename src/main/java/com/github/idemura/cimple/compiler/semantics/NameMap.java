@@ -20,7 +20,7 @@ public class NameMap {
   private final Map<String, AstType> typeNameMap = new HashMap<>();
   private final Map<Identifier, AstEntity> entityQualifiedNameMap = new HashMap<>();
   private final Map<String, AstEntity> entityNameMap = new HashMap<>();
-  private final Map<Identifier, AstFunction> receiverFunctionMap = new HashMap<>();
+  private final Map<Identifier, AstFunction> methodMap = new HashMap<>();
   private final List<Scope> scopes = new ArrayList<>();
 
   public NameMap() {}
@@ -38,7 +38,7 @@ public class NameMap {
   public AstEntity addFunction(AstFunction function) {
     var name = function.name();
     if (name.typeName() != null) {
-      return receiverFunctionMap.putIfAbsent(name, function);
+      return methodMap.putIfAbsent(name, function);
     }
     return addEntity(function);
   }
@@ -109,8 +109,8 @@ public class NameMap {
     return entityNameMap.get(name.entityName());
   }
 
-  public AstFunction lookupReceiverFunction(Identifier name) {
-    return receiverFunctionMap.get(name);
+  public AstFunction lookupMethod(Identifier name) {
+    return methodMap.get(name);
   }
 
   private Scope currentScope() {

@@ -245,7 +245,7 @@ public class PrintAstVisitor extends AstVisitor {
 
   @Override
   protected void visit(AstFieldAccess node) {
-    output.writeLine("%s %s".formatted(node.method() ? "RECEIVER" : "FIELD", node.fieldName()));
+    output.writeLine("%s %s".formatted(node.method() ? "METHOD" : "FIELD", node.fieldName()));
     output.indent();
     node.object().accept(this);
     output.unindent();

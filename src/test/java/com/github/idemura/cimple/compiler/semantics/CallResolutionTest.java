@@ -28,7 +28,7 @@ class CallResolutionTest extends AbstractSemanticsTest {
     semanticAnalyzer.analyze(module);
     assertEquals(List.of(), errorConsumer.errors());
     {
-      var header = module.findReceiverFunction("Duration", "toMillis").header();
+      var header = module.findMethod("Duration", "toMillis").header();
       var objectType = newRecordType("test", "Duration");
       assertEquals(objectType, header.objectType());
       assertEquals(1, header.objectIndex());
@@ -42,8 +42,8 @@ class CallResolutionTest extends AbstractSemanticsTest {
     }
     var nameMap = semanticAnalyzer.nameMap();
     assertSame(
-        module.findReceiverFunction("Duration", "toMillis"),
-        nameMap.lookupReceiverFunction(new Identifier("test", "Duration", "toMillis")));
+        module.findMethod("Duration", "toMillis"),
+        nameMap.lookupMethod(new Identifier("test", "Duration", "toMillis")));
     assertNull(nameMap.lookupEntity(Identifier.ofEntity("toMillis")));
   }
 
@@ -108,7 +108,7 @@ class CallResolutionTest extends AbstractSemanticsTest {
   }
 
   @Test
-  void testReceiverFunctionResolution() {
+  void testMethodResolution() {
     var code =
         """
         module test;
@@ -130,15 +130,15 @@ class CallResolutionTest extends AbstractSemanticsTest {
       var expr = extractReturnExpression(module.findFunction("f"));
       var call = (AstCall) expr;
       var function = (AstEntityRef) call.function();
-      assertSame(module.findReceiverFunction("Duration", "toMillis"), function.entity());
+      assertSame(module.findMethod("Duration", "toMillis"), function.entity());
       assertEquals(new Identifier("test", "Duration", "toMillis"), function.name());
       assertEquals(1, call.arguments().size());
-      var receiver = (AstEntityRef) call.arguments().get(0);
-      assertEquals(Identifier.ofEntity("d"), receiver.name());
-      assertSame(module.findFunction("f").header().parameters().get(0), receiver.entity());
+      var object = (AstEntityRef) call.arguments().get(0);
+      assertEquals(Identifier.ofEntity("d"), object.name());
+      assertSame(module.findFunction("f").header().parameters().get(0), object.entity());
     }
     {
-      var function = module.findReceiverFunction("Duration", "toMillis");
+      var function = module.findMethod("Duration", "toMillis");
       assertEquals(newRecordType("test", "Duration"), function.header().objectType());
     }
   }

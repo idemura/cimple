@@ -64,13 +64,13 @@ class PreprocessVisitor extends AstExpressionRewriteVisitor {
   @Override
   protected void visit(AstFunction node) {
     checkQualifiedName(reservedWords, errorConsumer, node.name(), node.location());
-    checkReceiverParameter(node.name(), node.header());
+    checkObjectParameter(node.name(), node.header());
     super.visit(node);
   }
 
-  private void checkReceiverParameter(Identifier functionName, AstFunctionHeader header) {
-    // Receiver functions must have exactly one receiver parameter: the only parameter without an
-    // explicit type. Free functions must not have any untyped parameters.
+  private void checkObjectParameter(Identifier functionName, AstFunctionHeader header) {
+    // Methods must have exactly one object parameter: the only parameter without an
+    // explicit type. Functions must not have any untyped parameters.
     var parameters = header.parameters();
     if (header.objectType() != null) {
       var objectIndex = -1;
@@ -79,9 +79,7 @@ class PreprocessVisitor extends AstExpressionRewriteVisitor {
         if (parameters.get(i).type() == null) {
           if (objectIndex >= 0) {
             errorConsumer.errorAt(
-                header.location(),
-                "Receiver function '%s': multiple receiver parameters",
-                functionName);
+                header.location(), "Method '%s': multiple object parameters", functionName);
             invalid = true;
             break;
           }
@@ -90,9 +88,7 @@ class PreprocessVisitor extends AstExpressionRewriteVisitor {
       }
       if (!invalid && objectIndex < 0) {
         errorConsumer.errorAt(
-            header.location(),
-            "Receiver function '%s': missing the receiver parameter",
-            functionName);
+            header.location(), "Method '%s': missing the object parameter", functionName);
       } else {
         header.objectIndex(objectIndex);
         parameters.get(objectIndex).type(header.objectType());
@@ -102,7 +98,7 @@ class PreprocessVisitor extends AstExpressionRewriteVisitor {
         if (parameter.type() == null) {
           errorConsumer.errorAt(
               parameter.location(),
-              "Free function '%s' cannot have a receiver parameter '%s'",
+              "Function '%s' cannot have object parameter '%s'",
               functionName,
               parameter.name());
         }
@@ -129,7 +125,7 @@ class PreprocessVisitor extends AstExpressionRewriteVisitor {
   @Override
   protected void visit(AstFunctionType node) {
     checkQualifiedName(reservedWords, errorConsumer, node.name(), node.location());
-    checkReceiverParameter(node.name(), node.header());
+    checkObjectParameter(node.name(), node.header());
     super.visit(node);
   }
 
@@ -206,8 +202,8 @@ class PreprocessVisitor extends AstExpressionRewriteVisitor {
     @Override
     public AstExpression rewrite(AstCall node) {
       if (node.function() instanceof AstFieldAccess fieldAccess) {
-        // Method call syntax starts as field access; later resolution binds it to a receiver
-        // function using the receiver object's type.
+        // Method call syntax starts as field access; later resolution binds it to a method using
+        // the object's type.
         fieldAccess.method(true);
       }
       return node;

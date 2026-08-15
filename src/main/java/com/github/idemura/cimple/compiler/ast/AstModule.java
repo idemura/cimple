@@ -65,7 +65,7 @@ public final class AstModule extends AstNode {
     return null;
   }
 
-  public AstFunction findReceiverFunction(String objectTypeName, String name) {
+  public AstFunction findMethod(String objectTypeName, String name) {
     for (var definition : definitions) {
       if (definition instanceof AstFunction function && function.name().entityName().equals(name)) {
         var objectType = function.header().objectType();

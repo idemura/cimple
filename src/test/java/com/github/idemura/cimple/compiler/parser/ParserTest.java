@@ -249,7 +249,7 @@ class ParserTest {
   }
 
   @Test
-  void testReceiverFunction() {
+  void testMethod() {
     var code =
         """
         module test;
@@ -258,11 +258,11 @@ class ParserTest {
         }
         """;
     var module = parseCode(code, makeErrorConsumer());
-    var header = module.findReceiverFunction("Duration", "toMillis").header();
+    var header = module.findMethod("Duration", "toMillis").header();
     assertEquals(newTypeRef("Duration"), header.objectType());
     assertEquals(
         Identifier.ofTypeEntity("Duration", "toMillis"),
-        module.findReceiverFunction("Duration", "toMillis").name());
+        module.findMethod("Duration", "toMillis").name());
     assertEquals(newTypeRef("int"), header.resultType());
     assertEquals(ImmutableList.of(rawVariable("this")), header.parameters());
   }
@@ -582,12 +582,12 @@ class ParserTest {
     }
     {
       var expr = ((AstLocal) statements.get(i++)).variable().expression().get();
-      var receiverCall = (AstCall) expr;
-      var receiverField = (AstFieldAccess) receiverCall.function();
-      assertEquals("baz", receiverField.fieldName());
-      assertFalse(receiverField.method());
+      var methodCall = (AstCall) expr;
+      var methodField = (AstFieldAccess) methodCall.function();
+      assertEquals("baz", methodField.fieldName());
+      assertFalse(methodField.method());
       {
-        var index = (AstArrayAccess) receiverField.object();
+        var index = (AstArrayAccess) methodField.object();
         assertEquals(AstNumberLiteral.of(3), index.index());
         {
           var call = (AstCall) index.array();

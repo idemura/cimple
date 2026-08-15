@@ -50,7 +50,7 @@ public class SemanticAnalyzer {
   }
 
   private void populateNameMap(AstModule module) {
-    // First, collect types. They are used for receiver resolution.
+    // First, collect types. They are used for object resolution.
     for (var def : module.definitions()) {
       if (def instanceof AstType type) {
         type.name(type.name().withModule(module.name()));
@@ -64,7 +64,7 @@ public class SemanticAnalyzer {
         }
       }
     }
-    // Collection functions and variables. Resolve receiver type.
+    // Collection functions and variables. Resolve object type.
     for (var def : module.definitions()) {
       switch (def) {
         case AstFunction function -> {
