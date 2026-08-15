@@ -9,11 +9,11 @@ import java.util.Objects;
 public final class AstTypeHolder extends AstHolder {
   private AstType value;
 
-  public static AstTypeHolder of(AstType type) {
+  public static AstTypeHolder ofNullable(AstType type) {
     return type == null ? null : new AstTypeHolder(type);
   }
 
-  public AstTypeHolder(AstType value) {
+  AstTypeHolder(AstType value) {
     this.value = checkNotNull(value);
   }
 

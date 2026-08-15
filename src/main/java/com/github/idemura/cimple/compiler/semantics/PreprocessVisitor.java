@@ -177,7 +177,8 @@ class PreprocessVisitor extends AstExpressionRewriteVisitor {
   private static class ExpressionRewriter extends AstExpressionRewriter {
     private final ReservedWords reservedWords;
     private final ErrorConsumer errorConsumer;
-    private final NormalizeTypeNameVisitor normalizeTypeNameVisitor = new NormalizeTypeNameVisitor();
+    private final NormalizeTypeNameVisitor normalizeTypeNameVisitor =
+        new NormalizeTypeNameVisitor();
 
     ExpressionRewriter(ReservedWords reservedWords, ErrorConsumer errorConsumer) {
       this.reservedWords = reservedWords;

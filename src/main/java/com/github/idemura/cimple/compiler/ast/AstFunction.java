@@ -24,7 +24,7 @@ public final class AstFunction extends AstEntity {
     var type = new AstFunctionType();
     type.name(typeName);
     type.header(header);
-    this.type = AstTypeHolder.of(type);
+    this.type = AstTypeHolder.ofNullable(type);
   }
 
   @Override
@@ -33,7 +33,7 @@ public final class AstFunction extends AstEntity {
   }
 
   public void type(AstType type) {
-    this.type = AstTypeHolder.of(type);
+    this.type = AstTypeHolder.ofNullable(type);
   }
 
   public AstTypeHolder typeHolder() {

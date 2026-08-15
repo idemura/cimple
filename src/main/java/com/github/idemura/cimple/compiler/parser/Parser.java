@@ -391,11 +391,7 @@ public class Parser {
   }
 
   private static boolean isComparisonOperator(TokenType type) {
-    return type == CMP_EQ
-        || type == CMP_LT
-        || type == CMP_GT
-        || type == CMP_LE
-        || type == CMP_GE;
+    return type == CMP_EQ || type == CMP_LT || type == CMP_GT || type == CMP_LE || type == CMP_GE;
   }
 
   private AstExpression parseAdditiveChain() {

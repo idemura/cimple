@@ -57,7 +57,7 @@ public final class AstFunctionHeader extends AstNode {
   }
 
   public void receiverType(AstType receiverType) {
-    this.receiverType = AstTypeHolder.of(receiverType);
+    this.receiverType = AstTypeHolder.ofNullable(receiverType);
   }
 
   public AstTypeHolder receiverTypeHolder() {
@@ -85,7 +85,7 @@ public final class AstFunctionHeader extends AstNode {
   }
 
   public void resultType(AstType resultType) {
-    this.resultType = AstTypeHolder.of(resultType);
+    this.resultType = AstTypeHolder.ofNullable(resultType);
   }
 
   public AstTypeHolder resultTypeHolder() {

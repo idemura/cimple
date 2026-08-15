@@ -27,7 +27,7 @@ public final class AstCast extends AstExpression {
   }
 
   public void type(AstType type) {
-    this.type = AstTypeHolder.of(type);
+    this.type = AstTypeHolder.ofNullable(type);
   }
 
   public AstTypeHolder typeHolder() {

@@ -58,7 +58,7 @@ public final class AstVariable extends AstEntity {
   }
 
   public void type(AstType type) {
-    this.type = AstTypeHolder.of(type);
+    this.type = AstTypeHolder.ofNullable(type);
   }
 
   public AstTypeHolder typeHolder() {

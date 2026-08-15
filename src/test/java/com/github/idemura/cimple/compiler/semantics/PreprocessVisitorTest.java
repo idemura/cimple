@@ -114,8 +114,7 @@ class PreprocessVisitorTest extends AbstractSemanticsTest {
 
     var statements = module.findFunction("f").block().statements();
     {
-      var field =
-          (AstFieldAccess) ((AstLocal) statements.get(0)).variable().expression().value();
+      var field = (AstFieldAccess) ((AstLocal) statements.get(0)).variable().expression().value();
       assertFalse(field.method());
     }
     {
