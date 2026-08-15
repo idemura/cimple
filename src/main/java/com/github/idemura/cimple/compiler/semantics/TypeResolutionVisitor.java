@@ -8,7 +8,6 @@ import com.github.idemura.cimple.compiler.ast.AstPointerType;
 import com.github.idemura.cimple.compiler.ast.AstType;
 import com.github.idemura.cimple.compiler.ast.AstTypeHolder;
 import com.github.idemura.cimple.compiler.ast.AstTypeRef;
-import com.github.idemura.cimple.compiler.ast.AstUnionType;
 import com.github.idemura.cimple.compiler.ast.AstVisitor;
 
 public class TypeResolutionVisitor extends AstVisitor {
@@ -22,7 +21,7 @@ public class TypeResolutionVisitor extends AstVisitor {
 
   @Override
   protected void visit(AstTypeHolder node) {
-    node.value(resolveTypeRefSafe(node.value()));
+    node.set(resolveTypeRefSafe(node.get()));
     // Stop here: after resolution, the holder points at a shared type definition, not an owned
     // child subtree. Walking into it would revisit definitions through references and can recurse
     // forever for valid shapes such as `record T { var next T*; }`.
@@ -30,14 +29,6 @@ public class TypeResolutionVisitor extends AstVisitor {
 
   @Override
   protected void visit(AstTypeRef node) {}
-
-  @Override
-  protected void visit(AstUnionType node) {
-    super.visit(node);
-    for (var variant : node.variants()) {
-      variant.valueType(resolveTypeRefSafe(variant.valueType()));
-    }
-  }
 
   @Override
   protected void visit(AstNew node) {

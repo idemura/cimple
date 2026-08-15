@@ -10,7 +10,7 @@ public final class AstUnionType extends AstType {
   public static final class Variant {
     private String tag;
     private Location location;
-    private AstType valueType;
+    private final AstTypeHolder type = new AstTypeHolder();
 
     @Override
     public int hashCode() {
@@ -39,11 +39,11 @@ public final class AstUnionType extends AstType {
     }
 
     public AstType valueType() {
-      return valueType;
+      return type.get();
     }
 
-    public void valueType(AstType valueType) {
-      this.valueType = valueType;
+    public void valueType(AstType type) {
+      this.type.set(type);
     }
   }
 
@@ -58,7 +58,7 @@ public final class AstUnionType extends AstType {
   @Override
   public void acceptChildren(AstVisitor visitor) {
     for (var variant : variants) {
-      acceptSafe(variant.valueType(), visitor);
+      acceptSafe(variant.type, visitor);
     }
   }
 

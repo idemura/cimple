@@ -141,7 +141,7 @@ public class NameResolutionVisitor extends AstExpressionRewriteVisitor {
 
   protected void visit(AstDelete node) {
     super.visit(node);
-    var expression = node.expression().value();
+    var expression = node.expression().get();
     switch (expression.type()) {
       case AstPointerType pointerType -> {
         // TODO: Generate defer call.
@@ -262,30 +262,30 @@ public class NameResolutionVisitor extends AstExpressionRewriteVisitor {
     }
 
     private void resolveReceiverCall(AstCall node, AstFieldAccess fieldAccess) {
-      var receiverType = fieldAccess.object().type();
-      checkState(receiverType != null);
-      if (receiverType instanceof AstFunctionType && fieldAccess.fieldName().equals("call")) {
+      var objectType = fieldAccess.object().type();
+      checkState(objectType != null);
+      if (objectType instanceof AstFunctionType && fieldAccess.fieldName().equals("call")) {
         // Function values reserve `.call(...)` as explicit invocation syntax.
         node.function(fieldAccess.object());
         return;
       }
-      if (receiverType instanceof AstArrayType) {
+      if (objectType instanceof AstArrayType) {
         resolveArrayMethodCall(node, fieldAccess);
         return;
       }
-      if (receiverType == AstBuiltinType.VOID) {
+      if (objectType == AstBuiltinType.VOID) {
         errorConsumer.errorAt(
             fieldAccess.location(),
             "Cannot resolve receiver function '%s' for null receiver",
             fieldAccess.fieldName());
         return;
       }
-      if (receiverType instanceof AstPointerType) {
+      if (objectType instanceof AstPointerType) {
         errorConsumer.errorAt(
-            fieldAccess.location(), "Receiver of pointer is not allowed", receiverType.name());
+            fieldAccess.location(), "Receiver of pointer is not allowed", objectType.name());
         return;
       }
-      var receiverFunctionName = receiverType.name().withEntity(fieldAccess.fieldName());
+      var receiverFunctionName = objectType.name().withEntity(fieldAccess.fieldName());
       var function = nameMap.lookupReceiverFunction(receiverFunctionName);
       if (function == null) {
         errorConsumer.errorAt(
@@ -299,7 +299,7 @@ public class NameResolutionVisitor extends AstExpressionRewriteVisitor {
       functionRef.location(fieldAccess.location());
 
       var arguments = new ArrayList<>(node.arguments());
-      arguments.add(function.header().receiverIndex(), fieldAccess.object());
+      arguments.add(function.header().objectIndex(), fieldAccess.object());
       node.arguments(arguments);
       node.function(functionRef);
     }

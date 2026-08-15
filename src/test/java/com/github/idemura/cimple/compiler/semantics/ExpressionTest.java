@@ -1,6 +1,5 @@
 package com.github.idemura.cimple.compiler.semantics;
 
-import static com.github.idemura.cimple.compiler.parser.Parser.parseCode;
 import static org.junit.jupiter.api.Assertions.*;
 
 import com.github.idemura.cimple.compiler.ast.AstBuiltinType;
@@ -114,14 +113,14 @@ class ExpressionTest extends AbstractSemanticsTest {
   }
 
   private static void assertOperator(AstStatement statement, AstFunction function) {
-    var call = (AstCall) ((AstLocal) statement).variable().expression().value();
+    var call = (AstCall) ((AstLocal) statement).variable().expression().get();
     var functionRef = (AstEntityRef) call.function();
     assertSame(function, functionRef.entity());
     assertEquals(AstBuiltinType.INT64, call.type());
   }
 
   private static void assertCompoundOperator(Object statement, AstFunction function) {
-    var expr = ((AstExpressionStatement) statement).expression().value();
+    var expr = ((AstExpressionStatement) statement).expression().get();
     var assign = (AstCompoundAssign) expr;
     assertSame(function, assign.operation().entity());
     assertEquals(AstBuiltinType.INT64, assign.type());

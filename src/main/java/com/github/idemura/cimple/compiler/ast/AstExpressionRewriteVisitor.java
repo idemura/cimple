@@ -9,7 +9,7 @@ public class AstExpressionRewriteVisitor extends AstVisitor {
 
   @Override
   protected void visit(AstExpressionHolder node) {
-    node.value(rewriter.rewriteRoot(node.value()));
+    node.set(rewriter.rewriteRoot(node.get()));
     // Do not visit children. Rewriter will do this.
   }
 }

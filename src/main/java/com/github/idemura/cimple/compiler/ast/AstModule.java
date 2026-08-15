@@ -56,8 +56,8 @@ public final class AstModule extends AstNode {
   public AstFunction findFunction(String name) {
     for (var definition : definitions) {
       if (definition instanceof AstFunction function && name.equals(function.name().entityName())) {
-        var receiverType = function.header().receiverType();
-        if (receiverType == null) {
+        var objectType = function.header().objectType();
+        if (objectType == null) {
           return function;
         }
       }
@@ -65,11 +65,11 @@ public final class AstModule extends AstNode {
     return null;
   }
 
-  public AstFunction findReceiverFunction(String receiverTypeName, String name) {
+  public AstFunction findReceiverFunction(String objectTypeName, String name) {
     for (var definition : definitions) {
       if (definition instanceof AstFunction function && function.name().entityName().equals(name)) {
-        var receiverType = function.header().receiverType();
-        if (receiverType != null && receiverTypeName.equals(receiverType.name().typeName())) {
+        var objectType = function.header().objectType();
+        if (objectType != null && objectTypeName.equals(objectType.name().typeName())) {
           return function;
         }
       }

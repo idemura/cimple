@@ -72,12 +72,12 @@ class PreprocessVisitor extends AstExpressionRewriteVisitor {
     // Receiver functions must have exactly one receiver parameter: the only parameter without an
     // explicit type. Free functions must not have any untyped parameters.
     var parameters = header.parameters();
-    if (header.receiverType() != null) {
-      var receiverIndex = -1;
+    if (header.objectType() != null) {
+      var objectIndex = -1;
       var invalid = false;
       for (int i = 0; i < parameters.size(); i++) {
         if (parameters.get(i).type() == null) {
-          if (receiverIndex >= 0) {
+          if (objectIndex >= 0) {
             errorConsumer.errorAt(
                 header.location(),
                 "Receiver function '%s': multiple receiver parameters",
@@ -85,17 +85,17 @@ class PreprocessVisitor extends AstExpressionRewriteVisitor {
             invalid = true;
             break;
           }
-          receiverIndex = i;
+          objectIndex = i;
         }
       }
-      if (!invalid && receiverIndex < 0) {
+      if (!invalid && objectIndex < 0) {
         errorConsumer.errorAt(
             header.location(),
             "Receiver function '%s': missing the receiver parameter",
             functionName);
       } else {
-        header.receiverIndex(receiverIndex);
-        parameters.get(receiverIndex).type(header.receiverType());
+        header.objectIndex(objectIndex);
+        parameters.get(objectIndex).type(header.objectType());
       }
     } else {
       for (var parameter : parameters) {

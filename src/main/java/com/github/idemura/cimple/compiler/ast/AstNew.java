@@ -6,7 +6,7 @@ import com.google.common.collect.ImmutableList;
 import java.util.List;
 
 public final class AstNew extends AstExpression {
-  private AstTypeHolder type;
+  private final AstTypeHolder type = new AstTypeHolder();
   private List<AstExpression> arguments;
 
   @Override
@@ -30,11 +30,11 @@ public final class AstNew extends AstExpression {
 
   @Override
   public AstType type() {
-    return type == null ? null : type.value();
+    return type.get();
   }
 
   public void type(AstType type) {
-    this.type = AstTypeHolder.ofNullable(type);
+    this.type.set(type);
   }
 
   public List<AstExpression> arguments() {

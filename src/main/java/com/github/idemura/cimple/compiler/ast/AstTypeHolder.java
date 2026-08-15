@@ -1,7 +1,5 @@
 package com.github.idemura.cimple.compiler.ast;
 
-import static com.google.common.base.Preconditions.checkNotNull;
-
 import java.util.Objects;
 
 // Marks the ownership boundary for a type tree. Type resolution replaces the holder type, so
@@ -9,13 +7,7 @@ import java.util.Objects;
 public final class AstTypeHolder extends AstHolder {
   private AstType value;
 
-  public static AstTypeHolder ofNullable(AstType type) {
-    return type == null ? null : new AstTypeHolder(type);
-  }
-
-  AstTypeHolder(AstType value) {
-    this.value = checkNotNull(value);
-  }
+  public AstTypeHolder() {}
 
   @Override
   public int hashCode() {
@@ -35,14 +27,16 @@ public final class AstTypeHolder extends AstHolder {
 
   @Override
   public void acceptChildren(AstVisitor visitor) {
-    value.accept(visitor);
+    if (value != null) {
+      value.accept(visitor);
+    }
   }
 
-  public AstType value() {
+  public AstType get() {
     return value;
   }
 
-  public void value(AstType type) {
-    this.value = checkNotNull(type);
+  public void set(AstType type) {
+    this.value = type;
   }
 }

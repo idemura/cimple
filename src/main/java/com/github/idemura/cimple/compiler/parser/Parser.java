@@ -548,10 +548,10 @@ public class Parser {
     var current = take(IDENTIFIER);
     Identifier name;
     if (tokenizer.takeIf(COLON)) {
-      var receiverType = new AstTypeRef();
-      receiverType.name(Identifier.ofType(current.value()));
-      receiverType.location(current.location());
-      header.receiverType(receiverType);
+      var objectType = new AstTypeRef();
+      objectType.name(Identifier.ofType(current.value()));
+      objectType.location(current.location());
+      header.objectType(objectType);
       header.location(tokenizer.currentLocation());
       name = Identifier.ofType(current.value()).withEntity(take(IDENTIFIER).value());
     } else {

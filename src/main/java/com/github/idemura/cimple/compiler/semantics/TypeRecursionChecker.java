@@ -65,7 +65,7 @@ class TypeRecursionChecker {
   private static boolean functionContainsType(
       AstType root, AstFunctionType functionType, Set<AstType> path) {
     var header = functionType.header();
-    if (containsDirectType(root, header.receiverType(), path)
+    if (containsDirectType(root, header.objectType(), path)
         || containsDirectType(root, header.resultType(), path)) {
       return true;
     }

@@ -11,7 +11,7 @@ public final class AstVariable extends AstEntity {
   public static final long GLOBAL = 0x10L;
 
   private Identifier name;
-  private AstTypeHolder type;
+  private final AstTypeHolder type = new AstTypeHolder();
   private AstExpressionHolder expression;
   private long flags;
 
@@ -54,15 +54,11 @@ public final class AstVariable extends AstEntity {
 
   @Override
   public AstType type() {
-    return type == null ? null : type.value();
+    return type.get();
   }
 
   public void type(AstType type) {
-    this.type = AstTypeHolder.ofNullable(type);
-  }
-
-  public AstTypeHolder typeHolder() {
-    return type;
+    this.type.set(type);
   }
 
   public boolean getBit(long mask) {

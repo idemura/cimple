@@ -5,10 +5,10 @@ import java.util.List;
 import java.util.Objects;
 
 public final class AstFunctionHeader extends AstNode {
-  private AstTypeHolder receiverType;
-  private int receiverIndex = -1;
+  private final AstTypeHolder objectType = new AstTypeHolder();
+  private final AstTypeHolder resultType = new AstTypeHolder();
   private List<AstVariable> parameters;
-  private AstTypeHolder resultType;
+  private int objectIndex = -1;
 
   public AstFunctionHeader() {}
 
@@ -19,17 +19,17 @@ public final class AstFunctionHeader extends AstNode {
 
   @Override
   public void acceptChildren(AstVisitor visitor) {
-    // Receiver type ref is also assigned to the receiver parameter during preprocessing.
+    // Object type ref is also assigned to the object parameter during preprocessing.
     for (var parameter : parameters) {
       parameter.accept(visitor);
     }
-    acceptSafe(receiverType, visitor);
+    acceptSafe(objectType, visitor);
     acceptSafe(resultType, visitor);
   }
 
   @Override
   public int hashCode() {
-    return Objects.hash(receiverType(), parameters, resultType());
+    return Objects.hash(objectType(), parameters, resultType());
   }
 
   @Override
@@ -52,24 +52,20 @@ public final class AstFunctionHeader extends AstNode {
     return true;
   }
 
-  public AstType receiverType() {
-    return receiverType == null ? null : receiverType.value();
+  public AstType objectType() {
+    return objectType.get();
   }
 
-  public void receiverType(AstType receiverType) {
-    this.receiverType = AstTypeHolder.ofNullable(receiverType);
+  public void objectType(AstType objectType) {
+    this.objectType.set(objectType);
   }
 
-  public AstTypeHolder receiverTypeHolder() {
-    return receiverType;
+  public int objectIndex() {
+    return objectIndex;
   }
 
-  public int receiverIndex() {
-    return receiverIndex;
-  }
-
-  public void receiverIndex(int receiverIndex) {
-    this.receiverIndex = receiverIndex;
+  public void objectIndex(int objectIndex) {
+    this.objectIndex = objectIndex;
   }
 
   public List<AstVariable> parameters() {
@@ -81,14 +77,10 @@ public final class AstFunctionHeader extends AstNode {
   }
 
   public AstType resultType() {
-    return resultType == null ? null : resultType.value();
+    return resultType.get();
   }
 
   public void resultType(AstType resultType) {
-    this.resultType = AstTypeHolder.ofNullable(resultType);
-  }
-
-  public AstTypeHolder resultTypeHolder() {
-    return resultType;
+    this.resultType.set(resultType);
   }
 }

@@ -64,20 +64,20 @@ public final class AstUtils {
   }
 
   public static AstExpression extractReturnExpression(AstFunction function) {
-    return ((AstReturn) function.block().statements().get(0)).expression().value();
+    return ((AstReturn) function.block().statements().get(0)).expression().get();
   }
 
   public static AstFunction function(String name) {
     return function(null, name);
   }
 
-  public static AstFunction function(String receiverTypeName, String name) {
+  public static AstFunction function(String objectTypeName, String name) {
     var header = new AstFunctionHeader();
-    if (receiverTypeName != null) {
-      header.receiverType(newTypeRef(receiverTypeName));
+    if (objectTypeName != null) {
+      header.objectType(newTypeRef(objectTypeName));
     }
     var function = new AstFunction();
-    function.name(Identifier.ofTypeEntity(receiverTypeName, name));
+    function.name(Identifier.ofTypeEntity(objectTypeName, name));
     function.header(header);
     return function;
   }

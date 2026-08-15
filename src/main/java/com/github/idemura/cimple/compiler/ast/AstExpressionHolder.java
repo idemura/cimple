@@ -25,11 +25,11 @@ public final class AstExpressionHolder extends AstHolder {
     value.accept(visitor);
   }
 
-  public AstExpression value() {
+  public AstExpression get() {
     return value;
   }
 
-  public void value(AstExpression expression) {
+  public void set(AstExpression expression) {
     this.value = checkNotNull(expression);
   }
 

@@ -29,15 +29,15 @@ class CallResolutionTest extends AbstractSemanticsTest {
     assertEquals(List.of(), errorConsumer.errors());
     {
       var header = module.findReceiverFunction("Duration", "toMillis").header();
-      var receiverType = newRecordType("test", "Duration");
-      assertEquals(receiverType, header.receiverType());
-      assertEquals(1, header.receiverIndex());
-      assertEquals(receiverType, header.parameters().get(1).type());
+      var objectType = newRecordType("test", "Duration");
+      assertEquals(objectType, header.objectType());
+      assertEquals(1, header.objectIndex());
+      assertEquals(objectType, header.parameters().get(1).type());
       assertEquals(AstBuiltinType.VOID, header.resultType());
     }
     {
       var header = module.findFunction("f").header();
-      assertEquals(-1, header.receiverIndex());
+      assertEquals(-1, header.objectIndex());
       assertEquals(AstBuiltinType.VOID, header.resultType());
     }
     var nameMap = semanticAnalyzer.nameMap();
@@ -139,7 +139,7 @@ class CallResolutionTest extends AbstractSemanticsTest {
     }
     {
       var function = module.findReceiverFunction("Duration", "toMillis");
-      assertEquals(newRecordType("test", "Duration"), function.header().receiverType());
+      assertEquals(newRecordType("test", "Duration"), function.header().objectType());
     }
   }
 
@@ -187,7 +187,7 @@ class CallResolutionTest extends AbstractSemanticsTest {
       var local = (AstLocal) block.statements().get(0);
       assertEquals(Identifier.ofEntity("t"), local.variable().name());
       assertEquals(AstStringType.INSTANCE, local.variable().type());
-      var call = (AstCall) local.variable().expression().value();
+      var call = (AstCall) local.variable().expression().get();
       assertEquals(newEntityRef("test", "f"), call.function());
       assertEquals(AstStringType.INSTANCE, call.type());
     }

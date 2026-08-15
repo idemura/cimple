@@ -13,11 +13,11 @@ import java.util.List;
 import org.junit.jupiter.api.Test;
 
 class ArrayTest extends AbstractSemanticsTest {
-  private static void assertArraySizeCall(AstFunction function, AstType expectedReceiverType) {
+  private static void assertArraySizeCall(AstFunction function, AstType expectedObjectType) {
     var local = (AstLocal) function.block().statements().get(0);
     assertEquals(AstBuiltinType.INT64, local.variable().type());
 
-    var call = (AstCall) local.variable().expression().value();
+    var call = (AstCall) local.variable().expression().get();
     var functionRef = (AstEntityRef) call.function();
     assertSame(BuiltinFunctions.ARRAY_SIZE, functionRef.entity());
     assertEquals(AstBuiltinType.INT64, call.type());
@@ -25,7 +25,7 @@ class ArrayTest extends AbstractSemanticsTest {
     assertEquals(1, call.arguments().size());
     var receiver = (AstEntityRef) call.arguments().get(0);
     assertSame(function.header().parameters().get(0), receiver.entity());
-    assertEquals(expectedReceiverType, receiver.type());
+    assertEquals(expectedObjectType, receiver.type());
   }
 
   @Test
