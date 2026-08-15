@@ -90,7 +90,7 @@ public class NameMap {
 
   public AstType lookupType(Identifier name) {
     if ("string".equals(name.typeName())) {
-      return AstStringType.STRING;
+      return AstStringType.INSTANCE;
     }
     var builtinType = AstBuiltinType.lookup(name.typeName());
     if (builtinType != null) {

@@ -165,7 +165,7 @@ class CallResolutionTest extends AbstractSemanticsTest {
     var function = (AstFieldAccess) call.function();
     assertEquals("func_ptr", function.fieldName());
     assertFalse(function.method());
-    assertEquals(AstStringType.STRING, call.type());
+    assertEquals(AstStringType.INSTANCE, call.type());
   }
 
   @Test
@@ -186,10 +186,10 @@ class CallResolutionTest extends AbstractSemanticsTest {
       var block = module.findFunction("g").block();
       var local = (AstLocal) block.statements().get(0);
       assertEquals(Identifier.ofEntity("t"), local.variable().name());
-      assertEquals(AstStringType.STRING, local.variable().type());
+      assertEquals(AstStringType.INSTANCE, local.variable().type());
       var call = (AstCall) local.variable().expression().value();
       assertEquals(newEntityRef("test", "f"), call.function());
-      assertEquals(AstStringType.STRING, call.type());
+      assertEquals(AstStringType.INSTANCE, call.type());
     }
   }
 

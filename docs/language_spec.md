@@ -64,6 +64,7 @@ Point
 RandomGenerator
 openConnection
 action
+arg1
 ```
 
 ### Literals
@@ -139,6 +140,43 @@ string
 
 `int` is a synonym for `int64` and `float` is a synonym for `float64`.
 
+### Array
+
+Ci arrays are resizable and may be reallocated. They store initialized elements and track both
+their current size and their capacity. Elements are accessed with the indexing operator:
+
+```
+a[i]
+```
+
+Use `.size()` to get the number of elements currently stored in the array, and `.capacity()` to get
+the number of elements the array can hold without allocating new storage.
+
+Appending is explicit. `.append(value)` adds one element to the end of the array, but it does not
+reallocate automatically. If the array has reached its capacity, `.append(value)` terminates the
+program. This is simpler than C++ `vector`: capacity growth is visible in the source code and is
+controlled by the programmer.
+
+When a larger capacity is needed, use `.makeCopy(newCapacity int)`. It creates and returns a new
+array
+with the requested capacity and copies the existing elements into it. This keeps allocation explicit
+while still supporting efficient resizing. This model allows the implementation to allocate
+uninitialized capacity internally while exposing only initialized elements to the programmer. New
+elements become part of the array when they are appended.
+
+Elements can be removed from the end with `.remove(n int)`. If the array is empty, or if `n` is
+larger than the current size, `.remove(n int)` terminates the program.
+
+Array method reference:
+
+| Method     | Arguments      | Return value    | Description                                                                   |
+|------------|----------------|-----------------|-------------------------------------------------------------------------------|
+| `size`     | none           | `int`           | Returns the current number of elements.                                       |
+| `capacity` | none           | `int`           | Returns the number of elements the array can hold without reallocating.       |
+| `append`   | `value`        | `void`          | Appends one initialized element.                                              |
+| `makeCopy` | `capacity int` | same array type | Creates a new array with the requested capacity and copies existing elements. |
+| `remove`   | `n int`        | `void`          | Removes `n` elements from the end.                                            |
+
 ### Record
 
 ```
@@ -174,18 +212,18 @@ type interface FileSystem {
 
 From highest to lowest:
 
-| Operators                 | Associativity |
-|---------------------------|---------------|
-| `(e)` `[e type t]`        | Left-to-right |
-| `new` `.` `[]` `f(x)`     | Left-to-right |
-| `*` `/` `%`               | Left-to-right |
-| `+` `-`                   | Left-to-right |
-| `<` `>` `>=` `<=`         | Left-to-right |
-| `==` `!=`                 | Left-to-right |
-| `!`                       | Right-to-left |
-| `&`                       | Left-to-right |
-| `\|`                      | Left-to-right |
-| `=` and op-shorthand      | None          |
+| Operators             | Associativity |
+|-----------------------|---------------|
+| `(e)` `[e type t]`    | Left-to-right |
+| `new` `.` `[]` `f(x)` | Left-to-right |
+| `*` `/` `%`           | Left-to-right |
+| `+` `-`               | Left-to-right |
+| `<` `>` `>=` `<=`     | Left-to-right |
+| `==` `!=`             | Left-to-right |
+| `!`                   | Right-to-left |
+| `&`                   | Left-to-right |
+| `\|`                  | Left-to-right |
+| `=` and op-shorthand  | None          |
 
 Only one assignment per expression is allowed. Therefore, it does not matter whether it is
 left-to-right or right-to-left. For simplicity, the parser parses it in left-to-right order.

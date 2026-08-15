@@ -3,7 +3,7 @@ package com.github.idemura.cimple.compiler.ast;
 import com.github.idemura.cimple.compiler.Identifier;
 
 public final class AstStringType extends AstType {
-  public static final AstStringType STRING = new AstStringType();
+  public static final AstStringType INSTANCE = new AstStringType();
 
   private final Identifier name = Identifier.ofType("string").builtin();
 

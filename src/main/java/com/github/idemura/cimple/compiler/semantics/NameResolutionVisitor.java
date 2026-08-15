@@ -5,6 +5,7 @@ import static com.google.common.base.Preconditions.checkState;
 
 import com.github.idemura.cimple.compiler.ErrorConsumer;
 import com.github.idemura.cimple.compiler.Location;
+import com.github.idemura.cimple.compiler.ast.AstArrayType;
 import com.github.idemura.cimple.compiler.ast.AstBlock;
 import com.github.idemura.cimple.compiler.ast.AstBuiltinType;
 import com.github.idemura.cimple.compiler.ast.AstCall;
@@ -173,7 +174,7 @@ public class NameResolutionVisitor extends AstExpressionRewriteVisitor {
       if (node.isResolved()) {
         return node;
       }
-      // Builtin names are resolved in AstCall, after the argument expressions are available.
+      // Parser-created operator references are already tagged as builtins.
       if (node.isBuiltin()) {
         return node;
       }
@@ -216,12 +217,15 @@ public class NameResolutionVisitor extends AstExpressionRewriteVisitor {
     public AstExpression rewrite(AstCall node) {
       // Callee and argument expressions have already been rewritten by AstCall.acceptRewriter.
       var function = node.function();
-      if (function instanceof AstFieldAccess fieldAccess && fieldAccess.method()) {
-        resolveReceiverCall(node, fieldAccess);
+      if (function instanceof AstFieldAccess field && field.method()) {
+        resolveReceiverCall(node, field);
       }
       function = node.function();
       // Builtin calls are selected here, once argument expressions are available.
       if (function instanceof AstEntityRef ref && ref.isBuiltin()) {
+        if (ref.entity() == BuiltinFunctions.ARRAY_SIZE) {
+          return node;
+        }
         checkState(!ref.isResolved());
         resolveBuiltinFunction(ref);
       }
@@ -265,6 +269,10 @@ public class NameResolutionVisitor extends AstExpressionRewriteVisitor {
         node.function(fieldAccess.object());
         return;
       }
+      if (receiverType instanceof AstArrayType) {
+        resolveArrayMethodCall(node, fieldAccess);
+        return;
+      }
       if (receiverType == AstBuiltinType.VOID) {
         errorConsumer.errorAt(
             fieldAccess.location(),
@@ -292,6 +300,32 @@ public class NameResolutionVisitor extends AstExpressionRewriteVisitor {
 
       var arguments = new ArrayList<>(node.arguments());
       arguments.add(function.header().receiverIndex(), fieldAccess.object());
+      node.arguments(arguments);
+      node.function(functionRef);
+    }
+
+    private void resolveArrayMethodCall(AstCall node, AstFieldAccess fieldAccess) {
+      var function = BuiltinFunctions.lookupArrayMethod(fieldAccess.fieldName());
+      if (function == null) {
+        errorConsumer.errorAt(
+            fieldAccess.location(), "Undefined array method: '%s'", fieldAccess.fieldName());
+        return;
+      }
+      if (!node.arguments().isEmpty()) {
+        errorConsumer.errorAt(
+            node.location(),
+            "Array method '%s' expects 0 arguments, got %d",
+            fieldAccess.fieldName(),
+            node.arguments().size());
+      }
+
+      var functionRef = new AstEntityRef();
+      functionRef.name(function.name());
+      functionRef.entity(function);
+      functionRef.location(fieldAccess.location());
+
+      var arguments = new ArrayList<>(node.arguments());
+      arguments.add(0, fieldAccess.object());
       node.arguments(arguments);
       node.function(functionRef);
     }

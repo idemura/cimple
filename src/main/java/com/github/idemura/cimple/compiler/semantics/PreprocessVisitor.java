@@ -255,7 +255,7 @@ class PreprocessVisitor extends AstExpressionRewriteVisitor {
 
     @Override
     public AstExpression rewrite(AstStringLiteral node) {
-      node.type(AstStringType.STRING);
+      node.type(AstStringType.INSTANCE);
       return node;
     }
 
