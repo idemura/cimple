@@ -29,7 +29,7 @@ public class SemanticAnalyzer {
     if (hasErrors()) {
       return false;
     }
-    module.accept(new TypeResolutionVisitor(nameMap, errorConsumer));
+    module.accept(new TypeRefResolutionVisitor(nameMap, errorConsumer));
     new TypeRecursionChecker(errorConsumer).check(module);
     if (hasErrors()) {
       return false;

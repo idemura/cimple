@@ -24,7 +24,10 @@ public final class AstArrayAccess extends AstExpression {
 
   @Override
   public AstType type() {
-    throw new UnsupportedOperationException();
+    if (array.type() instanceof AstArrayType arrayType) {
+      return arrayType.baseType();
+    }
+    return AstBuiltinType.VOID;
   }
 
   public AstExpression array() {

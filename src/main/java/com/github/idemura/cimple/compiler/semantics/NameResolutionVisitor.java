@@ -5,6 +5,7 @@ import static com.google.common.base.Preconditions.checkState;
 
 import com.github.idemura.cimple.compiler.ErrorConsumer;
 import com.github.idemura.cimple.compiler.Location;
+import com.github.idemura.cimple.compiler.ast.AstArrayAccess;
 import com.github.idemura.cimple.compiler.ast.AstArrayType;
 import com.github.idemura.cimple.compiler.ast.AstBlock;
 import com.github.idemura.cimple.compiler.ast.AstBuiltinType;
@@ -210,6 +211,23 @@ public class NameResolutionVisitor extends AstExpressionRewriteVisitor {
           "Undefined field '%s' in record '%s'",
           node.fieldName(),
           recordType.name());
+      return node;
+    }
+
+    @Override
+    public AstExpression rewrite(AstArrayAccess node) {
+      var arrayType = checkNotNull(node.array().type());
+      if (!(arrayType instanceof AstArrayType)) {
+        errorConsumer.errorAt(
+            node.location(), "Array access requires an array, got '%s'", arrayType.name());
+      }
+      var indexType = checkNotNull(node.index().type());
+      if (!AstBuiltinType.INT64.equals(indexType)) {
+        errorConsumer.errorAt(
+            node.index().location(),
+            "Array index has type '%s', expected 'int64'",
+            indexType.name());
+      }
       return node;
     }
 

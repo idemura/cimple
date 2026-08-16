@@ -10,11 +10,11 @@ import com.github.idemura.cimple.compiler.ast.AstTypeHolder;
 import com.github.idemura.cimple.compiler.ast.AstTypeRef;
 import com.github.idemura.cimple.compiler.ast.AstVisitor;
 
-public class TypeResolutionVisitor extends AstVisitor {
+public class TypeRefResolutionVisitor extends AstVisitor {
   private final NameMap nameMap;
   private final ErrorConsumer errorConsumer;
 
-  public TypeResolutionVisitor(NameMap nameMap, ErrorConsumer errorConsumer) {
+  public TypeRefResolutionVisitor(NameMap nameMap, ErrorConsumer errorConsumer) {
     this.nameMap = nameMap;
     this.errorConsumer = errorConsumer;
   }
