@@ -166,8 +166,15 @@ public class Parser {
     var parsedHeader = parseFunctionHeaderWithName(false);
     function.header(parsedHeader.header());
     function.name(parsedHeader.name());
-    function.block(parseBlock());
+    function.block(parseFunctionBody());
     return function;
+  }
+
+  private AstBlock parseFunctionBody() {
+    if (tokenizer.takeIf(SEMICOLON)) {
+      return null;
+    }
+    return parseBlock();
   }
 
   private AstVariable parseVariable(boolean mutable) {

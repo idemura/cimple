@@ -150,6 +150,33 @@ class ParserTest {
   }
 
   @Test
+  void testFunctionDeclaration() {
+    var code =
+        """
+        module test;
+        type record Duration {}
+        function external(x int) string;
+        function Duration:toMillis(this) int;
+        """;
+    var module = parseCode(code, makeErrorConsumer());
+    {
+      var f = module.findFunction("external");
+      assertEquals(Identifier.ofEntity("external"), f.name());
+      assertEquals(newTypeRef("string"), f.header().resultType());
+      assertEquals(ImmutableList.of(rawVariable("x", "int")), f.header().parameters());
+      assertNull(f.block());
+    }
+    {
+      var f = module.findMethod("Duration", "toMillis");
+      assertEquals(Identifier.ofTypeEntity("Duration", "toMillis"), f.name());
+      assertEquals(newTypeRef("Duration"), f.header().objectType());
+      assertEquals(newTypeRef("int"), f.header().resultType());
+      assertEquals(ImmutableList.of(rawVariable("this")), f.header().parameters());
+      assertNull(f.block());
+    }
+  }
+
+  @Test
   void testRecordType() {
     var code =
         """

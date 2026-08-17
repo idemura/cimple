@@ -35,7 +35,11 @@ public class PrintAstVisitor extends AstVisitor {
     for (var parameter : header.parameters()) {
       printEntity("ARG", parameter.name(), parameter.type());
     }
-    node.block().accept(this);
+    if (node.block() == null) {
+      output.writeLine("EXTERNAL");
+    } else {
+      node.block().accept(this);
+    }
     output.unindent();
     output.writeLine("END");
   }

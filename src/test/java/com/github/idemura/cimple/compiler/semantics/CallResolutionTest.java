@@ -144,6 +144,46 @@ class CallResolutionTest extends AbstractSemanticsTest {
   }
 
   @Test
+  void testLinkTimeFunctionAndMethodDeclarationsResolve() {
+    var code =
+        """
+        module test;
+        type record Duration {}
+        function external(x int) string;
+        function Duration:toMillis(this) int;
+        function f(d Duration) {
+          var s = external(1);
+          var m = d.toMillis();
+        }
+        """;
+    var module = parseCode(code);
+    var sa = new SemanticAnalyzer(errorConsumer);
+    sa.analyze(module);
+    assertEquals(List.of(), errorConsumer.errors());
+
+    var external = module.findFunction("external");
+    var toMillis = module.findMethod("Duration", "toMillis");
+    assertNull(external.block());
+    assertNull(toMillis.block());
+
+    var statements = module.findFunction("f").block().statements();
+    {
+      var local = (AstLocal) statements.get(0);
+      assertEquals(AstStringType.INSTANCE, local.variable().type());
+      var call = (AstCall) local.variable().expression().get();
+      var function = (AstEntityRef) call.function();
+      assertSame(external, function.entity());
+    }
+    {
+      var local = (AstLocal) statements.get(1);
+      assertEquals(AstBuiltinType.INT64, local.variable().type());
+      var call = (AstCall) local.variable().expression().get();
+      var function = (AstEntityRef) call.function();
+      assertSame(toMillis, function.entity());
+    }
+  }
+
+  @Test
   void testFunctionValueCallResolution() {
     var code =
         """

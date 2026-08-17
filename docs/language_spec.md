@@ -96,15 +96,16 @@ Modules cannot be nested.
 ## Functions
 
 ```
-<function> := "function" <function_name> "(" <argument_list>? ")" <type_ref>? <block>
-<function_name> := <identifier> ("." <identfier>)?
+<function> := "function" <function_name> "(" <argument_list>? ")" <type_ref>? (<block> | ";")
+<function_name> := (<identifier> ":")? <identifier>
 <type_ref> := <identifier> ("[]" | "*")*
 <argument_list> := <argument> ("," <argument>)*
 <argument> := <identifier> <type_ref>?
 <block> := "{" <statement>* "}"
 ```
 
-There are two kinds of functions: functions and method.
+There are two kinds of functions: functions and methods.
+A function or method that ends with `;` has no body and is resolved at linking time.
 This section is incomplete.
 
 ## Types
