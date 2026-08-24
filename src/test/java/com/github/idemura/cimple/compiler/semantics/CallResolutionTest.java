@@ -25,7 +25,7 @@ class CallResolutionTest extends AbstractSemanticsTest {
         """;
     var module = parseCode(code);
     var semanticAnalyzer = new SemanticAnalyzer(errorConsumer);
-    semanticAnalyzer.analyze(module);
+    semanticAnalyzer.analyze(List.of(module));
     assertEquals(List.of(), errorConsumer.errors());
     {
       var header = module.findMethod("Duration", "toMillis").header();
@@ -62,7 +62,7 @@ class CallResolutionTest extends AbstractSemanticsTest {
         """;
     var module = parseCode(code);
     var sa = new SemanticAnalyzer(errorConsumer);
-    sa.analyze(module);
+    sa.analyze(List.of(module));
     assertEquals(List.of(), errorConsumer.errors());
     {
       var expr = extractReturnExpression(module.findFunction("f"));
@@ -92,7 +92,7 @@ class CallResolutionTest extends AbstractSemanticsTest {
         """;
     var module = parseCode(code);
     var sa = new SemanticAnalyzer(errorConsumer);
-    sa.analyze(module);
+    sa.analyze(List.of(module));
     assertEquals(List.of(), errorConsumer.errors());
     {
       var expr = extractReturnExpression(module.findFunction("g"));
@@ -105,6 +105,33 @@ class CallResolutionTest extends AbstractSemanticsTest {
       var entityRef = (AstEntityRef) expr;
       assertSame(module.findVariable("x"), entityRef.entity());
     }
+  }
+
+  @Test
+  void testCrossModuleFunctionResolution() {
+    var clientModule =
+        parseCode(
+            """
+            module client;
+            function f() int {
+              return server~make();
+            }
+            """);
+    var serverModule =
+        parseCode(
+            """
+            module server;
+            function make() int;
+            """);
+    var sa = new SemanticAnalyzer(errorConsumer);
+    sa.analyze(List.of(clientModule, serverModule));
+    assertEquals(List.of(), errorConsumer.errors());
+
+    var call = (AstCall) extractReturnExpression(clientModule.findFunction("f"));
+    var function = (AstEntityRef) call.function();
+    assertSame(serverModule.findFunction("make"), function.entity());
+    assertEquals(Identifier.ofEntity("make").withModule("api"), function.name());
+    assertEquals(AstBuiltinType.INT64, call.type());
   }
 
   @Test
@@ -124,7 +151,7 @@ class CallResolutionTest extends AbstractSemanticsTest {
         """;
     var module = parseCode(code);
     var sa = new SemanticAnalyzer(errorConsumer);
-    sa.analyze(module);
+    sa.analyze(List.of(module));
     assertEquals(List.of(), errorConsumer.errors());
     {
       var expr = extractReturnExpression(module.findFunction("f"));
@@ -158,7 +185,7 @@ class CallResolutionTest extends AbstractSemanticsTest {
         """;
     var module = parseCode(code);
     var sa = new SemanticAnalyzer(errorConsumer);
-    sa.analyze(module);
+    sa.analyze(List.of(module));
     assertEquals(List.of(), errorConsumer.errors());
 
     var external = module.findFunction("external");
@@ -198,7 +225,7 @@ class CallResolutionTest extends AbstractSemanticsTest {
         """;
     var module = parseCode(code);
     var sa = new SemanticAnalyzer(errorConsumer);
-    sa.analyze(module);
+    sa.analyze(List.of(module));
     assertEquals(List.of(), errorConsumer.errors());
 
     var call = (AstCall) extractReturnExpression(module.findFunction("f"));
@@ -220,7 +247,7 @@ class CallResolutionTest extends AbstractSemanticsTest {
         """;
     var module = parseCode(code);
     var sa = new SemanticAnalyzer(errorConsumer);
-    sa.analyze(module);
+    sa.analyze(List.of(module));
     assertEquals(List.of(), errorConsumer.errors());
     {
       var block = module.findFunction("g").block();
@@ -245,7 +272,7 @@ class CallResolutionTest extends AbstractSemanticsTest {
         """;
     var module = parseCode(code);
     var sa = new SemanticAnalyzer(errorConsumer);
-    sa.analyze(module);
+    sa.analyze(List.of(module));
     assertEquals(List.of("Function 'test~f' expects 1 arguments, got 0"), errorConsumer.errors());
   }
 
@@ -261,7 +288,7 @@ class CallResolutionTest extends AbstractSemanticsTest {
         """;
     var module = parseCode(code);
     var sa = new SemanticAnalyzer(errorConsumer);
-    sa.analyze(module);
+    sa.analyze(List.of(module));
     assertEquals(
         List.of("Argument 0 of function 'test~f' has type 'bool', expected 'int64'"),
         errorConsumer.errors());

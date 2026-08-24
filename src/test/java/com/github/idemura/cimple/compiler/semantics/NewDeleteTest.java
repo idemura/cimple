@@ -24,7 +24,7 @@ class NewDeleteTest extends AbstractSemanticsTest {
         """;
     var module = parseCode(code);
     var sa = new SemanticAnalyzer(errorConsumer);
-    sa.analyze(module);
+    sa.analyze(List.of(module));
     assertEquals(List.of(), errorConsumer.errors());
     var statements = module.findFunction("f").block().statements();
     {
@@ -50,7 +50,7 @@ class NewDeleteTest extends AbstractSemanticsTest {
         """;
     var module = parseCode(code);
     var sa = new SemanticAnalyzer(errorConsumer);
-    sa.analyze(module);
+    sa.analyze(List.of(module));
     assertEquals(
         List.of(
             "Delete expression of type 'int64', expected pointer",

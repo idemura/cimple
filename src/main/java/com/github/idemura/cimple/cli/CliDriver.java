@@ -55,18 +55,15 @@ public class CliDriver {
   }
 
   boolean run() {
-    var success = true;
     var errorConsumer = new CliErrorConsumer();
     errorConsumer.enable(Mode.PRINT_LEVEL);
     errorConsumer.enable(Mode.PRINT_LOCATION);
+    var sources = new ArrayList<String>();
+    sources.add("lib/_builtin.ci");
+    sources.addAll(files);
     var compiler = new Compiler(compilerParams(), errorConsumer, codeGenerator());
-    for (var fileName : files) {
-      var code = readCodeFromFile(fileName);
-      if (!compiler.compile(fileName, code)) {
-        success = false;
-      }
-    }
-    return success;
+    var codeList = sources.stream().map(CliDriver::readCodeFromFile).toList();
+    return compiler.compile(codeList);
   }
 
   private CompilerParams compilerParams() {

@@ -22,7 +22,6 @@ import com.github.idemura.cimple.compiler.ast.AstFunction;
 import com.github.idemura.cimple.compiler.ast.AstFunctionHeader;
 import com.github.idemura.cimple.compiler.ast.AstFunctionType;
 import com.github.idemura.cimple.compiler.ast.AstLocal;
-import com.github.idemura.cimple.compiler.ast.AstModule;
 import com.github.idemura.cimple.compiler.ast.AstPointerType;
 import com.github.idemura.cimple.compiler.ast.AstRecordType;
 import com.github.idemura.cimple.compiler.ast.AstTypeHolder;
@@ -40,22 +39,6 @@ public class NameResolutionVisitor extends AstExpressionRewriteVisitor {
     super(new ExpressionRewriter(nameMap, errorConsumer));
     this.nameMap = nameMap;
     this.errorConsumer = errorConsumer;
-  }
-
-  @Override
-  protected void visit(AstModule node) {
-    // Named function types are structural:
-    //   type function foo(int x) bool;
-    //   type function bar(int x) bool;
-    // Values of types `foo` and `bar` are assignment-compatible because the signatures are the
-    // same. Functions therefore need an explicit lambda type derived from their headers. Assign
-    // those types to all module-level functions before resolving names inside function bodies.
-    for (var entity : node.definitions()) {
-      if (entity instanceof AstFunction function) {
-        function.makeLambdaType();
-      }
-    }
-    super.visit(node);
   }
 
   @Override

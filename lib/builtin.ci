@@ -1,0 +1,3 @@
+module _builtin;
+
+function int64.println();

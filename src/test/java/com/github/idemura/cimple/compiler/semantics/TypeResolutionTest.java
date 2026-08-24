@@ -18,7 +18,7 @@ class TypeResolutionTest extends AbstractSemanticsTest {
         var apa int[]*[];
         """;
     var module = parseCode(code);
-    new SemanticAnalyzer(errorConsumer).analyze(module);
+    new SemanticAnalyzer(errorConsumer).analyze(List.of(module));
     assertEquals(List.of(), errorConsumer.errors());
     assertEquals(arrayType(AstBuiltinType.INT64), module.findVariable("a").type());
     assertEquals(arrayType(pointerType(AstBuiltinType.INT64)), module.findVariable("ap").type());

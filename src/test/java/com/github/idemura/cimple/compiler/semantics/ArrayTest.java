@@ -56,7 +56,7 @@ class ArrayTest extends AbstractSemanticsTest {
         }
         """;
     var module = parseCode(code);
-    new SemanticAnalyzer(errorConsumer).analyze(module);
+    new SemanticAnalyzer(errorConsumer).analyze(List.of(module));
     assertEquals(List.of(), errorConsumer.errors());
 
     assertArraySizeCall(module.findFunction("f"), arrayType(AstBuiltinType.INT64));
@@ -76,7 +76,7 @@ class ArrayTest extends AbstractSemanticsTest {
         }
         """;
     var module = parseCode(code);
-    new SemanticAnalyzer(errorConsumer).analyze(module);
+    new SemanticAnalyzer(errorConsumer).analyze(List.of(module));
     assertEquals(List.of(), errorConsumer.errors());
 
     assertArraySizeCall(module.findFunction("f"), arrayType(AstBuiltinType.INT64));
@@ -92,7 +92,7 @@ class ArrayTest extends AbstractSemanticsTest {
         }
         """;
     var module = parseCode(code);
-    new SemanticAnalyzer(errorConsumer).analyze(module);
+    new SemanticAnalyzer(errorConsumer).analyze(List.of(module));
     assertEquals(List.of("Array method 'size' expects 0 arguments, got 1"), errorConsumer.errors());
   }
 
@@ -110,7 +110,7 @@ class ArrayTest extends AbstractSemanticsTest {
         }
         """;
     var module = parseCode(code);
-    new SemanticAnalyzer(errorConsumer).analyze(module);
+    new SemanticAnalyzer(errorConsumer).analyze(List.of(module));
     assertEquals(List.of(), errorConsumer.errors());
 
     assertArrayAccess(module.findFunction("f"), AstBuiltinType.INT64);
@@ -128,7 +128,7 @@ class ArrayTest extends AbstractSemanticsTest {
         }
         """;
     var module = parseCode(code);
-    new SemanticAnalyzer(errorConsumer).analyze(module);
+    new SemanticAnalyzer(errorConsumer).analyze(List.of(module));
     assertEquals(
         List.of(
             "Array access requires an array, got 'int64'",

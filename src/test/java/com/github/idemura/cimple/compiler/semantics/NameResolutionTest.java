@@ -21,7 +21,7 @@ class NameResolutionTest extends AbstractSemanticsTest {
         """;
     var module = parseCode(code);
     var semanticAnalyzer = new SemanticAnalyzer(errorConsumer);
-    semanticAnalyzer.analyze(module);
+    semanticAnalyzer.analyze(List.of(module));
     assertEquals(List.of(), errorConsumer.errors());
     var nameMap = semanticAnalyzer.nameMap();
     assertSame(module.findVariable("x"), nameMap.lookupEntity(Identifier.ofEntity("x")));
@@ -41,7 +41,7 @@ class NameResolutionTest extends AbstractSemanticsTest {
         """;
     var module = parseCode(code);
     var sa = new SemanticAnalyzer(errorConsumer);
-    sa.analyze(module);
+    sa.analyze(List.of(module));
     assertEquals(
         List.of("Definition of variable 'x' has a name collision with variable defined at 2,5"),
         errorConsumer.errors());
@@ -57,7 +57,7 @@ class NameResolutionTest extends AbstractSemanticsTest {
         """;
     var module = parseCode(code);
     var sa = new SemanticAnalyzer(errorConsumer);
-    sa.analyze(module);
+    sa.analyze(List.of(module));
     assertEquals(
         List.of("Definition of function 'f' has a name collision with function defined at 2,10"),
         errorConsumer.errors());
@@ -73,7 +73,7 @@ class NameResolutionTest extends AbstractSemanticsTest {
         """;
     var module = parseCode(code);
     var sa = new SemanticAnalyzer(errorConsumer);
-    sa.analyze(module);
+    sa.analyze(List.of(module));
     assertEquals(
         List.of("Definition of function 'f' has a name collision with variable defined at 2,5"),
         errorConsumer.errors());
@@ -89,7 +89,7 @@ class NameResolutionTest extends AbstractSemanticsTest {
         """;
     var module = parseCode(code);
     var sa = new SemanticAnalyzer(errorConsumer);
-    sa.analyze(module);
+    sa.analyze(List.of(module));
     assertEquals(List.of("Duplicate type: 'test~R'. Defined at 2,13."), errorConsumer.errors());
   }
 }

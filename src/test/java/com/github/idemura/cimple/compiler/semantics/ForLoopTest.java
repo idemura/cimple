@@ -9,7 +9,7 @@ import org.junit.jupiter.api.Test;
 class ForLoopTest extends AbstractSemanticsTest {
   private void analyze(String code) {
     var module = parseCode(code);
-    new SemanticAnalyzer(errorConsumer).analyze(module);
+    new SemanticAnalyzer(errorConsumer).analyze(List.of(module));
   }
 
   @Test

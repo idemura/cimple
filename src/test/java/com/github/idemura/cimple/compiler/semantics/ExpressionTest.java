@@ -29,7 +29,7 @@ class ExpressionTest extends AbstractSemanticsTest {
         """;
     var module = parseCode(code);
     var sa = new SemanticAnalyzer(errorConsumer);
-    sa.analyze(module);
+    sa.analyze(List.of(module));
     assertEquals(List.of(), errorConsumer.errors());
   }
 
@@ -48,7 +48,7 @@ class ExpressionTest extends AbstractSemanticsTest {
         """;
     var module = parseCode(code);
     var sa = new SemanticAnalyzer(errorConsumer);
-    sa.analyze(module);
+    sa.analyze(List.of(module));
     assertEquals(List.of(), errorConsumer.errors());
 
     var statements = module.findFunction("f").block().statements();
@@ -76,7 +76,7 @@ class ExpressionTest extends AbstractSemanticsTest {
         """;
     var module = parseCode(code);
     var sa = new SemanticAnalyzer(errorConsumer);
-    sa.analyze(module);
+    sa.analyze(List.of(module));
     assertEquals(List.of(), errorConsumer.errors());
 
     var statements = module.findFunction("f").block().statements();
@@ -104,7 +104,7 @@ class ExpressionTest extends AbstractSemanticsTest {
         """;
     var module = parseCode(code);
     var sa = new SemanticAnalyzer(errorConsumer);
-    sa.analyze(module);
+    sa.analyze(List.of(module));
     assertEquals(
         List.of(
             "Field access requires a record, got 'int64'",

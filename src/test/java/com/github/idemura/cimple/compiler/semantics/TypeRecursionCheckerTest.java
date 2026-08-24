@@ -22,7 +22,7 @@ class TypeRecursionCheckerTest extends AbstractSemanticsTest {
         type function Visitor(v Visitor*);
         """;
     var module = parseCode(code);
-    new SemanticAnalyzer(errorConsumer).analyze(module);
+    new SemanticAnalyzer(errorConsumer).analyze(List.of(module));
     assertEquals(List.of(), errorConsumer.errors());
   }
 
@@ -36,7 +36,7 @@ class TypeRecursionCheckerTest extends AbstractSemanticsTest {
         }
         """;
     var module = parseCode(code);
-    new SemanticAnalyzer(errorConsumer).analyze(module);
+    new SemanticAnalyzer(errorConsumer).analyze(List.of(module));
     assertEquals(List.of("Recursive type definition: 'test~Node'"), errorConsumer.errors());
   }
 
@@ -51,7 +51,7 @@ class TypeRecursionCheckerTest extends AbstractSemanticsTest {
         }
         """;
     var module = parseCode(code);
-    new SemanticAnalyzer(errorConsumer).analyze(module);
+    new SemanticAnalyzer(errorConsumer).analyze(List.of(module));
     assertEquals(List.of("Recursive type definition: 'test~Tree'"), errorConsumer.errors());
   }
 
@@ -63,7 +63,7 @@ class TypeRecursionCheckerTest extends AbstractSemanticsTest {
         type function Callback(next Callback);
         """;
     var module = parseCode(code);
-    new SemanticAnalyzer(errorConsumer).analyze(module);
+    new SemanticAnalyzer(errorConsumer).analyze(List.of(module));
     assertEquals(List.of("Recursive type definition: 'test~Callback'"), errorConsumer.errors());
   }
 
@@ -80,7 +80,7 @@ class TypeRecursionCheckerTest extends AbstractSemanticsTest {
         }
         """;
     var module = parseCode(code);
-    new SemanticAnalyzer(errorConsumer).analyze(module);
+    new SemanticAnalyzer(errorConsumer).analyze(List.of(module));
     assertEquals(
         List.of("Recursive type definition: 'test~A'", "Recursive type definition: 'test~B'"),
         errorConsumer.errors());

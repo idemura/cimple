@@ -3,6 +3,7 @@ package com.github.idemura.cimple.compiler.codegen.c;
 import com.github.idemura.cimple.compiler.IndentWriter;
 import com.github.idemura.cimple.compiler.ast.AstModule;
 import com.github.idemura.cimple.compiler.codegen.CodeGenerator;
+import java.util.List;
 
 public class CCodeGenerator extends CodeGenerator {
   private final CCodeGeneratorParams params;
@@ -14,14 +15,21 @@ public class CCodeGenerator extends CodeGenerator {
   }
 
   @Override
-  public void generateCode(AstModule module) {
+  public void generateCode(List<AstModule> modules) {
     if (params.outputPreamble()) {
       emitPrologue();
     }
-    module.accept(new CCodeGeneratorVisitor(out, params));
+    for (var module : modules) {
+      module.accept(new CCodeGeneratorVisitor(out, params));
+    }
     if (params.outputPreamble()) {
       emitEpilogue();
     }
+  }
+
+  @Override
+  public void generateCode(AstModule module) {
+    generateCode(List.of(module));
   }
 
   private void emitPrologue() {
