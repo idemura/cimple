@@ -76,7 +76,20 @@ public enum Keyword {
         .build();
   }
 
+  // Builtin types that we allow to define methods for.
   public static Set<String> reservedTypeNames() {
-    return reservedNames();
+    var builder = new ImmutableSet.Builder<String>();
+    return builder
+        .add("bool")
+        .add("byte")
+        .add("char")
+        .add("float")
+        .add("float32")
+        .add("float64")
+        .add("int")
+        .add("int32")
+        .add("int64")
+        .add("string")
+        .build();
   }
 }

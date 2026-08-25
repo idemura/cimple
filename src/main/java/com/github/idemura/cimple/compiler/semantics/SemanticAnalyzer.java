@@ -85,7 +85,7 @@ public class SemanticAnalyzer {
         }
       }
     }
-    // Collect functions and variables only after types, so methods can be keyed by receiver type.
+    // Collect functions and variables only after types, so methods can be keyed by object type.
     for (var module : modules) {
       for (var def : module.definitions()) {
         switch (def) {
