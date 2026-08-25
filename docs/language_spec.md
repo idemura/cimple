@@ -97,7 +97,7 @@ Modules cannot be nested.
 
 ```
 <function> := "function" <function_name> "(" <argument_list>? ")" <type_ref>? (<block> | ";")
-<function_name> := (<identifier> ":")? <identifier>
+<function_name> := (<identifier> ".")? <identifier>
 <type_ref> := <identifier> ("[]" | "*")*
 <argument_list> := <argument> ("," <argument>)*
 <argument> := <identifier> <type_ref>?

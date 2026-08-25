@@ -5,6 +5,7 @@ import com.beust.jcommander.Parameter;
 import com.github.idemura.cimple.compiler.Compiler;
 import com.github.idemura.cimple.compiler.CompilerParams;
 import com.github.idemura.cimple.compiler.ErrorConsumer.Mode;
+import com.github.idemura.cimple.compiler.SourceCode;
 import com.github.idemura.cimple.compiler.codegen.CodeGenerator;
 import com.github.idemura.cimple.compiler.codegen.NoopCodeGenerator;
 import com.github.idemura.cimple.compiler.codegen.c.CCodeGenerator;
@@ -62,8 +63,8 @@ public class CliDriver {
     sources.add("lib/_builtin.ci");
     sources.addAll(files);
     var compiler = new Compiler(compilerParams(), errorConsumer, codeGenerator());
-    var codeList = sources.stream().map(CliDriver::readCodeFromFile).toList();
-    return compiler.compile(codeList);
+    var sourceCodeList = sources.stream().map(CliDriver::readSourceCodeFromFile).toList();
+    return compiler.compile(sourceCodeList);
   }
 
   private CompilerParams compilerParams() {
@@ -89,9 +90,9 @@ public class CliDriver {
     };
   }
 
-  static String readCodeFromFile(String fileName) {
+  static SourceCode readSourceCodeFromFile(String fileName) {
     try {
-      return Files.readString(Paths.get(fileName));
+      return new SourceCode(Files.readString(Paths.get(fileName)), fileName);
     } catch (IOException e) {
       throw new UncheckedIOException(e);
     }

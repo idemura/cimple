@@ -25,10 +25,10 @@ public final class AstCall extends AstExpression {
   }
 
   @Override
-  public AstExpression rewrite(AstExpressionRewriter rewriter) {
-    function = function.rewrite(rewriter);
-    arguments = arguments.stream().map(a -> a.rewrite(rewriter)).collect(toImmutableList());
-    return rewriter.rewrite(this);
+  public AstExpression rewrite(AstExpressionRewriteVisitor visitor) {
+    function = function.rewrite(visitor);
+    arguments = arguments.stream().map(a -> a.rewrite(visitor)).collect(toImmutableList());
+    return visitor.rewrite(this);
   }
 
   @Override

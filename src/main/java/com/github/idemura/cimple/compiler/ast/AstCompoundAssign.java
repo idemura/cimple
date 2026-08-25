@@ -18,10 +18,10 @@ public final class AstCompoundAssign extends AstExpression {
   }
 
   @Override
-  public AstExpression rewrite(AstExpressionRewriter rewriter) {
-    target = target.rewrite(rewriter);
-    value = value.rewrite(rewriter);
-    return rewriter.rewrite(this);
+  public AstExpression rewrite(AstExpressionRewriteVisitor visitor) {
+    target = target.rewrite(visitor);
+    value = value.rewrite(visitor);
+    return visitor.rewrite(this);
   }
 
   @Override

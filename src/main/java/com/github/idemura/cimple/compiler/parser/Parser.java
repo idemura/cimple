@@ -554,7 +554,7 @@ public class Parser {
     var header = new AstFunctionHeader();
     var current = take(IDENTIFIER);
     Identifier name;
-    if (tokenizer.takeIf(COLON)) {
+    if (tokenizer.takeIf(PERIOD)) {
       var objectType = new AstTypeRef();
       objectType.name(Identifier.ofType(current.value()));
       objectType.location(current.location());

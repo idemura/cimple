@@ -16,10 +16,10 @@ public final class AstArrayAccess extends AstExpression {
   }
 
   @Override
-  public AstExpression rewrite(AstExpressionRewriter rewriter) {
-    array = array.rewrite(rewriter);
-    index = index.rewrite(rewriter);
-    return rewriter.rewrite(this);
+  public AstExpression rewrite(AstExpressionRewriteVisitor visitor) {
+    array = array.rewrite(visitor);
+    index = index.rewrite(visitor);
+    return visitor.rewrite(this);
   }
 
   @Override

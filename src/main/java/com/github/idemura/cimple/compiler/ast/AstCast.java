@@ -16,9 +16,9 @@ public final class AstCast extends AstExpression {
   }
 
   @Override
-  public AstExpression rewrite(AstExpressionRewriter rewriter) {
-    expression = expression.rewrite(rewriter);
-    return rewriter.rewrite(this);
+  public AstExpression rewrite(AstExpressionRewriteVisitor visitor) {
+    expression = expression.rewrite(visitor);
+    return visitor.rewrite(this);
   }
 
   @Override

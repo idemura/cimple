@@ -8,8 +8,11 @@ import com.github.idemura.cimple.compiler.parser.Tokenizer;
 import com.github.idemura.cimple.compiler.semantics.SemanticAnalyzer;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Set;
 
 public class Compiler {
+  private static final Set<String> BUILTIN_FILES = Set.of("lib/_builtin.ci");
+
   private final CompilerParams params;
   private final IndentWriter debugOutput;
   private final ErrorConsumer errorConsumer;
@@ -22,10 +25,10 @@ public class Compiler {
     this.codeGenerator = codeGenerator;
   }
 
-  public boolean compile(List<String> codeList) {
+  public boolean compile(List<SourceCode> sourceCodeList) {
     List<AstModule> modules;
     try {
-      modules = parseModules(codeList);
+      modules = parseModules(sourceCodeList);
     } catch (CompilerException e) {
       // Fatal frontend errors are reported through the error consumer.
       return false;
@@ -49,26 +52,31 @@ public class Compiler {
     return true;
   }
 
-  private List<AstModule> parseModules(List<String> codeList) {
+  private List<AstModule> parseModules(List<SourceCode> sourceCodeList) {
     var modules = new ArrayList<AstModule>();
-    for (var code : codeList) {
-      modules.add(parseModule(code));
+    for (var sourceCode : sourceCodeList) {
+      modules.add(parseModule(sourceCode));
     }
     return modules;
   }
 
-  private AstModule parseModule(String code) {
+  private AstModule parseModule(SourceCode sourceCode) {
     var tokenizer = new Tokenizer(errorConsumer);
-    tokenizer.split(code, null);
+    tokenizer.split(sourceCode.code(), sourceCode.fileName());
     if (params.printTokens()) {
       debugOutput.writeLine(tokenizer.tokenList().toString());
       debugOutput.writeLine("\n");
     }
     var module = new Parser(tokenizer, errorConsumer).parse();
+    module.builtin(isBuiltinFile(sourceCode.fileName()));
     if (params.printAst()) {
       debugOutput.writeLine("Parse tree\n");
       new PrintAstVisitor(debugOutput).print(module);
     }
     return module;
+  }
+
+  private static boolean isBuiltinFile(String fileName) {
+    return fileName != null && BUILTIN_FILES.contains(fileName);
   }
 }

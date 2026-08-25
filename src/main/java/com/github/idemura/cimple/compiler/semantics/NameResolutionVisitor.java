@@ -15,7 +15,6 @@ import com.github.idemura.cimple.compiler.ast.AstDelete;
 import com.github.idemura.cimple.compiler.ast.AstEntityRef;
 import com.github.idemura.cimple.compiler.ast.AstExpression;
 import com.github.idemura.cimple.compiler.ast.AstExpressionRewriteVisitor;
-import com.github.idemura.cimple.compiler.ast.AstExpressionRewriter;
 import com.github.idemura.cimple.compiler.ast.AstFieldAccess;
 import com.github.idemura.cimple.compiler.ast.AstFor;
 import com.github.idemura.cimple.compiler.ast.AstFunction;
@@ -36,7 +35,6 @@ public class NameResolutionVisitor extends AstExpressionRewriteVisitor {
   private final ErrorConsumer errorConsumer;
 
   public NameResolutionVisitor(NameMap nameMap, ErrorConsumer errorConsumer) {
-    super(new ExpressionRewriter(nameMap, errorConsumer));
     this.nameMap = nameMap;
     this.errorConsumer = errorConsumer;
   }
@@ -144,254 +142,240 @@ public class NameResolutionVisitor extends AstExpressionRewriteVisitor {
     }
   }
 
-  private static class ExpressionRewriter extends AstExpressionRewriter {
-    private final NameMap nameMap;
-    private final ErrorConsumer errorConsumer;
-
-    ExpressionRewriter(NameMap nameMap, ErrorConsumer errorConsumer) {
-      this.nameMap = nameMap;
-      this.errorConsumer = errorConsumer;
-    }
-
-    @Override
-    public AstExpression rewrite(AstEntityRef node) {
-      if (node.isResolved()) {
-        return node;
-      }
-      // Parser-created operator references are already tagged as builtins.
-      if (node.isBuiltin()) {
-        return node;
-      }
-      var entity = nameMap.lookupEntity(node.name());
-      if (entity == null) {
-        errorConsumer.errorAt(node.location(), "Undefined name: '%s'", node.name());
-        return node;
-      }
-      node.name(entity.name());
-      node.entity(entity);
+  @Override
+  public AstExpression rewrite(AstEntityRef node) {
+    if (node.isResolved()) {
       return node;
     }
+    // Parser-created operator references are already tagged as builtins.
+    if (node.isBuiltin()) {
+      return node;
+    }
+    var entity = nameMap.lookupEntity(node.name());
+    if (entity == null) {
+      errorConsumer.errorAt(node.location(), "Undefined name: '%s'", node.name());
+      return node;
+    }
+    node.name(entity.name());
+    node.entity(entity);
+    return node;
+  }
 
-    @Override
-    public AstExpression rewrite(AstFieldAccess node) {
-      if (node.method()) {
+  @Override
+  public AstExpression rewrite(AstFieldAccess node) {
+    if (node.method()) {
+      return node;
+    }
+    var objectType = checkNotNull(node.object().type());
+    if (!(objectType instanceof AstRecordType recordType)) {
+      errorConsumer.errorAt(
+          node.location(), "Field access requires a record, got '%s'", objectType.name());
+      return node;
+    }
+    for (var field : recordType.fields()) {
+      if (field.name().entityName().equals(node.fieldName())) {
+        node.field(field);
         return node;
       }
-      var objectType = checkNotNull(node.object().type());
-      if (!(objectType instanceof AstRecordType recordType)) {
-        errorConsumer.errorAt(
-            node.location(), "Field access requires a record, got '%s'", objectType.name());
+    }
+    errorConsumer.errorAt(
+        node.location(),
+        "Undefined field '%s' in record '%s'",
+        node.fieldName(),
+        recordType.name());
+    return node;
+  }
+
+  @Override
+  public AstExpression rewrite(AstArrayAccess node) {
+    var arrayType = checkNotNull(node.array().type());
+    if (!(arrayType instanceof AstArrayType)) {
+      errorConsumer.errorAt(
+          node.location(), "Array access requires an array, got '%s'", arrayType.name());
+    }
+    var indexType = checkNotNull(node.index().type());
+    if (!AstBuiltinType.INT64.equals(indexType)) {
+      errorConsumer.errorAt(
+          node.index().location(), "Array index has type '%s', expected 'int64'", indexType.name());
+    }
+    return node;
+  }
+
+  @Override
+  public AstExpression rewrite(AstCall node) {
+    // Callee and argument expressions have already been rewritten by AstCall.acceptRewriter.
+    var function = node.function();
+    if (function instanceof AstFieldAccess field && field.method()) {
+      resolveMethodCall(node, field);
+    }
+    function = node.function();
+    // Builtin calls are selected here, once argument expressions are available.
+    if (function instanceof AstEntityRef ref && ref.isBuiltin()) {
+      if (ref.entity() == BuiltinFunctions.ARRAY_SIZE) {
         return node;
       }
-      for (var field : recordType.fields()) {
-        if (field.name().entityName().equals(node.fieldName())) {
-          node.field(field);
-          return node;
-        }
-      }
+      checkState(!ref.isResolved());
+      resolveBuiltinFunction(ref);
+    }
+    // Method lookup and builtin resolution may replace the callee expression.
+    checkCallParameters(node);
+    return node;
+  }
+
+  @Override
+  public AstExpression rewrite(AstCompoundAssign node) {
+    resolveBuiltinFunction(node.operation());
+    checkBinaryOperatorArguments(
+        node.operation(), List.of(node.target(), node.value()), node.location());
+    return node;
+  }
+
+  private void resolveBuiltinFunction(AstEntityRef operatorRef) {
+    // TODO: Select the builtin overload using the resolved argument types.
+    var function =
+        switch (operatorRef.name().entityName()) {
+          case "+" -> BuiltinFunctions.ADD_I64;
+          case "-" -> BuiltinFunctions.SUB_I64;
+          case "*" -> BuiltinFunctions.MUL_I64;
+          case "/" -> BuiltinFunctions.DIV_I64;
+          case "%" -> BuiltinFunctions.MOD_I64;
+          case "<" -> BuiltinFunctions.LT_I64;
+          case ">" -> BuiltinFunctions.GT_I64;
+          default ->
+              throw new IllegalStateException(
+                  "Unknown builtin entity '%s'".formatted(operatorRef.name()));
+        };
+    operatorRef.name(function.name());
+    operatorRef.entity(function);
+  }
+
+  private void resolveMethodCall(AstCall node, AstFieldAccess fieldAccess) {
+    var objectType = fieldAccess.object().type();
+    checkState(objectType != null);
+    if (objectType instanceof AstFunctionType && fieldAccess.fieldName().equals("call")) {
+      // Function values reserve `.call(...)` as explicit invocation syntax.
+      node.function(fieldAccess.object());
+      return;
+    }
+    if (objectType instanceof AstArrayType) {
+      resolveArrayMethodCall(node, fieldAccess);
+      return;
+    }
+    if (objectType == AstBuiltinType.VOID) {
+      errorConsumer.errorAt(
+          fieldAccess.location(),
+          "Cannot resolve method '%s' for null object",
+          fieldAccess.fieldName());
+      return;
+    }
+    if (objectType instanceof AstPointerType) {
+      errorConsumer.errorAt(
+          fieldAccess.location(), "Method of pointer is not allowed", objectType.name());
+      return;
+    }
+    var methodName = objectType.name().withEntity(fieldAccess.fieldName());
+    var function = nameMap.lookupMethod(methodName);
+    if (function == null) {
+      errorConsumer.errorAt(fieldAccess.location(), "Undefined method: '%s'", methodName);
+      return;
+    }
+
+    var functionRef = new AstEntityRef();
+    functionRef.name(function.name());
+    functionRef.entity(function);
+    functionRef.location(fieldAccess.location());
+
+    var arguments = new ArrayList<>(node.arguments());
+    arguments.add(function.header().objectIndex(), fieldAccess.object());
+    node.arguments(arguments);
+    node.function(functionRef);
+  }
+
+  private void resolveArrayMethodCall(AstCall node, AstFieldAccess fieldAccess) {
+    var function = BuiltinFunctions.lookupArrayMethod(fieldAccess.fieldName());
+    if (function == null) {
+      errorConsumer.errorAt(
+          fieldAccess.location(), "Undefined array method: '%s'", fieldAccess.fieldName());
+      return;
+    }
+    if (!node.arguments().isEmpty()) {
       errorConsumer.errorAt(
           node.location(),
-          "Undefined field '%s' in record '%s'",
-          node.fieldName(),
-          recordType.name());
-      return node;
+          "Array method '%s' expects 0 arguments, got %d",
+          fieldAccess.fieldName(),
+          node.arguments().size());
     }
 
-    @Override
-    public AstExpression rewrite(AstArrayAccess node) {
-      var arrayType = checkNotNull(node.array().type());
-      if (!(arrayType instanceof AstArrayType)) {
-        errorConsumer.errorAt(
-            node.location(), "Array access requires an array, got '%s'", arrayType.name());
-      }
-      var indexType = checkNotNull(node.index().type());
-      if (!AstBuiltinType.INT64.equals(indexType)) {
-        errorConsumer.errorAt(
-            node.index().location(),
-            "Array index has type '%s', expected 'int64'",
-            indexType.name());
-      }
-      return node;
+    var functionRef = new AstEntityRef();
+    functionRef.name(function.name());
+    functionRef.entity(function);
+    functionRef.location(fieldAccess.location());
+
+    var arguments = new ArrayList<>(node.arguments());
+    arguments.add(0, fieldAccess.object());
+    node.arguments(arguments);
+    node.function(functionRef);
+  }
+
+  private void checkCallParameters(AstCall call) {
+    var type = checkNotNull(call.function().type());
+    if (type instanceof AstFunctionType functionType) {
+      checkFunctionArguments(
+          functionType,
+          call.arguments(),
+          call.location(),
+          calleeExpressionMessage(call.function()));
+    } else {
+      errorConsumer.errorAt(
+          call.function().location(), "Calling expression of type '%s', function expected.", type);
     }
+  }
 
-    @Override
-    public AstExpression rewrite(AstCall node) {
-      // Callee and argument expressions have already been rewritten by AstCall.acceptRewriter.
-      var function = node.function();
-      if (function instanceof AstFieldAccess field && field.method()) {
-        resolveMethodCall(node, field);
-      }
-      function = node.function();
-      // Builtin calls are selected here, once argument expressions are available.
-      if (function instanceof AstEntityRef ref && ref.isBuiltin()) {
-        if (ref.entity() == BuiltinFunctions.ARRAY_SIZE) {
-          return node;
-        }
-        checkState(!ref.isResolved());
-        resolveBuiltinFunction(ref);
-      }
-      // Method lookup and builtin resolution may replace the callee expression.
-      checkCallParameters(node);
-      return node;
+  private void checkBinaryOperatorArguments(
+      AstEntityRef operation, List<AstExpression> arguments, Location location) {
+    var type = checkNotNull(operation.type());
+    if (type instanceof AstFunctionType functionType) {
+      checkFunctionArguments(functionType, arguments, location, operation.name().toString());
+    } else {
+      errorConsumer.errorAt(
+          operation.location(), "Operator expression of type '%s', function expected.", type);
     }
+  }
 
-    @Override
-    public AstExpression rewrite(AstCompoundAssign node) {
-      resolveBuiltinFunction(node.operation());
-      checkBinaryOperatorArguments(
-          node.operation(), List.of(node.target(), node.value()), node.location());
-      return node;
+  private void checkFunctionArguments(
+      AstFunctionType functionType,
+      List<AstExpression> arguments,
+      Location location,
+      String functionName) {
+    var parameters = functionType.header().parameters();
+    if (arguments.size() != parameters.size()) {
+      errorConsumer.errorAt(
+          location,
+          "Function '%s' expects %d arguments, got %d",
+          functionName,
+          parameters.size(),
+          arguments.size());
+      return;
     }
-
-    private void resolveBuiltinFunction(AstEntityRef operatorRef) {
-      // TODO: Select the builtin overload using the resolved argument types.
-      var function =
-          switch (operatorRef.name().entityName()) {
-            case "+" -> BuiltinFunctions.ADD_I64;
-            case "-" -> BuiltinFunctions.SUB_I64;
-            case "*" -> BuiltinFunctions.MUL_I64;
-            case "/" -> BuiltinFunctions.DIV_I64;
-            case "%" -> BuiltinFunctions.MOD_I64;
-            case "<" -> BuiltinFunctions.LT_I64;
-            case ">" -> BuiltinFunctions.GT_I64;
-            default ->
-                throw new IllegalStateException(
-                    "Unknown builtin entity '%s'".formatted(operatorRef.name()));
-          };
-      operatorRef.name(function.name());
-      operatorRef.entity(function);
-    }
-
-    private void resolveMethodCall(AstCall node, AstFieldAccess fieldAccess) {
-      var objectType = fieldAccess.object().type();
-      checkState(objectType != null);
-      if (objectType instanceof AstFunctionType && fieldAccess.fieldName().equals("call")) {
-        // Function values reserve `.call(...)` as explicit invocation syntax.
-        node.function(fieldAccess.object());
-        return;
-      }
-      if (objectType instanceof AstArrayType) {
-        resolveArrayMethodCall(node, fieldAccess);
-        return;
-      }
-      if (objectType == AstBuiltinType.VOID) {
+    for (int i = 0; i < arguments.size(); i++) {
+      var argumentType = checkNotNull(arguments.get(i).type());
+      var parameterType = checkNotNull(parameters.get(i).type());
+      if (!argumentType.equals(parameterType)) {
         errorConsumer.errorAt(
-            fieldAccess.location(),
-            "Cannot resolve method '%s' for null object",
-            fieldAccess.fieldName());
-        return;
-      }
-      if (objectType instanceof AstPointerType) {
-        errorConsumer.errorAt(
-            fieldAccess.location(), "Method of pointer is not allowed", objectType.name());
-        return;
-      }
-      var methodName = objectType.name().withEntity(fieldAccess.fieldName());
-      var function = nameMap.lookupMethod(methodName);
-      if (function == null) {
-        errorConsumer.errorAt(fieldAccess.location(), "Undefined method: '%s'", methodName);
-        return;
-      }
-
-      var functionRef = new AstEntityRef();
-      functionRef.name(function.name());
-      functionRef.entity(function);
-      functionRef.location(fieldAccess.location());
-
-      var arguments = new ArrayList<>(node.arguments());
-      arguments.add(function.header().objectIndex(), fieldAccess.object());
-      node.arguments(arguments);
-      node.function(functionRef);
-    }
-
-    private void resolveArrayMethodCall(AstCall node, AstFieldAccess fieldAccess) {
-      var function = BuiltinFunctions.lookupArrayMethod(fieldAccess.fieldName());
-      if (function == null) {
-        errorConsumer.errorAt(
-            fieldAccess.location(), "Undefined array method: '%s'", fieldAccess.fieldName());
-        return;
-      }
-      if (!node.arguments().isEmpty()) {
-        errorConsumer.errorAt(
-            node.location(),
-            "Array method '%s' expects 0 arguments, got %d",
-            fieldAccess.fieldName(),
-            node.arguments().size());
-      }
-
-      var functionRef = new AstEntityRef();
-      functionRef.name(function.name());
-      functionRef.entity(function);
-      functionRef.location(fieldAccess.location());
-
-      var arguments = new ArrayList<>(node.arguments());
-      arguments.add(0, fieldAccess.object());
-      node.arguments(arguments);
-      node.function(functionRef);
-    }
-
-    private void checkCallParameters(AstCall call) {
-      var type = checkNotNull(call.function().type());
-      if (type instanceof AstFunctionType functionType) {
-        checkFunctionArguments(
-            functionType,
-            call.arguments(),
-            call.location(),
-            calleeExpressionMessage(call.function()));
-      } else {
-        errorConsumer.errorAt(
-            call.function().location(),
-            "Calling expression of type '%s', function expected.",
-            type);
-      }
-    }
-
-    private void checkBinaryOperatorArguments(
-        AstEntityRef operation, List<AstExpression> arguments, Location location) {
-      var type = checkNotNull(operation.type());
-      if (type instanceof AstFunctionType functionType) {
-        checkFunctionArguments(functionType, arguments, location, operation.name().toString());
-      } else {
-        errorConsumer.errorAt(
-            operation.location(), "Operator expression of type '%s', function expected.", type);
-      }
-    }
-
-    private void checkFunctionArguments(
-        AstFunctionType functionType,
-        List<AstExpression> arguments,
-        Location location,
-        String functionName) {
-      var parameters = functionType.header().parameters();
-      if (arguments.size() != parameters.size()) {
-        errorConsumer.errorAt(
-            location,
-            "Function '%s' expects %d arguments, got %d",
+            arguments.get(i).location(),
+            "Argument %d of function '%s' has type '%s', expected '%s'",
+            i,
             functionName,
-            parameters.size(),
-            arguments.size());
-        return;
-      }
-      for (int i = 0; i < arguments.size(); i++) {
-        var argumentType = checkNotNull(arguments.get(i).type());
-        var parameterType = checkNotNull(parameters.get(i).type());
-        if (!argumentType.equals(parameterType)) {
-          errorConsumer.errorAt(
-              arguments.get(i).location(),
-              "Argument %d of function '%s' has type '%s', expected '%s'",
-              i,
-              functionName,
-              argumentType.name(),
-              parameterType.name());
-        }
+            argumentType.name(),
+            parameterType.name());
       }
     }
+  }
 
-    private static String calleeExpressionMessage(AstExpression expression) {
-      if (expression instanceof AstEntityRef entityRef) {
-        return entityRef.name().toString();
-      }
-      return "function pointer";
+  private static String calleeExpressionMessage(AstExpression expression) {
+    if (expression instanceof AstEntityRef entityRef) {
+      return entityRef.name().toString();
     }
+    return "function pointer";
   }
 }

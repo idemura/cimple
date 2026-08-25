@@ -23,9 +23,9 @@ public final class AstNew extends AstExpression {
   }
 
   @Override
-  public AstExpression rewrite(AstExpressionRewriter rewriter) {
-    arguments = arguments.stream().map(a -> a.rewrite(rewriter)).collect(toImmutableList());
-    return rewriter.rewrite(this);
+  public AstExpression rewrite(AstExpressionRewriteVisitor visitor) {
+    arguments = arguments.stream().map(a -> a.rewrite(visitor)).collect(toImmutableList());
+    return visitor.rewrite(this);
   }
 
   @Override

@@ -6,6 +6,7 @@ import java.util.List;
 public final class AstModule extends AstNode {
   private final List<AstNode> definitions = new ArrayList<>();
   private String name;
+  private boolean builtin;
 
   public AstModule() {
     super();
@@ -17,6 +18,14 @@ public final class AstModule extends AstNode {
 
   public void name(String name) {
     this.name = name;
+  }
+
+  public boolean builtin() {
+    return builtin;
+  }
+
+  public void builtin(boolean builtin) {
+    this.builtin = builtin;
   }
 
   @Override

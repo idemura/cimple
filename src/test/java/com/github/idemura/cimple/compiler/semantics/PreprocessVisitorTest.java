@@ -209,7 +209,7 @@ class PreprocessVisitorTest extends AbstractSemanticsTest {
         """
         module test;
         type record Duration {}
-        function Duration:toMillis(x int, this) {}
+        function Duration.toMillis(x int, this) {}
         function f(x int) {}
         """;
     var module = parseCode(code);
@@ -282,16 +282,16 @@ class PreprocessVisitorTest extends AbstractSemanticsTest {
         """
         module test;
         type record Duration {}
-        function Duration:a(x bool) {}
-        function Duration:b(x, y) {}
+        function Duration.a(x bool) {}
+        function Duration.b(x, y) {}
         function f(x) {}
         """;
     var module = parseCode(code);
     module.accept(new PreprocessVisitor(reservedWords, errorConsumer));
     assertEquals(
         List.of(
-            "Method 'Duration:a': missing the object parameter",
-            "Method 'Duration:b': multiple object parameters",
+            "Method 'Duration.a': missing the object parameter",
+            "Method 'Duration.b': multiple object parameters",
             "Function 'f' cannot have object parameter 'x'"),
         errorConsumer.errors());
   }

@@ -16,7 +16,7 @@ public final class AstNullLiteral extends AstLiteral {
   }
 
   @Override
-  public AstExpression rewrite(AstExpressionRewriter rewriter) {
-    return rewriter.rewrite(this);
+  public AstExpression rewrite(AstExpressionRewriteVisitor visitor) {
+    return visitor.rewrite(this);
   }
 }

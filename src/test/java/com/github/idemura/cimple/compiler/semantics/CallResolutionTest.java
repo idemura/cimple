@@ -20,7 +20,7 @@ class CallResolutionTest extends AbstractSemanticsTest {
         """
         module test;
         type record Duration {}
-        function Duration:toMillis(x int, this) {}
+        function Duration.toMillis(x int, this) {}
         function f(x int) {}
         """;
     var module = parseCode(code);
@@ -130,7 +130,7 @@ class CallResolutionTest extends AbstractSemanticsTest {
     var call = (AstCall) extractReturnExpression(clientModule.findFunction("f"));
     var function = (AstEntityRef) call.function();
     assertSame(serverModule.findFunction("make"), function.entity());
-    assertEquals(Identifier.ofEntity("make").withModule("api"), function.name());
+    assertEquals(Identifier.ofEntity("make").withModule("server"), function.name());
     assertEquals(AstBuiltinType.INT64, call.type());
   }
 
@@ -142,7 +142,7 @@ class CallResolutionTest extends AbstractSemanticsTest {
         type record Duration {
           var seconds int;
         }
-        function Duration:toMillis(this) int {
+        function Duration.toMillis(this) int {
           return this.seconds * 1000;
         }
         function f(d Duration) {
@@ -177,7 +177,7 @@ class CallResolutionTest extends AbstractSemanticsTest {
         module test;
         type record Duration {}
         function external(x int) string;
-        function Duration:toMillis(this) int;
+        function Duration.toMillis(this) int;
         function f(d Duration) {
           var s = external(1);
           var m = d.toMillis();

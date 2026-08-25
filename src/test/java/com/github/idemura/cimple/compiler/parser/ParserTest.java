@@ -156,7 +156,7 @@ class ParserTest {
         module test;
         type record Duration {}
         function external(x int) string;
-        function Duration:toMillis(this) int;
+        function Duration.toMillis(this) int;
         """;
     var module = parseCode(code, makeErrorConsumer());
     {
@@ -280,7 +280,7 @@ class ParserTest {
     var code =
         """
         module test;
-        function Duration:toMillis(this) int {
+        function Duration.toMillis(this) int {
           return 6;
         }
         """;

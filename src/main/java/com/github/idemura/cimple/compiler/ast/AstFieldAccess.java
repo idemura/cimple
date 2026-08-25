@@ -17,9 +17,9 @@ public final class AstFieldAccess extends AstExpression {
   }
 
   @Override
-  public AstExpression rewrite(AstExpressionRewriter rewriter) {
-    object = object.rewrite(rewriter);
-    return rewriter.rewrite(this);
+  public AstExpression rewrite(AstExpressionRewriteVisitor visitor) {
+    object = object.rewrite(visitor);
+    return visitor.rewrite(this);
   }
 
   @Override

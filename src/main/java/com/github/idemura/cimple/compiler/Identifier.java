@@ -59,7 +59,7 @@ public record Identifier(String moduleName, String typeName, String entityName)
     if (entityName != null) {
       if (typeName != null) {
         sb.append(typeName);
-        sb.append(":");
+        sb.append(".");
       }
       sb.append(entityName);
     } else {

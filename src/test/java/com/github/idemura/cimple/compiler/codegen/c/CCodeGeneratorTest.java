@@ -5,6 +5,7 @@ import static org.junit.jupiter.api.Assertions.*;
 import com.github.idemura.cimple.compiler.Compiler;
 import com.github.idemura.cimple.compiler.CompilerParams;
 import com.github.idemura.cimple.compiler.InMemoryErrorConsumer;
+import com.github.idemura.cimple.compiler.SourceCode;
 import java.util.List;
 import org.junit.jupiter.api.Test;
 
@@ -18,7 +19,7 @@ class CCodeGeneratorTest {
     var codegen = new CCodeGenerator(codegenParamsBuilder.build(), output);
     var compilerParams = CompilerParams.builder().build();
     var compiler = new Compiler(compilerParams, errorConsumer, codegen);
-    assertTrue(compiler.compile(List.of(code)));
+    assertTrue(compiler.compile(List.of(new SourceCode(code))));
     assertEquals(0, errorConsumer.errorCount());
     return output.toString();
   }
