@@ -40,11 +40,11 @@ class CallResolutionTest extends AbstractSemanticsTest {
       assertEquals(-1, header.objectIndex());
       assertEquals(AstBuiltinType.VOID, header.resultType());
     }
-    var nameMap = semanticAnalyzer.nameMap();
+    var globalNameMap = semanticAnalyzer.globalNameMap();
     assertSame(
         module.findMethod("Duration", "toMillis"),
-        nameMap.lookupMethod(new Identifier("test", "Duration", "toMillis")));
-    assertNull(nameMap.lookupEntity(Identifier.ofEntity("toMillis")));
+        globalNameMap.lookupMethod(new Identifier("test", "Duration", "toMillis")));
+    assertNull(globalNameMap.lookupEntity(Identifier.ofEntity("toMillis")));
   }
 
   @Test

@@ -1,6 +1,7 @@
 package com.github.idemura.cimple.compiler.semantics;
 
 import com.github.idemura.cimple.compiler.ErrorConsumer;
+import com.github.idemura.cimple.compiler.Identifier;
 import com.github.idemura.cimple.compiler.ast.AstArrayType;
 import com.github.idemura.cimple.compiler.ast.AstBuiltinType;
 import com.github.idemura.cimple.compiler.ast.AstNew;
@@ -11,11 +12,14 @@ import com.github.idemura.cimple.compiler.ast.AstTypeRef;
 import com.github.idemura.cimple.compiler.ast.AstVisitor;
 
 public class TypeRefResolutionVisitor extends AstVisitor {
-  private final NameMap nameMap;
+  private final GlobalNameMap globalNameMap;
+  private final LocalNameMap localNameMap;
   private final ErrorConsumer errorConsumer;
 
-  public TypeRefResolutionVisitor(NameMap nameMap, ErrorConsumer errorConsumer) {
-    this.nameMap = nameMap;
+  public TypeRefResolutionVisitor(
+      GlobalNameMap globalNameMap, LocalNameMap localNameMap, ErrorConsumer errorConsumer) {
+    this.globalNameMap = globalNameMap;
+    this.localNameMap = localNameMap;
     this.errorConsumer = errorConsumer;
   }
 
@@ -38,7 +42,7 @@ public class TypeRefResolutionVisitor extends AstVisitor {
 
   private AstType resolveTypeRefSafe(AstType type) {
     if (type instanceof AstTypeRef typeRef) {
-      var resolvedType = nameMap.lookupType(typeRef.name());
+      var resolvedType = lookupType(typeRef.name());
       if (resolvedType == null) {
         errorConsumer.errorAt(type.location(), "Undefined type: '%s'", type.name());
         return AstBuiltinType.VOID;
@@ -52,5 +56,12 @@ public class TypeRefResolutionVisitor extends AstVisitor {
       arrayType.baseType(resolveTypeRefSafe(arrayType.baseType()));
     }
     return type;
+  }
+
+  private AstType lookupType(Identifier name) {
+    if (name.moduleName() == null) {
+      return localNameMap.lookupType(name);
+    }
+    return globalNameMap.lookupType(name);
   }
 }

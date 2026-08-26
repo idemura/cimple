@@ -13,6 +13,7 @@ import com.github.idemura.cimple.compiler.ast.AstBuiltinType;
 import com.github.idemura.cimple.compiler.ast.AstCall;
 import com.github.idemura.cimple.compiler.ast.AstCompoundAssign;
 import com.github.idemura.cimple.compiler.ast.AstDelete;
+import com.github.idemura.cimple.compiler.ast.AstEntity;
 import com.github.idemura.cimple.compiler.ast.AstEntityRef;
 import com.github.idemura.cimple.compiler.ast.AstExpression;
 import com.github.idemura.cimple.compiler.ast.AstExpressionRewriteVisitor;
@@ -34,12 +35,15 @@ import java.util.ArrayList;
 import java.util.List;
 
 public class NameResolutionVisitor extends AstExpressionRewriteVisitor {
-  private final NameMap nameMap;
+  private final GlobalNameMap globalNameMap;
+  private final LocalNameMap localNameMap;
   private final ErrorConsumer errorConsumer;
   private String moduleName;
 
-  public NameResolutionVisitor(NameMap nameMap, ErrorConsumer errorConsumer) {
-    this.nameMap = nameMap;
+  public NameResolutionVisitor(
+      GlobalNameMap globalNameMap, LocalNameMap localNameMap, ErrorConsumer errorConsumer) {
+    this.globalNameMap = globalNameMap;
+    this.localNameMap = localNameMap;
     this.errorConsumer = errorConsumer;
   }
 
@@ -62,13 +66,13 @@ public class NameResolutionVisitor extends AstExpressionRewriteVisitor {
   @Override
   protected void visit(AstFunction node) {
     try {
-      nameMap.beginScope();
+      localNameMap.beginScope();
       for (var parameter : node.header().parameters()) {
         registerLocal(parameter);
       }
       super.visit(node);
     } finally {
-      nameMap.endScope();
+      localNameMap.endScope();
     }
   }
 
@@ -118,15 +122,15 @@ public class NameResolutionVisitor extends AstExpressionRewriteVisitor {
   @Override
   protected void visit(AstFor node) {
     try {
-      nameMap.beginScope();
+      localNameMap.beginScope();
       super.visit(node);
     } finally {
-      nameMap.endScope();
+      localNameMap.endScope();
     }
   }
 
   private void registerLocal(AstVariable variable) {
-    var existing = nameMap.addLocal(variable);
+    var existing = localNameMap.addLocal(variable);
     if (existing != null) {
       errorConsumer.errorAt(
           variable.location(),
@@ -167,7 +171,7 @@ public class NameResolutionVisitor extends AstExpressionRewriteVisitor {
     if (node.isBuiltin()) {
       return node;
     }
-    var entity = nameMap.lookupEntity(node.name());
+    var entity = lookupEntity(node.name());
     if (entity == null) {
       errorConsumer.errorAt(node.location(), "Undefined name: '%s'", node.name());
       return node;
@@ -312,12 +316,19 @@ public class NameResolutionVisitor extends AstExpressionRewriteVisitor {
       // Builtin object types live in _builtin, while extension methods are declared in the
       // current source module.
       var localMethodName = new Identifier(moduleName, objectType.name().typeName(), fieldName);
-      var function = nameMap.lookupMethod(localMethodName);
+      var function = globalNameMap.lookupMethod(localMethodName);
       if (function != null) {
         return function;
       }
     }
-    return nameMap.lookupMethod(objectType.name().withEntity(fieldName));
+    return globalNameMap.lookupMethod(objectType.name().withEntity(fieldName));
+  }
+
+  private AstEntity lookupEntity(Identifier name) {
+    if (name.moduleName() == null) {
+      return localNameMap.lookupEntity(name);
+    }
+    return globalNameMap.lookupEntity(name);
   }
 
   private void resolveArrayMethodCall(AstCall node, AstFieldAccess fieldAccess) {

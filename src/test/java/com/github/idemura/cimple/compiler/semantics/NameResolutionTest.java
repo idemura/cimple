@@ -23,12 +23,12 @@ class NameResolutionTest extends AbstractSemanticsTest {
     var semanticAnalyzer = new SemanticAnalyzer(errorConsumer);
     semanticAnalyzer.analyze(List.of(module));
     assertEquals(List.of(), errorConsumer.errors());
-    var nameMap = semanticAnalyzer.nameMap().populateModuleShortNames("test");
-    assertSame(module.findVariable("x"), nameMap.lookupEntity(Identifier.ofEntity("x")));
-    assertSame(module.findVariable("y"), nameMap.lookupEntity(Identifier.ofEntity("y")));
-    assertSame(module.findFunction("f"), nameMap.lookupEntity(Identifier.ofEntity("f")));
-    assertSame(module.findFunction("g"), nameMap.lookupEntity(Identifier.ofEntity("g")));
-    assertSame(module.findType("R"), nameMap.lookupType(Identifier.ofType("R")));
+    var localNameMap = semanticAnalyzer.globalNameMap().populateModuleShortNames("test");
+    assertSame(module.findVariable("x"), localNameMap.lookupEntity(Identifier.ofEntity("x")));
+    assertSame(module.findVariable("y"), localNameMap.lookupEntity(Identifier.ofEntity("y")));
+    assertSame(module.findFunction("f"), localNameMap.lookupEntity(Identifier.ofEntity("f")));
+    assertSame(module.findFunction("g"), localNameMap.lookupEntity(Identifier.ofEntity("g")));
+    assertSame(module.findType("R"), localNameMap.lookupType(Identifier.ofType("R")));
   }
 
   @Test

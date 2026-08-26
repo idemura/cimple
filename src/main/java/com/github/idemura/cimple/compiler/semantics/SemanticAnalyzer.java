@@ -11,7 +11,7 @@ import java.util.List;
 
 public class SemanticAnalyzer {
   private final ErrorConsumer errorConsumer;
-  private final NameMap nameMap = new NameMap();
+  private final GlobalNameMap globalNameMap = new GlobalNameMap();
   private final ReservedWords reservedWords =
       new ReservedWords(Keyword.reservedNames(), Keyword.reservedTypeNames());
 
@@ -29,7 +29,7 @@ public class SemanticAnalyzer {
     }
 
     AstModule module;
-    NameMap nameMap;
+    LocalNameMap localNameMap;
   }
 
   private boolean analyzeWithContext(List<AnalyzerContext> contexts) {
@@ -46,9 +46,10 @@ public class SemanticAnalyzer {
     }
     for (var context : contexts) {
       var module = context.module;
-      context.nameMap = nameMap.populateModuleShortNames(module.name());
+      context.localNameMap = globalNameMap.populateModuleShortNames(module.name());
       // TODO: Include import names.
-      module.accept(new TypeRefResolutionVisitor(context.nameMap, errorConsumer));
+      module.accept(
+          new TypeRefResolutionVisitor(globalNameMap, context.localNameMap, errorConsumer));
       new TypeRecursionChecker(errorConsumer).check(module);
       if (hasErrors()) {
         return false;
@@ -63,7 +64,8 @@ public class SemanticAnalyzer {
     }
     for (var context : contexts) {
       var module = context.module;
-      module.accept(new NameResolutionVisitor(context.nameMap, errorConsumer));
+      module.accept(
+          new NameResolutionVisitor(globalNameMap, context.localNameMap, errorConsumer));
       if (hasErrors()) {
         return false;
       }
@@ -71,8 +73,8 @@ public class SemanticAnalyzer {
     return true;
   }
 
-  NameMap nameMap() {
-    return nameMap;
+  GlobalNameMap globalNameMap() {
+    return globalNameMap;
   }
 
   private boolean hasErrors() {
@@ -86,7 +88,7 @@ public class SemanticAnalyzer {
       for (var def : module.definitions()) {
         if (def instanceof AstType type) {
           type.name(type.name().withModule(module.name()));
-          var existing = nameMap.addType(type);
+          var existing = globalNameMap.addType(type);
           if (existing != null) {
             errorConsumer.errorAt(
                 type.location(),
@@ -104,14 +106,14 @@ public class SemanticAnalyzer {
         switch (def) {
           case AstFunction function -> {
             function.name(function.name().withModule(module.name()));
-            var existing = nameMap.addFunction(function);
+            var existing = globalNameMap.addFunction(function);
             if (existing != null) {
               errorEntityCollision(function, existing);
             }
           }
           case AstVariable variable -> {
             variable.name(variable.name().withModule(module.name()));
-            var existing = nameMap.addVariable(variable);
+            var existing = globalNameMap.addVariable(variable);
             if (existing != null) {
               errorEntityCollision(variable, existing);
             }
