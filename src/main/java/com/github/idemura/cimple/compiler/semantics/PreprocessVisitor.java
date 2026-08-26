@@ -31,6 +31,17 @@ import com.github.idemura.cimple.compiler.ast.AstUnionType;
 import com.github.idemura.cimple.compiler.ast.AstVariable;
 import java.util.HashMap;
 
+// Runs AST checks and rewrites that do not require name resolution:
+//  - Validates identifiers
+//  - Marks parameters and locals
+//  - Validates method object parameters
+//  - Sets missing function result types to void
+//  - Checks that variables have either a type or an initializer
+//  - Checks duplicate function parameters, record fields, and union variants
+//  - Normalizes builtin type aliases such as int and float
+//  - Marks method-call syntax
+//  - Rejects nested assignments
+//  - Types literal nodes
 class PreprocessVisitor extends AstExpressionRewriteVisitor {
   private final ReservedWords reservedWords;
   private final ErrorConsumer errorConsumer;
