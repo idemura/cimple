@@ -26,7 +26,6 @@ import com.github.idemura.cimple.compiler.ast.AstLocal;
 import com.github.idemura.cimple.compiler.ast.AstModule;
 import com.github.idemura.cimple.compiler.ast.AstPointerType;
 import com.github.idemura.cimple.compiler.ast.AstRecordType;
-import com.github.idemura.cimple.compiler.ast.AstType;
 import com.github.idemura.cimple.compiler.ast.AstTypeHolder;
 import com.github.idemura.cimple.compiler.ast.AstTypeRef;
 import com.github.idemura.cimple.compiler.ast.AstUnionType;
@@ -289,7 +288,7 @@ public class NameResolutionVisitor extends AstExpressionRewriteVisitor {
       return;
     }
     var methodName = objectType.name().withEntity(fieldAccess.fieldName());
-    var function = lookupMethod(objectType, fieldAccess.fieldName());
+    var function = (AstFunction) globalNameMap.lookupEntity(methodName);
     if (function == null) {
       errorConsumer.errorAt(fieldAccess.location(), "Undefined method: '%s'", methodName);
       return;
@@ -304,20 +303,6 @@ public class NameResolutionVisitor extends AstExpressionRewriteVisitor {
     arguments.add(function.header().objectIndex(), fieldAccess.object());
     node.arguments(arguments);
     node.function(functionRef);
-  }
-
-  private AstFunction lookupMethod(AstType objectType, String fieldName) {
-    checkNotNull(module.name());
-    if (objectType.name().isBuiltin()) {
-      // Builtin object types live in _builtin, while extension methods are declared in the
-      // current source module.
-      var localMethodName = new Identifier(module.name(), objectType.name().typeName(), fieldName);
-      var function = (AstFunction) globalNameMap.lookupEntity(localMethodName);
-      if (function != null) {
-        return function;
-      }
-    }
-    return (AstFunction) globalNameMap.lookupEntity(objectType.name().withEntity(fieldName));
   }
 
   private AstEntity lookupEntity(Identifier name) {
