@@ -64,8 +64,7 @@ public class SemanticAnalyzer {
     }
     for (var context : contexts) {
       var module = context.module;
-      module.accept(
-          new NameResolutionVisitor(globalNameMap, context.localNameMap, errorConsumer));
+      module.accept(new NameResolutionVisitor(globalNameMap, context.localNameMap, errorConsumer));
       if (hasErrors()) {
         return false;
       }

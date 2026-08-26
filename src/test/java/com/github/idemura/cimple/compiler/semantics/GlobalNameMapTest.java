@@ -13,8 +13,7 @@ class GlobalNameMapTest {
     var function = function("Duration", "toMillis");
     assertNull(globalNameMap.addFunction(function));
     assertNull(globalNameMap.lookupEntity(Identifier.ofEntity("toMillis")));
-    assertSame(
-        function, globalNameMap.lookupMethod(Identifier.ofTypeEntity("Duration", "toMillis")));
+    assertSame(function, globalNameMap.lookupEntity(Identifier.ofMethod("Duration", "toMillis")));
   }
 
   @Test

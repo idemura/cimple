@@ -77,7 +77,7 @@ public final class AstUtils {
       header.objectType(newTypeRef(objectTypeName));
     }
     var function = new AstFunction();
-    function.name(Identifier.ofTypeEntity(objectTypeName, name));
+    function.name(Identifier.ofMethod(objectTypeName, name));
     function.header(header);
     return function;
   }

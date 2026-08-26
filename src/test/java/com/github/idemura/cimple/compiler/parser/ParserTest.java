@@ -168,7 +168,7 @@ class ParserTest {
     }
     {
       var f = module.findMethod("Duration", "toMillis");
-      assertEquals(Identifier.ofTypeEntity("Duration", "toMillis"), f.name());
+      assertEquals(Identifier.ofMethod("Duration", "toMillis"), f.name());
       assertEquals(newTypeRef("Duration"), f.header().objectType());
       assertEquals(newTypeRef("int"), f.header().resultType());
       assertEquals(ImmutableList.of(rawVariable("this")), f.header().parameters());
@@ -288,7 +288,7 @@ class ParserTest {
     var header = module.findMethod("Duration", "toMillis").header();
     assertEquals(newTypeRef("Duration"), header.objectType());
     assertEquals(
-        Identifier.ofTypeEntity("Duration", "toMillis"),
+        Identifier.ofMethod("Duration", "toMillis"),
         module.findMethod("Duration", "toMillis").name());
     assertEquals(newTypeRef("int"), header.resultType());
     assertEquals(ImmutableList.of(rawVariable("this")), header.parameters());

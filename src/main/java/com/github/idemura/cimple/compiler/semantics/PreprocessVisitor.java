@@ -46,7 +46,7 @@ class PreprocessVisitor extends AstExpressionRewriteVisitor {
   private final ReservedWords reservedWords;
   private final ErrorConsumer errorConsumer;
   private final NormalizeTypeNameVisitor normalizeTypeNameVisitor = new NormalizeTypeNameVisitor();
-  private boolean builtin;
+  private AstModule module;
 
   PreprocessVisitor(ReservedWords reservedWords, ErrorConsumer errorConsumer) {
     this.reservedWords = reservedWords;
@@ -55,7 +55,7 @@ class PreprocessVisitor extends AstExpressionRewriteVisitor {
 
   @Override
   protected void visit(AstModule node) {
-    builtin = node.builtin();
+    module = node;
     checkName(node.name(), node.location());
     super.visit(node);
   }
@@ -328,7 +328,7 @@ class PreprocessVisitor extends AstExpressionRewriteVisitor {
   }
 
   private void checkUnderscoreRules(String name, Location location) {
-    if (builtin) {
+    if (module.builtin()) {
       // Exception for builtin modules.
       return;
     }

@@ -2,6 +2,7 @@ package com.github.idemura.cimple.compiler;
 
 import static com.github.idemura.cimple.compiler.Constants.BUILTIN_MODULE;
 
+// Type and entity only present for methods.
 public record Identifier(String moduleName, String typeName, String entityName)
     implements Comparable<Identifier> {
   public static Identifier ofEntity(String entityName) {
@@ -12,7 +13,7 @@ public record Identifier(String moduleName, String typeName, String entityName)
     return new Identifier(null, typeName, null);
   }
 
-  public static Identifier ofTypeEntity(String typeName, String entityName) {
+  public static Identifier ofMethod(String typeName, String entityName) {
     return new Identifier(null, typeName, entityName);
   }
 

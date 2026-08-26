@@ -11,21 +11,16 @@ import java.util.HashMap;
 import java.util.Map;
 
 public class GlobalNameMap {
-  private final Map<Identifier, AstType> typeQualifiedNameMap = new HashMap<>();
-  private final Map<Identifier, AstEntity> entityQualifiedNameMap = new HashMap<>();
-  private final Map<Identifier, AstFunction> methodMap = new HashMap<>();
+  private final Map<Identifier, AstType> typeMap = new HashMap<>();
+  private final Map<Identifier, AstEntity> entityMap = new HashMap<>();
 
   public GlobalNameMap() {}
 
   public AstType addType(AstType type) {
-    return typeQualifiedNameMap.putIfAbsent(type.name(), type);
+    return typeMap.putIfAbsent(type.name(), type);
   }
 
   public AstEntity addFunction(AstFunction function) {
-    var name = function.name();
-    if (name.typeName() != null) {
-      return methodMap.putIfAbsent(name, function);
-    }
     return addEntity(function);
   }
 
@@ -35,13 +30,13 @@ public class GlobalNameMap {
 
   public LocalNameMap populateModuleShortNames(String moduleName) {
     var result = new LocalNameMap();
-    for (var entry : typeQualifiedNameMap.entrySet()) {
+    for (var entry : typeMap.entrySet()) {
       var name = entry.getKey();
       if (moduleName.equals(name.moduleName())) {
         result.addType(entry.getValue());
       }
     }
-    for (var entry : entityQualifiedNameMap.entrySet()) {
+    for (var entry : entityMap.entrySet()) {
       var name = entry.getKey();
       if (moduleName.equals(name.moduleName())) {
         result.addEntity(entry.getValue());
@@ -51,28 +46,18 @@ public class GlobalNameMap {
   }
 
   public AstType lookupType(Identifier name) {
-    if (name.moduleName() == null) {
-      return null;
-    }
     if (name.isBuiltin()) {
       return lookupBuiltinType(name.typeName());
     }
-    return typeQualifiedNameMap.get(name);
+    return typeMap.get(name);
   }
 
   public AstEntity lookupEntity(Identifier name) {
-    if (name.moduleName() == null) {
-      return null;
-    }
-    return entityQualifiedNameMap.get(name);
-  }
-
-  public AstFunction lookupMethod(Identifier name) {
-    return methodMap.get(name);
+    return entityMap.get(name);
   }
 
   private AstEntity addEntity(AstEntity entity) {
-    return entityQualifiedNameMap.putIfAbsent(entity.name(), entity);
+    return entityMap.putIfAbsent(entity.name(), entity);
   }
 
   static AstType lookupBuiltinType(String name) {

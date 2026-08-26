@@ -38,7 +38,7 @@ public class NameResolutionVisitor extends AstExpressionRewriteVisitor {
   private final GlobalNameMap globalNameMap;
   private final LocalNameMap localNameMap;
   private final ErrorConsumer errorConsumer;
-  private String moduleName;
+  private AstModule module;
 
   public NameResolutionVisitor(
       GlobalNameMap globalNameMap, LocalNameMap localNameMap, ErrorConsumer errorConsumer) {
@@ -49,13 +49,8 @@ public class NameResolutionVisitor extends AstExpressionRewriteVisitor {
 
   @Override
   protected void visit(AstModule node) {
-    var previousModuleName = moduleName;
-    try {
-      moduleName = node.name();
-      super.visit(node);
-    } finally {
-      moduleName = previousModuleName;
-    }
+    module = node;
+    super.visit(node);
   }
 
   @Override
@@ -312,16 +307,17 @@ public class NameResolutionVisitor extends AstExpressionRewriteVisitor {
   }
 
   private AstFunction lookupMethod(AstType objectType, String fieldName) {
-    if (objectType.name().isBuiltin() && moduleName != null) {
+    checkNotNull(module.name());
+    if (objectType.name().isBuiltin()) {
       // Builtin object types live in _builtin, while extension methods are declared in the
       // current source module.
-      var localMethodName = new Identifier(moduleName, objectType.name().typeName(), fieldName);
-      var function = globalNameMap.lookupMethod(localMethodName);
+      var localMethodName = new Identifier(module.name(), objectType.name().typeName(), fieldName);
+      var function = (AstFunction) globalNameMap.lookupEntity(localMethodName);
       if (function != null) {
         return function;
       }
     }
-    return globalNameMap.lookupMethod(objectType.name().withEntity(fieldName));
+    return (AstFunction) globalNameMap.lookupEntity(objectType.name().withEntity(fieldName));
   }
 
   private AstEntity lookupEntity(Identifier name) {
