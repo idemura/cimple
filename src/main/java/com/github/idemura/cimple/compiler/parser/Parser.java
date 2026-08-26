@@ -37,6 +37,7 @@ import com.github.idemura.cimple.compiler.ast.AstReturn;
 import com.github.idemura.cimple.compiler.ast.AstStatement;
 import com.github.idemura.cimple.compiler.ast.AstStringLiteral;
 import com.github.idemura.cimple.compiler.ast.AstType;
+import com.github.idemura.cimple.compiler.ast.AstAliasType;
 import com.github.idemura.cimple.compiler.ast.AstTypeRef;
 import com.github.idemura.cimple.compiler.ast.AstUnionType;
 import com.github.idemura.cimple.compiler.ast.AstVariable;
@@ -96,13 +97,24 @@ public class Parser {
   private AstType parseType() {
     takeKeyword(TYPE);
     return switch (keyword(tokenizer.current())) {
+      case ALIAS -> parseTypeAlias();
       case RECORD -> parseTypeRecord();
       case FUNCTION -> parseTypeFunction();
       case UNION -> parseTypeUnion();
       default ->
           throw fatalAtCurrentLocation(
-              "Invalid type definition: %s allowed", List.of(RECORD, FUNCTION, UNION));
+              "Invalid type definition: %s allowed", List.of(ALIAS, RECORD, FUNCTION, UNION));
     };
+  }
+
+  private AstAliasType parseTypeAlias() {
+    var type = new AstAliasType();
+    takeKeyword(ALIAS);
+    type.location(tokenizer.currentLocation());
+    type.name(Identifier.ofType(take(IDENTIFIER).value()));
+    type.targetType(parseTypeRef());
+    take(SEMICOLON);
+    return type;
   }
 
   private AstRecordType parseTypeRecord() {
@@ -595,11 +607,9 @@ public class Parser {
   }
 
   private AstType parseTypeRef() {
-    var current = tokenizer.current();
     var ref = new AstTypeRef();
-    ref.name(Identifier.ofType(current.value()));
-    ref.location(current.location());
-    tokenizer.step();
+    ref.location(tokenizer.currentLocation());
+    ref.name(parseQualifiedTypeName());
     AstType type = ref;
     var suffixes = new ArrayList<Function<AstType, AstType>>();
     while (true) {
@@ -643,6 +653,15 @@ public class Parser {
       return Identifier.ofEntity(take(IDENTIFIER).value()).withModule(first.value());
     } else {
       return Identifier.ofEntity(first.value());
+    }
+  }
+
+  private Identifier parseQualifiedTypeName() {
+    var first = take(IDENTIFIER);
+    if (tokenizer.takeIf(TILDE)) {
+      return Identifier.ofType(take(IDENTIFIER).value()).withModule(first.value());
+    } else {
+      return Identifier.ofType(first.value());
     }
   }
 

@@ -29,6 +29,10 @@ public class SemanticAnalyzer {
     if (hasErrors()) {
       return false;
     }
+    nameMap.resolveAliases(errorConsumer);
+    if (hasErrors()) {
+      return false;
+    }
     for (var module : modules) {
       module.accept(new TypeRefResolutionVisitor(nameMap, errorConsumer));
     }

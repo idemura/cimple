@@ -1,3 +1,4 @@
 module _builtin;
 
-function int64.println(n);
+function int64.print(n);
+function string.print(s);

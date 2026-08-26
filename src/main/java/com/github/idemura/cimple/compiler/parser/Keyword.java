@@ -4,7 +4,9 @@ import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.ImmutableSet;
 import java.util.Set;
 
+// TODO: Do not reserve type keywords (alias, record, union) for functions/variables.
 public enum Keyword {
+  ALIAS("alias"),
   CASE("case"),
   CLASS("class"),
   CONST("const"),

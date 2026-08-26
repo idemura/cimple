@@ -60,6 +60,11 @@ public class PrintAstVisitor extends AstVisitor {
   }
 
   @Override
+  protected void visit(AstAliasType node) {
+    output.writeLine("TYPE ALIAS %s %s".formatted(node.name(), node.targetType()));
+  }
+
+  @Override
   protected void visit(AstBuiltinType node) {
     output.writeLine("TYPE BUILTIN %s".formatted(node.name()));
   }
