@@ -12,6 +12,10 @@ class NameMapTest {
     assertSame(variable, nameMap.lookupEntity(Identifier.ofEntity(variable.name().entityName())));
   }
 
+  private static NameMap populateTestModuleShortNames(NameMap nameMap) {
+    return nameMap.populateModuleShortNames("test");
+  }
+
   @Test
   void testAddLocalNoCollision() {
     var nameMap = new NameMap();
@@ -78,11 +82,12 @@ class NameMapTest {
     var global = globalVariable("test", "x");
     var local = localVariable("x");
     assertNull(nameMap.addVariable(global));
-    nameMap.beginScope();
-    assertNull(nameMap.addLocal(local));
-    assertSame(local, nameMap.lookupEntity(Identifier.ofEntity("x")));
-    nameMap.endScope();
-    assertSame(global, nameMap.lookupEntity(Identifier.ofEntity("x")));
+    var moduleNameMap = populateTestModuleShortNames(nameMap);
+    moduleNameMap.beginScope();
+    assertNull(moduleNameMap.addLocal(local));
+    assertSame(local, moduleNameMap.lookupEntity(Identifier.ofEntity("x")));
+    moduleNameMap.endScope();
+    assertSame(global, moduleNameMap.lookupEntity(Identifier.ofEntity("x")));
   }
 
   @Test
@@ -92,5 +97,32 @@ class NameMapTest {
     assertNull(nameMap.addFunction(function));
     assertNull(nameMap.lookupEntity(Identifier.ofEntity("toMillis")));
     assertSame(function, nameMap.lookupMethod(Identifier.ofTypeEntity("Duration", "toMillis")));
+  }
+
+  @Test
+  void testPopulateModuleShortNames() {
+    var nameMap = new NameMap();
+    var type1 = newRecordType("m1", "Duration");
+    var type2 = newRecordType("m2", "Duration");
+    var var1 = globalVariable("m1", "x");
+    var var2 = globalVariable("m2", "x");
+
+    assertNull(nameMap.addType(type1));
+    assertNull(nameMap.addType(type2));
+    assertNull(nameMap.addVariable(var1));
+    assertNull(nameMap.addVariable(var2));
+
+    assertNull(nameMap.lookupType(Identifier.ofType("Duration")));
+    assertNull(nameMap.lookupEntity(Identifier.ofEntity("x")));
+    assertSame(type1, nameMap.lookupType(Identifier.ofType("Duration").withModule("m1")));
+    assertSame(type2, nameMap.lookupType(Identifier.ofType("Duration").withModule("m2")));
+    assertSame(var1, nameMap.lookupEntity(Identifier.ofEntity("x").withModule("m1")));
+    assertSame(var2, nameMap.lookupEntity(Identifier.ofEntity("x").withModule("m2")));
+
+    var testNameMap = nameMap.populateModuleShortNames("m1");
+    assertSame(type1, testNameMap.lookupType(Identifier.ofType("Duration")));
+    assertSame(var1, testNameMap.lookupEntity(Identifier.ofEntity("x")));
+    assertSame(type2, testNameMap.lookupType(Identifier.ofType("Duration").withModule("m2")));
+    assertSame(var2, testNameMap.lookupEntity(Identifier.ofEntity("x").withModule("m2")));
   }
 }

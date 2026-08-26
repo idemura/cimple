@@ -23,7 +23,7 @@ class NameResolutionTest extends AbstractSemanticsTest {
     var semanticAnalyzer = new SemanticAnalyzer(errorConsumer);
     semanticAnalyzer.analyze(List.of(module));
     assertEquals(List.of(), errorConsumer.errors());
-    var nameMap = semanticAnalyzer.nameMap();
+    var nameMap = semanticAnalyzer.nameMap().populateModuleShortNames("test");
     assertSame(module.findVariable("x"), nameMap.lookupEntity(Identifier.ofEntity("x")));
     assertSame(module.findVariable("y"), nameMap.lookupEntity(Identifier.ofEntity("y")));
     assertSame(module.findFunction("f"), nameMap.lookupEntity(Identifier.ofEntity("f")));

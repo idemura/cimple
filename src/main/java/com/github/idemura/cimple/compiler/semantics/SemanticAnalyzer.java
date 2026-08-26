@@ -12,38 +12,61 @@ import java.util.List;
 public class SemanticAnalyzer {
   private final ErrorConsumer errorConsumer;
   private final NameMap nameMap = new NameMap();
+  private final ReservedWords reservedWords =
+      new ReservedWords(Keyword.reservedNames(), Keyword.reservedTypeNames());
 
   public SemanticAnalyzer(ErrorConsumer errorConsumer) {
     this.errorConsumer = errorConsumer;
   }
 
   public boolean analyze(List<AstModule> modules) {
-    var reservedWords = new ReservedWords(Keyword.reservedNames(), Keyword.reservedTypeNames());
-    for (var module : modules) {
+    return analyzeWithContext(modules.stream().map(AnalyzerContext::new).toList());
+  }
+
+  private static class AnalyzerContext {
+    AnalyzerContext(AstModule module) {
+      this.module = module;
+    }
+
+    AstModule module;
+    NameMap nameMap;
+  }
+
+  private boolean analyzeWithContext(List<AnalyzerContext> contexts) {
+    for (var context : contexts) {
+      var module = context.module;
       module.accept(new PreprocessVisitor(reservedWords, errorConsumer));
     }
     if (hasErrors()) {
       return false;
     }
-    populateNameMap(modules);
+    populateNameMap(contexts);
     if (hasErrors()) {
       return false;
     }
-    for (var module : modules) {
-      module.accept(new TypeRefResolutionVisitor(nameMap, errorConsumer));
-    }
-    for (var module : modules) {
+    for (var context : contexts) {
+      var module = context.module;
+      context.nameMap = nameMap.populateModuleShortNames(module.name());
+      // TODO: Include import names.
+      module.accept(new TypeRefResolutionVisitor(context.nameMap, errorConsumer));
       new TypeRecursionChecker(errorConsumer).check(module);
+      if (hasErrors()) {
+        return false;
+      }
+      // Function values are resolved through AstEntityRef.type(), so every function needs its
+      // synthetic function type before any module starts resolving calls.
+      for (var def : module.definitions()) {
+        if (def instanceof AstFunction function) {
+          function.makeLambdaType();
+        }
+      }
     }
-    if (hasErrors()) {
-      return false;
-    }
-    assignFunctionTypes(modules);
-    for (var module : modules) {
-      module.accept(new NameResolutionVisitor(nameMap, errorConsumer));
-    }
-    if (hasErrors()) {
-      return false;
+    for (var context : contexts) {
+      var module = context.module;
+      module.accept(new NameResolutionVisitor(context.nameMap, errorConsumer));
+      if (hasErrors()) {
+        return false;
+      }
     }
     return true;
   }
@@ -56,21 +79,10 @@ public class SemanticAnalyzer {
     return errorConsumer.errorCount() > 0;
   }
 
-  private void assignFunctionTypes(List<AstModule> modules) {
-    // Function values are resolved through AstEntityRef.type(), so every function needs its
-    // synthetic function type before any module starts resolving calls.
-    for (var module : modules) {
-      for (var def : module.definitions()) {
-        if (def instanceof AstFunction function) {
-          function.makeLambdaType();
-        }
-      }
-    }
-  }
-
-  private void populateNameMap(List<AstModule> modules) {
+  private void populateNameMap(List<AnalyzerContext> contexts) {
     // First, collect types. They are used for object resolution.
-    for (var module : modules) {
+    for (var context : contexts) {
+      var module = context.module;
       for (var def : module.definitions()) {
         if (def instanceof AstType type) {
           type.name(type.name().withModule(module.name()));
@@ -86,7 +98,8 @@ public class SemanticAnalyzer {
       }
     }
     // Collect functions and variables only after types, so methods can be keyed by object type.
-    for (var module : modules) {
+    for (var context : contexts) {
+      var module = context.module;
       for (var def : module.definitions()) {
         switch (def) {
           case AstFunction function -> {

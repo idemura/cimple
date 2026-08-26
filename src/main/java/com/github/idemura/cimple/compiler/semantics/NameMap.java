@@ -26,13 +26,7 @@ public class NameMap {
   public NameMap() {}
 
   public AstType addType(AstType type) {
-    var name = type.name();
-    var existing = typeQualifiedNameMap.putIfAbsent(name, type);
-    if (existing != null) {
-      return existing;
-    }
-    typeNameMap.put(name.typeName(), type);
-    return null;
+    return typeQualifiedNameMap.putIfAbsent(type.name(), type);
   }
 
   public AstEntity addFunction(AstFunction function) {
@@ -48,12 +42,27 @@ public class NameMap {
   }
 
   private AstEntity addEntity(AstEntity entity) {
-    var existing = entityQualifiedNameMap.putIfAbsent(entity.name(), entity);
-    if (existing != null) {
-      return existing;
+    return entityQualifiedNameMap.putIfAbsent(entity.name(), entity);
+  }
+
+  public NameMap populateModuleShortNames(String moduleName) {
+    var result = new NameMap();
+    result.typeQualifiedNameMap.putAll(typeQualifiedNameMap);
+    result.entityQualifiedNameMap.putAll(entityQualifiedNameMap);
+    result.methodMap.putAll(methodMap);
+    for (var entry : typeQualifiedNameMap.entrySet()) {
+      var name = entry.getKey();
+      if (moduleName.equals(name.moduleName())) {
+        result.typeNameMap.put(name.typeName(), entry.getValue());
+      }
     }
-    entityNameMap.putIfAbsent(entity.name().entityName(), entity);
-    return null;
+    for (var entry : entityQualifiedNameMap.entrySet()) {
+      var name = entry.getKey();
+      if (moduleName.equals(name.moduleName())) {
+        result.entityNameMap.put(name.entityName(), entry.getValue());
+      }
+    }
+    return result;
   }
 
   public AstEntity addLocal(AstVariable variable) {
