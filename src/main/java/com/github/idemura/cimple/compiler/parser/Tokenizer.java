@@ -72,6 +72,7 @@ public class Tokenizer {
           case ',' -> tokens.add(takeSingleCharToken(context, COMMA));
           case '.' -> tokens.add(takeSingleCharToken(context, PERIOD));
           case '=' -> tokens.add(takeSuffixToken(context, ASSIGN, CMP_EQ));
+          case '!' -> tokens.add(takeRequiredSuffixToken(context, '!', '=', CMP_NE));
           case ';' -> tokens.add(takeSingleCharToken(context, SEMICOLON));
           case '+' -> tokens.add(takeSuffixToken(context, PLUS, PLUS_ASSIGN));
           case '-' -> tokens.add(takeSuffixToken(context, MINUS, MINUS_ASSIGN));
@@ -205,6 +206,17 @@ public class Tokenizer {
       return new Token(suffixToken, null, location);
     }
     return new Token(baseToken, null, location);
+  }
+
+  private Token takeRequiredSuffixToken(
+      SplitContext context, char base, char suffix, TokenType tokenType) {
+    var location = currentLocation(context);
+    next(context);
+    if (context.index < context.code.length() && context.code.charAt(context.index) == suffix) {
+      next(context);
+      return new Token(tokenType, null, location);
+    }
+    throw errorConsumer.fatalAt(location, "Expected '%s' after '%s'", suffix, base);
   }
 
   private Location currentLocation(SplitContext context) {

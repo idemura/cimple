@@ -91,6 +91,8 @@ class ExpressionTest extends AbstractSemanticsTest {
           var le = 1 <= 2;
           var gt = 1 > 2;
           var ge = 1 >= 2;
+          var eq = 1 == 2;
+          var ne = 1 != 2;
         }
         """;
     var module = parseCode(code);
@@ -99,11 +101,13 @@ class ExpressionTest extends AbstractSemanticsTest {
     assertEquals(List.of(), errorConsumer.errors());
 
     var statements = module.findFunction("f").block().statements();
-    assertEquals(4, statements.size());
+    assertEquals(6, statements.size());
     assertComparisonOperator(statements.get(0), BuiltinFunctions.LT_I64);
     assertComparisonOperator(statements.get(1), BuiltinFunctions.LE_I64);
     assertComparisonOperator(statements.get(2), BuiltinFunctions.GT_I64);
     assertComparisonOperator(statements.get(3), BuiltinFunctions.GE_I64);
+    assertComparisonOperator(statements.get(4), BuiltinFunctions.EQ_I64);
+    assertComparisonOperator(statements.get(5), BuiltinFunctions.NE_I64);
   }
 
   @Test

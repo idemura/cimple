@@ -96,6 +96,7 @@ class TokenizerTest {
         a > b;
         a >= b;
         a == b;
+        a != b;
         """;
     var errorConsumer = new InMemoryErrorConsumer();
     var tokenizer = new Tokenizer(errorConsumer);
@@ -121,7 +122,11 @@ class TokenizerTest {
             new Token(IDENTIFIER, "a", new Location(5, 1)),
             new Token(CMP_EQ, null, new Location(5, 3)),
             new Token(IDENTIFIER, "b", new Location(5, 6)),
-            new Token(SEMICOLON, null, new Location(5, 7))),
+            new Token(SEMICOLON, null, new Location(5, 7)),
+            new Token(IDENTIFIER, "a", new Location(6, 1)),
+            new Token(CMP_NE, null, new Location(6, 3)),
+            new Token(IDENTIFIER, "b", new Location(6, 6)),
+            new Token(SEMICOLON, null, new Location(6, 7))),
         tokenizer.tokenList());
   }
 }

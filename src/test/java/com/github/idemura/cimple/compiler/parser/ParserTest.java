@@ -473,6 +473,7 @@ class ParserTest {
           var x = 1 > 2;
           var x = 1 >= 2;
           var x = 1 == 2;
+          var x = 1 != 2;
         }
         """;
     var module = parseCode(code, makeErrorConsumer());
@@ -514,6 +515,14 @@ class ParserTest {
       var expr = ((AstLocal) statements.get(i++)).variable().expression().get();
       var call = (AstCall) expr;
       assertEquals(newBuiltinEntityRef("=="), call.function());
+      assertEquals(2, call.arguments().size());
+      assertEquals(AstNumberLiteral.of(1), call.arguments().get(0));
+      assertEquals(AstNumberLiteral.of(2), call.arguments().get(1));
+    }
+    {
+      var expr = ((AstLocal) statements.get(i++)).variable().expression().get();
+      var call = (AstCall) expr;
+      assertEquals(newBuiltinEntityRef("!="), call.function());
       assertEquals(2, call.arguments().size());
       assertEquals(AstNumberLiteral.of(1), call.arguments().get(0));
       assertEquals(AstNumberLiteral.of(2), call.arguments().get(1));

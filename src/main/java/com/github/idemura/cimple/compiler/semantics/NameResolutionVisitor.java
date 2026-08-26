@@ -258,6 +258,8 @@ public class NameResolutionVisitor extends AstExpressionRewriteVisitor {
           case "*" -> BuiltinFunctions.MUL_I64;
           case "/" -> BuiltinFunctions.DIV_I64;
           case "%" -> BuiltinFunctions.MOD_I64;
+          case "==" -> BuiltinFunctions.EQ_I64;
+          case "!=" -> BuiltinFunctions.NE_I64;
           case "<" -> BuiltinFunctions.LT_I64;
           case "<=" -> BuiltinFunctions.LE_I64;
           case ">" -> BuiltinFunctions.GT_I64;
