@@ -4,23 +4,30 @@ import com.github.idemura.cimple.compiler.ErrorConsumer;
 import com.github.idemura.cimple.compiler.Identifier;
 import com.github.idemura.cimple.compiler.ast.AstArrayType;
 import com.github.idemura.cimple.compiler.ast.AstBuiltinType;
+import com.github.idemura.cimple.compiler.ast.AstModule;
 import com.github.idemura.cimple.compiler.ast.AstNew;
 import com.github.idemura.cimple.compiler.ast.AstPointerType;
 import com.github.idemura.cimple.compiler.ast.AstType;
 import com.github.idemura.cimple.compiler.ast.AstTypeHolder;
 import com.github.idemura.cimple.compiler.ast.AstTypeRef;
 import com.github.idemura.cimple.compiler.ast.AstVisitor;
+import java.util.Map;
 
 public class TypeRefResolutionVisitor extends AstVisitor {
   private final GlobalNameMap globalNameMap;
-  private final LocalNameMap localNameMap;
   private final ErrorConsumer errorConsumer;
+  private Map<String, AstType> typeMap;
 
-  public TypeRefResolutionVisitor(
-      GlobalNameMap globalNameMap, LocalNameMap localNameMap, ErrorConsumer errorConsumer) {
+  public TypeRefResolutionVisitor(GlobalNameMap globalNameMap, ErrorConsumer errorConsumer) {
     this.globalNameMap = globalNameMap;
-    this.localNameMap = localNameMap;
     this.errorConsumer = errorConsumer;
+  }
+
+  @Override
+  protected void visit(AstModule node) {
+    // TODO: Include import names.
+    typeMap = globalNameMap.collectTypes(node, errorConsumer);
+    super.visit(node);
   }
 
   @Override
@@ -60,7 +67,11 @@ public class TypeRefResolutionVisitor extends AstVisitor {
 
   private AstType lookupType(Identifier name) {
     if (name.moduleName() == null) {
-      return localNameMap.lookupType(name);
+      var builtinType = GlobalNameMap.lookupBuiltinType(name.typeName());
+      if (builtinType != null) {
+        return builtinType;
+      }
+      return typeMap.get(name.typeName());
     }
     return globalNameMap.lookupType(name);
   }

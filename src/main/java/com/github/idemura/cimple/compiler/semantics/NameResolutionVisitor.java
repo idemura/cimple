@@ -26,6 +26,7 @@ import com.github.idemura.cimple.compiler.ast.AstLocal;
 import com.github.idemura.cimple.compiler.ast.AstModule;
 import com.github.idemura.cimple.compiler.ast.AstPointerType;
 import com.github.idemura.cimple.compiler.ast.AstRecordType;
+import com.github.idemura.cimple.compiler.ast.AstType;
 import com.github.idemura.cimple.compiler.ast.AstTypeHolder;
 import com.github.idemura.cimple.compiler.ast.AstTypeRef;
 import com.github.idemura.cimple.compiler.ast.AstUnionType;
@@ -35,20 +36,19 @@ import java.util.List;
 
 public class NameResolutionVisitor extends AstExpressionRewriteVisitor {
   private final GlobalNameMap globalNameMap;
-  private final LocalNameMap localNameMap;
   private final ErrorConsumer errorConsumer;
+  private LocalNameMap localNameMap;
   private AstModule module;
 
-  public NameResolutionVisitor(
-      GlobalNameMap globalNameMap, LocalNameMap localNameMap, ErrorConsumer errorConsumer) {
+  public NameResolutionVisitor(GlobalNameMap globalNameMap, ErrorConsumer errorConsumer) {
     this.globalNameMap = globalNameMap;
-    this.localNameMap = localNameMap;
     this.errorConsumer = errorConsumer;
   }
 
   @Override
   protected void visit(AstModule node) {
     module = node;
+    localNameMap = globalNameMap.collectFunctionsAndVariables(module, errorConsumer);
     super.visit(node);
   }
 
@@ -151,7 +151,9 @@ public class NameResolutionVisitor extends AstExpressionRewriteVisitor {
       // }
       default -> {
         errorConsumer.errorAt(
-            node.location(), "Delete expression of type '%s', expected pointer", expression.type());
+            node.location(),
+            "Delete expression of type '%s', expected pointer",
+            formatType(expression.type()));
       }
     }
   }
@@ -183,7 +185,7 @@ public class NameResolutionVisitor extends AstExpressionRewriteVisitor {
     var objectType = checkNotNull(node.object().type());
     if (!(objectType instanceof AstRecordType recordType)) {
       errorConsumer.errorAt(
-          node.location(), "Field access requires a record, got '%s'", objectType.name());
+          node.location(), "Field access requires a record, got '%s'", formatType(objectType));
       return node;
     }
     for (var field : recordType.fields()) {
@@ -205,12 +207,14 @@ public class NameResolutionVisitor extends AstExpressionRewriteVisitor {
     var arrayType = checkNotNull(node.array().type());
     if (!(arrayType instanceof AstArrayType)) {
       errorConsumer.errorAt(
-          node.location(), "Array access requires an array, got '%s'", arrayType.name());
+          node.location(), "Array access requires an array, got '%s'", formatType(arrayType));
     }
     var indexType = checkNotNull(node.index().type());
     if (!AstBuiltinType.INT64.equals(indexType)) {
       errorConsumer.errorAt(
-          node.index().location(), "Array index has type '%s', expected 'int64'", indexType.name());
+          node.index().location(),
+          "Array index has type '%s', expected 'int64'",
+          formatType(indexType));
     }
     return node;
   }
@@ -288,7 +292,7 @@ public class NameResolutionVisitor extends AstExpressionRewriteVisitor {
       return;
     }
     var methodName = objectType.name().withEntity(fieldAccess.fieldName());
-    var function = (AstFunction) globalNameMap.lookupEntity(methodName);
+    var function = lookupMethod(objectType, fieldAccess.fieldName());
     if (function == null) {
       errorConsumer.errorAt(fieldAccess.location(), "Undefined method: '%s'", methodName);
       return;
@@ -303,6 +307,21 @@ public class NameResolutionVisitor extends AstExpressionRewriteVisitor {
     arguments.add(function.header().objectIndex(), fieldAccess.object());
     node.arguments(arguments);
     node.function(functionRef);
+  }
+
+  private AstFunction lookupMethod(AstType objectType, String fieldName) {
+    if (objectType.name().isBuiltin() && module != null) {
+      var localMethodName = new Identifier(module.name(), objectType.name().typeName(), fieldName);
+      var function = lookupFunction(localMethodName);
+      if (function != null) {
+        return function;
+      }
+    }
+    return lookupFunction(objectType.name().withEntity(fieldName));
+  }
+
+  private AstFunction lookupFunction(Identifier name) {
+    return globalNameMap.lookupEntity(name) instanceof AstFunction function ? function : null;
   }
 
   private AstEntity lookupEntity(Identifier name) {
@@ -348,7 +367,9 @@ public class NameResolutionVisitor extends AstExpressionRewriteVisitor {
           calleeExpressionMessage(call.function()));
     } else {
       errorConsumer.errorAt(
-          call.function().location(), "Calling expression of type '%s', function expected.", type);
+          call.function().location(),
+          "Calling expression of type '%s', function expected.",
+          formatType(type));
     }
   }
 
@@ -359,7 +380,9 @@ public class NameResolutionVisitor extends AstExpressionRewriteVisitor {
       checkFunctionArguments(functionType, arguments, location, operation.name().toString());
     } else {
       errorConsumer.errorAt(
-          operation.location(), "Operator expression of type '%s', function expected.", type);
+          operation.location(),
+          "Operator expression of type '%s', function expected.",
+          formatType(type));
     }
   }
 
@@ -387,10 +410,18 @@ public class NameResolutionVisitor extends AstExpressionRewriteVisitor {
             "Argument %d of function '%s' has type '%s', expected '%s'",
             i,
             functionName,
-            argumentType.name(),
-            parameterType.name());
+            formatType(argumentType),
+            formatType(parameterType));
       }
     }
+  }
+
+  private static String formatType(AstType type) {
+    var name = type.name();
+    if (name.isBuiltin()) {
+      return name.typeName();
+    }
+    return name.toString();
   }
 
   private static String calleeExpressionMessage(AstExpression expression) {

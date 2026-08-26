@@ -23,12 +23,14 @@ class NameResolutionTest extends AbstractSemanticsTest {
     var semanticAnalyzer = new SemanticAnalyzer(errorConsumer);
     semanticAnalyzer.analyze(List.of(module));
     assertEquals(List.of(), errorConsumer.errors());
-    var localNameMap = semanticAnalyzer.globalNameMap().populateModuleShortNames("test");
+    var typeMap = semanticAnalyzer.globalNameMap().collectTypes(module, errorConsumer);
+    var localNameMap =
+        semanticAnalyzer.globalNameMap().collectFunctionsAndVariables(module, errorConsumer);
     assertSame(module.findVariable("x"), localNameMap.lookupEntity(Identifier.ofEntity("x")));
     assertSame(module.findVariable("y"), localNameMap.lookupEntity(Identifier.ofEntity("y")));
     assertSame(module.findFunction("f"), localNameMap.lookupEntity(Identifier.ofEntity("f")));
     assertSame(module.findFunction("g"), localNameMap.lookupEntity(Identifier.ofEntity("g")));
-    assertSame(module.findType("R"), localNameMap.lookupType(Identifier.ofType("R")));
+    assertSame(module.findType("R"), typeMap.get("R"));
   }
 
   @Test

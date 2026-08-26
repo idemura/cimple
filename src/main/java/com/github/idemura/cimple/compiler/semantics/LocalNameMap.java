@@ -4,7 +4,6 @@ import static com.google.common.base.Preconditions.checkArgument;
 
 import com.github.idemura.cimple.compiler.Identifier;
 import com.github.idemura.cimple.compiler.ast.AstEntity;
-import com.github.idemura.cimple.compiler.ast.AstType;
 import com.github.idemura.cimple.compiler.ast.AstVariable;
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -20,7 +19,6 @@ public class LocalNameMap {
     private final Map<String, AstEntity> shadowed = new LinkedHashMap<>();
   }
 
-  private final Map<String, AstType> typeNameMap = new HashMap<>();
   private final Map<String, AstEntity> entityNameMap = new HashMap<>();
   private final List<Scope> scopes = new ArrayList<>();
 
@@ -58,21 +56,6 @@ public class LocalNameMap {
     entityNameMap.putAll(scope.shadowed);
   }
 
-  public AstType lookupType(Identifier name) {
-    if (name.moduleName() != null) {
-      return null;
-    }
-    return lookupType(name.typeName());
-  }
-
-  public AstType lookupType(String name) {
-    var builtinType = GlobalNameMap.lookupBuiltinType(name);
-    if (builtinType != null) {
-      return builtinType;
-    }
-    return typeNameMap.get(name);
-  }
-
   // TODO: Revisit
   public AstEntity lookupEntity(Identifier name) {
     if (name.moduleName() != null) {
@@ -83,10 +66,6 @@ public class LocalNameMap {
 
   public AstEntity lookupEntity(String name) {
     return entityNameMap.get(name);
-  }
-
-  AstType addType(AstType type) {
-    return typeNameMap.putIfAbsent(type.name().typeName(), type);
   }
 
   AstEntity addEntity(AstEntity entity) {

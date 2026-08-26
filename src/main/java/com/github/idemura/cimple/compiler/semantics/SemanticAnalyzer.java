@@ -1,7 +1,5 @@
 package com.github.idemura.cimple.compiler.semantics;
 
-import static com.google.common.collect.ImmutableList.toImmutableList;
-
 import com.github.idemura.cimple.compiler.ErrorConsumer;
 import com.github.idemura.cimple.compiler.ast.AstEntity;
 import com.github.idemura.cimple.compiler.ast.AstFunction;
@@ -22,52 +20,33 @@ public class SemanticAnalyzer {
   }
 
   public boolean analyze(List<AstModule> modules) {
-    return analyzeWithContext(
-        modules.stream().map(AnalyzerContext::new).collect(toImmutableList()));
-  }
-
-  private static class AnalyzerContext {
-    AnalyzerContext(AstModule module) {
-      this.module = module;
-    }
-
-    AstModule module;
-    LocalNameMap localNameMap;
-  }
-
-  private boolean analyzeWithContext(List<AnalyzerContext> contexts) {
-    for (var context : contexts) {
-      var module = context.module;
+    for (var module : modules) {
       module.accept(new PreprocessVisitor(reservedWords, errorConsumer));
     }
     if (hasErrors()) {
       return false;
     }
-    populateNameMap(contexts);
+    collectTypes(modules);
     if (hasErrors()) {
       return false;
     }
-    for (var context : contexts) {
-      var module = context.module;
-      context.localNameMap = globalNameMap.populateModuleShortNames(module.name());
-      // TODO: Include import names.
-      module.accept(
-          new TypeRefResolutionVisitor(globalNameMap, context.localNameMap, errorConsumer));
+
+    for (var module : modules) {
+      module.accept(new TypeRefResolutionVisitor(globalNameMap, errorConsumer));
       new TypeRecursionChecker(errorConsumer).check(module);
       if (hasErrors()) {
         return false;
       }
-      // Function values are resolved through AstEntityRef.type(), so every function needs its
-      // synthetic function type before any module starts resolving calls.
-      for (var def : module.definitions()) {
-        if (def instanceof AstFunction function) {
-          function.makeLambdaType();
-        }
-      }
     }
-    for (var context : contexts) {
-      var module = context.module;
-      module.accept(new NameResolutionVisitor(globalNameMap, context.localNameMap, errorConsumer));
+
+    collectFunctionsAndVariables(modules);
+    if (hasErrors()) {
+      return false;
+    }
+
+    assignFunctionTypes(modules);
+    for (var module : modules) {
+      module.accept(new NameResolutionVisitor(globalNameMap, errorConsumer));
       if (hasErrors()) {
         return false;
       }
@@ -83,10 +62,20 @@ public class SemanticAnalyzer {
     return errorConsumer.errorCount() > 0;
   }
 
-  private void populateNameMap(List<AnalyzerContext> contexts) {
-    // First, collect types. They are used for object resolution.
-    for (var context : contexts) {
-      var module = context.module;
+  private void assignFunctionTypes(List<AstModule> modules) {
+    // Function values are resolved through AstEntityRef.type(), so every function needs its
+    // synthetic function type before any module starts resolving calls.
+    for (var module : modules) {
+      for (var def : module.definitions()) {
+        if (def instanceof AstFunction function) {
+          function.makeLambdaType();
+        }
+      }
+    }
+  }
+
+  private void collectTypes(List<AstModule> modules) {
+    for (var module : modules) {
       for (var def : module.definitions()) {
         if (def instanceof AstType type) {
           type.name(type.name().withModule(module.name()));
@@ -101,9 +90,10 @@ public class SemanticAnalyzer {
         }
       }
     }
-    // Collect functions and variables only after types, so methods can be keyed by object type.
-    for (var context : contexts) {
-      var module = context.module;
+  }
+
+  private void collectFunctionsAndVariables(List<AstModule> modules) {
+    for (var module : modules) {
       for (var def : module.definitions()) {
         switch (def) {
           case AstFunction function -> {

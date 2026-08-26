@@ -13,10 +13,6 @@ class LocalNameMapTest {
         variable, localNameMap.lookupEntity(Identifier.ofEntity(variable.name().entityName())));
   }
 
-  private static LocalNameMap populateTestModuleShortNames(GlobalNameMap globalNameMap) {
-    return globalNameMap.populateModuleShortNames("test");
-  }
-
   @Test
   void testAddLocalNoCollision() {
     var localNameMap = new LocalNameMap();
@@ -83,7 +79,8 @@ class LocalNameMapTest {
     var global = globalVariable("test", "x");
     var local = localVariable("x");
     assertNull(globalNameMap.addVariable(global));
-    var localNameMap = populateTestModuleShortNames(globalNameMap);
+    var localNameMap = new LocalNameMap();
+    assertNull(localNameMap.addEntity(global));
     localNameMap.beginScope();
     assertNull(localNameMap.addLocal(local));
     assertSame(local, localNameMap.lookupEntity(Identifier.ofEntity("x")));
