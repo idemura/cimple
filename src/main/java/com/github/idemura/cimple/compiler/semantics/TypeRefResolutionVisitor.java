@@ -4,12 +4,14 @@ import com.github.idemura.cimple.compiler.ErrorConsumer;
 import com.github.idemura.cimple.compiler.Identifier;
 import com.github.idemura.cimple.compiler.ast.AstArrayType;
 import com.github.idemura.cimple.compiler.ast.AstBuiltinType;
+import com.github.idemura.cimple.compiler.ast.AstFunction;
 import com.github.idemura.cimple.compiler.ast.AstModule;
 import com.github.idemura.cimple.compiler.ast.AstNew;
 import com.github.idemura.cimple.compiler.ast.AstPointerType;
 import com.github.idemura.cimple.compiler.ast.AstType;
 import com.github.idemura.cimple.compiler.ast.AstTypeHolder;
 import com.github.idemura.cimple.compiler.ast.AstTypeRef;
+import com.github.idemura.cimple.compiler.ast.AstVariable;
 import com.github.idemura.cimple.compiler.ast.AstVisitor;
 import java.util.Map;
 
@@ -28,6 +30,16 @@ public class TypeRefResolutionVisitor extends AstVisitor {
     // TODO: Include import names.
     typeMap = globalNameMap.collectTypes(node, errorConsumer);
     super.visit(node);
+  }
+
+  @Override
+  protected void visit(AstFunction node) {
+    super.visit(node);
+    var objectType = node.header().objectType();
+    if (objectType != null) {
+      // When we resolved the object type, qualified function name may be affected.
+      node.name(objectType.name().withEntity(node.name().entityName()));
+    }
   }
 
   @Override

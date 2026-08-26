@@ -12,14 +12,8 @@ import java.util.Collections;
 import java.util.IdentityHashMap;
 import java.util.Set;
 
-class TypeRecursionChecker {
-  private final ErrorConsumer errorConsumer;
-
-  TypeRecursionChecker(ErrorConsumer errorConsumer) {
-    this.errorConsumer = errorConsumer;
-  }
-
-  void check(AstModule module) {
+class TypeValidator {
+  static void checkRecursiveTypeDefinitions(AstModule module, ErrorConsumer errorConsumer) {
     for (var definition : module.definitions()) {
       if (definition instanceof AstType type && isCheckedType(type)) {
         var path = Collections.newSetFromMap(new IdentityHashMap<AstType, Boolean>());

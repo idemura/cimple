@@ -20,7 +20,9 @@ public final class BuiltinFunctions {
   public static final AstFunction DIV_I64 = makeBinaryOperator("_div_i64", INT64, INT64, INT64);
   public static final AstFunction MOD_I64 = makeBinaryOperator("_mod_i64", INT64, INT64, INT64);
   public static final AstFunction LT_I64 = makeBinaryOperator("_lt_i64", BOOL, INT64, INT64);
+  public static final AstFunction LE_I64 = makeBinaryOperator("_le_i64", BOOL, INT64, INT64);
   public static final AstFunction GT_I64 = makeBinaryOperator("_gt_i64", BOOL, INT64, INT64);
+  public static final AstFunction GE_I64 = makeBinaryOperator("_ge_i64", BOOL, INT64, INT64);
   public static final AstFunction ARRAY_SIZE = makeArrayMethod(SIZE, INT64);
 
   private static final ImmutableMap<String, AstFunction> ARRAY_METHODS =

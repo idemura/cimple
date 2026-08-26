@@ -14,6 +14,27 @@ import java.util.List;
 import org.junit.jupiter.api.Test;
 
 class ExpressionTest extends AbstractSemanticsTest {
+  private static void assertOperator(AstStatement statement, AstFunction function) {
+    var call = (AstCall) ((AstLocal) statement).variable().expression().get();
+    var functionRef = (AstEntityRef) call.function();
+    assertSame(function, functionRef.entity());
+    assertEquals(AstBuiltinType.INT64, call.type());
+  }
+
+  private static void assertComparisonOperator(AstStatement statement, AstFunction function) {
+    var call = (AstCall) ((AstLocal) statement).variable().expression().get();
+    var functionRef = (AstEntityRef) call.function();
+    assertSame(function, functionRef.entity());
+    assertEquals(AstBuiltinType.BOOL, call.type());
+  }
+
+  private static void assertCompoundOperator(Object statement, AstFunction function) {
+    var expr = ((AstExpressionStatement) statement).expression().get();
+    var assign = (AstCompoundAssign) expr;
+    assertSame(function, assign.operation().entity());
+    assertEquals(AstBuiltinType.INT64, assign.type());
+  }
+
   @Test
   void testExpression() {
     var code =
@@ -58,6 +79,31 @@ class ExpressionTest extends AbstractSemanticsTest {
     assertOperator(statements.get(2), BuiltinFunctions.MUL_I64);
     assertOperator(statements.get(3), BuiltinFunctions.DIV_I64);
     assertOperator(statements.get(4), BuiltinFunctions.MOD_I64);
+  }
+
+  @Test
+  void testComparisonOperatorsResolveToI64Builtins() {
+    var code =
+        """
+        module test;
+        function f() {
+          var lt = 1 < 2;
+          var le = 1 <= 2;
+          var gt = 1 > 2;
+          var ge = 1 >= 2;
+        }
+        """;
+    var module = parseCode(code);
+    var sa = new SemanticAnalyzer(errorConsumer);
+    sa.analyze(List.of(module));
+    assertEquals(List.of(), errorConsumer.errors());
+
+    var statements = module.findFunction("f").block().statements();
+    assertEquals(4, statements.size());
+    assertComparisonOperator(statements.get(0), BuiltinFunctions.LT_I64);
+    assertComparisonOperator(statements.get(1), BuiltinFunctions.LE_I64);
+    assertComparisonOperator(statements.get(2), BuiltinFunctions.GT_I64);
+    assertComparisonOperator(statements.get(3), BuiltinFunctions.GE_I64);
   }
 
   @Test
@@ -112,17 +158,4 @@ class ExpressionTest extends AbstractSemanticsTest {
         errorConsumer.errors());
   }
 
-  private static void assertOperator(AstStatement statement, AstFunction function) {
-    var call = (AstCall) ((AstLocal) statement).variable().expression().get();
-    var functionRef = (AstEntityRef) call.function();
-    assertSame(function, functionRef.entity());
-    assertEquals(AstBuiltinType.INT64, call.type());
-  }
-
-  private static void assertCompoundOperator(Object statement, AstFunction function) {
-    var expr = ((AstExpressionStatement) statement).expression().get();
-    var assign = (AstCompoundAssign) expr;
-    assertSame(function, assign.operation().entity());
-    assertEquals(AstBuiltinType.INT64, assign.type());
-  }
 }

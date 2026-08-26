@@ -259,7 +259,9 @@ public class NameResolutionVisitor extends AstExpressionRewriteVisitor {
           case "/" -> BuiltinFunctions.DIV_I64;
           case "%" -> BuiltinFunctions.MOD_I64;
           case "<" -> BuiltinFunctions.LT_I64;
+          case "<=" -> BuiltinFunctions.LE_I64;
           case ">" -> BuiltinFunctions.GT_I64;
+          case ">=" -> BuiltinFunctions.GE_I64;
           default ->
               throw new IllegalStateException(
                   "Unknown builtin entity '%s'".formatted(operatorRef.name()));

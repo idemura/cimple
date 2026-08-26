@@ -1,5 +1,6 @@
 package com.github.idemura.cimple.compiler.semantics;
 
+import static com.github.idemura.cimple.compiler.Constants.BUILTIN_MODULE;
 import static com.github.idemura.cimple.compiler.ast.AstUtils.*;
 import static org.junit.jupiter.api.Assertions.*;
 
@@ -101,7 +102,7 @@ class MethodsTest extends AbstractSemanticsTest {
     assertEquals(List.of(), errorConsumer.errors());
 
     var method = module.findMethod("int64", "isPositive");
-    assertEquals(new Identifier("test", "int64", "isPositive"), method.name());
+    assertEquals(new Identifier(BUILTIN_MODULE, "int64", "isPositive"), method.name());
     assertEquals(AstBuiltinType.INT64, method.header().objectType());
     assertMethodCall(module.findFunction("f"), method, AstBuiltinType.BOOL);
   }
@@ -122,7 +123,7 @@ class MethodsTest extends AbstractSemanticsTest {
     assertEquals(List.of(), errorConsumer.errors());
 
     var method = module.findMethod("int64", "abs");
-    assertEquals(new Identifier("test", "int64", "abs"), method.name());
+    assertEquals(new Identifier(BUILTIN_MODULE, "int64", "abs"), method.name());
     assertEquals(AstBuiltinType.INT64, method.header().objectType());
     assertEquals(AstBuiltinType.INT64, method.header().parameters().get(0).type());
 

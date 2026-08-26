@@ -1,5 +1,7 @@
 package com.github.idemura.cimple.compiler.semantics;
 
+import static com.github.idemura.cimple.compiler.semantics.TypeValidator.checkRecursiveTypeDefinitions;
+
 import com.github.idemura.cimple.compiler.ErrorConsumer;
 import com.github.idemura.cimple.compiler.ast.AstEntity;
 import com.github.idemura.cimple.compiler.ast.AstFunction;
@@ -33,10 +35,15 @@ public class SemanticAnalyzer {
 
     for (var module : modules) {
       module.accept(new TypeRefResolutionVisitor(globalNameMap, errorConsumer));
-      new TypeRecursionChecker(errorConsumer).check(module);
+      checkRecursiveTypeDefinitions(module, errorConsumer);
       if (hasErrors()) {
         return false;
       }
+    }
+
+    // After type resolution, variable and free functions remain with nonqualified names.
+    for (var module : modules) {
+      qualifyTopLevelNames(module);
     }
 
     collectFunctionsAndVariables(modules);
@@ -60,6 +67,17 @@ public class SemanticAnalyzer {
 
   private boolean hasErrors() {
     return errorConsumer.errorCount() > 0;
+  }
+
+  private void qualifyTopLevelNames(AstModule module) {
+    for (var def : module.definitions()) {
+      if (def instanceof AstEntity entity) {
+        var name = entity.name();
+        if (name.moduleName() == null) {
+          entity.name(name.withModule(module.name()));
+        }
+      }
+    }
   }
 
   private void assignFunctionTypes(List<AstModule> modules) {
@@ -97,14 +115,12 @@ public class SemanticAnalyzer {
       for (var def : module.definitions()) {
         switch (def) {
           case AstFunction function -> {
-            function.name(function.name().withModule(module.name()));
             var existing = globalNameMap.addFunction(function);
             if (existing != null) {
               errorEntityCollision(function, existing);
             }
           }
           case AstVariable variable -> {
-            variable.name(variable.name().withModule(module.name()));
             var existing = globalNameMap.addVariable(variable);
             if (existing != null) {
               errorEntityCollision(variable, existing);
