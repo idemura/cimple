@@ -1,5 +1,7 @@
 package com.github.idemura.cimple.compiler.semantics;
 
+import static com.google.common.collect.ImmutableList.toImmutableList;
+
 import com.github.idemura.cimple.compiler.ErrorConsumer;
 import com.github.idemura.cimple.compiler.ast.AstEntity;
 import com.github.idemura.cimple.compiler.ast.AstFunction;
@@ -20,7 +22,8 @@ public class SemanticAnalyzer {
   }
 
   public boolean analyze(List<AstModule> modules) {
-    return analyzeWithContext(modules.stream().map(AnalyzerContext::new).toList());
+    return analyzeWithContext(
+        modules.stream().map(AnalyzerContext::new).collect(toImmutableList()));
   }
 
   private static class AnalyzerContext {

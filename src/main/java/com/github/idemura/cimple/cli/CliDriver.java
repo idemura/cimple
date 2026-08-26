@@ -1,5 +1,7 @@
 package com.github.idemura.cimple.cli;
 
+import static com.google.common.collect.ImmutableList.toImmutableList;
+
 import com.beust.jcommander.JCommander;
 import com.beust.jcommander.Parameter;
 import com.github.idemura.cimple.compiler.Compiler;
@@ -63,7 +65,8 @@ public class CliDriver {
     sources.add("lib/_builtin.ci");
     sources.addAll(files);
     var compiler = new Compiler(compilerParams(), errorConsumer, codeGenerator());
-    var sourceCodeList = sources.stream().map(CliDriver::readSourceCodeFromFile).toList();
+    var sourceCodeList =
+        sources.stream().map(CliDriver::readSourceCodeFromFile).collect(toImmutableList());
     return compiler.compile(sourceCodeList);
   }
 
