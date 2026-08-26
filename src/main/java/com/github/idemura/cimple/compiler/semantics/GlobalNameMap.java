@@ -52,7 +52,7 @@ public class GlobalNameMap {
     var result = new LocalNameMap();
     for (var entity : entityMap.values()) {
       var name = entity.name();
-      if (module.name().equals(name.moduleName())) {
+      if (module.name().equals(name.moduleName()) && name.typeName() == null) {
         var existing = result.addEntity(entity);
         if (existing != null) {
           errorEntityCollision(errorConsumer, entity, existing);

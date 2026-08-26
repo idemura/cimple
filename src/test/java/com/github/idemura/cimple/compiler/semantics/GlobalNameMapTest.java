@@ -107,6 +107,6 @@ class GlobalNameMapTest {
     assertEquals(0, errorConsumer.errorCount());
     assertSame(var1, localNameMap.lookupEntity(Identifier.ofEntity("x")));
     assertSame(function1, localNameMap.lookupEntity(Identifier.ofEntity("f")));
-    assertSame(method, localNameMap.lookupEntity(Identifier.ofEntity("toMillis")));
+    assertNull(localNameMap.lookupEntity(Identifier.ofEntity("toMillis")));
   }
 }
