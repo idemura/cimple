@@ -232,8 +232,9 @@ public class NameResolutionVisitor extends AstExpressionRewriteVisitor {
       if (ref.entity() == BuiltinFunctions.ARRAY_SIZE) {
         return node;
       }
-      checkState(!ref.isResolved());
-      resolveBuiltinFunction(ref);
+      if (!ref.isResolved()) {
+        resolveBuiltinFunction(ref);
+      }
     }
     // Method lookup and builtin resolution may replace the callee expression.
     checkCallParameters(node);
@@ -310,13 +311,6 @@ public class NameResolutionVisitor extends AstExpressionRewriteVisitor {
   }
 
   private AstFunction lookupMethod(AstType objectType, String fieldName) {
-    if (objectType.name().isBuiltin() && module != null) {
-      var localMethodName = new Identifier(module.name(), objectType.name().typeName(), fieldName);
-      var function = lookupFunction(localMethodName);
-      if (function != null) {
-        return function;
-      }
-    }
     return lookupFunction(objectType.name().withEntity(fieldName));
   }
 
