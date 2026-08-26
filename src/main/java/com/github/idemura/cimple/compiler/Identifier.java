@@ -53,7 +53,7 @@ public record Identifier(String moduleName, String typeName, String entityName)
   @Override
   public String toString() {
     var sb = new StringBuilder();
-    if (moduleName != null && !isBuiltin()) {
+    if (moduleName != null) {
       sb.append(moduleName);
       sb.append("~");
     }
