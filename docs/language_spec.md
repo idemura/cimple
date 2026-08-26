@@ -142,16 +142,6 @@ string
 
 `int` is a synonym for `int64` and `float` is a synonym for `float64`.
 
-### Alias
-
-```
-type alias Milliseconds int64;
-type alias Imported other~Duration;
-```
-
-Aliases are transparent. Semantic analysis resolves alias chains to their final target type.
-Circular aliases and aliases to undefined types are errors.
-
 ### Array
 
 Ci arrays are resizable and may be reallocated. They store initialized elements and track both

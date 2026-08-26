@@ -26,7 +26,6 @@ import com.github.idemura.cimple.compiler.ast.AstNumberLiteral;
 import com.github.idemura.cimple.compiler.ast.AstRecordType;
 import com.github.idemura.cimple.compiler.ast.AstStringLiteral;
 import com.github.idemura.cimple.compiler.ast.AstStringType;
-import com.github.idemura.cimple.compiler.ast.AstAliasType;
 import com.github.idemura.cimple.compiler.ast.AstTypeRef;
 import com.github.idemura.cimple.compiler.ast.AstUnionType;
 import com.github.idemura.cimple.compiler.ast.AstVariable;
@@ -75,7 +74,7 @@ class PreprocessVisitor extends AstExpressionRewriteVisitor {
         || !(node.header().objectType() instanceof AstTypeRef typeRef)) {
       return;
     }
-    // Keep the method-map key in sync with normalized object type aliases such as int -> int64.
+    // Keep the method-map key in sync with normalized builtin type names such as int -> int64.
     node.name(node.name().withType(typeRef.name().typeName()));
   }
 
@@ -130,12 +129,6 @@ class PreprocessVisitor extends AstExpressionRewriteVisitor {
   @Override
   protected void visit(AstTypeRef node) {
     normalizeTypeNameVisitor.normalize(node);
-    super.visit(node);
-  }
-
-  @Override
-  protected void visit(AstAliasType node) {
-    checkQualifiedName(node.name(), false, node.location());
     super.visit(node);
   }
 

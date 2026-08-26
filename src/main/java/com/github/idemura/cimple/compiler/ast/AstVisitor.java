@@ -27,10 +27,6 @@ public abstract class AstVisitor {
     node.acceptChildren(this);
   }
 
-  protected void visit(AstAliasType node) {
-    node.acceptChildren(this);
-  }
-
   protected void visit(AstPointerType node) {
     node.acceptChildren(this);
   }
