@@ -762,7 +762,7 @@ class ParserTest {
     {
       var expr = ((AstLocal) statements.get(0)).variable().expression().get();
       var newExpr = (AstNew) expr;
-      assertEquals(newTypeRef("Duration"), newExpr.type());
+      assertEquals(pointerType(newTypeRef("Duration")), newExpr.type());
       assertEquals(List.of(), newExpr.arguments());
     }
     {

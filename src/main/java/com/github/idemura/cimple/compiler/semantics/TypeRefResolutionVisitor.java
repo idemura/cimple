@@ -11,7 +11,6 @@ import com.github.idemura.cimple.compiler.ast.AstPointerType;
 import com.github.idemura.cimple.compiler.ast.AstType;
 import com.github.idemura.cimple.compiler.ast.AstTypeHolder;
 import com.github.idemura.cimple.compiler.ast.AstTypeRef;
-import com.github.idemura.cimple.compiler.ast.AstVariable;
 import com.github.idemura.cimple.compiler.ast.AstVisitor;
 import java.util.Map;
 
@@ -56,7 +55,6 @@ public class TypeRefResolutionVisitor extends AstVisitor {
   @Override
   protected void visit(AstNew node) {
     super.visit(node);
-    node.type(new AstPointerType(resolveTypeRefSafe(node.type())));
   }
 
   private AstType resolveTypeRefSafe(AstType type) {

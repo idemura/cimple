@@ -118,6 +118,26 @@ class ArrayTest extends AbstractSemanticsTest {
   }
 
   @Test
+  void testNewArrayAndDeleteArray() {
+    var code =
+        """
+        module test;
+        function f() {
+          var values = new int[](5);
+          delete values;
+        }
+        """;
+    var module = parseCode(code);
+    new SemanticAnalyzer(errorConsumer).analyze(List.of(module));
+    assertEquals(List.of(), errorConsumer.errors());
+
+    var statements = module.findFunction("f").block().statements();
+    assertEquals(2, statements.size());
+    var local = (AstLocal) statements.get(0);
+    assertEquals(arrayType(AstBuiltinType.INT64), local.variable().type());
+  }
+
+  @Test
   void testArrayAccessTypeErrors() {
     var code =
         """

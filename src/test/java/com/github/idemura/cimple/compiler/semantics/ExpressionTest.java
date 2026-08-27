@@ -161,5 +161,4 @@ class ExpressionTest extends AbstractSemanticsTest {
             "Undefined field 'millis' in record 'test~Duration'"),
         errorConsumer.errors());
   }
-
 }

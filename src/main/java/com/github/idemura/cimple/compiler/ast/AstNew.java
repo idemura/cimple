@@ -34,7 +34,8 @@ public final class AstNew extends AstExpression {
   }
 
   public void type(AstType type) {
-    this.type.set(type);
+    var newType = type instanceof AstArrayType ? type : new AstPointerType(type);
+    this.type.set(newType);
   }
 
   public List<AstExpression> arguments() {

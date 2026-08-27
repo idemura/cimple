@@ -26,6 +26,7 @@ import com.github.idemura.cimple.compiler.ast.AstLocal;
 import com.github.idemura.cimple.compiler.ast.AstModule;
 import com.github.idemura.cimple.compiler.ast.AstPointerType;
 import com.github.idemura.cimple.compiler.ast.AstRecordType;
+import com.github.idemura.cimple.compiler.ast.AstStringType;
 import com.github.idemura.cimple.compiler.ast.AstType;
 import com.github.idemura.cimple.compiler.ast.AstTypeHolder;
 import com.github.idemura.cimple.compiler.ast.AstTypeRef;
@@ -142,13 +143,13 @@ public class NameResolutionVisitor extends AstExpressionRewriteVisitor {
       case AstPointerType pointerType -> {
         // TODO: Generate defer call.
       }
-      // case AstStringType stringType -> {
-      //   // TODO: Free string
-      // }
-      // case AstArrayType arrayType -> {
-      //   // TODO: Free array. Call defer.
-      //
-      // }
+      case AstStringType stringType -> {
+        // TODO: Delete string.
+      }
+      case AstArrayType arrayType -> {
+        // TODO: Delete array. Call defer on elements.
+
+      }
       default -> {
         errorConsumer.errorAt(
             node.location(),
