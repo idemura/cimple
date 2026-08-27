@@ -104,6 +104,6 @@ public class CliDriver {
   public static void main(String[] args) {
     var app = new CliDriver();
     app.parseCmdLine(args);
-    System.exit(app.run() ? 1 : 0);
+    System.exit(app.run() ? 0 : 1);
   }
 }
