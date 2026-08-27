@@ -5,6 +5,7 @@ import static com.github.idemura.cimple.compiler.ast.AstBuiltinType.INT64;
 
 import com.github.idemura.cimple.compiler.Identifier;
 import com.github.idemura.cimple.compiler.ast.AstBuiltinType;
+import com.github.idemura.cimple.compiler.ast.AstEntity;
 import com.github.idemura.cimple.compiler.ast.AstFunction;
 import com.github.idemura.cimple.compiler.ast.AstFunctionHeader;
 import com.github.idemura.cimple.compiler.ast.AstVariable;
@@ -12,6 +13,8 @@ import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableMap;
 
 public final class BuiltinFunctions {
+  private static final String APPEND = "append";
+  private static final String CAPACITY = "capacity";
   private static final String SIZE = "size";
 
   public static final AstFunction ADD_I64 = makeBinaryOperator("_add_i64", INT64, INT64, INT64);
@@ -25,15 +28,25 @@ public final class BuiltinFunctions {
   public static final AstFunction LE_I64 = makeBinaryOperator("_le_i64", BOOL, INT64, INT64);
   public static final AstFunction GT_I64 = makeBinaryOperator("_gt_i64", BOOL, INT64, INT64);
   public static final AstFunction GE_I64 = makeBinaryOperator("_ge_i64", BOOL, INT64, INT64);
-  public static final AstFunction ARRAY_SIZE = makeArrayMethod(SIZE, INT64);
+  public static final AstFunction ARRAY_APPEND = makeArrayMethod(APPEND, AstBuiltinType.VOID, 1);
+  public static final AstFunction ARRAY_CAPACITY = makeArrayMethod(CAPACITY, INT64, 0);
+  public static final AstFunction ARRAY_SIZE = makeArrayMethod(SIZE, INT64, 0);
 
   private static final ImmutableMap<String, AstFunction> ARRAY_METHODS =
-      ImmutableMap.of(SIZE, ARRAY_SIZE);
+      ImmutableMap.<String, AstFunction>builder()
+          .put(APPEND, ARRAY_APPEND)
+          .put(CAPACITY, ARRAY_CAPACITY)
+          .put(SIZE, ARRAY_SIZE)
+          .build();
 
   private BuiltinFunctions() {}
 
   static AstFunction lookupArrayMethod(String name) {
     return ARRAY_METHODS.get(name);
+  }
+
+  static boolean isArrayMethod(AstEntity entity) {
+    return entity == ARRAY_APPEND || entity == ARRAY_CAPACITY || entity == ARRAY_SIZE;
   }
 
   static AstVariable makeParameter(String name, AstBuiltinType type) {
@@ -57,10 +70,16 @@ public final class BuiltinFunctions {
         name, result, ImmutableList.of(makeParameter("_0", arg1), makeParameter("_1", arg2)));
   }
 
-  private static AstFunction makeArrayMethod(String name, AstBuiltinType resultType) {
+  private static AstFunction makeArrayMethod(
+      String name, AstBuiltinType resultType, int extraParameterCount) {
     // The synthetic object parameter is type-checked by NameResolutionVisitor because the AST
     // does not yet have a way to express "array of any element type" as a concrete parameter type.
-    return makeBuiltinFunction(name, resultType, ImmutableList.of(makePolymorphicParameter("_0")));
+    var parameters = new ImmutableList.Builder<AstVariable>();
+    parameters.add(makePolymorphicParameter("_0"));
+    for (var i = 0; i < extraParameterCount; i++) {
+      parameters.add(makePolymorphicParameter("_" + (i + 1)));
+    }
+    return makeBuiltinFunction(name, resultType, parameters.build());
   }
 
   private static AstFunction makeBuiltinFunction(

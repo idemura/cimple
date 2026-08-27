@@ -4,9 +4,11 @@ import static com.github.idemura.cimple.compiler.ast.AstUtils.*;
 import static org.junit.jupiter.api.Assertions.*;
 
 import com.github.idemura.cimple.compiler.ast.AstArrayAccess;
+import com.github.idemura.cimple.compiler.ast.AstArrayType;
 import com.github.idemura.cimple.compiler.ast.AstBuiltinType;
 import com.github.idemura.cimple.compiler.ast.AstCall;
 import com.github.idemura.cimple.compiler.ast.AstEntityRef;
+import com.github.idemura.cimple.compiler.ast.AstExpressionStatement;
 import com.github.idemura.cimple.compiler.ast.AstFunction;
 import com.github.idemura.cimple.compiler.ast.AstLocal;
 import com.github.idemura.cimple.compiler.ast.AstType;
@@ -15,18 +17,39 @@ import org.junit.jupiter.api.Test;
 
 class ArrayTest extends AbstractSemanticsTest {
   private static void assertArraySizeCall(AstFunction function, AstType expectedObjectType) {
-    var local = (AstLocal) function.block().statements().get(0);
+    assertArrayMethodCall(function, 0, BuiltinFunctions.ARRAY_SIZE, expectedObjectType);
+  }
+
+  private static void assertArrayMethodCall(
+      AstFunction function, int statementIndex, AstFunction method, AstType expectedObjectType) {
+    var local = (AstLocal) function.block().statements().get(statementIndex);
     assertEquals(AstBuiltinType.INT64, local.variable().type());
 
     var call = (AstCall) local.variable().expression().get();
     var functionRef = (AstEntityRef) call.function();
-    assertSame(BuiltinFunctions.ARRAY_SIZE, functionRef.entity());
+    assertSame(method, functionRef.entity());
     assertEquals(AstBuiltinType.INT64, call.type());
 
+    assertEquals(1, method.header().parameters().size());
     assertEquals(1, call.arguments().size());
     var object = (AstEntityRef) call.arguments().get(0);
     assertSame(function.header().parameters().get(0), object.entity());
     assertEquals(expectedObjectType, object.type());
+  }
+
+  private static void assertArrayAppendCall(
+      AstFunction function, int statementIndex, int objectIndex, AstArrayType expectedObjectType) {
+    var statement = (AstExpressionStatement) function.block().statements().get(statementIndex);
+    var call = (AstCall) statement.expression().get();
+    var functionRef = (AstEntityRef) call.function();
+    assertSame(BuiltinFunctions.ARRAY_APPEND, functionRef.entity());
+    assertEquals(AstBuiltinType.VOID, call.type());
+
+    assertEquals(2, call.arguments().size());
+    var object = (AstEntityRef) call.arguments().get(0);
+    assertSame(function.header().parameters().get(objectIndex), object.entity());
+    assertEquals(expectedObjectType, object.type());
+    assertEquals(expectedObjectType.baseType(), call.arguments().get(1).type());
   }
 
   private static void assertArrayAccess(AstFunction function, AstType expectedElementType) {
@@ -83,17 +106,26 @@ class ArrayTest extends AbstractSemanticsTest {
   }
 
   @Test
-  void testArraySizeRejectsArguments() {
+  void testArrayMethodsRejectInvalidArguments() {
     var code =
         """
         module test;
         function f(values int[]) {
           var n = values.size(1);
+          var c = values.capacity(1);
+          values.append();
+          values.append(true);
         }
         """;
     var module = parseCode(code);
     new SemanticAnalyzer(errorConsumer).analyze(List.of(module));
-    assertEquals(List.of("Array method 'size' expects 0 arguments, got 1"), errorConsumer.errors());
+    assertEquals(
+        List.of(
+            "Array method 'size' expects 0 arguments, got 1",
+            "Array method 'capacity' expects 0 arguments, got 1",
+            "Array method 'append' expects 1 arguments, got 0",
+            "Array method 'append' argument has type 'bool', expected 'int64'"),
+        errorConsumer.errors());
   }
 
   @Test
@@ -115,6 +147,30 @@ class ArrayTest extends AbstractSemanticsTest {
 
     assertArrayAccess(module.findFunction("f"), AstBuiltinType.INT64);
     assertArrayAccess(module.findFunction("g"), newRecordType("test", "Point"));
+  }
+
+  @Test
+  void testArrayCapacityAndAppendAcceptArrayOfAnyElementType() {
+    var code =
+        """
+        module test;
+        type record Point {}
+        function f(values int[], points Point[], point Point) {
+          var capacity = values.capacity();
+          values.append(1);
+          points.append(point);
+        }
+        """;
+    var module = parseCode(code);
+    new SemanticAnalyzer(errorConsumer).analyze(List.of(module));
+    assertEquals(List.of(), errorConsumer.errors());
+
+    var function = module.findFunction("f");
+    assertEquals(3, function.block().statements().size());
+    assertArrayMethodCall(
+        function, 0, BuiltinFunctions.ARRAY_CAPACITY, arrayType(AstBuiltinType.INT64));
+    assertArrayAppendCall(function, 1, 0, arrayType(AstBuiltinType.INT64));
+    assertArrayAppendCall(function, 2, 1, arrayType(newRecordType("test", "Point")));
   }
 
   @Test

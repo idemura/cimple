@@ -230,7 +230,7 @@ public class NameResolutionVisitor extends AstExpressionRewriteVisitor {
     function = node.function();
     // Builtin calls are selected here, once argument expressions are available.
     if (function instanceof AstEntityRef ref && ref.isBuiltin()) {
-      if (ref.entity() == BuiltinFunctions.ARRAY_SIZE) {
+      if (BuiltinFunctions.isArrayMethod(ref.entity())) {
         return node;
       }
       if (!ref.isResolved()) {
@@ -281,8 +281,8 @@ public class NameResolutionVisitor extends AstExpressionRewriteVisitor {
       node.function(fieldAccess.object());
       return;
     }
-    if (objectType instanceof AstArrayType) {
-      resolveArrayMethodCall(node, fieldAccess);
+    if (objectType instanceof AstArrayType arrayType) {
+      resolveArrayMethodCall(node, fieldAccess, arrayType);
       return;
     }
     if (objectType == AstBuiltinType.VOID) {
@@ -330,19 +330,18 @@ public class NameResolutionVisitor extends AstExpressionRewriteVisitor {
     return globalNameMap.lookupEntity(name);
   }
 
-  private void resolveArrayMethodCall(AstCall node, AstFieldAccess fieldAccess) {
+  private void resolveArrayMethodCall(
+      AstCall node, AstFieldAccess fieldAccess, AstArrayType arrayType) {
     var function = BuiltinFunctions.lookupArrayMethod(fieldAccess.fieldName());
     if (function == null) {
       errorConsumer.errorAt(
           fieldAccess.location(), "Undefined array method: '%s'", fieldAccess.fieldName());
       return;
     }
-    if (!node.arguments().isEmpty()) {
-      errorConsumer.errorAt(
-          node.location(),
-          "Array method '%s' expects 0 arguments, got %d",
-          fieldAccess.fieldName(),
-          node.arguments().size());
+    if (function == BuiltinFunctions.ARRAY_APPEND) {
+      checkArrayAppendArguments(node, fieldAccess, arrayType);
+    } else {
+      checkArrayMethodArgumentCount(node, fieldAccess, 0);
     }
 
     var functionRef = new AstEntityRef();
@@ -354,6 +353,37 @@ public class NameResolutionVisitor extends AstExpressionRewriteVisitor {
     arguments.add(0, fieldAccess.object());
     node.arguments(arguments);
     node.function(functionRef);
+  }
+
+  private void checkArrayAppendArguments(
+      AstCall node, AstFieldAccess fieldAccess, AstArrayType arrayType) {
+    if (!checkArrayMethodArgumentCount(node, fieldAccess, 1)) {
+      return;
+    }
+    var value = node.arguments().get(0);
+    var valueType = checkNotNull(value.type());
+    var elementType = arrayType.baseType();
+    if (!valueType.equals(elementType)) {
+      errorConsumer.errorAt(
+          value.location(),
+          "Array method 'append' argument has type '%s', expected '%s'",
+          formatType(valueType),
+          formatType(elementType));
+    }
+  }
+
+  private boolean checkArrayMethodArgumentCount(
+      AstCall node, AstFieldAccess fieldAccess, int expectedCount) {
+    if (node.arguments().size() == expectedCount) {
+      return true;
+    }
+    errorConsumer.errorAt(
+        node.location(),
+        "Array method '%s' expects %d arguments, got %d",
+        fieldAccess.fieldName(),
+        expectedCount,
+        node.arguments().size());
+    return false;
   }
 
   private void checkCallParameters(AstCall call) {
