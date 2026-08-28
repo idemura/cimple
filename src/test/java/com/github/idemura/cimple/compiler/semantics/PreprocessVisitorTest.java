@@ -160,17 +160,17 @@ class PreprocessVisitorTest extends AbstractSemanticsTest {
     module.accept(new PreprocessVisitor(reservedWords, errorConsumer));
     assertEquals(
         ImmutableList.of(
-            "Reserved word 'if' cannot be used as a name",
-            "Reserved word 'return' cannot be used as a name",
-            "Reserved word 'else' cannot be used as a name",
-            "Reserved word 'true' cannot be used as a name",
-            "Reserved word 'bool' cannot be used as a type name",
-            "Reserved word 'int32' cannot be used as a type name"),
+            "Reserved word 'if' cannot be used as name",
+            "Reserved word 'return' cannot be used as name",
+            "Reserved word 'else' cannot be used as name",
+            "Reserved word 'true' cannot be used as name",
+            "Reserved word 'bool' cannot be used as type name",
+            "Reserved word 'int32' cannot be used as type name"),
         errorConsumer.errors());
   }
 
   @Test
-  void testRecordAndUnionAreContextualKeywords() {
+  void testContextualKeywords() {
     var code =
         """
         module record;
@@ -182,17 +182,18 @@ class PreprocessVisitorTest extends AbstractSemanticsTest {
         }
         type union record {
         }
+        type enum enum(int) {
+          union;
+        }
         """;
     var module = parseCode(code);
     module.accept(new PreprocessVisitor(reservedWords, errorConsumer));
     assertEquals(
         List.of(
-            "Reserved word 'record' cannot be used as a name",
-            "Reserved word 'union' cannot be used as a name",
-            "Reserved word 'record' cannot be used as a name",
-            "Reserved word 'union' cannot be used as a name",
-            "Reserved word 'union' cannot be used as a type name",
-            "Reserved word 'record' cannot be used as a type name"),
+            "Reserved word 'union' cannot be used as type name",
+            "Reserved word 'record' cannot be used as type name",
+            "Reserved word 'enum' cannot be used as type name",
+            "Reserved word 'union' cannot be used as tag"),
         errorConsumer.errors());
   }
 
@@ -275,8 +276,7 @@ class PreprocessVisitorTest extends AbstractSemanticsTest {
     assertEquals(List.of(), errorConsumer.errors());
     assertEquals(newBuiltinTypeRef("int64"), module.findVariable("g").type());
     assertEquals(
-        newBuiltinTypeRef("int64"),
-        ((AstRecordType) module.findType("R")).fields().get(0).type());
+        newBuiltinTypeRef("int64"), ((AstRecordType) module.findType("R")).fields().get(0).type());
     assertEquals(
         newBuiltinTypeRef("int64"), module.findFunction("f").header().parameters().get(0).type());
   }

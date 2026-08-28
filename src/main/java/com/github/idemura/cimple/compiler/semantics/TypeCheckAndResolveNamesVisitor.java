@@ -1,5 +1,6 @@
 package com.github.idemura.cimple.compiler.semantics;
 
+import static com.github.idemura.cimple.compiler.ast.AstBuiltinType.isIntegerType;
 import static com.google.common.base.Preconditions.checkNotNull;
 import static com.google.common.base.Preconditions.checkState;
 
@@ -15,6 +16,7 @@ import com.github.idemura.cimple.compiler.ast.AstCompoundAssign;
 import com.github.idemura.cimple.compiler.ast.AstDelete;
 import com.github.idemura.cimple.compiler.ast.AstEntity;
 import com.github.idemura.cimple.compiler.ast.AstEntityRef;
+import com.github.idemura.cimple.compiler.ast.AstEnumType;
 import com.github.idemura.cimple.compiler.ast.AstExpression;
 import com.github.idemura.cimple.compiler.ast.AstExpressionRewriteVisitor;
 import com.github.idemura.cimple.compiler.ast.AstFieldAccess;
@@ -24,6 +26,7 @@ import com.github.idemura.cimple.compiler.ast.AstFunctionHeader;
 import com.github.idemura.cimple.compiler.ast.AstFunctionType;
 import com.github.idemura.cimple.compiler.ast.AstLocal;
 import com.github.idemura.cimple.compiler.ast.AstModule;
+import com.github.idemura.cimple.compiler.ast.AstNumberLiteral;
 import com.github.idemura.cimple.compiler.ast.AstPointerType;
 import com.github.idemura.cimple.compiler.ast.AstRecordType;
 import com.github.idemura.cimple.compiler.ast.AstStringType;
@@ -104,6 +107,32 @@ public class TypeCheckAndResolveNamesVisitor extends AstExpressionRewriteVisitor
   }
 
   @Override
+  protected void visit(AstEnumType node) {
+    super.visit(node);
+
+    for (var variant : node.variants()) {
+      var valueExpression = variant.valueExpression();
+      if (valueExpression == null) {
+        continue;
+      }
+      if (!(valueExpression instanceof AstNumberLiteral)) {
+        // TODO: Remove one constant folding works.
+        errorConsumer.errorAt(
+            variant.location(), "Enum variant '%s' value must be a number literal", variant.tag());
+        continue;
+      }
+      var valueType = checkNotNull(valueExpression.type());
+      if (!isIntegerType(valueType)) {
+        errorConsumer.errorAt(
+            variant.location(),
+            "Enum variant '%s' value has type '%s', expected integer",
+            variant.tag(),
+            valueType.formatName());
+      }
+    }
+  }
+
+  @Override
   protected void visit(AstBlock node) {
     super.visit(node);
   }
@@ -154,7 +183,7 @@ public class TypeCheckAndResolveNamesVisitor extends AstExpressionRewriteVisitor
         errorConsumer.errorAt(
             node.location(),
             "Delete expression of type '%s', expected pointer",
-            formatType(expression.type()));
+            expression.type().formatName());
       }
     }
   }
@@ -186,7 +215,7 @@ public class TypeCheckAndResolveNamesVisitor extends AstExpressionRewriteVisitor
     var objectType = checkNotNull(node.object().type());
     if (!(objectType instanceof AstRecordType recordType)) {
       errorConsumer.errorAt(
-          node.location(), "Field access requires a record, got '%s'", formatType(objectType));
+          node.location(), "Field access requires a record, got '%s'", objectType.formatName());
       return node;
     }
     for (var field : recordType.fields()) {
@@ -208,14 +237,14 @@ public class TypeCheckAndResolveNamesVisitor extends AstExpressionRewriteVisitor
     var arrayType = checkNotNull(node.array().type());
     if (!(arrayType instanceof AstArrayType)) {
       errorConsumer.errorAt(
-          node.location(), "Array access requires an array, got '%s'", formatType(arrayType));
+          node.location(), "Array access requires an array, got '%s'", arrayType.formatName());
     }
     var indexType = checkNotNull(node.index().type());
     if (!AstBuiltinType.INT64.equals(indexType)) {
       errorConsumer.errorAt(
           node.index().location(),
           "Array index has type '%s', expected 'int64'",
-          formatType(indexType));
+          indexType.formatName());
     }
     return node;
   }
@@ -367,8 +396,8 @@ public class TypeCheckAndResolveNamesVisitor extends AstExpressionRewriteVisitor
       errorConsumer.errorAt(
           value.location(),
           "Array method 'append' argument has type '%s', expected '%s'",
-          formatType(valueType),
-          formatType(elementType));
+          valueType.formatName(),
+          elementType.formatName());
     }
   }
 
@@ -398,7 +427,7 @@ public class TypeCheckAndResolveNamesVisitor extends AstExpressionRewriteVisitor
       errorConsumer.errorAt(
           call.function().location(),
           "Calling expression of type '%s', function expected.",
-          formatType(type));
+          type.formatName());
     }
   }
 
@@ -411,7 +440,7 @@ public class TypeCheckAndResolveNamesVisitor extends AstExpressionRewriteVisitor
       errorConsumer.errorAt(
           operation.location(),
           "Operator expression of type '%s', function expected.",
-          formatType(type));
+          type.formatName());
     }
   }
 
@@ -439,18 +468,10 @@ public class TypeCheckAndResolveNamesVisitor extends AstExpressionRewriteVisitor
             "Argument %d of function '%s' has type '%s', expected '%s'",
             i,
             functionName,
-            formatType(argumentType),
-            formatType(parameterType));
+            argumentType.formatName(),
+            parameterType.formatName());
       }
     }
-  }
-
-  private static String formatType(AstType type) {
-    var name = type.name();
-    if (name.isBuiltin()) {
-      return name.typeName();
-    }
-    return name.toString();
   }
 
   private static String calleeExpressionMessage(AstExpression expression) {

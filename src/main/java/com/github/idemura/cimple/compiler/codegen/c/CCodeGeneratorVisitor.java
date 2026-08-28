@@ -4,6 +4,7 @@ import com.github.idemura.cimple.compiler.Identifier;
 import com.github.idemura.cimple.compiler.IndentWriter;
 import com.github.idemura.cimple.compiler.ast.AstArrayType;
 import com.github.idemura.cimple.compiler.ast.AstBuiltinType;
+import com.github.idemura.cimple.compiler.ast.AstEnumType;
 import com.github.idemura.cimple.compiler.ast.AstFunction;
 import com.github.idemura.cimple.compiler.ast.AstFunctionType;
 import com.github.idemura.cimple.compiler.ast.AstModule;
@@ -30,7 +31,9 @@ class CCodeGeneratorVisitor extends AstVisitor {
   protected void visit(AstModule node) {
     var records = collectRecords(node);
     var unions = collectUnions(node);
+    var enums = collectEnums(node);
     emitRecordForwardDeclarations(records);
+    emitEnumDefinitions(enums);
     emitRecordDefinitions(records);
     emitUnionDefinitions(unions);
     // TODO: Emit global variables.
@@ -67,6 +70,16 @@ class CCodeGeneratorVisitor extends AstVisitor {
     return unions;
   }
 
+  private static List<AstEnumType> collectEnums(AstModule module) {
+    var enums = new ArrayList<AstEnumType>();
+    for (var definition : module.definitions()) {
+      if (definition instanceof AstEnumType enumType) {
+        enums.add(enumType);
+      }
+    }
+    return enums;
+  }
+
   private void emitRecordForwardDeclarations(List<AstRecordType> records) {
     for (var record : records) {
       out.writeLine("struct %s;".formatted(cTypeName(record.name())));
@@ -99,6 +112,24 @@ class CCodeGeneratorVisitor extends AstVisitor {
       }
       out.writeLine("");
     }
+  }
+
+  private void emitEnumDefinitions(List<AstEnumType> enums) {
+    for (var enumType : enums) {
+      emitEnumDefinition(enumType);
+      out.writeLine("");
+    }
+  }
+
+  private void emitEnumDefinition(AstEnumType enumType) {
+    out.writeLine("enum %s {".formatted(cTypeName(enumType.name())));
+    out.indent();
+    for (var variant : enumType.variants()) {
+      out.writeLine(
+          "%s_%s = %d,".formatted(cTypeName(enumType.name()), variant.tag(), variant.value()));
+    }
+    out.unindent();
+    out.writeLine("};");
   }
 
   private void emitTaggedUnionDefinition(AstUnionType union) {
@@ -135,6 +166,7 @@ class CCodeGeneratorVisitor extends AstVisitor {
       case AstBuiltinType builtinType -> cBuiltinType(builtinType);
       case AstStringType ignored -> "char*";
       case AstRecordType recordType -> "struct " + cTypeName(recordType.name());
+      case AstEnumType enumType -> "enum " + cTypeName(enumType.name());
       case AstPointerType pointerType -> cType(pointerType.baseType()) + "*";
       case AstArrayType ignored ->
           throw new UnsupportedOperationException("C array type emission is not implemented yet");

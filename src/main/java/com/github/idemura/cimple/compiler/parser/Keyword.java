@@ -21,11 +21,9 @@ public enum Keyword {
   MATCH("match"),
   MODULE("module"),
   NEW("new"),
-  RECORD("record"),
   RETURN("return"),
   TEMPLATE("template"),
   TYPE("type"),
-  UNION("union"),
   VAR("var");
 
   private static final ImmutableMap<String, Keyword> SYMBOL_NAME_MAP = createSymbolNameMap();
@@ -77,6 +75,9 @@ public enum Keyword {
   // Builtin types that we allow to define methods for.
   public static Set<String> reservedTypeNames() {
     var builder = new ImmutableSet.Builder<String>();
+    for (var keyword : values()) {
+      builder.add(keyword.symbolName);
+    }
     return builder
         .add("bool")
         .add("char")
@@ -86,8 +87,10 @@ public enum Keyword {
         .add("int32")
         .add("int64")
         .add("string")
-        .add("record")
-        .add("union")
+        .add("void")
+        .add(ContextKeywords.RECORD)
+        .add(ContextKeywords.ENUM)
+        .add(ContextKeywords.UNION)
         .build();
   }
 }

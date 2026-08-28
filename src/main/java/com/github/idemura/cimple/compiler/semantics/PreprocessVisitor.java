@@ -12,6 +12,7 @@ import com.github.idemura.cimple.compiler.ast.AstBuiltinType;
 import com.github.idemura.cimple.compiler.ast.AstCall;
 import com.github.idemura.cimple.compiler.ast.AstCompoundAssign;
 import com.github.idemura.cimple.compiler.ast.AstEntityRef;
+import com.github.idemura.cimple.compiler.ast.AstEnumType;
 import com.github.idemura.cimple.compiler.ast.AstExpression;
 import com.github.idemura.cimple.compiler.ast.AstExpressionRewriteVisitor;
 import com.github.idemura.cimple.compiler.ast.AstFieldAccess;
@@ -37,7 +38,7 @@ import java.util.HashMap;
 //  - Validates method object parameters
 //  - Sets missing function result types to void
 //  - Checks that variables have either a type or an initializer
-//  - Checks duplicate function parameters, record fields, and union variants
+//  - Checks duplicate function parameters, record fields, union variants, and enum variants.
 //  - Normalizes builtin type aliases such as int and float
 //  - Marks method-call syntax
 //  - Rejects nested assignments
@@ -74,7 +75,7 @@ class PreprocessVisitor extends AstExpressionRewriteVisitor {
 
   @Override
   protected void visit(AstFunction node) {
-    checkQualifiedName(node.name(), true, node.location());
+    checkIdentifier(node.name(), node.location());
     checkObjectParameter(node.name(), node.header());
     super.visit(node);
     normalizeMethodObjectName(node);
@@ -129,7 +130,7 @@ class PreprocessVisitor extends AstExpressionRewriteVisitor {
 
   @Override
   protected void visit(AstVariable node) {
-    checkQualifiedName(node.name(), false, node.location());
+    checkIdentifier(node.name(), node.location());
     if (!node.getBit(AstVariable.PARAMETER) && node.type() == null && node.expression() == null) {
       errorConsumer.errorAt(
           node.location(), "Variable '%s' must have a type or an initializer", node.name());
@@ -145,7 +146,7 @@ class PreprocessVisitor extends AstExpressionRewriteVisitor {
 
   @Override
   protected void visit(AstFunctionType node) {
-    checkQualifiedName(node.name(), true, node.location());
+    checkIdentifier(node.name(), node.location());
     checkObjectParameter(node.name(), node.header());
     super.visit(node);
   }
@@ -158,7 +159,7 @@ class PreprocessVisitor extends AstExpressionRewriteVisitor {
 
   @Override
   protected void visit(AstRecordType node) {
-    checkQualifiedName(node.name(), false, node.location());
+    checkIdentifier(node.name(), node.location());
     var fieldMap = new HashMap<String, AstVariable>();
     for (var field : node.fields()) {
       var existing = fieldMap.putIfAbsent(field.name().entityName(), field);
@@ -175,15 +176,33 @@ class PreprocessVisitor extends AstExpressionRewriteVisitor {
 
   @Override
   protected void visit(AstUnionType node) {
-    checkQualifiedName(node.name(), false, node.location());
+    checkIdentifier(node.name(), node.location());
     var variantMap = new HashMap<String, AstUnionType.Variant>();
     for (var variant : node.variants()) {
-      checkName(variant.tag(), variant.location());
+      checkTagName(variant.tag(), node.location());
       var existing = variantMap.putIfAbsent(variant.tag(), variant);
       if (existing != null) {
         errorConsumer.errorAt(
             variant.location(),
             "Duplicate union variant '%s'. First defined at %s.",
+            variant.tag(),
+            existing.location());
+      }
+    }
+    super.visit(node);
+  }
+
+  @Override
+  protected void visit(AstEnumType node) {
+    checkIdentifier(node.name(), node.location());
+    var variantMap = new HashMap<String, AstEnumType.Variant>();
+    for (var variant : node.variants()) {
+      checkTagName(variant.tag(), node.location());
+      var existing = variantMap.putIfAbsent(variant.tag(), variant);
+      if (existing != null) {
+        errorConsumer.errorAt(
+            variant.location(),
+            "Duplicate enum variant '%s'. First defined at %s.",
             variant.tag(),
             existing.location());
       }
@@ -290,16 +309,32 @@ class PreprocessVisitor extends AstExpressionRewriteVisitor {
     if (newNode != node) {
       newNode.location(node.location());
     } else {
-      checkQualifiedName(node.name(), false, node.location());
+      checkIdentifier(node.name(), node.location());
     }
     return newNode;
   }
 
-  private void checkQualifiedName(Identifier name, boolean method, Location location) {
-    if (!name.isBuiltin()) {
-      checkName(name.moduleName(), location);
-      checkTypeName(name.typeName(), method, location);
-      checkName(name.entityName(), location);
+  private void checkIdentifier(Identifier ident, Location location) {
+    if (!ident.isBuiltin()) {
+      checkName(ident.moduleName(), location);
+      var type = ident.typeName();
+      if (type != null) {
+        checkUnderscoreRules(type, location);
+        var method = ident.entityName() != null;
+        // Allow methods for builtin types.
+        if (reservedWords.isReservedTypeName(type) && !method) {
+          errorConsumer.errorAt(
+              location, "Reserved word '%s' cannot be used as type name", ident);
+        }
+      }
+      checkName(ident.entityName(), location);
+    }
+  }
+
+  private void checkTagName(String tag, Location location) {
+    checkUnderscoreRules(tag, location);
+    if (reservedWords.isReservedTypeName(tag)) {
+      errorConsumer.errorAt(location, "Reserved word '%s' cannot be used as tag", tag);
     }
   }
 
@@ -309,21 +344,7 @@ class PreprocessVisitor extends AstExpressionRewriteVisitor {
     }
     checkUnderscoreRules(name, location);
     if (reservedWords.isReservedName(name)) {
-      errorConsumer.errorAt(location, "Reserved word '%s' cannot be used as a name", name);
-    }
-  }
-
-  private void checkTypeName(String name, boolean method, Location location) {
-    if (name == null) {
-      return;
-    }
-    checkUnderscoreRules(name, location);
-    // Allow methods for reserved type names.
-    if (method && reservedWords.isReservedTypeName(name)) {
-      return;
-    }
-    if (reservedWords.isReservedName(name)) {
-      errorConsumer.errorAt(location, "Reserved word '%s' cannot be used as a type name", name);
+      errorConsumer.errorAt(location, "Reserved word '%s' cannot be used as name", name);
     }
   }
 

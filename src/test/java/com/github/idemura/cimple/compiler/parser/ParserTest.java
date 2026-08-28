@@ -17,6 +17,7 @@ import com.github.idemura.cimple.compiler.ast.AstCompoundAssign;
 import com.github.idemura.cimple.compiler.ast.AstDefer;
 import com.github.idemura.cimple.compiler.ast.AstDelete;
 import com.github.idemura.cimple.compiler.ast.AstEntityRef;
+import com.github.idemura.cimple.compiler.ast.AstEnumType;
 import com.github.idemura.cimple.compiler.ast.AstExpressionStatement;
 import com.github.idemura.cimple.compiler.ast.AstFieldAccess;
 import com.github.idemura.cimple.compiler.ast.AstFor;
@@ -39,6 +40,17 @@ class ParserTest {
     var errorConsumer = new InMemoryErrorConsumer();
     errorConsumer.enable(ErrorConsumer.Mode.THROW_ON_ERROR);
     return errorConsumer;
+  }
+
+  private static void assertEnumVariant(
+      AstEnumType.Variant variant, String name, String valueExpression) {
+    assertEquals(name, variant.tag());
+    if (valueExpression == null) {
+      assertNull(variant.valueExpression());
+    } else {
+      var expression = (AstNumberLiteral) variant.valueExpression();
+      assertEquals(valueExpression, expression.value());
+    }
   }
 
   @Test
@@ -239,6 +251,39 @@ class ParserTest {
     assertEquals(
         ImmutableList.of(unionVariant("None", null), unionVariant("Some", "string")),
         type.variants());
+  }
+
+  @Test
+  void testEnumType() {
+    var code =
+        """
+        module test;
+        type enum Color(int32) {
+          Red;
+          Green(3);
+          Blue;
+        }
+        """;
+    var module = parseCode(code, makeErrorConsumer());
+    assertEquals("test", module.name());
+    var type = (AstEnumType) module.findType("Color");
+    assertEquals(Identifier.ofType("Color"), type.name());
+    assertEquals(newTypeRef("int32"), type.baseType());
+    var variants = type.variants();
+    assertEquals(3, variants.size());
+    int i = 0;
+    {
+      var variant = variants.get(i++);
+      assertEnumVariant(variant, "Red", null);
+    }
+    {
+      var variant = variants.get(i++);
+      assertEnumVariant(variant, "Green", "3");
+    }
+    {
+      var variant = variants.get(i++);
+      assertEnumVariant(variant, "Blue", null);
+    }
   }
 
   @Test

@@ -212,7 +212,7 @@ function, or variable namespace.
 
 Enum values follow the same assignment rules as C: the first variant is assigned `0` unless it has
 an explicit value, and each variant without an explicit value is assigned the previous variant's
-value plus `1`. All enum values must be unique.
+value plus `1`.
 
 Every enum must define a variant with value `0`. This is required because Ci values may be
 zero-initialized, so every enum type needs a valid zero value.

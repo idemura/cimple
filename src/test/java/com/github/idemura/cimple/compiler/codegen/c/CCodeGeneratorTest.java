@@ -120,6 +120,30 @@ class CCodeGeneratorTest {
   }
 
   @Test
+  void testGenerateEnumType() {
+    var code =
+        """
+        module test;
+        type enum Color(int) {
+          Red;
+          Green(3);
+          Blue;
+        }
+        """;
+    var output = compile(code);
+    assertEquals(
+        """
+        enum test__Color {
+          test__Color_Red = 0,
+          test__Color_Green = 3,
+          test__Color_Blue = 4,
+        };
+
+        """,
+        output);
+  }
+
+  @Test
   void testGenerateTaggedUnionType() {
     var code =
         """

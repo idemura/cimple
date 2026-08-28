@@ -1,9 +1,12 @@
 package com.github.idemura.cimple.compiler.semantics;
 
+import static com.github.idemura.cimple.compiler.ast.AstBuiltinType.isIntegerType;
+
 import com.github.idemura.cimple.compiler.ErrorConsumer;
 import com.github.idemura.cimple.compiler.Identifier;
 import com.github.idemura.cimple.compiler.ast.AstArrayType;
 import com.github.idemura.cimple.compiler.ast.AstBuiltinType;
+import com.github.idemura.cimple.compiler.ast.AstEnumType;
 import com.github.idemura.cimple.compiler.ast.AstFunction;
 import com.github.idemura.cimple.compiler.ast.AstModule;
 import com.github.idemura.cimple.compiler.ast.AstNew;
@@ -51,6 +54,21 @@ public class ResolveTypesVisitor extends AstVisitor {
 
   @Override
   protected void visit(AstTypeRef node) {}
+
+  @Override
+  protected void visit(AstEnumType node) {
+    super.visit(node);
+    if (node.baseType() == null) {
+      node.baseType(AstBuiltinType.INT64);
+    }
+    if (!isIntegerType(node.baseType())) {
+      errorConsumer.errorAt(
+          node.location(),
+          "Enum '%s' base type must be an integer type, got '%s'",
+          node.name(),
+          node.baseType().formatName());
+    }
+  }
 
   @Override
   protected void visit(AstNew node) {

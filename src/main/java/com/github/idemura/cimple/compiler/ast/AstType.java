@@ -10,12 +10,21 @@ public abstract sealed class AstType extends AstNode
         AstStringType,
         AstFunctionType,
         AstRecordType,
-        AstUnionType {
+        AstUnionType,
+        AstEnumType {
   protected AstType() {}
 
   public abstract Identifier name();
 
   public abstract void name(Identifier name);
+
+  public String formatName() {
+    var name = name();
+    if (name.isBuiltin()) {
+      return name.typeName();
+    }
+    return name.toString();
+  }
 
   @Override
   public int hashCode() {

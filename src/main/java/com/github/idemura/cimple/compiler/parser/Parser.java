@@ -17,6 +17,7 @@ import com.github.idemura.cimple.compiler.ast.AstCompoundAssign;
 import com.github.idemura.cimple.compiler.ast.AstDefer;
 import com.github.idemura.cimple.compiler.ast.AstDelete;
 import com.github.idemura.cimple.compiler.ast.AstEntityRef;
+import com.github.idemura.cimple.compiler.ast.AstEnumType;
 import com.github.idemura.cimple.compiler.ast.AstExpression;
 import com.github.idemura.cimple.compiler.ast.AstExpressionHolder;
 import com.github.idemura.cimple.compiler.ast.AstExpressionStatement;
@@ -95,19 +96,30 @@ public class Parser {
 
   private AstType parseType() {
     takeKeyword(TYPE);
-    return switch (keyword(tokenizer.current())) {
-      case RECORD -> parseTypeRecord();
-      case FUNCTION -> parseTypeFunction();
-      case UNION -> parseTypeUnion();
-      default ->
-          throw fatalAtCurrentLocation(
-              "Invalid type definition: %s allowed", List.of(RECORD, FUNCTION, UNION));
-    };
+    if (currentIdentifierValueEquals(ContextKeywords.RECORD)) {
+      return parseTypeRecord();
+    }
+    if (currentIdentifierValueEquals(ContextKeywords.UNION)) {
+      return parseTypeUnion();
+    }
+    if (currentIdentifierValueEquals(ContextKeywords.ENUM)) {
+      return parseTypeEnum();
+    }
+    if (keywordOrNull(tokenizer.current()) == FUNCTION) {
+      return parseTypeFunction();
+    }
+    throw fatalAtCurrentLocation(
+        "Invalid type definition: one of %s expected",
+        List.of(
+            ContextKeywords.RECORD,
+            ContextKeywords.UNION,
+            ContextKeywords.ENUM,
+            FUNCTION.toString()));
   }
 
   private AstRecordType parseTypeRecord() {
     var type = new AstRecordType();
-    takeKeyword(RECORD);
+    takeContextualKeyword(ContextKeywords.RECORD);
     type.location(tokenizer.currentLocation());
     type.name(Identifier.ofType(take(IDENTIFIER).value()));
     take(LCURLY);
@@ -121,7 +133,7 @@ public class Parser {
 
   private AstUnionType parseTypeUnion() {
     var type = new AstUnionType();
-    takeKeyword(UNION);
+    takeContextualKeyword(ContextKeywords.UNION);
     type.location(tokenizer.currentLocation());
     type.name(Identifier.ofType(take(IDENTIFIER).value()));
     take(LCURLY);
@@ -140,6 +152,36 @@ public class Parser {
     variant.tag(take(IDENTIFIER).value());
     if (tokenizer.takeIf(LPAREN)) {
       variant.valueType(parseTypeRef());
+      take(RPAREN);
+    }
+    return variant;
+  }
+
+  private AstEnumType parseTypeEnum() {
+    var type = new AstEnumType();
+    takeContextualKeyword(ContextKeywords.ENUM);
+    type.location(tokenizer.currentLocation());
+    type.name(Identifier.ofType(take(IDENTIFIER).value()));
+    if (tokenizer.takeIf(LPAREN)) {
+      type.baseType(parseTypeRef());
+      take(RPAREN);
+    }
+    take(LCURLY);
+    var variants = new ImmutableList.Builder<AstEnumType.Variant>();
+    while (!tokenizer.takeIf(RCURLY)) {
+      variants.add(parseEnumVariant());
+      take(SEMICOLON);
+    }
+    type.variants(variants.build());
+    return type;
+  }
+
+  private AstEnumType.Variant parseEnumVariant() {
+    var variant = new AstEnumType.Variant();
+    variant.location(tokenizer.currentLocation());
+    variant.tag(take(IDENTIFIER).value());
+    if (tokenizer.takeIf(LPAREN)) {
+      variant.valueExpression(parseExpression());
       take(RPAREN);
     }
     return variant;
@@ -643,12 +685,26 @@ public class Parser {
     return tokenizer.take();
   }
 
+  private boolean currentIdentifierValueEquals(String value) {
+    var current = tokenizer.current();
+    return current.is(IDENTIFIER) && value.equals(current.value());
+  }
+
   private Identifier parseQualifiedName(Token first) {
     if (tokenizer.takeIf(TILDE)) {
       return Identifier.ofEntity(take(IDENTIFIER).value()).withModule(first.value());
     } else {
       return Identifier.ofEntity(first.value());
     }
+  }
+
+  private Location takeContextualKeyword(String value) {
+    var current = take(IDENTIFIER);
+    if (!value.equals(current.value())) {
+      throw errorConsumer.fatalAt(
+          current.location(), "Expected keyword '%s', found '%s'", value, current);
+    }
+    return current.location();
   }
 
   private Location takeKeyword(Keyword keyword) {

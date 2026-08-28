@@ -100,6 +100,21 @@ public class PrintAstVisitor extends AstVisitor {
   }
 
   @Override
+  protected void visit(AstEnumType node) {
+    output.writeLine("TYPE ENUM %s : %s".formatted(node.name(), node.baseType()));
+    output.indent();
+    for (var variant : node.variants()) {
+      if (variant.valueExpression() == null) {
+        output.writeLine("VARIANT %s".formatted(variant.tag()));
+      } else {
+        output.writeLine("VARIANT %s(%s)".formatted(variant.tag(), variant.valueExpression()));
+      }
+    }
+    output.unindent();
+    output.writeLine("END");
+  }
+
+  @Override
   protected void visit(AstBlock node) {
     output.writeLine("BLOCK");
     output.indent();

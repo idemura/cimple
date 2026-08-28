@@ -58,6 +58,13 @@ public class SemanticAnalyzer {
         return false;
       }
     }
+
+    for (var module : modules) {
+      module.accept(new ConstantFoldingVisitor(errorConsumer));
+      if (hasErrors()) {
+        return false;
+      }
+    }
     return true;
   }
 
