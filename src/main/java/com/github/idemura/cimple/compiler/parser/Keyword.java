@@ -4,7 +4,6 @@ import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.ImmutableSet;
 import java.util.Set;
 
-// TODO: Do not reserve type keywords (record, union) for functions/variables.
 public enum Keyword {
   CASE("case"),
   CLASS("class"),
@@ -22,11 +21,11 @@ public enum Keyword {
   MATCH("match"),
   MODULE("module"),
   NEW("new"),
+  RECORD("record") /* not reserved */,
   RETURN("return"),
-  RECORD("record"),
   TEMPLATE("template"),
   TYPE("type"),
-  UNION("union"),
+  UNION("union") /* not reserved */,
   VAR("var");
 
   private static final ImmutableMap<String, Keyword> SYMBOL_NAME_MAP = createSymbolNameMap();
@@ -57,6 +56,10 @@ public enum Keyword {
   public static Set<String> reservedNames() {
     var builder = new ImmutableSet.Builder<String>();
     for (var keyword : values()) {
+      // record/union are contextual after "type"; elsewhere they are ordinary identifiers.
+      if (keyword == RECORD || keyword == UNION) {
+        continue;
+      }
       builder.add(keyword.symbolName);
     }
     return builder

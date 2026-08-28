@@ -170,6 +170,31 @@ class PreprocessVisitorTest extends AbstractSemanticsTest {
   }
 
   @Test
+  void testRecordAndUnionAreContextualKeywords() {
+    var code =
+        """
+        module record;
+        var union int;
+        function f(record int) int {
+          var union = record;
+          record = union;
+          union = record;
+          return union;
+        }
+        type record record {
+          var union int;
+        }
+        type union union {
+          record;
+          union(int);
+        }
+        """;
+    var module = parseCode(code);
+    module.accept(new PreprocessVisitor(reservedWords, errorConsumer));
+    assertEquals(List.of(), errorConsumer.errors());
+  }
+
+  @Test
   void testUnderscoreNameFailures() {
     var code =
         """

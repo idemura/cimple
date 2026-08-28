@@ -211,7 +211,7 @@ public class Parser {
   }
 
   private AstStatement parseStatement() {
-    var keyword = keywordOrNull(tokenizer.current());
+    var keyword = statementKeywordOrNull(tokenizer.current());
     if (keyword == null) {
       return parseExpressionStatement();
     }
@@ -674,6 +674,17 @@ public class Parser {
       return null;
     }
     return Keyword.find(token.value());
+  }
+
+  private static Keyword statementKeywordOrNull(Token token) {
+    var keyword = keywordOrNull(token);
+    if (keyword == null) {
+      return null;
+    }
+    return switch (keyword) {
+      case VAR, CONST, RETURN, DELETE, IF, FOR, DEFER, MATCH, GOTO -> keyword;
+      default -> null;
+    };
   }
 
   private Keyword keyword(Token token) {
