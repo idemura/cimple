@@ -21,9 +21,11 @@ public enum Keyword {
   MATCH("match"),
   MODULE("module"),
   NEW("new"),
+  RECORD("record"),
   RETURN("return"),
   TEMPLATE("template"),
   TYPE("type"),
+  UNION("union"),
   VAR("var");
 
   private static final ImmutableMap<String, Keyword> SYMBOL_NAME_MAP = createSymbolNameMap();
@@ -61,7 +63,6 @@ public enum Keyword {
         .add("false")
         .add("null")
         .add("bool")
-        .add("byte")
         .add("char")
         .add("float32")
         .add("float64")
@@ -78,7 +79,6 @@ public enum Keyword {
     var builder = new ImmutableSet.Builder<String>();
     return builder
         .add("bool")
-        .add("byte")
         .add("char")
         .add("float32")
         .add("float64")
@@ -86,6 +86,8 @@ public enum Keyword {
         .add("int32")
         .add("int64")
         .add("string")
+        .add("record")
+        .add("union")
         .build();
   }
 }

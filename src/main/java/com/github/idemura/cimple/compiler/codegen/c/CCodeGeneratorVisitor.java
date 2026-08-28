@@ -155,7 +155,7 @@ class CCodeGeneratorVisitor extends AstVisitor {
     if (type == AstBuiltinType.BOOL) {
       return "bool";
     }
-    if (type == AstBuiltinType.BYTE || type == AstBuiltinType.INT8) {
+    if (type == AstBuiltinType.INT8) {
       return "int8_t";
     }
     if (type == AstBuiltinType.INT16) {

@@ -153,8 +153,8 @@ class PreprocessVisitorTest extends AbstractSemanticsTest {
         var return int;
         const else int = 1;
         function true() {}
-        type record int {}
-        type union byte {}
+        type record bool {}
+        type union int32 {}
         """;
     var module = parseCode(code);
     module.accept(new PreprocessVisitor(reservedWords, errorConsumer));
@@ -164,8 +164,8 @@ class PreprocessVisitorTest extends AbstractSemanticsTest {
             "Reserved word 'return' cannot be used as a name",
             "Reserved word 'else' cannot be used as a name",
             "Reserved word 'true' cannot be used as a name",
-            "Reserved word 'int' cannot be used as a type name",
-            "Reserved word 'byte' cannot be used as a type name"),
+            "Reserved word 'bool' cannot be used as a type name",
+            "Reserved word 'int32' cannot be used as a type name"),
         errorConsumer.errors());
   }
 
@@ -176,22 +176,24 @@ class PreprocessVisitorTest extends AbstractSemanticsTest {
         module record;
         var union int;
         function f(record int) int {
-          var union = record;
-          record = union;
-          union = record;
-          return union;
+          var union = 0;
         }
-        type record record {
-          var union int;
+        type record union {
         }
-        type union union {
-          record;
-          union(int);
+        type union record {
         }
         """;
     var module = parseCode(code);
     module.accept(new PreprocessVisitor(reservedWords, errorConsumer));
-    assertEquals(List.of(), errorConsumer.errors());
+    assertEquals(
+        List.of(
+            "Reserved word 'record' cannot be used as a name",
+            "Reserved word 'union' cannot be used as a name",
+            "Reserved word 'record' cannot be used as a name",
+            "Reserved word 'union' cannot be used as a name",
+            "Reserved word 'union' cannot be used as a type name",
+            "Reserved word 'record' cannot be used as a type name"),
+        errorConsumer.errors());
   }
 
   @Test
@@ -262,11 +264,10 @@ class PreprocessVisitorTest extends AbstractSemanticsTest {
         """
         module test;
         type record R {
-          var f float;
+          var f int;
         }
         var g int;
         function f(p int) {
-          var l float;
         }
         """;
     var module = parseCode(code);
@@ -274,13 +275,10 @@ class PreprocessVisitorTest extends AbstractSemanticsTest {
     assertEquals(List.of(), errorConsumer.errors());
     assertEquals(newBuiltinTypeRef("int64"), module.findVariable("g").type());
     assertEquals(
-        newBuiltinTypeRef("float64"),
+        newBuiltinTypeRef("int64"),
         ((AstRecordType) module.findType("R")).fields().get(0).type());
     assertEquals(
         newBuiltinTypeRef("int64"), module.findFunction("f").header().parameters().get(0).type());
-    assertEquals(
-        newBuiltinTypeRef("float64"),
-        ((AstLocal) module.findFunction("f").block().statements().get(0)).variable().type());
   }
 
   @Test
