@@ -35,13 +35,13 @@ import com.github.idemura.cimple.compiler.ast.AstVariable;
 import java.util.ArrayList;
 import java.util.List;
 
-public class NameResolutionVisitor extends AstExpressionRewriteVisitor {
+public class TypeCheckAndResolveNamesVisitor extends AstExpressionRewriteVisitor {
   private final GlobalNameMap globalNameMap;
   private final ErrorConsumer errorConsumer;
   private LocalNameMap localNameMap;
   private AstModule module;
 
-  public NameResolutionVisitor(GlobalNameMap globalNameMap, ErrorConsumer errorConsumer) {
+  public TypeCheckAndResolveNamesVisitor(GlobalNameMap globalNameMap, ErrorConsumer errorConsumer) {
     this.globalNameMap = globalNameMap;
     this.errorConsumer = errorConsumer;
   }

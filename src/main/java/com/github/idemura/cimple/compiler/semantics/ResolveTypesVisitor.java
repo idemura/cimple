@@ -14,12 +14,12 @@ import com.github.idemura.cimple.compiler.ast.AstTypeRef;
 import com.github.idemura.cimple.compiler.ast.AstVisitor;
 import java.util.Map;
 
-public class TypeRefResolutionVisitor extends AstVisitor {
+public class ResolveTypesVisitor extends AstVisitor {
   private final GlobalNameMap globalNameMap;
   private final ErrorConsumer errorConsumer;
   private Map<String, AstType> typeMap;
 
-  public TypeRefResolutionVisitor(GlobalNameMap globalNameMap, ErrorConsumer errorConsumer) {
+  public ResolveTypesVisitor(GlobalNameMap globalNameMap, ErrorConsumer errorConsumer) {
     this.globalNameMap = globalNameMap;
     this.errorConsumer = errorConsumer;
   }

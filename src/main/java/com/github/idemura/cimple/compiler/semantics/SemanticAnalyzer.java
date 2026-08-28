@@ -34,7 +34,7 @@ public class SemanticAnalyzer {
     }
 
     for (var module : modules) {
-      module.accept(new TypeRefResolutionVisitor(globalNameMap, errorConsumer));
+      module.accept(new ResolveTypesVisitor(globalNameMap, errorConsumer));
       checkRecursiveTypeDefinitions(module, errorConsumer);
       if (hasErrors()) {
         return false;
@@ -53,7 +53,7 @@ public class SemanticAnalyzer {
 
     assignFunctionTypes(modules);
     for (var module : modules) {
-      module.accept(new NameResolutionVisitor(globalNameMap, errorConsumer));
+      module.accept(new TypeCheckAndResolveNamesVisitor(globalNameMap, errorConsumer));
       if (hasErrors()) {
         return false;
       }
