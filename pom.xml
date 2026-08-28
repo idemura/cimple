@@ -14,11 +14,12 @@
 
   <properties>
     <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
-    <maven.compiler.release>21</maven.compiler.release>
-    <junit.version>5.10.3</junit.version>
+    <maven.compiler.release>25</maven.compiler.release>
+    <junit.version>6.1.3</junit.version>
+    <assertj.version>3.27.7</assertj.version>
     <tinylog.version>2.7.0</tinylog.version>
-    <jcommander.version>1.82</jcommander.version>
-    <guava.version>33.5.0-jre</guava.version>
+    <jcommander.version>3.0</jcommander.version>
+    <guava.version>33.7.1-jre</guava.version>
   </properties>
 
   <dependencies>
@@ -35,14 +36,22 @@
       <scope>test</scope>
     </dependency>
     <dependency>
+      <groupId>org.assertj</groupId>
+      <artifactId>assertj-core</artifactId>
+      <version>${assertj.version}</version>
+      <scope>test</scope>
+    </dependency>
+    <dependency>
       <groupId>org.tinylog</groupId>
       <artifactId>tinylog-impl</artifactId>
       <version>${tinylog.version}</version>
+      <scope>compile</scope>
     </dependency>
     <dependency>
-      <groupId>com.beust</groupId>
+      <groupId>org.jcommander</groupId>
       <artifactId>jcommander</artifactId>
       <version>${jcommander.version}</version>
+      <scope>compile</scope>
     </dependency>
     <dependency>
       <groupId>com.google.guava</groupId>
