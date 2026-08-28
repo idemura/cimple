@@ -40,10 +40,11 @@ public class CCodeGenerator extends CodeGenerator {
       #include <stdbool.h>
       #include <stdint.h>
       #include <stddef.h>
+      #include <stdlib.h>
       #include <memory.h>
 
-      typedef float float32_t;
-      typedef double float64_t;
+      typedef float cif32_t;
+      typedef double cif64_t;
       """);
   }
 
