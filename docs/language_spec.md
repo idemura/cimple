@@ -116,6 +116,7 @@ There are several kinds of types in Cimple:
 * Alias
 * Record
 * Union
+* Enum
 * Function
 * Interface
 
@@ -193,6 +194,28 @@ type union <name> {
     Some(string);
 }
 ```
+
+### Enum
+
+```
+type enum <name> ["(" <baseType> ")"] {
+    Red;
+    Green(5);
+    Blue;
+}
+```
+
+If the base type is omitted, `int64` is used.
+
+Enum variants are scoped to the enum namespace. They do not leak into the surrounding module,
+function, or variable namespace.
+
+Enum values follow the same assignment rules as C: the first variant is assigned `0` unless it has
+an explicit value, and each variant without an explicit value is assigned the previous variant's
+value plus `1`. All enum values must be unique.
+
+Every enum must define a variant with value `0`. This is required because Ci values may be
+zero-initialized, so every enum type needs a valid zero value.
 
 ### Function
 
