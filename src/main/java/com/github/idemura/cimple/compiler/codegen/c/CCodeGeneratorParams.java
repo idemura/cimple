@@ -3,7 +3,7 @@ package com.github.idemura.cimple.compiler.codegen.c;
 public record CCodeGeneratorParams(
     CStandard standard, boolean mangleModuleName, boolean outputPreamble) {
   public static final class Builder {
-    private CStandard standard = CStandard.C11;
+    private CStandard standard = CStandard.def();
     private boolean mangleModuleName = true;
     private boolean outputPreamble = true;
 

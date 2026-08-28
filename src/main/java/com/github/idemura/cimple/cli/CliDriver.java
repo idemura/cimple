@@ -27,7 +27,7 @@ public class CliDriver {
   String codeGen = "none";
 
   @Parameter(names = {"--c_standard"})
-  CStandard cStandard = CStandard.C11;
+  CStandard cStandard = CStandard.def();
 
   @Parameter(
       names = {"--c_mangle_module_name"},
