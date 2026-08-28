@@ -35,6 +35,10 @@ public final class AstBuiltinType extends AstType {
     };
   }
 
+  public static boolean isIntegerType(AstType type) {
+    return type == INT8 || type == INT16 || type == INT32 || type == INT64;
+  }
+
   @Override
   public void accept(AstVisitor visitor) {
     visitor.visit(this);
