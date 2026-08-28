@@ -136,11 +136,10 @@ int64
 int
 float32
 float64
-float
 string
 ```
 
-`int` is a synonym for `int64` and `float` is a synonym for `float64`.
+`int` is a synonym for `int64`.
 
 ### Array
 

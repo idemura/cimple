@@ -42,9 +42,6 @@ public class CCodeGenerator extends CodeGenerator {
       #include <stddef.h>
       #include <stdlib.h>
       #include <memory.h>
-
-      typedef float cif32_t;
-      typedef double cif64_t;
       """);
   }
 

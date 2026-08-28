@@ -21,11 +21,9 @@ public enum Keyword {
   MATCH("match"),
   MODULE("module"),
   NEW("new"),
-  RECORD("record") /* not reserved */,
   RETURN("return"),
   TEMPLATE("template"),
   TYPE("type"),
-  UNION("union") /* not reserved */,
   VAR("var");
 
   private static final ImmutableMap<String, Keyword> SYMBOL_NAME_MAP = createSymbolNameMap();
@@ -56,10 +54,6 @@ public enum Keyword {
   public static Set<String> reservedNames() {
     var builder = new ImmutableSet.Builder<String>();
     for (var keyword : values()) {
-      // record/union are contextual after "type"; elsewhere they are ordinary identifiers.
-      if (keyword == RECORD || keyword == UNION) {
-        continue;
-      }
       builder.add(keyword.symbolName);
     }
     return builder
@@ -69,7 +63,6 @@ public enum Keyword {
         .add("bool")
         .add("byte")
         .add("char")
-        .add("float")
         .add("float32")
         .add("float64")
         .add("int")
@@ -87,7 +80,6 @@ public enum Keyword {
         .add("bool")
         .add("byte")
         .add("char")
-        .add("float")
         .add("float32")
         .add("float64")
         .add("int")
