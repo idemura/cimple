@@ -1,0 +1,752 @@
+package com.github.idemura.cimple.compiler;
+
+import static com.github.idemura.cimple.compiler.Keyword.*;
+import static com.github.idemura.cimple.compiler.TokenType.*;
+
+import com.github.idemura.cimple.compiler.ast.AstArrayAccess;
+import com.github.idemura.cimple.compiler.ast.AstArrayType;
+import com.github.idemura.cimple.compiler.ast.AstAssign;
+import com.github.idemura.cimple.compiler.ast.AstBlock;
+import com.github.idemura.cimple.compiler.ast.AstCall;
+import com.github.idemura.cimple.compiler.ast.AstCast;
+import com.github.idemura.cimple.compiler.ast.AstCompoundAssign;
+import com.github.idemura.cimple.compiler.ast.AstDefer;
+import com.github.idemura.cimple.compiler.ast.AstDelete;
+import com.github.idemura.cimple.compiler.ast.AstEntityRef;
+import com.github.idemura.cimple.compiler.ast.AstEnumType;
+import com.github.idemura.cimple.compiler.ast.AstExpression;
+import com.github.idemura.cimple.compiler.ast.AstExpressionHolder;
+import com.github.idemura.cimple.compiler.ast.AstExpressionStatement;
+import com.github.idemura.cimple.compiler.ast.AstFieldAccess;
+import com.github.idemura.cimple.compiler.ast.AstFor;
+import com.github.idemura.cimple.compiler.ast.AstFunction;
+import com.github.idemura.cimple.compiler.ast.AstFunctionHeader;
+import com.github.idemura.cimple.compiler.ast.AstFunctionType;
+import com.github.idemura.cimple.compiler.ast.AstGoto;
+import com.github.idemura.cimple.compiler.ast.AstIf;
+import com.github.idemura.cimple.compiler.ast.AstLocal;
+import com.github.idemura.cimple.compiler.ast.AstModule;
+import com.github.idemura.cimple.compiler.ast.AstNew;
+import com.github.idemura.cimple.compiler.ast.AstNumberLiteral;
+import com.github.idemura.cimple.compiler.ast.AstPointerType;
+import com.github.idemura.cimple.compiler.ast.AstRecordType;
+import com.github.idemura.cimple.compiler.ast.AstReturn;
+import com.github.idemura.cimple.compiler.ast.AstStatement;
+import com.github.idemura.cimple.compiler.ast.AstStringLiteral;
+import com.github.idemura.cimple.compiler.ast.AstType;
+import com.github.idemura.cimple.compiler.ast.AstTypeRef;
+import com.github.idemura.cimple.compiler.ast.AstUnionType;
+import com.github.idemura.cimple.compiler.ast.AstVariable;
+import com.google.common.collect.ImmutableList;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.function.Function;
+
+// Parses the token stream and builds the AST. Semantic analysis runs later.
+public class Parser {
+  private final Tokenizer tokenizer;
+  private final ErrorConsumer errorConsumer;
+
+  // Test helper for parsing a single in-memory source string.
+  public static AstModule parseCode(String code, ErrorConsumer errorConsumer) {
+    var tokenizer = new Tokenizer(errorConsumer);
+    tokenizer.split(code, null);
+    return new Parser(tokenizer, errorConsumer).parse();
+  }
+
+  public Parser(Tokenizer tokenizer, ErrorConsumer errorConsumer) {
+    this.tokenizer = tokenizer;
+    this.errorConsumer = errorConsumer;
+  }
+
+  public AstModule parse() {
+    return parseModule();
+  }
+
+  private AstModule parseModule() {
+    var module = new AstModule();
+    parseModuleName(module);
+
+    // TODO: Parse imports when the module system is implemented.
+
+    while (!tokenizer.done()) {
+      switch (keyword(tokenizer.current())) {
+        case FUNCTION:
+          module.definitions().add(parseFunction());
+          break;
+        case TYPE:
+          module.definitions().add(parseType());
+          break;
+        case VAR:
+          module.definitions().add(parseVariable(true));
+          break;
+        case CONST:
+          module.definitions().add(parseVariable(false));
+          break;
+        default:
+          throw fatalAtCurrentLocation("Invalid module definition");
+      }
+    }
+    return module;
+  }
+
+  private AstType parseType() {
+    takeKeyword(TYPE);
+    if (currentIdentifierValueEquals(ContextKeywords.RECORD)) {
+      return parseTypeRecord();
+    }
+    if (currentIdentifierValueEquals(ContextKeywords.UNION)) {
+      return parseTypeUnion();
+    }
+    if (currentIdentifierValueEquals(ContextKeywords.ENUM)) {
+      return parseTypeEnum();
+    }
+    if (keywordOrNull(tokenizer.current()) == FUNCTION) {
+      return parseTypeFunction();
+    }
+    throw fatalAtCurrentLocation(
+        "Invalid type definition: one of %s expected",
+        List.of(
+            ContextKeywords.RECORD,
+            ContextKeywords.UNION,
+            ContextKeywords.ENUM,
+            FUNCTION.toString()));
+  }
+
+  private AstRecordType parseTypeRecord() {
+    var type = new AstRecordType();
+    takeContextualKeyword(ContextKeywords.RECORD);
+    type.location(tokenizer.currentLocation());
+    type.name(Identifier.ofType(take(IDENTIFIER).value()));
+    take(LCURLY);
+    var fields = new ImmutableList.Builder<AstVariable>();
+    while (!tokenizer.takeIf(RCURLY)) {
+      fields.add(parseVariable(keyword(tokenizer.current()) != CONST));
+    }
+    type.fields(fields.build());
+    return type;
+  }
+
+  private AstUnionType parseTypeUnion() {
+    var type = new AstUnionType();
+    takeContextualKeyword(ContextKeywords.UNION);
+    type.location(tokenizer.currentLocation());
+    type.name(Identifier.ofType(take(IDENTIFIER).value()));
+    take(LCURLY);
+    var variants = new ImmutableList.Builder<AstUnionType.Variant>();
+    while (!tokenizer.takeIf(RCURLY)) {
+      variants.add(parseUnionVariant());
+      take(SEMICOLON);
+    }
+    type.variants(variants.build());
+    return type;
+  }
+
+  private AstUnionType.Variant parseUnionVariant() {
+    var variant = new AstUnionType.Variant();
+    variant.location(tokenizer.currentLocation());
+    variant.tag(take(IDENTIFIER).value());
+    if (tokenizer.takeIf(LPAREN)) {
+      variant.valueType(parseTypeRef());
+      take(RPAREN);
+    }
+    return variant;
+  }
+
+  private AstEnumType parseTypeEnum() {
+    var type = new AstEnumType();
+    takeContextualKeyword(ContextKeywords.ENUM);
+    type.location(tokenizer.currentLocation());
+    type.name(Identifier.ofType(take(IDENTIFIER).value()));
+    if (tokenizer.takeIf(LPAREN)) {
+      type.baseType(parseTypeRef());
+      take(RPAREN);
+    }
+    take(LCURLY);
+    var variants = new ImmutableList.Builder<AstEnumType.Variant>();
+    while (!tokenizer.takeIf(RCURLY)) {
+      variants.add(parseEnumVariant());
+      take(SEMICOLON);
+    }
+    type.variants(variants.build());
+    return type;
+  }
+
+  private AstEnumType.Variant parseEnumVariant() {
+    var variant = new AstEnumType.Variant();
+    variant.location(tokenizer.currentLocation());
+    variant.tag(take(IDENTIFIER).value());
+    if (tokenizer.takeIf(LPAREN)) {
+      variant.valueExpression(parseExpression());
+      take(RPAREN);
+    }
+    return variant;
+  }
+
+  private AstFunctionType parseTypeFunction() {
+    var type = new AstFunctionType();
+    var parsedHeader = parseFunctionHeaderWithName(true);
+    type.header(parsedHeader.header());
+    type.name(parsedHeader.name());
+    take(SEMICOLON);
+    return type;
+  }
+
+  private void parseModuleName(AstModule module) {
+    takeKeyword(MODULE);
+    module.location(tokenizer.currentLocation());
+    module.name(take(IDENTIFIER).value());
+    take(SEMICOLON);
+  }
+
+  private AstFunction parseFunction() {
+    var function = new AstFunction();
+    var parsedHeader = parseFunctionHeaderWithName(false);
+    function.header(parsedHeader.header());
+    function.name(parsedHeader.name());
+    function.block(parseFunctionBody());
+    return function;
+  }
+
+  private AstBlock parseFunctionBody() {
+    if (tokenizer.takeIf(SEMICOLON)) {
+      return null;
+    }
+    return parseBlock();
+  }
+
+  private AstVariable parseVariable(boolean mutable) {
+    takeKeyword(mutable ? VAR : CONST);
+    var variable = new AstVariable();
+    if (mutable) {
+      variable.setBit(AstVariable.MUTABLE);
+    }
+    variable.location(tokenizer.currentLocation());
+    variable.name(Identifier.ofEntity(take(IDENTIFIER).value()));
+    if (tokenizer.current().is(IDENTIFIER)) {
+      variable.type(parseTypeRef());
+    }
+    if (tokenizer.takeIf(ASSIGN)) {
+      variable.expression(parseExpressionHolder());
+    }
+    take(SEMICOLON);
+    return variable;
+  }
+
+  private AstLocal parseVariableStatement(boolean mutable) {
+    var stmt = new AstLocal();
+    stmt.variable(parseVariable(mutable));
+    return stmt;
+  }
+
+  private AstBlock parseBlock() {
+    var block = new AstBlock();
+    take(LCURLY);
+    while (!tokenizer.takeIf(RCURLY)) {
+      block.statements().add(parseStatement());
+    }
+    return block;
+  }
+
+  private AstStatement parseStatement() {
+    var keyword = statementKeywordOrNull(tokenizer.current());
+    if (keyword == null) {
+      return parseExpressionStatement();
+    }
+    return switch (keyword) {
+      case VAR -> parseVariableStatement(true);
+      case CONST -> parseVariableStatement(false);
+      case RETURN -> parseReturn();
+      case DELETE -> parseDelete();
+      case IF -> parseIf();
+      case FOR -> parseFor();
+      case DEFER -> parseDefer();
+      case MATCH -> throw new UnsupportedOperationException();
+      case GOTO -> parseGoto();
+      default ->
+          throw fatalAtCurrentLocation("Statement starts with unexpected keyword '%s'", keyword);
+    };
+  }
+
+  private AstStatement parseReturn() {
+    var stmt = new AstReturn();
+    stmt.location(takeKeyword(RETURN));
+    stmt.expression(parseExpressionHolder());
+    take(SEMICOLON);
+    return stmt;
+  }
+
+  private AstStatement parseDelete() {
+    var stmt = new AstDelete();
+    stmt.location(takeKeyword(DELETE));
+    stmt.expression(parseExpressionHolder());
+    take(SEMICOLON);
+    return stmt;
+  }
+
+  private AstStatement parseIf() {
+    var stmt = new AstIf();
+    stmt.location(takeKeyword(IF));
+    var conditions = new ImmutableList.Builder<AstExpressionHolder>();
+    var thenBlocks = new ImmutableList.Builder<AstBlock>();
+    conditions.add(parseExpressionHolder());
+    thenBlocks.add(parseBlock());
+    while (takeKeywordIf(ELSE)) {
+      if (takeKeywordIf(IF)) {
+        conditions.add(parseExpressionHolder());
+        thenBlocks.add(parseBlock());
+      } else {
+        stmt.elseBlock(parseBlock());
+        break;
+      }
+    }
+    stmt.conditions(conditions.build());
+    stmt.thenBlocks(thenBlocks.build());
+    return stmt;
+  }
+
+  private AstStatement parseFor() {
+    var stmt = new AstFor();
+    stmt.location(takeKeyword(FOR));
+    if (keywordOrNull(tokenizer.current()) == VAR) {
+      stmt.init(parseVariableStatement(true));
+    }
+    // The loop condition is required, even for an infinite loop such as `for true ...`.
+    stmt.condition(parseExpressionHolder());
+    if (tokenizer.takeIf(SEMICOLON)) {
+      stmt.increment(parseExpressionHolder());
+    }
+    stmt.block(parseBlock());
+    return stmt;
+  }
+
+  private AstStatement parseGoto() {
+    var stmt = new AstGoto();
+    stmt.location(takeKeyword(GOTO));
+    stmt.label(take(IDENTIFIER).value());
+    take(SEMICOLON);
+    return stmt;
+  }
+
+  private AstStatement parseDefer() {
+    var stmt = new AstDefer();
+    stmt.location(takeKeyword(DEFER));
+    if (tokenizer.current().is(LCURLY)) {
+      stmt.block(parseBlock());
+    } else {
+      var exprStmt = new AstExpressionStatement();
+      exprStmt.location(tokenizer.currentLocation());
+      exprStmt.expression(parseExpressionHolder());
+      take(SEMICOLON);
+      var block = new AstBlock();
+      block.statements().add(exprStmt);
+      stmt.block(block);
+    }
+    return stmt;
+  }
+
+  private AstStatement parseExpressionStatement() {
+    var stmt = new AstExpressionStatement();
+    stmt.location(tokenizer.currentLocation());
+    stmt.expression(parseExpressionHolder());
+    take(SEMICOLON);
+    return stmt;
+  }
+
+  private AstExpressionHolder parseExpressionHolder() {
+    return AstExpressionHolder.of(parseExpression());
+  }
+
+  private AstExpression parseExpression() {
+    return parseAssignment();
+  }
+
+  private AstExpression parseAssignment() {
+    var target = parseComparisonChain();
+    if (target == null) {
+      return null;
+    }
+    var current = tokenizer.current();
+    if (tokenizer.takeIf(ASSIGN)) {
+      var value = parseAssignment();
+      if (value == null) {
+        throw errorConsumer.fatalAt(current.location(), "Expected expression after %s", current);
+      }
+      var expr = new AstAssign();
+      expr.target(target);
+      expr.value(value);
+      expr.location(current.location());
+      return expr;
+    }
+    if (isCompoundAssignment(current.type())) {
+      tokenizer.step();
+      var value = parseAssignment();
+      if (value == null) {
+        throw errorConsumer.fatalAt(current.location(), "Expected expression after %s", current);
+      }
+      var expr = new AstCompoundAssign();
+      expr.target(target);
+      expr.operation(parseCompoundAssignmentOperator(current));
+      expr.value(value);
+      expr.location(current.location());
+      return expr;
+    }
+    return target;
+  }
+
+  private static boolean isCompoundAssignment(TokenType type) {
+    return type == PLUS_ASSIGN
+        || type == MINUS_ASSIGN
+        || type == STAR_ASSIGN
+        || type == SLASH_ASSIGN
+        || type == PERCENT_ASSIGN;
+  }
+
+  private AstEntityRef parseCompoundAssignmentOperator(Token token) {
+    var operator =
+        switch (token.type()) {
+          case PLUS_ASSIGN -> PLUS;
+          case MINUS_ASSIGN -> MINUS;
+          case STAR_ASSIGN -> STAR;
+          case SLASH_ASSIGN -> SLASH;
+          case PERCENT_ASSIGN -> PERCENT;
+          default -> throw new IllegalArgumentException("Not a compound assignment: " + token);
+        };
+    return parseOperator(new Token(operator, null, token.location()));
+  }
+
+  private AstExpression parseComparisonChain() {
+    var expr = parseAdditiveChain();
+    if (expr == null) {
+      return null;
+    }
+    while (isComparisonOperator(tokenizer.current().type())) {
+      var operator = tokenizer.take();
+      var m = parseAdditiveChain();
+      if (m == null) {
+        throw errorConsumer.fatalAt(operator.location(), "Expected expression after %s", operator);
+      }
+      var call = new AstCall();
+      call.function(parseOperator(operator));
+      call.arguments(ImmutableList.of(expr, m));
+      call.location(operator.location());
+      expr = call;
+    }
+    return expr;
+  }
+
+  private static boolean isComparisonOperator(TokenType type) {
+    return type == CMP_EQ
+        || type == CMP_NE
+        || type == CMP_LT
+        || type == CMP_GT
+        || type == CMP_LE
+        || type == CMP_GE;
+  }
+
+  private AstExpression parseAdditiveChain() {
+    var expr = parseMultiplicativeChain();
+    if (expr == null) {
+      return null;
+    }
+    while (tokenizer.current().is(PLUS) || tokenizer.current().is(MINUS)) {
+      var operator = tokenizer.take();
+      var m = parseMultiplicativeChain();
+      if (m == null) {
+        throw errorConsumer.fatalAt(operator.location(), "Expected expression after %s", operator);
+      }
+      var call = new AstCall();
+      call.function(parseOperator(operator));
+      call.arguments(ImmutableList.of(expr, m));
+      call.location(operator.location());
+      expr = call;
+    }
+    return expr;
+  }
+
+  private AstExpression parseMultiplicativeChain() {
+    var expr = parseFieldArrayCallChain();
+    if (expr == null) {
+      return null;
+    }
+    while (tokenizer.current().is(STAR)
+        || tokenizer.current().is(SLASH)
+        || tokenizer.current().is(PERCENT)) {
+      var operator = tokenizer.take();
+      var m = parseFieldArrayCallChain();
+      if (m == null) {
+        throw errorConsumer.fatalAt(operator.location(), "Expected expression after %s", operator);
+      }
+      var call = new AstCall();
+      call.function(parseOperator(operator));
+      call.arguments(ImmutableList.of(expr, m));
+      call.location(operator.location());
+      expr = call;
+    }
+    return expr;
+  }
+
+  private AstExpression parseFieldArrayCallChain() {
+    var expr =
+        tokenizer.current().is(IDENTIFIER) && keywordOrNull(tokenizer.current()) == NEW
+            ? parseNew()
+            : parsePrimary();
+    while (true) {
+      var current = tokenizer.current();
+      if (tokenizer.takeIf(PERIOD)) {
+        var fieldAccess = new AstFieldAccess();
+        fieldAccess.object(expr);
+        fieldAccess.fieldName(take(IDENTIFIER).value());
+        expr = fieldAccess;
+      } else if (tokenizer.takeIf(LBRACKET)) {
+        var arrayAccess = new AstArrayAccess();
+        arrayAccess.array(expr);
+        arrayAccess.index(parseExpression());
+        take(RBRACKET);
+        expr = arrayAccess;
+      } else if (tokenizer.current().is(LPAREN)) {
+        var call = new AstCall();
+        call.function(expr);
+        call.arguments(parseExpressionList());
+        expr = call;
+      } else {
+        break;
+      }
+      expr.location(current.location());
+    }
+    return expr;
+  }
+
+  private AstNew parseNew() {
+    var expr = new AstNew();
+    expr.location(takeKeyword(NEW));
+    expr.type(parseTypeRef());
+    expr.arguments(parseExpressionList());
+    return expr;
+  }
+
+  // Parses one primary expression:
+  //   - (<expression>)
+  //   - [<expression> type <type-ref>]
+  //   - <identifier> or <module>~<identifier>
+  //   - <literal>
+  private AstExpression parsePrimary() {
+    if (tokenizer.takeIf(LPAREN)) {
+      var expr = parseExpression();
+      take(RPAREN);
+      return expr;
+    }
+    if (tokenizer.takeIf(LBRACKET)) {
+      var expr = new AstCast();
+      expr.expression(parseExpression());
+      takeKeyword(TYPE);
+      expr.type(parseTypeRef());
+      take(RBRACKET);
+      return expr;
+    }
+    switch (tokenizer.current().type()) {
+      case IDENTIFIER -> {
+        var current = tokenizer.take();
+        var expr = new AstEntityRef();
+        expr.name(parseQualifiedName(current));
+        expr.location(current.location());
+        return expr;
+      }
+      case NUMBER -> {
+        var current = tokenizer.take();
+        var expr = new AstNumberLiteral(current.value());
+        expr.location(current.location());
+        return expr;
+      }
+      case STRING -> {
+        var current = tokenizer.take();
+        var expr = new AstStringLiteral(current.value());
+        expr.location(current.location());
+        return expr;
+      }
+      default -> throw fatalAtCurrentLocation("Primary expression expected");
+    }
+  }
+
+  private List<AstExpression> parseExpressionList() {
+    var result = new ImmutableList.Builder<AstExpression>();
+    take(LPAREN);
+    if (!tokenizer.takeIf(RPAREN)) {
+      do {
+        result.add(parseExpression());
+      } while (expressionListHasNext());
+    }
+    return result.build();
+  }
+
+  private boolean expressionListHasNext() {
+    if (tokenizer.takeIf(COMMA)) {
+      return true;
+    } else if (tokenizer.takeIf(RPAREN)) {
+      return false;
+    } else {
+      throw errorConsumer.fatalAt(
+          tokenizer.currentLocation(), "Invalid function call: , or ) expected");
+    }
+  }
+
+  private record ParsedFunctionHeader(Identifier name, AstFunctionHeader header) {}
+
+  private ParsedFunctionHeader parseFunctionHeaderWithName(boolean parsingType) {
+    takeKeyword(FUNCTION);
+    var header = new AstFunctionHeader();
+    var current = take(IDENTIFIER);
+    Identifier name;
+    if (tokenizer.takeIf(PERIOD)) {
+      var objectType = new AstTypeRef();
+      objectType.name(Identifier.ofType(current.value()));
+      objectType.location(current.location());
+      header.objectType(objectType);
+      header.location(tokenizer.currentLocation());
+      name = Identifier.ofType(current.value()).withEntity(take(IDENTIFIER).value());
+    } else {
+      header.location(current.location());
+      if (parsingType) {
+        name = Identifier.ofType(current.value());
+      } else {
+        name = Identifier.ofEntity(current.value());
+      }
+    }
+    header.parameters(parseParameters());
+    if (tokenizer.current().is(IDENTIFIER)) {
+      header.resultType(parseTypeRef());
+    }
+    return new ParsedFunctionHeader(name, header);
+  }
+
+  private List<AstVariable> parseParameters() {
+    var parameters = new ArrayList<AstVariable>();
+    take(LPAREN);
+    if (!tokenizer.current().is(RPAREN)) {
+      do {
+        var variable = new AstVariable();
+        variable.location(tokenizer.currentLocation());
+        variable.name(Identifier.ofEntity(take(IDENTIFIER).value()));
+        if (tokenizer.current().is(IDENTIFIER)) {
+          variable.type(parseTypeRef());
+        }
+        parameters.add(variable);
+      } while (tokenizer.takeIf(COMMA));
+    }
+    take(RPAREN);
+    return parameters;
+  }
+
+  private AstType parseTypeRef() {
+    var current = tokenizer.current();
+    var ref = new AstTypeRef();
+    ref.name(Identifier.ofType(current.value()));
+    ref.location(current.location());
+    tokenizer.step();
+    AstType type = ref;
+    var suffixes = new ArrayList<Function<AstType, AstType>>();
+    while (true) {
+      if (tokenizer.takeIf(STAR)) {
+        suffixes.add(AstPointerType::new);
+      } else if (tokenizer.current().is(LBRACKET)) {
+        tokenizer.step();
+        take(RBRACKET);
+        suffixes.add(AstArrayType::new);
+      } else {
+        break;
+      }
+    }
+    while (!suffixes.isEmpty()) {
+      type = suffixes.removeLast().apply(type);
+    }
+    return type;
+  }
+
+  private AstEntityRef parseOperator(Token token) {
+    var ref = new AstEntityRef();
+    ref.name(Identifier.ofEntity(token.type().symbolName()).builtin());
+    ref.location(token.location());
+    return ref;
+  }
+
+  private CompilerException fatalAtCurrentLocation(String pattern, Object... args) {
+    return errorConsumer.fatalAt(tokenizer.currentLocation(), pattern, args);
+  }
+
+  private Token take(TokenType type) {
+    var current = tokenizer.current();
+    if (!current.is(type)) {
+      throw fatalAtCurrentLocation("Expected '%s', found '%s'", type, current);
+    }
+    return tokenizer.take();
+  }
+
+  private boolean currentIdentifierValueEquals(String value) {
+    var current = tokenizer.current();
+    return current.is(IDENTIFIER) && value.equals(current.value());
+  }
+
+  private Identifier parseQualifiedName(Token first) {
+    if (tokenizer.takeIf(TILDE)) {
+      return Identifier.ofEntity(take(IDENTIFIER).value()).withModule(first.value());
+    } else {
+      return Identifier.ofEntity(first.value());
+    }
+  }
+
+  private Location takeContextualKeyword(String value) {
+    var current = take(IDENTIFIER);
+    if (!value.equals(current.value())) {
+      throw errorConsumer.fatalAt(
+          current.location(), "Expected keyword '%s', found '%s'", value, current);
+    }
+    return current.location();
+  }
+
+  private Location takeKeyword(Keyword keyword) {
+    var current = tokenizer.current();
+    var kw = keyword(current);
+    if (kw != keyword) {
+      throw fatalAtCurrentLocation("Expected keyword '%s', found '%s'", keyword, kw);
+    }
+    return tokenizer.take().location();
+  }
+
+  private boolean takeKeywordIf(Keyword keyword) {
+    var current = tokenizer.current();
+    if (keyword != keywordOrNull(current)) {
+      return false;
+    }
+    tokenizer.step();
+    return true;
+  }
+
+  private static Keyword keywordOrNull(Token token) {
+    if (!token.is(IDENTIFIER)) {
+      return null;
+    }
+    return Keyword.find(token.value());
+  }
+
+  private static Keyword statementKeywordOrNull(Token token) {
+    var keyword = keywordOrNull(token);
+    if (keyword == null) {
+      return null;
+    }
+    return switch (keyword) {
+      case VAR, CONST, RETURN, DELETE, IF, FOR, DEFER, MATCH, GOTO -> keyword;
+      default -> null;
+    };
+  }
+
+  private Keyword keyword(Token token) {
+    if (!token.is(IDENTIFIER)) {
+      throw errorConsumer.fatalAt(token.location(), "Expected keyword, found '%s'", token.type());
+    }
+    var kw = Keyword.find(token.value());
+    if (kw == null) {
+      throw errorConsumer.fatalAt(token.location(), "Expected keyword, found '%s'", token.type());
+    }
+    return kw;
+  }
+}
