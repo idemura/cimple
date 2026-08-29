@@ -260,7 +260,7 @@ From highest to lowest:
 
 | Operators             | Associativity |
 |-----------------------|---------------|
-| `(e)` `[e type t]`    | Left-to-right |
+| `(e)` `(e type t)`    | Left-to-right |
 | `new` `.` `[]` `f(x)` | Left-to-right |
 | `*` `/` `%`           | Left-to-right |
 | `+` `-`               | Left-to-right |
@@ -281,7 +281,7 @@ expression.
 When you need to cast a type, use this expression:
 
 ```
-<cast-expr> := "[" <expression> "type" <type_ref> "]"
+<cast-expr> := "(" <expression> "type" <type_ref> ")"
 ```
 
 Its precedence is the same as that of a parenthesized expression.

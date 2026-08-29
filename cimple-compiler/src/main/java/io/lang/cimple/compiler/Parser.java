@@ -3,6 +3,7 @@ package io.lang.cimple.compiler;
 import static io.lang.cimple.compiler.Keyword.*;
 import static io.lang.cimple.compiler.TokenType.*;
 
+import com.google.common.collect.ImmutableList;
 import io.lang.cimple.compiler.ast.AstArrayAccess;
 import io.lang.cimple.compiler.ast.AstArrayType;
 import io.lang.cimple.compiler.ast.AstAssign;
@@ -37,7 +38,6 @@ import io.lang.cimple.compiler.ast.AstType;
 import io.lang.cimple.compiler.ast.AstTypeRef;
 import io.lang.cimple.compiler.ast.AstUnionType;
 import io.lang.cimple.compiler.ast.AstVariable;
-import com.google.common.collect.ImmutableList;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.function.Function;
@@ -518,22 +518,24 @@ public class Parser {
 
   // Parses one primary expression:
   //   - (<expression>)
-  //   - [<expression> type <type-ref>]
+  //   - (<expression> type <type-ref>)
   //   - <identifier> or <module>~<identifier>
   //   - <literal>
   private AstExpression parsePrimary() {
-    if (tokenizer.takeIf(LPAREN)) {
-      var expr = parseExpression();
+    if (tokenizer.current().is(LPAREN)) {
+      var location = take(LPAREN).location();
+      var expression = parseExpression();
+      if (isKeyword(TYPE)) {
+        var cast = new AstCast();
+        cast.location(location);
+        cast.expression(expression);
+        takeKeyword(TYPE);
+        cast.type(parseTypeRef());
+        take(RPAREN);
+        return cast;
+      }
       take(RPAREN);
-      return expr;
-    }
-    if (tokenizer.takeIf(LBRACKET)) {
-      var expr = new AstCast();
-      expr.expression(parseExpression());
-      takeKeyword(TYPE);
-      expr.type(parseTypeRef());
-      take(RBRACKET);
-      return expr;
+      return expression;
     }
     switch (tokenizer.current().type()) {
       case IDENTIFIER -> {

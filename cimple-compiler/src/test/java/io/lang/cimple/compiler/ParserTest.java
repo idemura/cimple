@@ -411,7 +411,7 @@ class ParserTest {
           var x = 1 + 2 * 3;
           var x = 1 * 2 + 3;
           var x = (1 + 2);
-          var x = [1 + 2 type int];
+          var x = (1 + 2 type int);
           var x = p.t * 5;
         }
         """;
@@ -632,8 +632,7 @@ class ParserTest {
 
   @Test
   void testInvokeExpression() {
-    // We allow `(foo)()` because there is no ambiguity with type casts in Ci.
-    // Casts use the dedicated form `[<expression> type <cast-type>]`.
+    // Parenthesized calls stay unambiguous because a cast requires `type` before `)`.
     var code =
         """
         module test;
