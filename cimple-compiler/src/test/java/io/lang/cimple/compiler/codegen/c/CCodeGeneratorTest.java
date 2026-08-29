@@ -1,13 +1,12 @@
 package io.lang.cimple.compiler.codegen.c;
 
 import static org.junit.jupiter.api.Assertions.*;
-
 import io.lang.cimple.compiler.Compiler;
 import io.lang.cimple.compiler.CompilerParams;
 import io.lang.cimple.compiler.ErrorConsumer;
 import io.lang.cimple.compiler.SourceCode;
-import java.util.List;
 import org.junit.jupiter.api.Test;
+import java.util.List;
 
 class CCodeGeneratorTest {
   private final ErrorConsumer errorConsumer = new ErrorConsumer();
@@ -43,7 +42,7 @@ class CCodeGeneratorTest {
         struct test__Point {
           int64_t x;
           int64_t y;
-          char* name;
+          const char* name;
         };
 
         """,
@@ -109,10 +108,8 @@ class CCodeGeneratorTest {
     var output = compile(code);
     assertEquals(
         """
-        enum test__Color {
-          test__Color_Red,
-          test__Color_Green,
-          test__Color_Blue,
+        struct test__Color {
+          int64_t tag;
         };
 
         """,
@@ -157,16 +154,11 @@ class CCodeGeneratorTest {
     var output = compile(code);
     assertEquals(
         """
-        enum test__Maybe_tag_ {
-          test__Maybe_None,
-          test__Maybe_Some,
-          test__Maybe_Error,
-        };
         struct test__Maybe {
-          enum test__Maybe_tag_ tag;
+          int64_t tag;
           union {
             int64_t Some;
-            char* Error;
+            const char* Error;
           } u;
         };
 

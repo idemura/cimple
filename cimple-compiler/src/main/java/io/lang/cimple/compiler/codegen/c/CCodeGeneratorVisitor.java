@@ -105,11 +105,7 @@ class CCodeGeneratorVisitor extends AstVisitor {
 
   private void emitUnionDefinitions(List<AstUnionType> unions) {
     for (var union : unions) {
-      if (union.hasPayload()) {
-        emitTaggedUnionDefinition(union);
-      } else {
-        emitEnumDefinition(cTypeName(union.name()), union);
-      }
+      emitUnionDefinition(union);
       out.writeLine("");
     }
   }
@@ -132,21 +128,22 @@ class CCodeGeneratorVisitor extends AstVisitor {
     out.writeLine("};");
   }
 
-  private void emitTaggedUnionDefinition(AstUnionType union) {
+  private void emitUnionDefinition(AstUnionType union) {
     var name = cTypeName(union.name());
-    emitEnumDefinition(name + "_tag_", union);
     out.writeLine("struct %s {".formatted(name));
     out.indent();
-    out.writeLine("enum %s_tag_ tag;".formatted(name));
-    out.writeLine("union {");
-    out.indent();
-    for (var variant : union.variants()) {
-      if (variant.valueType() != null) {
-        out.writeLine("%s %s;".formatted(cType(variant.valueType()), variant.tag()));
+    out.writeLine("int64_t tag;".formatted(name));
+    if (union.hasPayload()) {
+      out.writeLine("union {");
+      out.indent();
+      for (var variant : union.variants()) {
+        if (variant.valueType() != null) {
+          out.writeLine("%s %s;".formatted(cType(variant.valueType()), variant.tag()));
+        }
       }
+      out.unindent();
+      out.writeLine("} u;");
     }
-    out.unindent();
-    out.writeLine("} u;");
     out.unindent();
     out.writeLine("};");
   }
@@ -164,7 +161,7 @@ class CCodeGeneratorVisitor extends AstVisitor {
   private String cType(AstType type) {
     return switch (type) {
       case AstBuiltinType builtinType -> cBuiltinType(builtinType);
-      case AstStringType ignored -> "char*";
+      case AstStringType ignored -> "const char*";
       case AstStructType structType -> "struct " + cTypeName(structType.name());
       case AstEnumType enumType -> "enum " + cTypeName(enumType.name());
       case AstPointerType pointerType -> cType(pointerType.baseType()) + "*";
