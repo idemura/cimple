@@ -18,7 +18,6 @@ import com.github.idemura.cimple.compiler.ast.AstExpressionStatement;
 import com.github.idemura.cimple.compiler.ast.AstFieldAccess;
 import com.github.idemura.cimple.compiler.ast.AstFor;
 import com.github.idemura.cimple.compiler.ast.AstFunctionType;
-import com.github.idemura.cimple.compiler.ast.AstGoto;
 import com.github.idemura.cimple.compiler.ast.AstIf;
 import com.github.idemura.cimple.compiler.ast.AstLocal;
 import com.github.idemura.cimple.compiler.ast.AstNew;
@@ -869,7 +868,6 @@ class ParserTest {
         module test;
         function f() {
           for true {
-            goto end;
           }
           for var i = 0; true {
           }
@@ -885,9 +883,7 @@ class ParserTest {
       assertNull(stmt.init());
       assertEquals(newEntityRef("true"), stmt.condition().get());
       assertNull(stmt.increment());
-      var bodyStatements = stmt.block().statements();
-      assertEquals(1, bodyStatements.size());
-      assertEquals(new AstGoto("end"), bodyStatements.get(0));
+      assertEquals(ImmutableList.of(), stmt.block().statements());
     }
     {
       var stmt = (AstFor) statements.get(i++);

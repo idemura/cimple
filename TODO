@@ -1,7 +1,7 @@
 * AstExpressionHolder.of -> new
 * Identifier: typeName, entityName final. module only can be set if current values is null.
 * Finals: struct fields, union variants and etc. Function parameters?
-* Document Mangling rules
+* Document mangling rules
 * Lambdas: function (x, y) {}
 * Function without body declaration (external): function c_func(s string);
 * Imports: import, import type because of namespace.
@@ -9,10 +9,7 @@
 * For each loop
 * Generics via named traits
 * No enum in union C code generation
-* Constant folding visitor
+* Implement constant folding visitor
 * Emit first forward decls and then types themselves.
-* NameResolutionVisitor rename to TypeCheckAndResolveNamesVisitor.
 * Use assertJ: use
-* struct syntax
-* goto -> continue + break
 * Annotations: cname

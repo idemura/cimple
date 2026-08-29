@@ -208,11 +208,6 @@ public class PrintAstVisitor extends AstVisitor {
   }
 
   @Override
-  protected void visit(AstGoto node) {
-    output.writeLine("GOTO %s".formatted(node.label()));
-  }
-
-  @Override
   protected void visit(AstNullLiteral node) {
     printLiteral(node);
   }

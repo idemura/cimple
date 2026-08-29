@@ -22,7 +22,6 @@ import com.github.idemura.cimple.compiler.ast.AstFor;
 import com.github.idemura.cimple.compiler.ast.AstFunction;
 import com.github.idemura.cimple.compiler.ast.AstFunctionHeader;
 import com.github.idemura.cimple.compiler.ast.AstFunctionType;
-import com.github.idemura.cimple.compiler.ast.AstGoto;
 import com.github.idemura.cimple.compiler.ast.AstIf;
 import com.github.idemura.cimple.compiler.ast.AstLocal;
 import com.github.idemura.cimple.compiler.ast.AstModule;
@@ -255,7 +254,6 @@ public class Parser {
       case FOR -> parseFor();
       case DEFER -> parseDefer();
       case MATCH -> throw new UnsupportedOperationException();
-      case GOTO -> parseGoto();
       default ->
           throw fatalAtCurrentLocation("Statement starts with unexpected keyword '%s'", keyword);
     };
@@ -312,14 +310,6 @@ public class Parser {
       stmt.increment(parseExpressionHolder());
     }
     stmt.block(parseBlock());
-    return stmt;
-  }
-
-  private AstStatement parseGoto() {
-    var stmt = new AstGoto();
-    stmt.location(takeKeyword(GOTO));
-    stmt.label(take(IDENTIFIER).value());
-    take(SEMICOLON);
     return stmt;
   }
 

@@ -91,10 +91,6 @@ public abstract class AstVisitor {
     node.acceptChildren(this);
   }
 
-  protected void visit(AstGoto node) {
-    node.acceptChildren(this);
-  }
-
   protected void visit(AstExpressionHolder node) {
     node.acceptChildren(this);
   }
