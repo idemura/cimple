@@ -274,6 +274,13 @@ Its precedence is the same as that of a parenthesized expression.
 
 ## Code Style
 
+This is recommendation and Cimple team default and promoted standard.
+For modules: `name_with_underscores`.
+For types: `PascalCase`. Acronyms treated as word: `HttpRequest`, `IoFile`.
+Also, for enum/union tags.
+For variables and functions: `camelCase`.
+For compile-time constants: `ALL_CAPS`.
+
 ### Modules
 
 Use snake_case for module names:
