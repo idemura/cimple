@@ -46,7 +46,7 @@ public final class AstModule extends AstNode {
 
   public AstType findType(String name) {
     for (var definition : definitions) {
-      if (definition instanceof AstType type && name.equals(type.name().typeName())) {
+      if (definition instanceof AstType type && name.equals(type.name().type())) {
         return type;
       }
     }
@@ -55,7 +55,7 @@ public final class AstModule extends AstNode {
 
   public AstVariable findVariable(String name) {
     for (var definition : definitions) {
-      if (definition instanceof AstVariable variable && name.equals(variable.name().entityName())) {
+      if (definition instanceof AstVariable variable && name.equals(variable.name().entity())) {
         return variable;
       }
     }
@@ -64,7 +64,7 @@ public final class AstModule extends AstNode {
 
   public AstFunction findFunction(String name) {
     for (var definition : definitions) {
-      if (definition instanceof AstFunction function && name.equals(function.name().entityName())) {
+      if (definition instanceof AstFunction function && name.equals(function.name().entity())) {
         var objectType = function.header().objectType();
         if (objectType == null) {
           return function;
@@ -76,9 +76,9 @@ public final class AstModule extends AstNode {
 
   public AstFunction findMethod(String objectTypeName, String name) {
     for (var definition : definitions) {
-      if (definition instanceof AstFunction function && function.name().entityName().equals(name)) {
+      if (definition instanceof AstFunction function && function.name().entity().equals(name)) {
         var objectType = function.header().objectType();
-        if (objectType != null && objectTypeName.equals(objectType.name().typeName())) {
+        if (objectType != null && objectTypeName.equals(objectType.name().type())) {
           return function;
         }
       }

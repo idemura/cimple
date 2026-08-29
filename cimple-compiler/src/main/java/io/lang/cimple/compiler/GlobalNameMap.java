@@ -32,8 +32,8 @@ public class GlobalNameMap {
     var result = new LinkedHashMap<String, AstType>();
     for (var type : typeMap.values()) {
       var name = type.name();
-      if (module.name().equals(name.moduleName())) {
-        var existing = result.putIfAbsent(name.typeName(), type);
+      if (module.name().equals(name.module())) {
+        var existing = result.putIfAbsent(name.type(), type);
         if (existing != null) {
           errorConsumer.errorAt(
               type.location(),
@@ -50,7 +50,7 @@ public class GlobalNameMap {
     var result = new LocalNameMap();
     for (var entity : entityMap.values()) {
       var name = entity.name();
-      if (module.name().equals(name.moduleName()) && name.typeName() == null) {
+      if (module.name().equals(name.module()) && name.type() == null) {
         var existing = result.addEntity(entity);
         if (existing != null) {
           errorEntityCollision(errorConsumer, entity, existing);
@@ -62,7 +62,7 @@ public class GlobalNameMap {
 
   public AstType lookupType(Identifier name) {
     if (name.isBuiltin()) {
-      return lookupBuiltinType(name.typeName());
+      return lookupBuiltinType(name.type());
     }
     return typeMap.get(name);
   }
@@ -88,7 +88,7 @@ public class GlobalNameMap {
         entity.location(),
         "Definition of %s '%s' has a name collision with %s defined at %s",
         entityKind(entity),
-        entity.name().entityName(),
+        entity.name().entity(),
         entityKind(existing),
         existing.location());
   }

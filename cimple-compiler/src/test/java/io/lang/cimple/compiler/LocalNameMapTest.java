@@ -8,8 +8,7 @@ import org.junit.jupiter.api.Test;
 
 class LocalNameMapTest {
   private static void assertLookup(LocalNameMap localNameMap, AstVariable variable) {
-    assertSame(
-        variable, localNameMap.lookupEntity(Identifier.ofEntity(variable.name().entityName())));
+    assertSame(variable, localNameMap.lookupEntity(Identifier.ofEntity(variable.name().entity())));
   }
 
   @Test

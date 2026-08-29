@@ -25,7 +25,7 @@ public class LocalNameMap {
 
   public AstEntity addLocal(AstVariable variable) {
     checkArgument(variable.isAnyOf(AstVariable.PARAMETER | AstVariable.LOCAL));
-    var name = variable.name().entityName();
+    var name = variable.name().entity();
     var existing = entityNameMap.get(name);
     if (existing == null) {
       entityNameMap.put(name, variable);
@@ -57,10 +57,10 @@ public class LocalNameMap {
 
   // TODO: Revisit
   public AstEntity lookupEntity(Identifier name) {
-    if (name.moduleName() != null) {
+    if (name.module() != null) {
       return null;
     }
-    return lookupEntity(name.entityName());
+    return lookupEntity(name.entity());
   }
 
   public AstEntity lookupEntity(String name) {
@@ -68,7 +68,7 @@ public class LocalNameMap {
   }
 
   AstEntity addEntity(AstEntity entity) {
-    return entityNameMap.putIfAbsent(entity.name().entityName(), entity);
+    return entityNameMap.putIfAbsent(entity.name().entity(), entity);
   }
 
   private Scope currentScope() {

@@ -21,7 +21,7 @@ public abstract sealed class AstType extends AstNode
   public String formatName() {
     var name = name();
     if (name.isBuiltin()) {
-      return name.typeName();
+      return name.type();
     }
     return name.toString();
   }

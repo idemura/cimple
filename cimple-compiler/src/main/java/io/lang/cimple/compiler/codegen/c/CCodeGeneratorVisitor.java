@@ -95,7 +95,7 @@ class CCodeGeneratorVisitor extends AstVisitor {
       out.writeLine("struct %s {".formatted(name));
       out.indent();
       for (var field : structType.fields()) {
-        out.writeLine("%s %s;".formatted(cType(field.type()), field.name().entityName()));
+        out.writeLine("%s %s;".formatted(cType(field.type()), field.name().entity()));
       }
       out.unindent();
       out.writeLine("};");
@@ -213,8 +213,8 @@ class CCodeGeneratorVisitor extends AstVisitor {
 
   private String cTypeName(Identifier name) {
     if (params.mangleModuleName()) {
-      return "%s__%s".formatted(name.moduleName(), name.typeName());
+      return "%s__%s".formatted(name.module(), name.type());
     }
-    return name.typeName();
+    return name.type();
   }
 }

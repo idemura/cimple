@@ -1,8 +1,8 @@
 package io.lang.cimple.compiler;
 
-import static io.lang.cimple.compiler.ast.AstBuiltinType.isIntegerType;
 import static com.google.common.base.Preconditions.checkNotNull;
 import static com.google.common.base.Preconditions.checkState;
+import static io.lang.cimple.compiler.ast.AstBuiltinType.isIntegerType;
 
 import io.lang.cimple.compiler.ast.AstArrayAccess;
 import io.lang.cimple.compiler.ast.AstArrayType;
@@ -229,7 +229,7 @@ public class TypeCheckAndResolveNamesVisitor extends AstExpressionRewriteVisitor
       return node;
     }
     for (var field : structType.fields()) {
-      if (field.name().entityName().equals(node.fieldName())) {
+      if (field.name().entity().equals(node.fieldName())) {
         node.field(field);
         return node;
       }
@@ -292,7 +292,7 @@ public class TypeCheckAndResolveNamesVisitor extends AstExpressionRewriteVisitor
   private void resolveBuiltinFunction(AstEntityRef operatorRef) {
     // TODO: Select the builtin overload using the resolved argument types.
     var function =
-        switch (operatorRef.name().entityName()) {
+        switch (operatorRef.name().entity()) {
           case "+" -> BuiltinFunctions.ADD_I64;
           case "-" -> BuiltinFunctions.SUB_I64;
           case "*" -> BuiltinFunctions.MUL_I64;
@@ -363,7 +363,7 @@ public class TypeCheckAndResolveNamesVisitor extends AstExpressionRewriteVisitor
   }
 
   private AstEntity lookupEntity(Identifier name) {
-    if (name.moduleName() == null) {
+    if (name.module() == null) {
       return localNameMap.lookupEntity(name);
     }
     return globalNameMap.lookupEntity(name);

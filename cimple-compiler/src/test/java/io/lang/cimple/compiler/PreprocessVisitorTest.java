@@ -3,6 +3,7 @@ package io.lang.cimple.compiler;
 import static io.lang.cimple.compiler.ast.AstUtils.*;
 import static org.junit.jupiter.api.Assertions.*;
 
+import com.google.common.collect.ImmutableList;
 import io.lang.cimple.compiler.ast.AstArrayType;
 import io.lang.cimple.compiler.ast.AstBuiltinType;
 import io.lang.cimple.compiler.ast.AstCall;
@@ -15,7 +16,6 @@ import io.lang.cimple.compiler.ast.AstLocal;
 import io.lang.cimple.compiler.ast.AstNew;
 import io.lang.cimple.compiler.ast.AstReturn;
 import io.lang.cimple.compiler.ast.AstStructType;
-import com.google.common.collect.ImmutableList;
 import java.util.List;
 import org.junit.jupiter.api.Test;
 

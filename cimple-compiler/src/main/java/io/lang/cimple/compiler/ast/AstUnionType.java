@@ -1,8 +1,8 @@
 package io.lang.cimple.compiler.ast;
 
+import com.google.common.collect.ImmutableList;
 import io.lang.cimple.compiler.Identifier;
 import io.lang.cimple.compiler.Location;
-import com.google.common.collect.ImmutableList;
 import java.util.List;
 import java.util.Objects;
 

@@ -36,7 +36,7 @@ import java.util.HashMap;
 //  - Sets missing function result types to void
 //  - Checks that variables have either a type or an initializer
 //  - Checks duplicate function parameters, struct fields, union variants, and enum variants.
-//  - Normalizes builtin type aliases such as int and float
+//  - Normalizes builtin type aliases (int)
 //  - Marks method-call syntax
 //  - Rejects nested assignments
 //  - Types literal nodes
@@ -77,12 +77,11 @@ class PreprocessVisitor extends AstExpressionRewriteVisitor {
   }
 
   private void normalizeMethodObjectName(AstFunction node) {
-    if (node.name().typeName() == null
-        || !(node.header().objectType() instanceof AstTypeRef typeRef)) {
+    if (node.name().type() == null || !(node.header().objectType() instanceof AstTypeRef typeRef)) {
       return;
     }
     // Keep the method-map key in sync with normalized builtin type names such as int -> int64.
-    node.name(node.name().withType(typeRef.name().typeName()));
+    node.name(node.name().withType(typeRef.name().type()));
   }
 
   private void checkObjectParameter(Identifier functionName, AstFunctionHeader header) {
@@ -157,12 +156,12 @@ class PreprocessVisitor extends AstExpressionRewriteVisitor {
     checkIdentifier(node.name(), node.location());
     var fieldMap = new HashMap<String, AstVariable>();
     for (var field : node.fields()) {
-      var existing = fieldMap.putIfAbsent(field.name().entityName(), field);
+      var existing = fieldMap.putIfAbsent(field.name().entity(), field);
       if (existing != null) {
         errorConsumer.errorAt(
             field.location(),
             "Duplicate struct field '%s'. First defined at %s.",
-            field.name().entityName(),
+            field.name().entity(),
             existing.location());
       }
     }
@@ -283,7 +282,7 @@ class PreprocessVisitor extends AstExpressionRewriteVisitor {
   @Override
   public AstExpression rewrite(AstEntityRef node) {
     var newNode =
-        switch (node.name().entityName()) {
+        switch (node.name().entity()) {
           case "true" -> {
             var literal = new AstBoolLiteral(true);
             literal.type(AstBuiltinType.BOOL);
@@ -311,17 +310,17 @@ class PreprocessVisitor extends AstExpressionRewriteVisitor {
 
   private void checkIdentifier(Identifier ident, Location location) {
     if (!ident.isBuiltin()) {
-      checkName(ident.moduleName(), location);
-      var type = ident.typeName();
+      checkName(ident.module(), location);
+      var type = ident.type();
       if (type != null) {
         checkUnderscoreRules(type, location);
-        var method = ident.entityName() != null;
+        var method = ident.entity() != null;
         // Allow methods for builtin types.
         if (Keyword.isReservedTypeName(type) && !method) {
           errorConsumer.errorAt(location, "Reserved word '%s' cannot be used as type name", ident);
         }
       }
-      checkName(ident.entityName(), location);
+      checkName(ident.entity(), location);
     }
   }
 

@@ -1,7 +1,7 @@
 package io.lang.cimple.compiler.ast;
 
-import io.lang.cimple.compiler.Identifier;
 import com.google.common.collect.ImmutableList;
+import io.lang.cimple.compiler.Identifier;
 import java.util.List;
 
 public final class AstStructType extends AstType {

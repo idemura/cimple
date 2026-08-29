@@ -3,68 +3,68 @@ package io.lang.cimple.compiler;
 import static io.lang.cimple.compiler.Constants.BUILTIN_MODULE;
 
 // Type and entity only present for methods.
-public record Identifier(String moduleName, String typeName, String entityName)
+public record Identifier(String module, String type, String entity)
     implements Comparable<Identifier> {
-  public static Identifier ofEntity(String entityName) {
-    return new Identifier(null, null, entityName);
+  public static Identifier ofEntity(String entity) {
+    return new Identifier(null, null, entity);
   }
 
-  public static Identifier ofType(String typeName) {
-    return new Identifier(null, typeName, null);
+  public static Identifier ofType(String type) {
+    return new Identifier(null, type, null);
   }
 
-  public static Identifier ofMethod(String typeName, String entityName) {
-    return new Identifier(null, typeName, entityName);
+  public static Identifier ofMethod(String type, String entity) {
+    return new Identifier(null, type, entity);
   }
 
   public boolean isBuiltin() {
-    return BUILTIN_MODULE.equals(moduleName);
+    return BUILTIN_MODULE.equals(module);
   }
 
   public Identifier builtin() {
     return withModule(BUILTIN_MODULE);
   }
 
-  public Identifier withModule(String moduleName) {
-    return new Identifier(moduleName, typeName, entityName);
+  public Identifier withModule(String module) {
+    return new Identifier(module, type, entity);
   }
 
-  public Identifier withType(String typeName) {
-    return new Identifier(moduleName, typeName, entityName);
+  public Identifier withType(String type) {
+    return new Identifier(module, type, entity);
   }
 
-  public Identifier withEntity(String entityName) {
-    return new Identifier(moduleName, typeName, entityName);
+  public Identifier withEntity(String entity) {
+    return new Identifier(module, type, entity);
   }
 
   @Override
   public int compareTo(Identifier other) {
-    var cmp = compareNullable(moduleName, other.moduleName);
+    var cmp = compareNullable(module, other.module);
     if (cmp != 0) {
       return cmp;
     }
-    cmp = compareNullable(typeName, other.typeName);
+    cmp = compareNullable(type, other.type);
     if (cmp != 0) {
       return cmp;
     }
-    return compareNullable(entityName, other.entityName);
+    return compareNullable(entity, other.entity);
   }
 
   @Override
   public String toString() {
     var sb = new StringBuilder();
-    if (moduleName != null) {
-      sb.append(moduleName);
+    if (module != null) {
+      sb.append(module);
       sb.append("~");
     }
-    if (entityName != null) {
-      if (typeName != null) {
-        sb.append(typeName);
+    if (entity != null) {
+      if (type != null) {
+        sb.append(type);
         sb.append(".");
       }
-      sb.append(entityName);
+      sb.append(entity);
     } else {
-      sb.append(typeName);
+      sb.append(type);
     }
     return sb.toString();
   }

@@ -76,7 +76,7 @@ public class SemanticAnalyzer {
     for (var def : module.definitions()) {
       if (def instanceof AstEntity entity) {
         var name = entity.name();
-        if (name.moduleName() == null) {
+        if (name.module() == null) {
           entity.name(name.withModule(module.name()));
         }
       }
@@ -148,7 +148,7 @@ public class SemanticAnalyzer {
         entity.location(),
         "Definition of %s '%s' has a name collision with %s defined at %s",
         entityKind(entity),
-        entity.name().entityName(),
+        entity.name().entity(),
         entityKind(existing),
         existing.location());
   }

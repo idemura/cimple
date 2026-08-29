@@ -38,7 +38,7 @@ public class ResolveTypesVisitor extends AstVisitor {
     var objectType = node.header().objectType();
     if (objectType != null) {
       // When we resolved the object type, qualified function name may be affected.
-      node.name(objectType.name().withEntity(node.name().entityName()));
+      node.name(objectType.name().withEntity(node.name().entity()));
     }
   }
 
@@ -92,12 +92,12 @@ public class ResolveTypesVisitor extends AstVisitor {
   }
 
   private AstType lookupType(Identifier name) {
-    if (name.moduleName() == null) {
-      var builtinType = GlobalNameMap.lookupBuiltinType(name.typeName());
+    if (name.module() == null) {
+      var builtinType = GlobalNameMap.lookupBuiltinType(name.type());
       if (builtinType != null) {
         return builtinType;
       }
-      return typeMap.get(name.typeName());
+      return typeMap.get(name.type());
     }
     return globalNameMap.lookupType(name);
   }
