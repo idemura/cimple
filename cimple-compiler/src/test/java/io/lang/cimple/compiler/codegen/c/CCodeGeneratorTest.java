@@ -108,6 +108,8 @@ class CCodeGeneratorTest {
     var output = compile(code);
     assertEquals(
         """
+        struct test__Color;
+
         struct test__Color {
           int64_t tag;
         };
@@ -154,11 +156,56 @@ class CCodeGeneratorTest {
     var output = compile(code);
     assertEquals(
         """
+        struct test__Maybe;
+
         struct test__Maybe {
           int64_t tag;
           union {
             int64_t Some;
             const char* Error;
+          } u;
+        };
+
+        """,
+        output);
+  }
+
+  @Test
+  void testGenerateTypeDefinitionsInCOrder() {
+    var code =
+        """
+        module test;
+        type struct Node {
+          var next Maybe*;
+        }
+        type union Maybe {
+          None;
+          Some(Node*);
+        }
+        type enum Status {
+          Ok;
+          Failed(2);
+        }
+        """;
+    var output = compile(code);
+    assertEquals(
+        """
+        struct test__Node;
+        struct test__Maybe;
+
+        enum test__Status {
+          test__Status_Ok = 0,
+          test__Status_Failed = 2,
+        };
+
+        struct test__Node {
+          struct test__Maybe* next;
+        };
+
+        struct test__Maybe {
+          int64_t tag;
+          union {
+            struct test__Node* Some;
           } u;
         };
 

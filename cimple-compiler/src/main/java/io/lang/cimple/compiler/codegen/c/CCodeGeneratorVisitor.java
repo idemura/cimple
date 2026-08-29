@@ -15,8 +15,6 @@ import io.lang.cimple.compiler.ast.AstType;
 import io.lang.cimple.compiler.ast.AstUnionType;
 import io.lang.cimple.compiler.ast.AstVariable;
 import io.lang.cimple.compiler.ast.AstVisitor;
-import java.util.ArrayList;
-import java.util.List;
 
 class CCodeGeneratorVisitor extends AstVisitor {
   private final IndentWriter out;
@@ -29,15 +27,22 @@ class CCodeGeneratorVisitor extends AstVisitor {
 
   @Override
   protected void visit(AstModule node) {
-    var structs = collectStructs(node);
-    var unions = collectUnions(node);
-    var enums = collectEnums(node);
-    emitStructForwardDeclarations(structs);
-    emitEnumDefinitions(enums);
-    emitStructDefinitions(structs);
-    emitUnionDefinitions(unions);
-    // TODO: Emit global variables.
-    // TODO: Emit functions.
+    emitForwardDeclarations(node);
+    for (var definition : node.definitions()) {
+      if (definition instanceof AstEnumType) {
+        definition.accept(this);
+      }
+    }
+    for (var definition : node.definitions()) {
+      if (definition instanceof AstType && !(definition instanceof AstEnumType)) {
+        definition.accept(this);
+      }
+    }
+    for (var definition : node.definitions()) {
+      if (!(definition instanceof AstType)) {
+        definition.accept(this);
+      }
+    }
   }
 
   @Override
@@ -50,93 +55,29 @@ class CCodeGeneratorVisitor extends AstVisitor {
     // TODO: Emit a C global variable definition.
   }
 
-  private static List<AstStructType> collectStructs(AstModule module) {
-    var structs = new ArrayList<AstStructType>();
-    for (var definition : module.definitions()) {
-      if (definition instanceof AstStructType structType) {
-        structs.add(structType);
-      }
-    }
-    return structs;
-  }
-
-  private static List<AstUnionType> collectUnions(AstModule module) {
-    var unions = new ArrayList<AstUnionType>();
-    for (var definition : module.definitions()) {
-      if (definition instanceof AstUnionType unionType) {
-        unions.add(unionType);
-      }
-    }
-    return unions;
-  }
-
-  private static List<AstEnumType> collectEnums(AstModule module) {
-    var enums = new ArrayList<AstEnumType>();
-    for (var definition : module.definitions()) {
-      if (definition instanceof AstEnumType enumType) {
-        enums.add(enumType);
-      }
-    }
-    return enums;
-  }
-
-  private void emitStructForwardDeclarations(List<AstStructType> structs) {
-    for (var structType : structs) {
-      out.writeLine("struct %s;".formatted(cTypeName(structType.name())));
-    }
-    if (!structs.isEmpty()) {
-      out.writeLine("");
-    }
-  }
-
-  private void emitStructDefinitions(List<AstStructType> structs) {
-    for (var structType : structs) {
-      var name = cTypeName(structType.name());
-      out.writeLine("struct %s {".formatted(name));
-      out.indent();
-      for (var field : structType.fields()) {
-        out.writeLine("%s %s;".formatted(cType(field.type()), field.name().entity()));
-      }
-      out.unindent();
-      out.writeLine("};");
-      out.writeLine("");
-    }
-  }
-
-  private void emitUnionDefinitions(List<AstUnionType> unions) {
-    for (var union : unions) {
-      emitUnionDefinition(union);
-      out.writeLine("");
-    }
-  }
-
-  private void emitEnumDefinitions(List<AstEnumType> enums) {
-    for (var enumType : enums) {
-      emitEnumDefinition(enumType);
-      out.writeLine("");
-    }
-  }
-
-  private void emitEnumDefinition(AstEnumType enumType) {
-    out.writeLine("enum %s {".formatted(cTypeName(enumType.name())));
+  @Override
+  protected void visit(AstStructType type) {
+    var name = cTypeName(type.name());
+    out.writeLine("struct %s {".formatted(name));
     out.indent();
-    for (var variant : enumType.variants()) {
-      out.writeLine(
-          "%s_%s = %d,".formatted(cTypeName(enumType.name()), variant.tag(), variant.value()));
+    for (var field : type.fields()) {
+      out.writeLine("%s %s;".formatted(cType(field.type()), field.name().entity()));
     }
     out.unindent();
     out.writeLine("};");
+    out.writeLine("");
   }
 
-  private void emitUnionDefinition(AstUnionType union) {
-    var name = cTypeName(union.name());
+  @Override
+  protected void visit(AstUnionType type) {
+    var name = cTypeName(type.name());
     out.writeLine("struct %s {".formatted(name));
     out.indent();
     out.writeLine("int64_t tag;".formatted(name));
-    if (union.hasPayload()) {
+    if (type.hasPayload()) {
       out.writeLine("union {");
       out.indent();
-      for (var variant : union.variants()) {
+      for (var variant : type.variants()) {
         if (variant.valueType() != null) {
           out.writeLine("%s %s;".formatted(cType(variant.valueType()), variant.tag()));
         }
@@ -146,16 +87,36 @@ class CCodeGeneratorVisitor extends AstVisitor {
     }
     out.unindent();
     out.writeLine("};");
+    out.writeLine("");
   }
 
-  private void emitEnumDefinition(String enumName, AstUnionType union) {
-    out.writeLine("enum %s {".formatted(enumName));
+  @Override
+  protected void visit(AstEnumType type) {
+    out.writeLine("enum %s {".formatted(cTypeName(type.name())));
     out.indent();
-    for (var variant : union.variants()) {
-      out.writeLine("%s_%s,".formatted(cTypeName(union.name()), variant.tag()));
+    for (var variant : type.variants()) {
+      out.writeLine(
+          "%s_%s = %d,".formatted(cTypeName(type.name()), variant.tag(), variant.value()));
     }
     out.unindent();
     out.writeLine("};");
+    out.writeLine("");
+  }
+
+  private void emitForwardDeclarations(AstModule module) {
+    var emitted = false;
+    for (var definition : module.definitions()) {
+      if (definition instanceof AstStructType type) {
+        out.writeLine("struct %s;".formatted(cTypeName(type.name())));
+        emitted = true;
+      } else if (definition instanceof AstUnionType type) {
+        out.writeLine("struct %s;".formatted(cTypeName(type.name())));
+        emitted = true;
+      }
+    }
+    if (emitted) {
+      out.writeLine("");
+    }
   }
 
   private String cType(AstType type) {
