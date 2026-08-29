@@ -12,6 +12,34 @@ class ForLoopTest extends AbstractSemanticsTest {
   }
 
   @Test
+  void testBreakInsideForLoop() {
+    var code =
+        """
+        module test;
+        function f() {
+          for true {
+            break;
+          }
+        }
+        """;
+    analyze(code);
+    assertEquals(List.of(), errorConsumer.errors());
+  }
+
+  @Test
+  void testBreakOutsideForLoop() {
+    var code =
+        """
+        module test;
+        function f() {
+          break;
+        }
+        """;
+    analyze(code);
+    assertEquals(List.of("'break' is only allowed inside a loop"), errorConsumer.errors());
+  }
+
+  @Test
   void testForLoopVariable() {
     var code =
         """

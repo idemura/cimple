@@ -108,6 +108,14 @@ There are two kinds of functions: functions and methods.
 A function or method that ends with `;` has no body and is resolved at linking time.
 This section is incomplete.
 
+## Statements
+
+```
+<break_statement> := "break" ";"
+```
+
+`break;` exits the nearest enclosing loop.
+
 ## Types
 
 There are several kinds of types in Cimple:

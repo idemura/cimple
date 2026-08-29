@@ -6,9 +6,9 @@ import java.util.Set;
 
 public enum Keyword {
   BOOL("bool"),
+  BREAK("break"),
   CASE("case"),
   CHAR("char"),
-  CLASS("class"),
   CONST("const"),
   DEFER("defer"),
   DELETE("delete"),

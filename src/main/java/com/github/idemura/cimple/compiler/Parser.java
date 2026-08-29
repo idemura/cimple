@@ -7,6 +7,7 @@ import com.github.idemura.cimple.compiler.ast.AstArrayAccess;
 import com.github.idemura.cimple.compiler.ast.AstArrayType;
 import com.github.idemura.cimple.compiler.ast.AstAssign;
 import com.github.idemura.cimple.compiler.ast.AstBlock;
+import com.github.idemura.cimple.compiler.ast.AstBreak;
 import com.github.idemura.cimple.compiler.ast.AstCall;
 import com.github.idemura.cimple.compiler.ast.AstCast;
 import com.github.idemura.cimple.compiler.ast.AstCompoundAssign;
@@ -249,6 +250,7 @@ public class Parser {
     return switch (keyword) {
       case VAR, CONST -> parseVariableStatement();
       case RETURN -> parseReturn();
+      case BREAK -> parseBreak();
       case DELETE -> parseDelete();
       case IF -> parseIf();
       case FOR -> parseFor();
@@ -263,6 +265,13 @@ public class Parser {
     var stmt = new AstReturn();
     stmt.location(takeKeyword(RETURN));
     stmt.expression(parseExpressionHolder());
+    take(SEMICOLON);
+    return stmt;
+  }
+
+  private AstStatement parseBreak() {
+    var stmt = new AstBreak();
+    stmt.location(takeKeyword(BREAK));
     take(SEMICOLON);
     return stmt;
   }

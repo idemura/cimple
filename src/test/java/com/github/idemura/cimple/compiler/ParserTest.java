@@ -7,6 +7,7 @@ import static org.junit.jupiter.api.Assertions.*;
 import com.github.idemura.cimple.compiler.ast.AstArrayAccess;
 import com.github.idemura.cimple.compiler.ast.AstArrayType;
 import com.github.idemura.cimple.compiler.ast.AstAssign;
+import com.github.idemura.cimple.compiler.ast.AstBreak;
 import com.github.idemura.cimple.compiler.ast.AstCall;
 import com.github.idemura.cimple.compiler.ast.AstCast;
 import com.github.idemura.cimple.compiler.ast.AstCompoundAssign;
@@ -868,6 +869,7 @@ class ParserTest {
         module test;
         function f() {
           for true {
+            break;
           }
           for var i = 0; true {
           }
@@ -883,7 +885,9 @@ class ParserTest {
       assertNull(stmt.init());
       assertEquals(newEntityRef("true"), stmt.condition().get());
       assertNull(stmt.increment());
-      assertEquals(ImmutableList.of(), stmt.block().statements());
+      var bodyStatements = stmt.block().statements();
+      assertEquals(1, bodyStatements.size());
+      assertEquals(new AstBreak(), bodyStatements.get(0));
     }
     {
       var stmt = (AstFor) statements.get(i++);

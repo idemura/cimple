@@ -7,6 +7,7 @@ import static com.google.common.base.Preconditions.checkState;
 import com.github.idemura.cimple.compiler.ast.AstArrayAccess;
 import com.github.idemura.cimple.compiler.ast.AstArrayType;
 import com.github.idemura.cimple.compiler.ast.AstBlock;
+import com.github.idemura.cimple.compiler.ast.AstBreak;
 import com.github.idemura.cimple.compiler.ast.AstBuiltinType;
 import com.github.idemura.cimple.compiler.ast.AstCall;
 import com.github.idemura.cimple.compiler.ast.AstCompoundAssign;
@@ -40,6 +41,7 @@ public class TypeCheckAndResolveNamesVisitor extends AstExpressionRewriteVisitor
   private final ErrorConsumer errorConsumer;
   private LocalNameMap localNameMap;
   private AstModule module;
+  private int loopDepth;
 
   public TypeCheckAndResolveNamesVisitor(GlobalNameMap globalNameMap, ErrorConsumer errorConsumer) {
     this.globalNameMap = globalNameMap;
@@ -109,22 +111,23 @@ public class TypeCheckAndResolveNamesVisitor extends AstExpressionRewriteVisitor
 
     for (var variant : node.variants()) {
       var valueExpression = variant.valueExpression();
-      if (valueExpression == null) {
-        continue;
-      }
-      if (!(valueExpression instanceof AstNumberLiteral)) {
-        // TODO: Remove one constant folding works.
-        errorConsumer.errorAt(
-            variant.location(), "Enum variant '%s' value must be a number literal", variant.tag());
-        continue;
-      }
-      var valueType = checkNotNull(valueExpression.type());
-      if (!isIntegerType(valueType)) {
-        errorConsumer.errorAt(
-            variant.location(),
-            "Enum variant '%s' value has type '%s', expected integer",
-            variant.tag(),
-            valueType.formatName());
+      if (valueExpression != null) {
+        if (valueExpression instanceof AstNumberLiteral) {
+          var valueType = checkNotNull(valueExpression.type());
+          if (!isIntegerType(valueType)) {
+            errorConsumer.errorAt(
+                variant.location(),
+                "Enum variant '%s' value has type '%s', expected integer",
+                variant.tag(),
+                valueType.formatName());
+          }
+        } else {
+          // TODO: Remove one constant folding works.
+          errorConsumer.errorAt(
+              variant.location(),
+              "Enum variant '%s' value must be a number literal",
+              variant.tag());
+        }
       }
     }
   }
@@ -144,10 +147,20 @@ public class TypeCheckAndResolveNamesVisitor extends AstExpressionRewriteVisitor
   protected void visit(AstFor node) {
     try {
       localNameMap.beginScope();
+      loopDepth++;
       super.visit(node);
     } finally {
+      loopDepth--;
       localNameMap.endScope();
     }
+  }
+
+  @Override
+  protected void visit(AstBreak node) {
+    if (loopDepth == 0) {
+      errorConsumer.errorAt(node.location(), "'break' is only allowed inside a loop");
+    }
+    super.visit(node);
   }
 
   private void registerLocal(AstVariable variable) {

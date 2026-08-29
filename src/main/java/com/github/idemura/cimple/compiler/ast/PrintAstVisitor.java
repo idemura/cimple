@@ -184,6 +184,11 @@ public class PrintAstVisitor extends AstVisitor {
   }
 
   @Override
+  protected void visit(AstBreak node) {
+    output.writeLine("BREAK");
+  }
+
+  @Override
   protected void visit(AstReturn node) {
     output.writeLine("RETURN");
     output.indent();

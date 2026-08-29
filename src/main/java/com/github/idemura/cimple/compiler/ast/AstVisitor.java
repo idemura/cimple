@@ -79,6 +79,10 @@ public abstract class AstVisitor {
     node.acceptChildren(this);
   }
 
+  protected void visit(AstBreak node) {
+    node.acceptChildren(this);
+  }
+
   protected void visit(AstReturn node) {
     node.acceptChildren(this);
   }
