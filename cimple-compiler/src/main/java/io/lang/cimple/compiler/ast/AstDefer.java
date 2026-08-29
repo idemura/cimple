@@ -1,0 +1,25 @@
+package io.lang.cimple.compiler.ast;
+
+public final class AstDefer extends AstStatement {
+  private AstBlock block;
+
+  public AstDefer() {}
+
+  @Override
+  public void accept(AstVisitor visitor) {
+    visitor.visit(this);
+  }
+
+  @Override
+  public void acceptChildren(AstVisitor visitor) {
+    block.accept(visitor);
+  }
+
+  public AstBlock block() {
+    return block;
+  }
+
+  public void block(AstBlock block) {
+    this.block = block;
+  }
+}

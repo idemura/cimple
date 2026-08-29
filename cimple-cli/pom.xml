@@ -58,7 +58,7 @@
         <configuration>
           <archive>
             <manifest>
-              <mainClass>com.github.idemura.cimple.cli.CliDriver</mainClass>
+              <mainClass>io.lang.cimple.cli.CliDriver</mainClass>
             </manifest>
           </archive>
         </configuration>

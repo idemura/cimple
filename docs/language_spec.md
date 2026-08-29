@@ -300,5 +300,5 @@ For compile-time constants: `ALL_CAPS`.
 Use snake_case for module names:
 
 ```
-module github_idemura_mathlib;
+module ml_mathlib;
 ```
