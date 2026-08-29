@@ -56,6 +56,7 @@ the second occurrence is in a comment.
 
 An identifier starts with a letter and can contain letters, digits, or underscores.
 Two or more underscores in a row are not allowed.
+Starting or ending with an underscore is not allowed.
 
 ```
 short_path
@@ -225,10 +226,23 @@ value plus `1`.
 Every enum must define a variant with value `0`. This is required because Ci values may be
 zero-initialized, so every enum type needs a valid zero value.
 
-### Function
+### Function Pointers
 
 ```
 type function Consumer(s string);
+```
+
+Once you a variable of function pointer type, you can invoke the target function with `call` method:
+
+```
+function printer(s string) {
+    # ...
+}
+
+function fpTest() {
+    var fp = printer;
+    fp.call("hello");
+}
 ```
 
 ### Interface
