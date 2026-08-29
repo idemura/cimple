@@ -6,7 +6,7 @@
   <modelVersion>4.0.0</modelVersion>
 
   <parent>
-    <groupId>com.github.idemura</groupId>
+    <groupId>io.lang.cimple</groupId>
     <artifactId>cimple</artifactId>
     <version>1.0-SNAPSHOT</version>
     <relativePath>../pom.xml</relativePath>
@@ -21,7 +21,7 @@
 
   <dependencies>
     <dependency>
-      <groupId>com.github.idemura</groupId>
+      <groupId>io.lang.cimple</groupId>
       <artifactId>cimple-compiler</artifactId>
       <version>${project.version}</version>
     </dependency>
