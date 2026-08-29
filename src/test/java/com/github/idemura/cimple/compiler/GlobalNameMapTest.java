@@ -40,8 +40,8 @@ class GlobalNameMapTest {
   void testCollectTypes() {
     var globalNameMap = new GlobalNameMap();
     var errorConsumer = new InMemoryErrorConsumer();
-    var type1 = newRecordType("m1", "Duration");
-    var type2 = newRecordType("m2", "Duration");
+    var type1 = newStructType("m1", "Duration");
+    var type2 = newStructType("m2", "Duration");
 
     assertNull(globalNameMap.addType(type1));
     assertNull(globalNameMap.addType(type2));
@@ -60,9 +60,9 @@ class GlobalNameMapTest {
   void testCollectTypesReportsDuplicateAndContinues() {
     var globalNameMap = new GlobalNameMap();
     var errorConsumer = new InMemoryErrorConsumer();
-    var type1 = newRecordType("m1", "Duration");
-    var type2 = newRecordType("m1", "Duration");
-    var type3 = newRecordType("m1", "Size");
+    var type1 = newStructType("m1", "Duration");
+    var type2 = newStructType("m1", "Duration");
+    var type3 = newStructType("m1", "Size");
     renameType(new Identifier("m1", "Duration", "tag1"), 1, type1);
     renameType(new Identifier("m1", "Duration", "tag2"), 2, type2);
     type3.location(new Location(3, 1));

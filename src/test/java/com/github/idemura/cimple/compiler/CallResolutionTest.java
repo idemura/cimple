@@ -18,7 +18,7 @@ class CallResolutionTest extends AbstractSemanticsTest {
     var code =
         """
         module test;
-        type record Duration {}
+        type struct Duration {}
         function Duration.toMillis(x int, this) {}
         function f(x int) {}
         """;
@@ -28,7 +28,7 @@ class CallResolutionTest extends AbstractSemanticsTest {
     assertEquals(List.of(), errorConsumer.errors());
     {
       var header = module.findMethod("Duration", "toMillis").header();
-      var objectType = newRecordType("test", "Duration");
+      var objectType = newStructType("test", "Duration");
       assertEquals(objectType, header.objectType());
       assertEquals(1, header.objectIndex());
       assertEquals(objectType, header.parameters().get(1).type());
@@ -138,7 +138,7 @@ class CallResolutionTest extends AbstractSemanticsTest {
     var code =
         """
         module test;
-        type record Duration {
+        type struct Duration {
           var seconds int;
         }
         function Duration.toMillis(this) int {
@@ -165,7 +165,7 @@ class CallResolutionTest extends AbstractSemanticsTest {
     }
     {
       var function = module.findMethod("Duration", "toMillis");
-      assertEquals(newRecordType("test", "Duration"), function.header().objectType());
+      assertEquals(newStructType("test", "Duration"), function.header().objectType());
     }
   }
 
@@ -174,7 +174,7 @@ class CallResolutionTest extends AbstractSemanticsTest {
     var code =
         """
         module test;
-        type record Duration {}
+        type struct Duration {}
         function external(x int) string;
         function Duration.toMillis(this) int;
         function f(d Duration) {
@@ -215,7 +215,7 @@ class CallResolutionTest extends AbstractSemanticsTest {
         """
         module test;
         type function IntFn(x int) string;
-        type record Holder {
+        type struct Holder {
           var func_ptr IntFn;
         }
         function f(h Holder) {

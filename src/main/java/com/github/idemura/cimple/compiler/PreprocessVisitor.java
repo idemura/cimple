@@ -21,9 +21,9 @@ import com.github.idemura.cimple.compiler.ast.AstModule;
 import com.github.idemura.cimple.compiler.ast.AstNew;
 import com.github.idemura.cimple.compiler.ast.AstNullLiteral;
 import com.github.idemura.cimple.compiler.ast.AstNumberLiteral;
-import com.github.idemura.cimple.compiler.ast.AstRecordType;
 import com.github.idemura.cimple.compiler.ast.AstStringLiteral;
 import com.github.idemura.cimple.compiler.ast.AstStringType;
+import com.github.idemura.cimple.compiler.ast.AstStructType;
 import com.github.idemura.cimple.compiler.ast.AstTypeRef;
 import com.github.idemura.cimple.compiler.ast.AstUnionType;
 import com.github.idemura.cimple.compiler.ast.AstVariable;
@@ -35,7 +35,7 @@ import java.util.HashMap;
 //  - Validates method object parameters
 //  - Sets missing function result types to void
 //  - Checks that variables have either a type or an initializer
-//  - Checks duplicate function parameters, record fields, union variants, and enum variants.
+//  - Checks duplicate function parameters, struct fields, union variants, and enum variants.
 //  - Normalizes builtin type aliases such as int and float
 //  - Marks method-call syntax
 //  - Rejects nested assignments
@@ -153,7 +153,7 @@ class PreprocessVisitor extends AstExpressionRewriteVisitor {
   }
 
   @Override
-  protected void visit(AstRecordType node) {
+  protected void visit(AstStructType node) {
     checkIdentifier(node.name(), node.location());
     var fieldMap = new HashMap<String, AstVariable>();
     for (var field : node.fields()) {
@@ -161,7 +161,7 @@ class PreprocessVisitor extends AstExpressionRewriteVisitor {
       if (existing != null) {
         errorConsumer.errorAt(
             field.location(),
-            "Duplicate record field '%s'. First defined at %s.",
+            "Duplicate struct field '%s'. First defined at %s.",
             field.name().entityName(),
             existing.location());
       }

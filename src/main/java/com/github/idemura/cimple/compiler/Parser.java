@@ -29,10 +29,10 @@ import com.github.idemura.cimple.compiler.ast.AstModule;
 import com.github.idemura.cimple.compiler.ast.AstNew;
 import com.github.idemura.cimple.compiler.ast.AstNumberLiteral;
 import com.github.idemura.cimple.compiler.ast.AstPointerType;
-import com.github.idemura.cimple.compiler.ast.AstRecordType;
 import com.github.idemura.cimple.compiler.ast.AstReturn;
 import com.github.idemura.cimple.compiler.ast.AstStatement;
 import com.github.idemura.cimple.compiler.ast.AstStringLiteral;
+import com.github.idemura.cimple.compiler.ast.AstStructType;
 import com.github.idemura.cimple.compiler.ast.AstType;
 import com.github.idemura.cimple.compiler.ast.AstTypeRef;
 import com.github.idemura.cimple.compiler.ast.AstUnionType;
@@ -90,8 +90,8 @@ public class Parser {
 
   private AstType parseType() {
     takeKeyword(TYPE);
-    if (isKeyword(RECORD)) {
-      return parseTypeRecord();
+    if (isKeyword(STRUCT)) {
+      return parseTypeStruct();
     }
     if (isKeyword(UNION)) {
       return parseTypeUnion();
@@ -103,12 +103,12 @@ public class Parser {
       return parseTypeFunction();
     }
     throw fatalAtCurrentLocation(
-        "Invalid type definition: one of %s expected", List.of(RECORD, UNION, ENUM, FUNCTION));
+        "Invalid type definition: one of %s expected", List.of(STRUCT, UNION, ENUM, FUNCTION));
   }
 
-  private AstRecordType parseTypeRecord() {
-    var type = new AstRecordType();
-    takeKeyword(RECORD);
+  private AstStructType parseTypeStruct() {
+    var type = new AstStructType();
+    takeKeyword(STRUCT);
     type.location(tokenizer.currentLocation());
     type.name(Identifier.ofType(take(IDENTIFIER).value()));
     take(LCURLY);

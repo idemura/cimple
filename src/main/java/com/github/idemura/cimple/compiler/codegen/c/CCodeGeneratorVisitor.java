@@ -9,8 +9,8 @@ import com.github.idemura.cimple.compiler.ast.AstFunction;
 import com.github.idemura.cimple.compiler.ast.AstFunctionType;
 import com.github.idemura.cimple.compiler.ast.AstModule;
 import com.github.idemura.cimple.compiler.ast.AstPointerType;
-import com.github.idemura.cimple.compiler.ast.AstRecordType;
 import com.github.idemura.cimple.compiler.ast.AstStringType;
+import com.github.idemura.cimple.compiler.ast.AstStructType;
 import com.github.idemura.cimple.compiler.ast.AstType;
 import com.github.idemura.cimple.compiler.ast.AstUnionType;
 import com.github.idemura.cimple.compiler.ast.AstVariable;
@@ -29,12 +29,12 @@ class CCodeGeneratorVisitor extends AstVisitor {
 
   @Override
   protected void visit(AstModule node) {
-    var records = collectRecords(node);
+    var structs = collectStructs(node);
     var unions = collectUnions(node);
     var enums = collectEnums(node);
-    emitRecordForwardDeclarations(records);
+    emitStructForwardDeclarations(structs);
     emitEnumDefinitions(enums);
-    emitRecordDefinitions(records);
+    emitStructDefinitions(structs);
     emitUnionDefinitions(unions);
     // TODO: Emit global variables.
     // TODO: Emit functions.
@@ -50,14 +50,14 @@ class CCodeGeneratorVisitor extends AstVisitor {
     // TODO: Emit a C global variable definition.
   }
 
-  private static List<AstRecordType> collectRecords(AstModule module) {
-    var records = new ArrayList<AstRecordType>();
+  private static List<AstStructType> collectStructs(AstModule module) {
+    var structs = new ArrayList<AstStructType>();
     for (var definition : module.definitions()) {
-      if (definition instanceof AstRecordType recordType) {
-        records.add(recordType);
+      if (definition instanceof AstStructType structType) {
+        structs.add(structType);
       }
     }
-    return records;
+    return structs;
   }
 
   private static List<AstUnionType> collectUnions(AstModule module) {
@@ -80,21 +80,21 @@ class CCodeGeneratorVisitor extends AstVisitor {
     return enums;
   }
 
-  private void emitRecordForwardDeclarations(List<AstRecordType> records) {
-    for (var record : records) {
-      out.writeLine("struct %s;".formatted(cTypeName(record.name())));
+  private void emitStructForwardDeclarations(List<AstStructType> structs) {
+    for (var structType : structs) {
+      out.writeLine("struct %s;".formatted(cTypeName(structType.name())));
     }
-    if (!records.isEmpty()) {
+    if (!structs.isEmpty()) {
       out.writeLine("");
     }
   }
 
-  private void emitRecordDefinitions(List<AstRecordType> records) {
-    for (var record : records) {
-      var name = cTypeName(record.name());
+  private void emitStructDefinitions(List<AstStructType> structs) {
+    for (var structType : structs) {
+      var name = cTypeName(structType.name());
       out.writeLine("struct %s {".formatted(name));
       out.indent();
-      for (var field : record.fields()) {
+      for (var field : structType.fields()) {
         out.writeLine("%s %s;".formatted(cType(field.type()), field.name().entityName()));
       }
       out.unindent();
@@ -165,7 +165,7 @@ class CCodeGeneratorVisitor extends AstVisitor {
     return switch (type) {
       case AstBuiltinType builtinType -> cBuiltinType(builtinType);
       case AstStringType ignored -> "char*";
-      case AstRecordType recordType -> "struct " + cTypeName(recordType.name());
+      case AstStructType structType -> "struct " + cTypeName(structType.name());
       case AstEnumType enumType -> "enum " + cTypeName(enumType.name());
       case AstPointerType pointerType -> cType(pointerType.baseType()) + "*";
       case AstArrayType ignored ->

@@ -47,7 +47,7 @@ public abstract class AstVisitor {
     node.acceptChildren(this);
   }
 
-  protected void visit(AstRecordType node) {
+  protected void visit(AstStructType node) {
     node.acceptChildren(this);
   }
 

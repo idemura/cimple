@@ -45,8 +45,8 @@ public final class AstUtils {
     return ref;
   }
 
-  public static AstRecordType newRecordType(String moduleName, String name) {
-    var type = new AstRecordType();
+  public static AstStructType newStructType(String moduleName, String name) {
+    var type = new AstStructType();
     type.name(Identifier.ofType(name).withModule(moduleName));
     return type;
   }

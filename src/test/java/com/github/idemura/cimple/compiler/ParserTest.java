@@ -23,8 +23,8 @@ import com.github.idemura.cimple.compiler.ast.AstIf;
 import com.github.idemura.cimple.compiler.ast.AstLocal;
 import com.github.idemura.cimple.compiler.ast.AstNew;
 import com.github.idemura.cimple.compiler.ast.AstNumberLiteral;
-import com.github.idemura.cimple.compiler.ast.AstRecordType;
 import com.github.idemura.cimple.compiler.ast.AstReturn;
+import com.github.idemura.cimple.compiler.ast.AstStructType;
 import com.github.idemura.cimple.compiler.ast.AstUnionType;
 import com.github.idemura.cimple.compiler.ast.AstVariable;
 import com.google.common.collect.ImmutableList;
@@ -162,7 +162,7 @@ class ParserTest {
     var code =
         """
         module test;
-        type record Duration {}
+        type struct Duration {}
         function external(x int) string;
         function Duration.toMillis(this) int;
         """;
@@ -185,12 +185,12 @@ class ParserTest {
   }
 
   @Test
-  void testRecordType() {
+  void testStructType() {
     var code =
         """
         module test;
-        type record Empty {}
-        type record Point {
+        type struct Empty {}
+        type struct Point {
           var x int;
           var y int;
           const name string;
@@ -199,12 +199,12 @@ class ParserTest {
     var module = parseCode(code, makeErrorConsumer());
     assertEquals("test", module.name());
     {
-      var type = (AstRecordType) module.findType("Empty");
+      var type = (AstStructType) module.findType("Empty");
       assertEquals(Identifier.ofType("Empty"), type.name());
       assertEquals(ImmutableList.of(), type.fields());
     }
     {
-      var type = (AstRecordType) module.findType("Point");
+      var type = (AstStructType) module.findType("Point");
       assertEquals(Identifier.ofType("Point"), type.name());
       var fields = type.fields();
       assertEquals(3, fields.size());

@@ -27,7 +27,7 @@ Comments start with `#` and continue until the end of the line:
 # File operations module
 module file_io;
 
-type record File {
+type struct File {
   # Fields
 }
 
@@ -114,7 +114,7 @@ There are several kinds of types in Cimple:
 
 * Builtin
 * Alias
-* Record
+* Struct
 * Union
 * Enum
 * Function
@@ -179,10 +179,10 @@ Array method reference:
 | `makeCopy` | `capacity int` | same array type | Creates a new array with the requested capacity and copies existing elements. |
 | `remove`   | `n int`        | `void`          | Removes `n` elements from the end.                                            |
 
-### Record
+### Struct
 
 ```
-type record <name> {
+type struct <name> {
 }
 ```
 

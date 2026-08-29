@@ -36,11 +36,11 @@ class MethodsTest extends AbstractSemanticsTest {
   }
 
   @Test
-  void testRecordMethod() {
+  void testStructMethod() {
     var code =
         """
         module test;
-        type record Duration {
+        type struct Duration {
           var seconds int;
         }
         function Duration.toMillis(this) int {

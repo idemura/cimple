@@ -25,8 +25,8 @@ import com.github.idemura.cimple.compiler.ast.AstLocal;
 import com.github.idemura.cimple.compiler.ast.AstModule;
 import com.github.idemura.cimple.compiler.ast.AstNumberLiteral;
 import com.github.idemura.cimple.compiler.ast.AstPointerType;
-import com.github.idemura.cimple.compiler.ast.AstRecordType;
 import com.github.idemura.cimple.compiler.ast.AstStringType;
+import com.github.idemura.cimple.compiler.ast.AstStructType;
 import com.github.idemura.cimple.compiler.ast.AstType;
 import com.github.idemura.cimple.compiler.ast.AstTypeHolder;
 import com.github.idemura.cimple.compiler.ast.AstTypeRef;
@@ -94,7 +94,7 @@ public class TypeCheckAndResolveNamesVisitor extends AstExpressionRewriteVisitor
   }
 
   @Override
-  protected void visit(AstRecordType node) {
+  protected void visit(AstStructType node) {
     super.visit(node);
   }
 
@@ -210,12 +210,12 @@ public class TypeCheckAndResolveNamesVisitor extends AstExpressionRewriteVisitor
       return node;
     }
     var objectType = checkNotNull(node.object().type());
-    if (!(objectType instanceof AstRecordType recordType)) {
+    if (!(objectType instanceof AstStructType structType)) {
       errorConsumer.errorAt(
-          node.location(), "Field access requires a record, got '%s'", objectType.formatName());
+          node.location(), "Field access requires a struct, got '%s'", objectType.formatName());
       return node;
     }
-    for (var field : recordType.fields()) {
+    for (var field : structType.fields()) {
       if (field.name().entityName().equals(node.fieldName())) {
         node.field(field);
         return node;
@@ -223,9 +223,9 @@ public class TypeCheckAndResolveNamesVisitor extends AstExpressionRewriteVisitor
     }
     errorConsumer.errorAt(
         node.location(),
-        "Undefined field '%s' in record '%s'",
+        "Undefined field '%s' in struct '%s'",
         node.fieldName(),
-        recordType.name());
+        structType.name());
     return node;
   }
 

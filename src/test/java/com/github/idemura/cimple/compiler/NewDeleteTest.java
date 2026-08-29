@@ -13,7 +13,7 @@ class NewDeleteTest extends AbstractSemanticsTest {
     var code =
         """
         module test;
-        type record Duration {
+        type struct Duration {
           var seconds int;
         }
         function f() {
@@ -29,7 +29,7 @@ class NewDeleteTest extends AbstractSemanticsTest {
     var statements = module.findFunction("f").block().statements();
     {
       var stmt = (AstLocal) statements.get(0);
-      assertEquals(pointerType(newRecordType("test", "Duration")), stmt.variable().type());
+      assertEquals(pointerType(newStructType("test", "Duration")), stmt.variable().type());
     }
   }
 
@@ -38,7 +38,7 @@ class NewDeleteTest extends AbstractSemanticsTest {
     var code =
         """
         module test;
-        type record Duration {
+        type struct Duration {
           var seconds int;
         }
         function f(n int) {

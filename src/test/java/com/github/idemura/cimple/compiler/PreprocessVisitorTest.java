@@ -13,8 +13,8 @@ import com.github.idemura.cimple.compiler.ast.AstFor;
 import com.github.idemura.cimple.compiler.ast.AstIf;
 import com.github.idemura.cimple.compiler.ast.AstLocal;
 import com.github.idemura.cimple.compiler.ast.AstNew;
-import com.github.idemura.cimple.compiler.ast.AstRecordType;
 import com.github.idemura.cimple.compiler.ast.AstReturn;
+import com.github.idemura.cimple.compiler.ast.AstStructType;
 import com.google.common.collect.ImmutableList;
 import java.util.List;
 import org.junit.jupiter.api.Test;
@@ -149,7 +149,7 @@ class PreprocessVisitorTest extends AbstractSemanticsTest {
         var return int;
         const else int = 1;
         function true() {}
-        type record bool {}
+        type struct bool {}
         type union int32 {}
         """;
     var module = parseCode(code);
@@ -169,14 +169,14 @@ class PreprocessVisitorTest extends AbstractSemanticsTest {
   void testContextualKeywords() {
     var code =
         """
-        module record;
+        module struct;
         var union int;
-        function f(record int) int {
+        function f(struct int) int {
           var union = 0;
         }
-        type record union {
+        type struct union {
         }
-        type union record {
+        type union struct {
         }
         type enum enum(int) {
           union;
@@ -187,7 +187,7 @@ class PreprocessVisitorTest extends AbstractSemanticsTest {
     assertEquals(
         List.of(
             "Reserved word 'union' cannot be used as type name",
-            "Reserved word 'record' cannot be used as type name",
+            "Reserved word 'struct' cannot be used as type name",
             "Reserved word 'enum' cannot be used as type name",
             "Reserved word 'union' cannot be used as tag"),
         errorConsumer.errors());
@@ -202,7 +202,7 @@ class PreprocessVisitorTest extends AbstractSemanticsTest {
         var trailing_ int;
         var bad__variable int;
         function bad__function() {}
-        type record bad__record {
+        type struct bad__struct {
           var bad__field int;
         }
         type union bad__union {
@@ -219,7 +219,7 @@ class PreprocessVisitorTest extends AbstractSemanticsTest {
             "Identifier 'trailing_' cannot end with '_'",
             "Identifier 'bad__variable' cannot contain '__'",
             "Identifier 'bad__function' cannot contain '__'",
-            "Identifier 'bad__record' cannot contain '__'",
+            "Identifier 'bad__struct' cannot contain '__'",
             "Identifier 'bad__field' cannot contain '__'",
             "Identifier 'bad__union' cannot contain '__'",
             "Identifier 'bad__variant' cannot contain '__'",
@@ -232,7 +232,7 @@ class PreprocessVisitorTest extends AbstractSemanticsTest {
     var code =
         """
         module test;
-        type record Duration {}
+        type struct Duration {}
         function Duration.toMillis(x int, this) {}
         function f(x int) {}
         """;
@@ -260,7 +260,7 @@ class PreprocessVisitorTest extends AbstractSemanticsTest {
     var code =
         """
         module test;
-        type record R {
+        type struct R {
           var f int;
         }
         var g int;
@@ -272,7 +272,7 @@ class PreprocessVisitorTest extends AbstractSemanticsTest {
     assertEquals(List.of(), errorConsumer.errors());
     assertEquals(newBuiltinTypeRef("int64"), module.findVariable("g").type());
     assertEquals(
-        newBuiltinTypeRef("int64"), ((AstRecordType) module.findType("R")).fields().get(0).type());
+        newBuiltinTypeRef("int64"), ((AstStructType) module.findType("R")).fields().get(0).type());
     assertEquals(
         newBuiltinTypeRef("int64"), module.findFunction("f").header().parameters().get(0).type());
   }
@@ -300,7 +300,7 @@ class PreprocessVisitorTest extends AbstractSemanticsTest {
     var code =
         """
         module test;
-        type record Duration {}
+        type struct Duration {}
         function Duration.a(x bool) {}
         function Duration.b(x, y) {}
         function f(x) {}
@@ -321,7 +321,7 @@ class PreprocessVisitorTest extends AbstractSemanticsTest {
         """
         module test;
         var x;
-        type record R {
+        type struct R {
           var y;
         }
         function f() {
@@ -339,11 +339,11 @@ class PreprocessVisitorTest extends AbstractSemanticsTest {
   }
 
   @Test
-  void testDuplicateRecordFieldFailure() {
+  void testDuplicateStructFieldFailure() {
     var code =
         """
         module test;
-        type record R {
+        type struct R {
           var x int;
           const x int;
         }
@@ -351,7 +351,7 @@ class PreprocessVisitorTest extends AbstractSemanticsTest {
     var module = parseCode(code);
     module.accept(new PreprocessVisitor(errorConsumer));
     assertEquals(
-        List.of("Duplicate record field 'x'. First defined at 3,7."), errorConsumer.errors());
+        List.of("Duplicate struct field 'x'. First defined at 3,7."), errorConsumer.errors());
   }
 
   @Test

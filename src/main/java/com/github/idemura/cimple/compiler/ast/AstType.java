@@ -9,7 +9,7 @@ public abstract sealed class AstType extends AstNode
         AstBuiltinType,
         AstStringType,
         AstFunctionType,
-        AstRecordType,
+        AstStructType,
         AstUnionType,
         AstEnumType {
   protected AstType() {}

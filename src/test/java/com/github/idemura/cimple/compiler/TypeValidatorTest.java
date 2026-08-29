@@ -11,7 +11,7 @@ class TypeValidatorTest extends AbstractSemanticsTest {
     var code =
         """
         module test;
-        type record Node {
+        type struct Node {
           var next Node*;
           var children Node[];
         }
@@ -27,11 +27,11 @@ class TypeValidatorTest extends AbstractSemanticsTest {
   }
 
   @Test
-  void testRecursiveRecordType() {
+  void testRecursiveStructType() {
     var code =
         """
         module test;
-        type record Node {
+        type struct Node {
           var next Node;
         }
         """;
@@ -72,10 +72,10 @@ class TypeValidatorTest extends AbstractSemanticsTest {
     var code =
         """
         module test;
-        type record A {
+        type struct A {
           var b B;
         }
-        type record B {
+        type struct B {
           var a A;
         }
         """;

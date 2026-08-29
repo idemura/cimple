@@ -25,11 +25,11 @@ class CCodeGeneratorTest {
   }
 
   @Test
-  void testGenerateRecordType() {
+  void testGenerateStructType() {
     var code =
         """
         module test;
-        type record Point {
+        type struct Point {
           var x int;
           var y int;
           const name string;
@@ -51,11 +51,11 @@ class CCodeGeneratorTest {
   }
 
   @Test
-  void testGenerateRecordTypeWithoutModuleNameMangle() {
+  void testGenerateStructTypeWithoutModuleNameMangle() {
     var code =
         """
         module test;
-        type record Point {
+        type struct Point {
           var x int;
         }
         """;
@@ -74,11 +74,11 @@ class CCodeGeneratorTest {
   }
 
   @Test
-  void testGenerateRecordTypeWithSelfPointer() {
+  void testGenerateStructTypeWithSelfPointer() {
     var code =
         """
         module test;
-        type record Node {
+        type struct Node {
           var next Node*;
         }
         """;

@@ -4,7 +4,7 @@ import com.github.idemura.cimple.compiler.ast.AstArrayType;
 import com.github.idemura.cimple.compiler.ast.AstFunctionType;
 import com.github.idemura.cimple.compiler.ast.AstModule;
 import com.github.idemura.cimple.compiler.ast.AstPointerType;
-import com.github.idemura.cimple.compiler.ast.AstRecordType;
+import com.github.idemura.cimple.compiler.ast.AstStructType;
 import com.github.idemura.cimple.compiler.ast.AstType;
 import com.github.idemura.cimple.compiler.ast.AstUnionType;
 import java.util.Collections;
@@ -28,16 +28,16 @@ class TypeValidator {
       return false;
     }
     return switch (type) {
-      case AstRecordType recordType -> recordContainsType(root, recordType, path);
+      case AstStructType structType -> structContainsType(root, structType, path);
       case AstUnionType unionType -> unionContainsType(root, unionType, path);
       case AstFunctionType functionType -> functionContainsType(root, functionType, path);
       default -> false;
     };
   }
 
-  private static boolean recordContainsType(
-      AstType root, AstRecordType recordType, Set<AstType> path) {
-    for (var field : recordType.fields()) {
+  private static boolean structContainsType(
+      AstType root, AstStructType structType, Set<AstType> path) {
+    for (var field : structType.fields()) {
       if (containsDirectType(root, field.type(), path)) {
         return true;
       }
@@ -81,7 +81,7 @@ class TypeValidator {
   }
 
   private static boolean isCheckedType(AstType type) {
-    return type instanceof AstRecordType
+    return type instanceof AstStructType
         || type instanceof AstUnionType
         || type instanceof AstFunctionType;
   }

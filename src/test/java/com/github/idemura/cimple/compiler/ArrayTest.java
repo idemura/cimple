@@ -70,7 +70,7 @@ class ArrayTest extends AbstractSemanticsTest {
     var code =
         """
         module test;
-        type record Point {}
+        type struct Point {}
         function f(values int[]) {
           var n = values.size();
         }
@@ -83,7 +83,7 @@ class ArrayTest extends AbstractSemanticsTest {
     assertEquals(List.of(), errorConsumer.errors());
 
     assertArraySizeCall(module.findFunction("f"), arrayType(AstBuiltinType.INT64));
-    assertArraySizeCall(module.findFunction("g"), arrayType(newRecordType("test", "Point")));
+    assertArraySizeCall(module.findFunction("g"), arrayType(newStructType("test", "Point")));
   }
 
   @Test
@@ -133,7 +133,7 @@ class ArrayTest extends AbstractSemanticsTest {
     var code =
         """
         module test;
-        type record Point {}
+        type struct Point {}
         function f(values int[]) {
           var x = values[0];
         }
@@ -146,7 +146,7 @@ class ArrayTest extends AbstractSemanticsTest {
     assertEquals(List.of(), errorConsumer.errors());
 
     assertArrayAccess(module.findFunction("f"), AstBuiltinType.INT64);
-    assertArrayAccess(module.findFunction("g"), newRecordType("test", "Point"));
+    assertArrayAccess(module.findFunction("g"), newStructType("test", "Point"));
   }
 
   @Test
@@ -154,7 +154,7 @@ class ArrayTest extends AbstractSemanticsTest {
     var code =
         """
         module test;
-        type record Point {}
+        type struct Point {}
         function f(values int[], points Point[], point Point) {
           var capacity = values.capacity();
           values.append(1);
@@ -170,7 +170,7 @@ class ArrayTest extends AbstractSemanticsTest {
     assertArrayMethodCall(
         function, 0, BuiltinFunctions.ARRAY_CAPACITY, arrayType(AstBuiltinType.INT64));
     assertArrayAppendCall(function, 1, 0, arrayType(AstBuiltinType.INT64));
-    assertArrayAppendCall(function, 2, 1, arrayType(newRecordType("test", "Point")));
+    assertArrayAppendCall(function, 2, 1, arrayType(newStructType("test", "Point")));
   }
 
   @Test

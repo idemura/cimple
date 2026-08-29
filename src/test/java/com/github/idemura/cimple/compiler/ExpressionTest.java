@@ -40,7 +40,7 @@ class ExpressionTest extends AbstractSemanticsTest {
     var code =
         """
         module test;
-        type record Duration {
+        type struct Duration {
           var seconds int;
         }
         function f(d Duration) {
@@ -143,7 +143,7 @@ class ExpressionTest extends AbstractSemanticsTest {
     var code =
         """
         module test;
-        type record Duration {
+        type struct Duration {
           var seconds int;
         }
         function f() {
@@ -157,8 +157,8 @@ class ExpressionTest extends AbstractSemanticsTest {
     sa.analyze(List.of(module));
     assertEquals(
         List.of(
-            "Field access requires a record, got 'int64'",
-            "Undefined field 'millis' in record 'test~Duration'"),
+            "Field access requires a struct, got 'int64'",
+            "Undefined field 'millis' in struct 'test~Duration'"),
         errorConsumer.errors());
   }
 }

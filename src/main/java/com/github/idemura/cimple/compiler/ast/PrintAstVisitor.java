@@ -76,8 +76,8 @@ public class PrintAstVisitor extends AstVisitor {
   }
 
   @Override
-  protected void visit(AstRecordType node) {
-    output.writeLine("TYPE RECORD %s".formatted(node.name()));
+  protected void visit(AstStructType node) {
+    output.writeLine("TYPE STRUCT %s".formatted(node.name()));
     output.indent();
     node.acceptChildren(this);
     output.unindent();

@@ -6,8 +6,8 @@ import java.util.Set;
 
 public enum Keyword {
   BOOL("bool"),
-  CHAR("char"),
   CASE("case"),
+  CHAR("char"),
   CLASS("class"),
   CONST("const"),
   DEFER("defer"),
@@ -31,9 +31,9 @@ public enum Keyword {
   MODULE("module"),
   NEW("new"),
   NULL("null"),
-  RECORD("record", false),
   RETURN("return"),
   STRING("string"),
+  STRUCT("struct", false),
   TEMPLATE("template"),
   TRUE("true"),
   TYPE("type"),

@@ -11,7 +11,7 @@ class NameResolutionTest extends AbstractSemanticsTest {
     var code =
         """
         module test;
-        type record R {}
+        type struct R {}
         var x int;
         const y int;
         function f() {}
@@ -84,8 +84,8 @@ class NameResolutionTest extends AbstractSemanticsTest {
     var code =
         """
         module test;
-        type record R {}
-        type record R {}
+        type struct R {}
+        type struct R {}
         """;
     var module = parseCode(code);
     var sa = new SemanticAnalyzer(errorConsumer);
