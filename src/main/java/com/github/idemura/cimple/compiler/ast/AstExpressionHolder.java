@@ -1,18 +1,13 @@
 package com.github.idemura.cimple.compiler.ast;
 
-import static com.google.common.base.Preconditions.checkNotNull;
-
 // Marks the ownership boundary for an expression tree. Rewrites replace the holder root, so
-// statements and declarations do not need custom code for each expression field.
+// statements and declarations do not need custom code for each expression field. Optional
+// expression slots still use a holder with a null value so the ownership boundary is explicit.
 public final class AstExpressionHolder extends AstHolder {
   private AstExpression value;
 
-  public static AstExpressionHolder of(AstExpression root) {
-    return root == null ? null : new AstExpressionHolder(root);
-  }
-
   public AstExpressionHolder(AstExpression value) {
-    this.value = checkNotNull(value);
+    this.value = value;
   }
 
   @Override
@@ -22,7 +17,9 @@ public final class AstExpressionHolder extends AstHolder {
 
   @Override
   public void acceptChildren(AstVisitor visitor) {
-    value.accept(visitor);
+    if (value != null) {
+      value.accept(visitor);
+    }
   }
 
   public AstExpression get() {
@@ -30,7 +27,7 @@ public final class AstExpressionHolder extends AstHolder {
   }
 
   public void set(AstExpression expression) {
-    this.value = checkNotNull(expression);
+    this.value = expression;
   }
 
   public AstType type() {

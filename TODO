@@ -1,4 +1,3 @@
-* AstExpressionHolder.of -> new
 * Identifier: typeName, entityName final. module only can be set if current values is null.
 * Finals: struct fields, union variants and etc. Function parameters?
 * Document mangling rules

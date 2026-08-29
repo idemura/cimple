@@ -44,7 +44,7 @@ public final class AstEnumType extends AstType {
     }
 
     public void valueExpression(AstExpression valueExpression) {
-      this.valueExpression = AstExpressionHolder.of(valueExpression);
+      this.valueExpression = new AstExpressionHolder(valueExpression);
     }
 
     public Long value() {

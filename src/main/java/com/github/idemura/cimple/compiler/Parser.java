@@ -348,7 +348,7 @@ public class Parser {
   }
 
   private AstExpressionHolder parseExpressionHolder() {
-    return AstExpressionHolder.of(parseExpression());
+    return new AstExpressionHolder(parseExpression());
   }
 
   private AstExpression parseExpression() {
