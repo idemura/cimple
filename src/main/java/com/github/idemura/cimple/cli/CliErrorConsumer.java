@@ -3,18 +3,11 @@ package com.github.idemura.cimple.cli;
 import com.github.idemura.cimple.compiler.ErrorConsumer;
 
 public class CliErrorConsumer extends ErrorConsumer {
-  private int errorCount;
-
   public CliErrorConsumer() {}
 
   @Override
-  public void outputError(String message) {
+  protected void outputError(String message) {
+    // Do not call super method, do not store error in memory.
     System.err.println(message);
-    errorCount++;
-  }
-
-  @Override
-  public int errorCount() {
-    return errorCount;
   }
 }

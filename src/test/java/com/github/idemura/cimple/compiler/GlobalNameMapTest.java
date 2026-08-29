@@ -39,7 +39,7 @@ class GlobalNameMapTest {
   @Test
   void testCollectTypes() {
     var globalNameMap = new GlobalNameMap();
-    var errorConsumer = new InMemoryErrorConsumer();
+    var errorConsumer = new ErrorConsumer();
     var type1 = newStructType("m1", "Duration");
     var type2 = newStructType("m2", "Duration");
 
@@ -59,7 +59,7 @@ class GlobalNameMapTest {
   @Test
   void testCollectTypesReportsDuplicateAndContinues() {
     var globalNameMap = new GlobalNameMap();
-    var errorConsumer = new InMemoryErrorConsumer();
+    var errorConsumer = new ErrorConsumer();
     var type1 = newStructType("m1", "Duration");
     var type2 = newStructType("m1", "Duration");
     var type3 = newStructType("m1", "Size");
@@ -82,7 +82,7 @@ class GlobalNameMapTest {
   @Test
   void testCollectFunctionsAndVariables() {
     var globalNameMap = new GlobalNameMap();
-    var errorConsumer = new InMemoryErrorConsumer();
+    var errorConsumer = new ErrorConsumer();
     var var1 = globalVariable("m1", "x");
     var var2 = globalVariable("m2", "x");
     var function1 = freeFunction("m1", "f");

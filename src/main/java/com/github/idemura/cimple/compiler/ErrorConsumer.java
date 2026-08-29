@@ -1,15 +1,16 @@
 package com.github.idemura.cimple.compiler;
 
+import java.util.ArrayList;
 import java.util.List;
 
-public abstract class ErrorConsumer {
+public class ErrorConsumer {
   public static final String FATAL = "Fatal";
   public static final String ERROR = "Error";
 
   public enum Mode {
-    PRINT_LOCATION(0x1L),
-    PRINT_LEVEL(0x2L),
-    THROW_ON_ERROR(0x4L);
+    PRINT_LOCATION(0x1),
+    PRINT_LEVEL(0x2),
+    THROW_ON_ERROR(0x4);
 
     private final long bit;
 
@@ -18,12 +19,15 @@ public abstract class ErrorConsumer {
     }
   }
 
-  protected long mode;
-  protected int errorCount;
+  private final List<String> errors = new ArrayList<>();
+  private long mode;
+  private int errorCount;
 
-  protected ErrorConsumer() {}
+  public ErrorConsumer() {}
 
-  protected abstract void outputError(String message);
+  protected void outputError(String message) {
+    errors.add(message);
+  }
 
   public void enable(Mode mode) {
     this.mode |= mode.bit;
@@ -38,51 +42,49 @@ public abstract class ErrorConsumer {
   }
 
   public void error(String pattern, Object... args) {
-    processAndOutputError(formatError(ERROR, null, pattern, args));
+    errorAt(null, pattern, args);
   }
 
   public void errorAt(Location location, String pattern, Object... args) {
-    processAndOutputError(formatError(ERROR, location, pattern, args));
+    processError(formatError(ERROR, location, pattern, args));
   }
 
   public CompilerException fatal(String pattern, Object... args) {
-    var message = formatError(FATAL, null, pattern, args);
-    processAndOutputError(message);
-    return new CompilerException(message);
+    return fatalAt(null, pattern, args);
   }
 
   public CompilerException fatalAt(Location location, String pattern, Object... args) {
     var message = formatError(FATAL, location, pattern, args);
-    processAndOutputError(message);
+    processError(message);
     return new CompilerException(message);
   }
 
-  protected String formatError(String level, Location location, String pattern, Object... args) {
+  public String formatError(String level, Location location, String pattern, Object... args) {
     var sb = new StringBuilder();
-    if (checkMode(Mode.PRINT_LEVEL)) {
+    if (modeIs(Mode.PRINT_LEVEL)) {
       sb.append(level).append(": ");
     }
-    if (location != null && checkMode(Mode.PRINT_LOCATION)) {
+    if (modeIs(Mode.PRINT_LOCATION) && location != null) {
       sb.append(location).append(": ");
     }
     sb.append(pattern.formatted(args));
     return sb.toString();
   }
 
-  protected boolean checkMode(Mode mode) {
+  private boolean modeIs(Mode mode) {
     return (this.mode & mode.bit) != 0;
   }
 
-  private void processAndOutputError(String message) {
+  private void processError(String message) {
     errorCount++;
-    if (checkMode(Mode.THROW_ON_ERROR)) {
+    if (modeIs(Mode.THROW_ON_ERROR)) {
       throw new CompilerException(message);
+    } else {
+      outputError(message);
     }
-    outputError(message);
   }
 
-  // Returns collected diagnostics when the implementation stores them in memory.
   public List<String> errors() {
-    throw new UnsupportedOperationException();
+    return errors;
   }
 }

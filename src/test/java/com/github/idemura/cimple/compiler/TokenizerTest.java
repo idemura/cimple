@@ -18,7 +18,7 @@ class TokenizerTest {
           var y = null;
         }
         """;
-    var errorConsumer = new InMemoryErrorConsumer();
+    var errorConsumer = new ErrorConsumer();
     var tokenizer = new Tokenizer(errorConsumer);
     tokenizer.split(code, null);
     assertEquals(
@@ -57,7 +57,7 @@ class TokenizerTest {
         a /= b;
         a %= b;
         """;
-    var errorConsumer = new InMemoryErrorConsumer();
+    var errorConsumer = new ErrorConsumer();
     var tokenizer = new Tokenizer(errorConsumer);
     tokenizer.split(code, null);
     assertEquals(
@@ -96,7 +96,7 @@ class TokenizerTest {
         a == b;
         a != b;
         """;
-    var errorConsumer = new InMemoryErrorConsumer();
+    var errorConsumer = new ErrorConsumer();
     var tokenizer = new Tokenizer(errorConsumer);
     tokenizer.split(code, null);
     assertEquals(

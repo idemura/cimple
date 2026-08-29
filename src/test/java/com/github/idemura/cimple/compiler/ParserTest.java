@@ -33,7 +33,7 @@ import org.junit.jupiter.api.Test;
 
 class ParserTest {
   private static ErrorConsumer makeErrorConsumer() {
-    var errorConsumer = new InMemoryErrorConsumer();
+    var errorConsumer = new ErrorConsumer();
     errorConsumer.enable(ErrorConsumer.Mode.THROW_ON_ERROR);
     return errorConsumer;
   }

@@ -4,13 +4,13 @@ import static org.junit.jupiter.api.Assertions.*;
 
 import com.github.idemura.cimple.compiler.Compiler;
 import com.github.idemura.cimple.compiler.CompilerParams;
-import com.github.idemura.cimple.compiler.InMemoryErrorConsumer;
+import com.github.idemura.cimple.compiler.ErrorConsumer;
 import com.github.idemura.cimple.compiler.SourceCode;
 import java.util.List;
 import org.junit.jupiter.api.Test;
 
 class CCodeGeneratorTest {
-  private final InMemoryErrorConsumer errorConsumer = new InMemoryErrorConsumer();
+  private final ErrorConsumer errorConsumer = new ErrorConsumer();
   private final CCodeGeneratorParams.Builder codegenParamsBuilder =
       CCodeGeneratorParams.builder().outputPreamble(false);
 
