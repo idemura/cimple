@@ -4,6 +4,7 @@ import static io.lang.cimple.compiler.Parser.parseCode;
 import static io.lang.cimple.compiler.ast.AstUtils.*;
 import static org.junit.jupiter.api.Assertions.*;
 
+import com.google.common.collect.ImmutableList;
 import io.lang.cimple.compiler.ast.AstArrayAccess;
 import io.lang.cimple.compiler.ast.AstArrayType;
 import io.lang.cimple.compiler.ast.AstAssign;
@@ -27,7 +28,6 @@ import io.lang.cimple.compiler.ast.AstReturn;
 import io.lang.cimple.compiler.ast.AstStructType;
 import io.lang.cimple.compiler.ast.AstUnionType;
 import io.lang.cimple.compiler.ast.AstVariable;
-import com.google.common.collect.ImmutableList;
 import java.util.List;
 import org.junit.jupiter.api.Test;
 
@@ -46,6 +46,66 @@ class ParserTest {
     } else {
       var expression = (AstNumberLiteral) variant.valueExpression();
       assertEquals(valueExpression, expression.value());
+    }
+  }
+
+  private static void assertVariableSyntax(
+      AstVariable variable, String name, String typeName, Long value) {
+    assertEquals(Identifier.ofEntity(name), variable.name());
+    if (typeName == null) {
+      assertNull(variable.type());
+    } else {
+      assertEquals(newTypeRef(typeName), variable.type());
+    }
+    if (value == null) {
+      assertNull(variable.expression());
+    } else {
+      assertEquals(AstNumberLiteral.of(value), variable.expression().get());
+    }
+    assertTrue(variable.getBit(AstVariable.MUTABLE));
+  }
+
+  @Test
+  void testVariableSyntax() {
+    var code =
+        """
+        module test;
+        var typedAndInitialized int = 1;
+        var typed int;
+        var initialized = 2;
+        var bare;
+        function f() {
+          var localTypedAndInitialized int = 3;
+          var localTyped int;
+          var localInitialized = 4;
+          var localBare;
+        }
+        """;
+    var module = parseCode(code, makeErrorConsumer());
+    assertVariableSyntax(
+        module.findVariable("typedAndInitialized"), "typedAndInitialized", "int", 1L);
+    assertVariableSyntax(module.findVariable("typed"), "typed", "int", null);
+    assertVariableSyntax(module.findVariable("initialized"), "initialized", null, 2L);
+    assertVariableSyntax(module.findVariable("bare"), "bare", null, null);
+
+    var statements = module.findFunction("f").block().statements();
+    assertEquals(4, statements.size());
+    int i = 0;
+    {
+      var variable = ((AstLocal) statements.get(i++)).variable();
+      assertVariableSyntax(variable, "localTypedAndInitialized", "int", 3L);
+    }
+    {
+      var variable = ((AstLocal) statements.get(i++)).variable();
+      assertVariableSyntax(variable, "localTyped", "int", null);
+    }
+    {
+      var variable = ((AstLocal) statements.get(i++)).variable();
+      assertVariableSyntax(variable, "localInitialized", null, 4L);
+    }
+    {
+      var variable = ((AstLocal) statements.get(i++)).variable();
+      assertVariableSyntax(variable, "localBare", null, null);
     }
   }
 
