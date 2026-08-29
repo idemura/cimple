@@ -20,9 +20,6 @@ import java.util.List;
 import org.junit.jupiter.api.Test;
 
 class PreprocessVisitorTest extends AbstractSemanticsTest {
-  private final ReservedWords reservedWords =
-      new ReservedWords(Keyword.reservedNames(), Keyword.reservedTypeNames());
-
   @Test
   void testRewriteTrueFalseNullLiterals() {
     var code =
@@ -39,7 +36,7 @@ class PreprocessVisitorTest extends AbstractSemanticsTest {
         }
         """;
     var module = parseCode(code);
-    module.accept(new PreprocessVisitor(reservedWords, errorConsumer));
+    module.accept(new PreprocessVisitor(errorConsumer));
     var statements = module.findFunction("f").block().statements();
     int i = 0;
     assertEquals(boolLiteral(true), ((AstIf) statements.get(i++)).conditions().get(0).get());
@@ -72,7 +69,7 @@ class PreprocessVisitorTest extends AbstractSemanticsTest {
         }
         """;
     var module = parseCode(code);
-    module.accept(new PreprocessVisitor(reservedWords, errorConsumer));
+    module.accept(new PreprocessVisitor(errorConsumer));
     assertEquals(List.of(), errorConsumer.errors());
   }
 
@@ -88,7 +85,7 @@ class PreprocessVisitorTest extends AbstractSemanticsTest {
         }
         """;
     var module = parseCode(code);
-    module.accept(new PreprocessVisitor(reservedWords, errorConsumer));
+    module.accept(new PreprocessVisitor(errorConsumer));
     assertEquals(
         List.of(
             "Assignment is only allowed at the root of an expression",
@@ -108,7 +105,7 @@ class PreprocessVisitorTest extends AbstractSemanticsTest {
         }
         """;
     var module = parseCode(code);
-    module.accept(new PreprocessVisitor(reservedWords, errorConsumer));
+    module.accept(new PreprocessVisitor(errorConsumer));
     assertEquals(List.of(), errorConsumer.errors());
 
     var statements = module.findFunction("f").block().statements();
@@ -135,7 +132,7 @@ class PreprocessVisitorTest extends AbstractSemanticsTest {
         }
         """;
     var module = parseCode(code);
-    module.accept(new PreprocessVisitor(reservedWords, errorConsumer));
+    module.accept(new PreprocessVisitor(errorConsumer));
     assertEquals(
         List.of(
             "Assignment is only allowed at the root of an expression",
@@ -156,7 +153,7 @@ class PreprocessVisitorTest extends AbstractSemanticsTest {
         type union int32 {}
         """;
     var module = parseCode(code);
-    module.accept(new PreprocessVisitor(reservedWords, errorConsumer));
+    module.accept(new PreprocessVisitor(errorConsumer));
     assertEquals(
         ImmutableList.of(
             "Reserved word 'if' cannot be used as name",
@@ -186,7 +183,7 @@ class PreprocessVisitorTest extends AbstractSemanticsTest {
         }
         """;
     var module = parseCode(code);
-    module.accept(new PreprocessVisitor(reservedWords, errorConsumer));
+    module.accept(new PreprocessVisitor(errorConsumer));
     assertEquals(
         List.of(
             "Reserved word 'union' cannot be used as type name",
@@ -214,7 +211,7 @@ class PreprocessVisitorTest extends AbstractSemanticsTest {
         type function bad__function_type();
         """;
     var module = parseCode(code);
-    module.accept(new PreprocessVisitor(reservedWords, errorConsumer));
+    module.accept(new PreprocessVisitor(errorConsumer));
     assertEquals(
         List.of(
             "Identifier 'bad__module' cannot contain '__'",
@@ -240,7 +237,7 @@ class PreprocessVisitorTest extends AbstractSemanticsTest {
         function f(x int) {}
         """;
     var module = parseCode(code);
-    module.accept(new PreprocessVisitor(reservedWords, errorConsumer));
+    module.accept(new PreprocessVisitor(errorConsumer));
     assertEquals(List.of(), errorConsumer.errors());
     {
       var header = module.findMethod("Duration", "toMillis").header();
@@ -271,7 +268,7 @@ class PreprocessVisitorTest extends AbstractSemanticsTest {
         }
         """;
     var module = parseCode(code);
-    module.accept(new PreprocessVisitor(reservedWords, errorConsumer));
+    module.accept(new PreprocessVisitor(errorConsumer));
     assertEquals(List.of(), errorConsumer.errors());
     assertEquals(newBuiltinTypeRef("int64"), module.findVariable("g").type());
     assertEquals(
@@ -290,7 +287,7 @@ class PreprocessVisitorTest extends AbstractSemanticsTest {
         }
         """;
     var module = parseCode(code);
-    module.accept(new PreprocessVisitor(reservedWords, errorConsumer));
+    module.accept(new PreprocessVisitor(errorConsumer));
     assertEquals(List.of(), errorConsumer.errors());
 
     var local = (AstLocal) module.findFunction("f").block().statements().get(0);
@@ -309,7 +306,7 @@ class PreprocessVisitorTest extends AbstractSemanticsTest {
         function f(x) {}
         """;
     var module = parseCode(code);
-    module.accept(new PreprocessVisitor(reservedWords, errorConsumer));
+    module.accept(new PreprocessVisitor(errorConsumer));
     assertEquals(
         List.of(
             "Method 'Duration.a': missing the object parameter",
@@ -332,7 +329,7 @@ class PreprocessVisitorTest extends AbstractSemanticsTest {
         }
         """;
     var module = parseCode(code);
-    module.accept(new PreprocessVisitor(reservedWords, errorConsumer));
+    module.accept(new PreprocessVisitor(errorConsumer));
     assertEquals(
         List.of(
             "Variable 'x' must have a type or an initializer",
@@ -352,7 +349,7 @@ class PreprocessVisitorTest extends AbstractSemanticsTest {
         }
         """;
     var module = parseCode(code);
-    module.accept(new PreprocessVisitor(reservedWords, errorConsumer));
+    module.accept(new PreprocessVisitor(errorConsumer));
     assertEquals(
         List.of("Duplicate record field 'x'. First defined at 3,7."), errorConsumer.errors());
   }
@@ -368,7 +365,7 @@ class PreprocessVisitorTest extends AbstractSemanticsTest {
         }
         """;
     var module = parseCode(code);
-    module.accept(new PreprocessVisitor(reservedWords, errorConsumer));
+    module.accept(new PreprocessVisitor(errorConsumer));
     assertEquals(
         List.of("Duplicate union variant 'A'. First defined at 3,3."), errorConsumer.errors());
   }

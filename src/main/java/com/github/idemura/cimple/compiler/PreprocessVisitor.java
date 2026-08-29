@@ -41,13 +41,11 @@ import java.util.HashMap;
 //  - Rejects nested assignments
 //  - Types literal nodes
 class PreprocessVisitor extends AstExpressionRewriteVisitor {
-  private final ReservedWords reservedWords;
   private final ErrorConsumer errorConsumer;
   private final NormalizeTypeNameVisitor normalizeTypeNameVisitor = new NormalizeTypeNameVisitor();
   private AstModule module;
 
-  PreprocessVisitor(ReservedWords reservedWords, ErrorConsumer errorConsumer) {
-    this.reservedWords = reservedWords;
+  PreprocessVisitor(ErrorConsumer errorConsumer) {
     this.errorConsumer = errorConsumer;
   }
 
@@ -319,7 +317,7 @@ class PreprocessVisitor extends AstExpressionRewriteVisitor {
         checkUnderscoreRules(type, location);
         var method = ident.entityName() != null;
         // Allow methods for builtin types.
-        if (reservedWords.isReservedTypeName(type) && !method) {
+        if (Keyword.isReservedTypeName(type) && !method) {
           errorConsumer.errorAt(location, "Reserved word '%s' cannot be used as type name", ident);
         }
       }
@@ -329,7 +327,7 @@ class PreprocessVisitor extends AstExpressionRewriteVisitor {
 
   private void checkTagName(String tag, Location location) {
     checkUnderscoreRules(tag, location);
-    if (reservedWords.isReservedTypeName(tag)) {
+    if (Keyword.isReservedTypeName(tag)) {
       errorConsumer.errorAt(location, "Reserved word '%s' cannot be used as tag", tag);
     }
   }
@@ -339,7 +337,7 @@ class PreprocessVisitor extends AstExpressionRewriteVisitor {
       return;
     }
     checkUnderscoreRules(name, location);
-    if (reservedWords.isReservedName(name)) {
+    if (Keyword.isReservedName(name)) {
       errorConsumer.errorAt(location, "Reserved word '%s' cannot be used as name", name);
     }
   }

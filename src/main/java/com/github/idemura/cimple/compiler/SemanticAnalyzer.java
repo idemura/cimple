@@ -12,8 +12,6 @@ import java.util.List;
 public class SemanticAnalyzer {
   private final ErrorConsumer errorConsumer;
   private final GlobalNameMap globalNameMap = new GlobalNameMap();
-  private final ReservedWords reservedWords =
-      new ReservedWords(Keyword.reservedNames(), Keyword.reservedTypeNames());
 
   public SemanticAnalyzer(ErrorConsumer errorConsumer) {
     this.errorConsumer = errorConsumer;
@@ -21,7 +19,7 @@ public class SemanticAnalyzer {
 
   public boolean analyze(List<AstModule> modules) {
     for (var module : modules) {
-      module.accept(new PreprocessVisitor(reservedWords, errorConsumer));
+      module.accept(new PreprocessVisitor(errorConsumer));
     }
     if (hasErrors()) {
       return false;

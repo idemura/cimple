@@ -70,7 +70,7 @@ public class Parser {
     // TODO: Parse imports when the module system is implemented.
 
     while (!tokenizer.done()) {
-      switch (keyword(tokenizer.current())) {
+      switch (currentKeyword()) {
         case FUNCTION:
           module.definitions().add(parseFunction());
           break;
@@ -78,10 +78,8 @@ public class Parser {
           module.definitions().add(parseType());
           break;
         case VAR:
-          module.definitions().add(parseVariable(true));
-          break;
         case CONST:
-          module.definitions().add(parseVariable(false));
+          module.definitions().add(parseVariable());
           break;
         default:
           throw fatalAtCurrentLocation("Invalid module definition");
@@ -92,36 +90,31 @@ public class Parser {
 
   private AstType parseType() {
     takeKeyword(TYPE);
-    if (currentIdentifierValueEquals(ContextKeywords.RECORD)) {
+    if (isKeyword(RECORD)) {
       return parseTypeRecord();
     }
-    if (currentIdentifierValueEquals(ContextKeywords.UNION)) {
+    if (isKeyword(UNION)) {
       return parseTypeUnion();
     }
-    if (currentIdentifierValueEquals(ContextKeywords.ENUM)) {
+    if (isKeyword(ENUM)) {
       return parseTypeEnum();
     }
-    if (keywordOrNull(tokenizer.current()) == FUNCTION) {
+    if (isKeyword(FUNCTION)) {
       return parseTypeFunction();
     }
     throw fatalAtCurrentLocation(
-        "Invalid type definition: one of %s expected",
-        List.of(
-            ContextKeywords.RECORD,
-            ContextKeywords.UNION,
-            ContextKeywords.ENUM,
-            FUNCTION.toString()));
+        "Invalid type definition: one of %s expected", List.of(RECORD, UNION, ENUM, FUNCTION));
   }
 
   private AstRecordType parseTypeRecord() {
     var type = new AstRecordType();
-    takeContextualKeyword(ContextKeywords.RECORD);
+    takeKeyword(RECORD);
     type.location(tokenizer.currentLocation());
     type.name(Identifier.ofType(take(IDENTIFIER).value()));
     take(LCURLY);
     var fields = new ImmutableList.Builder<AstVariable>();
     while (!tokenizer.takeIf(RCURLY)) {
-      fields.add(parseVariable(keyword(tokenizer.current()) != CONST));
+      fields.add(parseVariable());
     }
     type.fields(fields.build());
     return type;
@@ -129,7 +122,7 @@ public class Parser {
 
   private AstUnionType parseTypeUnion() {
     var type = new AstUnionType();
-    takeContextualKeyword(ContextKeywords.UNION);
+    takeKeyword(UNION);
     type.location(tokenizer.currentLocation());
     type.name(Identifier.ofType(take(IDENTIFIER).value()));
     take(LCURLY);
@@ -155,7 +148,7 @@ public class Parser {
 
   private AstEnumType parseTypeEnum() {
     var type = new AstEnumType();
-    takeContextualKeyword(ContextKeywords.ENUM);
+    takeKeyword(ENUM);
     type.location(tokenizer.currentLocation());
     type.name(Identifier.ofType(take(IDENTIFIER).value()));
     if (tokenizer.takeIf(LPAREN)) {
@@ -215,7 +208,8 @@ public class Parser {
     return parseBlock();
   }
 
-  private AstVariable parseVariable(boolean mutable) {
+  private AstVariable parseVariable() {
+    var mutable = isKeyword(VAR);
     takeKeyword(mutable ? VAR : CONST);
     var variable = new AstVariable();
     if (mutable) {
@@ -233,9 +227,9 @@ public class Parser {
     return variable;
   }
 
-  private AstLocal parseVariableStatement(boolean mutable) {
+  private AstLocal parseVariableStatement() {
     var stmt = new AstLocal();
-    stmt.variable(parseVariable(mutable));
+    stmt.variable(parseVariable());
     return stmt;
   }
 
@@ -249,13 +243,12 @@ public class Parser {
   }
 
   private AstStatement parseStatement() {
-    var keyword = statementKeywordOrNull(tokenizer.current());
+    var keyword = Keyword.fromString(tokenizer.current().value());
     if (keyword == null) {
       return parseExpressionStatement();
     }
     return switch (keyword) {
-      case VAR -> parseVariableStatement(true);
-      case CONST -> parseVariableStatement(false);
+      case VAR, CONST -> parseVariableStatement();
       case RETURN -> parseReturn();
       case DELETE -> parseDelete();
       case IF -> parseIf();
@@ -291,8 +284,10 @@ public class Parser {
     var thenBlocks = new ImmutableList.Builder<AstBlock>();
     conditions.add(parseExpressionHolder());
     thenBlocks.add(parseBlock());
-    while (takeKeywordIf(ELSE)) {
-      if (takeKeywordIf(IF)) {
+    while (isKeyword(ELSE)) {
+      tokenizer.step();
+      if (isKeyword(IF)) {
+        tokenizer.step();
         conditions.add(parseExpressionHolder());
         thenBlocks.add(parseBlock());
       } else {
@@ -308,8 +303,8 @@ public class Parser {
   private AstStatement parseFor() {
     var stmt = new AstFor();
     stmt.location(takeKeyword(FOR));
-    if (keywordOrNull(tokenizer.current()) == VAR) {
-      stmt.init(parseVariableStatement(true));
+    if (currentKeyword() == VAR) {
+      stmt.init(parseVariableStatement());
     }
     // The loop condition is required, even for an infinite loop such as `for true ...`.
     stmt.condition(parseExpressionHolder());
@@ -487,10 +482,7 @@ public class Parser {
   }
 
   private AstExpression parseFieldArrayCallChain() {
-    var expr =
-        tokenizer.current().is(IDENTIFIER) && keywordOrNull(tokenizer.current()) == NEW
-            ? parseNew()
-            : parsePrimary();
+    var expr = isKeyword(NEW) ? parseNew() : parsePrimary();
     while (true) {
       var current = tokenizer.current();
       if (tokenizer.takeIf(PERIOD)) {
@@ -669,6 +661,14 @@ public class Parser {
     return ref;
   }
 
+  private Identifier parseQualifiedName(Token first) {
+    if (tokenizer.takeIf(TILDE)) {
+      return Identifier.ofEntity(take(IDENTIFIER).value()).withModule(first.value());
+    } else {
+      return Identifier.ofEntity(first.value());
+    }
+  }
+
   private CompilerException fatalAtCurrentLocation(String pattern, Object... args) {
     return errorConsumer.fatalAt(tokenizer.currentLocation(), pattern, args);
   }
@@ -681,72 +681,25 @@ public class Parser {
     return tokenizer.take();
   }
 
-  private boolean currentIdentifierValueEquals(String value) {
-    var current = tokenizer.current();
-    return current.is(IDENTIFIER) && value.equals(current.value());
-  }
-
-  private Identifier parseQualifiedName(Token first) {
-    if (tokenizer.takeIf(TILDE)) {
-      return Identifier.ofEntity(take(IDENTIFIER).value()).withModule(first.value());
-    } else {
-      return Identifier.ofEntity(first.value());
-    }
-  }
-
-  private Location takeContextualKeyword(String value) {
-    var current = take(IDENTIFIER);
-    if (!value.equals(current.value())) {
-      throw errorConsumer.fatalAt(
-          current.location(), "Expected keyword '%s', found '%s'", value, current);
-    }
-    return current.location();
-  }
-
   private Location takeKeyword(Keyword keyword) {
-    var current = tokenizer.current();
-    var kw = keyword(current);
-    if (kw != keyword) {
-      throw fatalAtCurrentLocation("Expected keyword '%s', found '%s'", keyword, kw);
+    var currentKeyword = currentKeyword();
+    if (currentKeyword != keyword) {
+      throw fatalAtCurrentLocation("Expected keyword '%s', found '%s'", keyword, currentKeyword);
     }
     return tokenizer.take().location();
   }
 
-  private boolean takeKeywordIf(Keyword keyword) {
-    var current = tokenizer.current();
-    if (keyword != keywordOrNull(current)) {
-      return false;
-    }
-    tokenizer.step();
-    return true;
+  private boolean isKeyword(Keyword keyword) {
+    var token = tokenizer.current();
+    return keyword == Keyword.fromString(token.value());
   }
 
-  private static Keyword keywordOrNull(Token token) {
-    if (!token.is(IDENTIFIER)) {
-      return null;
-    }
-    return Keyword.find(token.value());
-  }
-
-  private static Keyword statementKeywordOrNull(Token token) {
-    var keyword = keywordOrNull(token);
+  private Keyword currentKeyword() {
+    var token = tokenizer.current();
+    var keyword = Keyword.fromString(token.value());
     if (keyword == null) {
-      return null;
-    }
-    return switch (keyword) {
-      case VAR, CONST, RETURN, DELETE, IF, FOR, DEFER, MATCH, GOTO -> keyword;
-      default -> null;
-    };
-  }
-
-  private Keyword keyword(Token token) {
-    if (!token.is(IDENTIFIER)) {
       throw errorConsumer.fatalAt(token.location(), "Expected keyword, found '%s'", token.type());
     }
-    var kw = Keyword.find(token.value());
-    if (kw == null) {
-      throw errorConsumer.fatalAt(token.location(), "Expected keyword, found '%s'", token.type());
-    }
-    return kw;
+    return keyword;
   }
 }

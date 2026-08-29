@@ -5,37 +5,68 @@ import com.google.common.collect.ImmutableSet;
 import java.util.Set;
 
 public enum Keyword {
+  BOOL("bool"),
+  CHAR("char"),
   CASE("case"),
   CLASS("class"),
   CONST("const"),
   DEFER("defer"),
   DELETE("delete"),
   ELSE("else"),
+  ENUM("enum", false),
+  FALSE("false"),
+  FLOAT32("float32"),
+  FLOAT64("float64"),
   FOR("for"),
   FUNCTION("function"),
   GOTO("goto"),
   IF("if"),
   IMPLEMENT("implement"),
   IMPORT("import"),
+  INT("int"),
+  INT32("int32"),
+  INT64("int64"),
   INTERFACE("interface"),
   MATCH("match"),
   MODULE("module"),
   NEW("new"),
+  NULL("null"),
+  RECORD("record", false),
   RETURN("return"),
+  STRING("string"),
   TEMPLATE("template"),
+  TRUE("true"),
   TYPE("type"),
-  VAR("var");
-
-  private static final ImmutableMap<String, Keyword> SYMBOL_NAME_MAP = createSymbolNameMap();
+  UNION("union", false),
+  VAR("var"),
+  VOID("void");
 
   private final String symbolName;
+  // There are global and context keywords.
+  private final boolean global;
 
   Keyword(String symbolName) {
-    this.symbolName = symbolName;
+    this(symbolName, true);
   }
 
-  public static Keyword find(String ident) {
-    return SYMBOL_NAME_MAP.get(ident);
+  Keyword(String symbolName, boolean global) {
+    this.symbolName = symbolName;
+    this.global = global;
+  }
+
+  private static final ImmutableMap<String, Keyword> ALL;
+
+  static {
+    var builder = new ImmutableMap.Builder<String, Keyword>();
+    for (var keyword : values()) {
+      builder.put(keyword.symbolName, keyword);
+    }
+    ALL = builder.build();
+  }
+
+  /// Returns null if not a keyword.
+  public static Keyword fromString(String ident) {
+    return ALL.get(ident);
   }
 
   @Override
@@ -43,54 +74,23 @@ public enum Keyword {
     return symbolName;
   }
 
-  public static ImmutableMap<String, Keyword> createSymbolNameMap() {
-    var builder = new ImmutableMap.Builder<String, Keyword>();
-    for (var keyword : values()) {
-      builder.put(keyword.symbolName, keyword);
-    }
-    return builder.build();
-  }
+  private static final Set<String> RESERVED_NAMES;
 
-  public static Set<String> reservedNames() {
+  static {
     var builder = new ImmutableSet.Builder<String>();
     for (var keyword : values()) {
-      builder.add(keyword.symbolName);
+      if (keyword.global) {
+        builder.add(keyword.symbolName);
+      }
     }
-    return builder
-        .add("true")
-        .add("false")
-        .add("null")
-        .add("bool")
-        .add("char")
-        .add("float32")
-        .add("float64")
-        .add("int")
-        .add("int32")
-        .add("int64")
-        .add("string")
-        .add("void")
-        .build();
+    RESERVED_NAMES = builder.build();
   }
 
-  // Builtin types that we allow to define methods for.
-  public static Set<String> reservedTypeNames() {
-    var builder = new ImmutableSet.Builder<String>();
-    for (var keyword : values()) {
-      builder.add(keyword.symbolName);
-    }
-    return builder
-        .add("bool")
-        .add("char")
-        .add("float32")
-        .add("float64")
-        .add("int")
-        .add("int32")
-        .add("int64")
-        .add("string")
-        .add("void")
-        .add(ContextKeywords.RECORD)
-        .add(ContextKeywords.ENUM)
-        .add(ContextKeywords.UNION)
-        .build();
+  public static boolean isReservedName(String name) {
+    return RESERVED_NAMES.contains(name);
+  }
+
+  public static boolean isReservedTypeName(String name) {
+    return ALL.containsKey(name);
   }
 }
