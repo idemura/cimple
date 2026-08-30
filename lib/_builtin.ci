@@ -5,5 +5,5 @@ function bitor(a int, b int) int;
 function bitxor(a int, b int) int;
 function bitneg(a int) int;
 
-function int64.print(n);
-function string.print(s);
+function print(n int);
+function print(s string);
