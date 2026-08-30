@@ -27,8 +27,7 @@ class CallResolutionTest extends AbstractSemanticsTest {
     assertEquals(AstBuiltinType.VOID, header.resultType());
     var globalNameMap = semanticAnalyzer.globalNameMap();
     assertSame(
-        module.findFunction("f"),
-        globalNameMap.lookupEntity(newEntityRef("test", "f").name()));
+        module.findFunction("f"), globalNameMap.lookupEntity(newEntityRef("test", "f").name()));
   }
 
   @Test

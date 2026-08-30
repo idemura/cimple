@@ -27,7 +27,6 @@ import io.lang.cimple.compiler.ast.AstNumberLiteral;
 import io.lang.cimple.compiler.ast.AstPointerType;
 import io.lang.cimple.compiler.ast.AstStringType;
 import io.lang.cimple.compiler.ast.AstStructType;
-import io.lang.cimple.compiler.ast.AstType;
 import io.lang.cimple.compiler.ast.AstTypeHolder;
 import io.lang.cimple.compiler.ast.AstTypeRef;
 import io.lang.cimple.compiler.ast.AstUnionType;

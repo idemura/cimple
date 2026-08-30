@@ -263,9 +263,7 @@ class PreprocessVisitorTest extends AbstractSemanticsTest {
         """;
     var module = parseCode(code);
     module.accept(new PreprocessVisitor(errorConsumer));
-    assertEquals(
-        List.of("Function 'f' parameter 'x' must have a type"),
-        errorConsumer.errors());
+    assertEquals(List.of("Function 'f' parameter 'x' must have a type"), errorConsumer.errors());
   }
 
   @Test
