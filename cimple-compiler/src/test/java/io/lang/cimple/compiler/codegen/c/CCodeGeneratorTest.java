@@ -1,12 +1,13 @@
 package io.lang.cimple.compiler.codegen.c;
 
 import static org.junit.jupiter.api.Assertions.*;
+
 import io.lang.cimple.compiler.Compiler;
 import io.lang.cimple.compiler.CompilerParams;
 import io.lang.cimple.compiler.ErrorConsumer;
 import io.lang.cimple.compiler.SourceCode;
-import org.junit.jupiter.api.Test;
 import java.util.List;
+import org.junit.jupiter.api.Test;
 
 class CCodeGeneratorTest {
   private final ErrorConsumer errorConsumer = new ErrorConsumer();

@@ -1,19 +1,13 @@
 package io.lang.cimple.compiler.ast;
 
-import static com.google.common.base.Preconditions.checkNotNull;
 import static com.google.common.collect.ImmutableList.toImmutableList;
 
 import com.google.common.collect.ImmutableList;
 import java.util.List;
 
-public final class AstCall extends AstExpression {
-  private final AstFunctionRef function;
+public final class AstFunctionPointerCall extends AstExpression {
+  private AstExpression function;
   private List<AstExpression> arguments;
-
-  public AstCall(AstFunctionRef function, List<AstExpression> arguments) {
-    this.function = checkNotNull(function);
-    this.arguments = ImmutableList.copyOf(arguments);
-  }
 
   @Override
   public void accept(AstVisitor visitor) {
@@ -30,23 +24,32 @@ public final class AstCall extends AstExpression {
 
   @Override
   public AstExpression rewrite(AstExpressionRewriteVisitor visitor) {
+    function = function.rewrite(visitor);
     arguments = arguments.stream().map(a -> a.rewrite(visitor)).collect(toImmutableList());
     return visitor.rewrite(this);
   }
 
   @Override
   public AstType type() {
-    if (!function.isResolved()) {
-      return null;
+    if (function.type() instanceof AstFunctionType functionType) {
+      return functionType.header().resultType();
     }
-    return ((AstFunctionType) function.type()).header().resultType();
+    return null;
   }
 
-  public AstFunctionRef function() {
+  public AstExpression function() {
     return function;
+  }
+
+  public void function(AstExpression function) {
+    this.function = function;
   }
 
   public List<AstExpression> arguments() {
     return arguments;
+  }
+
+  public void arguments(List<AstExpression> arguments) {
+    this.arguments = ImmutableList.copyOf(arguments);
   }
 }

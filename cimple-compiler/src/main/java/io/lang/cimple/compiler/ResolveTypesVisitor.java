@@ -27,7 +27,7 @@ public class ResolveTypesVisitor extends AstVisitor {
   @Override
   protected void visit(AstModule node) {
     // TODO: Include import names.
-    typeMap = globalNameMap.collectTypes(node, errorConsumer);
+    typeMap = globalNameMap.collectTypes(node.name(), errorConsumer);
     super.visit(node);
   }
 

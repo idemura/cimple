@@ -3,26 +3,20 @@ package io.lang.cimple.compiler.ast;
 import static com.google.common.base.Preconditions.checkNotNull;
 
 import io.lang.cimple.compiler.Identifier;
+import io.lang.cimple.compiler.Location;
 import java.util.Objects;
 
-public final class AstEntityRef extends AstExpression {
-  private Identifier name;
-  private AstEntity entity;
+public abstract sealed class AstEntityRef extends AstExpression
+    permits AstFunctionRef, AstVariableRef {
+  private final Identifier name;
 
-  public AstEntityRef() {}
-
-  @Override
-  public void accept(AstVisitor visitor) {
-    visitor.visit(this);
+  protected AstEntityRef(Location location, Identifier name) {
+    this.name = checkNotNull(name);
+    location(location);
   }
 
   @Override
   public void acceptChildren(AstVisitor visitor) {}
-
-  @Override
-  public AstExpression rewrite(AstExpressionRewriteVisitor visitor) {
-    return visitor.rewrite(this);
-  }
 
   @Override
   public int hashCode() {
@@ -32,37 +26,13 @@ public final class AstEntityRef extends AstExpression {
   @Override
   public boolean equals(Object object) {
     return this == object
-        || (object instanceof AstEntityRef other && Objects.equals(name, other.name));
-  }
-
-  @Override
-  public String toString() {
-    return "ENTITY_REF(%s)".formatted(name);
-  }
-
-  @Override
-  public AstType type() {
-    return entity.type();
+        || (object != null
+            && object.getClass() == getClass()
+            && Objects.equals(name, ((AstEntityRef) object).name));
   }
 
   public Identifier name() {
     return name;
-  }
-
-  public void name(Identifier name) {
-    this.name = name;
-  }
-
-  public AstEntity entity() {
-    return entity;
-  }
-
-  public void entity(AstEntity entity) {
-    this.entity = checkNotNull(entity);
-  }
-
-  public boolean isResolved() {
-    return entity != null;
   }
 
   public boolean isBuiltin() {

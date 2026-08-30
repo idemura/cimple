@@ -1,10 +1,29 @@
 package io.lang.cimple.compiler;
 
-import static io.lang.cimple.compiler.TokenType.*;
+import static io.lang.cimple.compiler.TokenType.ASSIGN;
+import static io.lang.cimple.compiler.TokenType.BANG;
+import static io.lang.cimple.compiler.TokenType.CMP_EQ;
+import static io.lang.cimple.compiler.TokenType.CMP_GE;
+import static io.lang.cimple.compiler.TokenType.CMP_GT;
+import static io.lang.cimple.compiler.TokenType.CMP_LE;
+import static io.lang.cimple.compiler.TokenType.CMP_LT;
+import static io.lang.cimple.compiler.TokenType.CMP_NE;
+import static io.lang.cimple.compiler.TokenType.IDENTIFIER;
+import static io.lang.cimple.compiler.TokenType.LCURLY;
+import static io.lang.cimple.compiler.TokenType.LPAREN;
+import static io.lang.cimple.compiler.TokenType.MINUS_ASSIGN;
+import static io.lang.cimple.compiler.TokenType.NUMBER;
+import static io.lang.cimple.compiler.TokenType.PERCENT_ASSIGN;
+import static io.lang.cimple.compiler.TokenType.PLUS_ASSIGN;
+import static io.lang.cimple.compiler.TokenType.RCURLY;
+import static io.lang.cimple.compiler.TokenType.RPAREN;
+import static io.lang.cimple.compiler.TokenType.SEMICOLON;
+import static io.lang.cimple.compiler.TokenType.SLASH_ASSIGN;
+import static io.lang.cimple.compiler.TokenType.STAR_ASSIGN;
 import static org.junit.jupiter.api.Assertions.*;
-
 import com.google.common.collect.ImmutableList;
 import org.junit.jupiter.api.Test;
+import java.util.List;
 
 class TokenizerTest {
   @Test
@@ -86,7 +105,7 @@ class TokenizerTest {
   }
 
   @Test
-  void testComparisonTokens() {
+  void testCharTokens() {
     var code =
         """
         a < b;
@@ -94,13 +113,14 @@ class TokenizerTest {
         a > b;
         a >= b;
         a == b;
+        a!;
         a != b;
         """;
     var errorConsumer = new ErrorConsumer();
     var tokenizer = new Tokenizer(errorConsumer);
     tokenizer.split(code, null);
     assertEquals(
-        ImmutableList.of(
+        List.of(
             new Token(IDENTIFIER, "a", new Location(1, 1)),
             new Token(CMP_LT, null, new Location(1, 3)),
             new Token(IDENTIFIER, "b", new Location(1, 5)),
@@ -122,9 +142,12 @@ class TokenizerTest {
             new Token(IDENTIFIER, "b", new Location(5, 6)),
             new Token(SEMICOLON, null, new Location(5, 7)),
             new Token(IDENTIFIER, "a", new Location(6, 1)),
-            new Token(CMP_NE, null, new Location(6, 3)),
-            new Token(IDENTIFIER, "b", new Location(6, 6)),
-            new Token(SEMICOLON, null, new Location(6, 7))),
+            new Token(BANG, null, new Location(6, 2)),
+            new Token(SEMICOLON, null, new Location(6, 3)),
+            new Token(IDENTIFIER, "a", new Location(7, 1)),
+            new Token(CMP_NE, null, new Location(7, 3)),
+            new Token(IDENTIFIER, "b", new Location(7, 6)),
+            new Token(SEMICOLON, null, new Location(7, 7))),
         tokenizer.tokenList());
   }
 }

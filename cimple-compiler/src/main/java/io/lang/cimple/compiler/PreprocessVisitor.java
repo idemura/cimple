@@ -6,13 +6,14 @@ import static java.lang.Long.parseLong;
 import io.lang.cimple.compiler.ast.AstAssign;
 import io.lang.cimple.compiler.ast.AstBoolLiteral;
 import io.lang.cimple.compiler.ast.AstBuiltinType;
+import io.lang.cimple.compiler.ast.AstCall;
 import io.lang.cimple.compiler.ast.AstCompoundAssign;
-import io.lang.cimple.compiler.ast.AstEntityRef;
 import io.lang.cimple.compiler.ast.AstEnumType;
 import io.lang.cimple.compiler.ast.AstExpression;
 import io.lang.cimple.compiler.ast.AstExpressionRewriteVisitor;
 import io.lang.cimple.compiler.ast.AstFunction;
 import io.lang.cimple.compiler.ast.AstFunctionHeader;
+import io.lang.cimple.compiler.ast.AstFunctionRef;
 import io.lang.cimple.compiler.ast.AstFunctionType;
 import io.lang.cimple.compiler.ast.AstLocal;
 import io.lang.cimple.compiler.ast.AstModule;
@@ -25,6 +26,7 @@ import io.lang.cimple.compiler.ast.AstStructType;
 import io.lang.cimple.compiler.ast.AstTypeRef;
 import io.lang.cimple.compiler.ast.AstUnionType;
 import io.lang.cimple.compiler.ast.AstVariable;
+import io.lang.cimple.compiler.ast.AstVariableRef;
 import java.util.HashMap;
 
 // Runs AST checks and rewrites that do not require name resolution:
@@ -190,6 +192,11 @@ class PreprocessVisitor extends AstExpressionRewriteVisitor {
   }
 
   @Override
+  public AstExpression rewrite(AstCall node) {
+    return super.rewrite(node);
+  }
+
+  @Override
   public AstExpression rewrite(AstNullLiteral node) {
     node.type(AstBuiltinType.NULL);
     return node;
@@ -231,7 +238,7 @@ class PreprocessVisitor extends AstExpressionRewriteVisitor {
   }
 
   @Override
-  public AstExpression rewrite(AstEntityRef node) {
+  public AstExpression rewrite(AstVariableRef node) {
     var newNode =
         switch (node.name().entity()) {
           case "true" -> {
@@ -253,10 +260,13 @@ class PreprocessVisitor extends AstExpressionRewriteVisitor {
         };
     if (newNode != node) {
       newNode.location(node.location());
-    } else {
-      checkIdentifier(node.name(), node.location());
     }
     return newNode;
+  }
+
+  @Override
+  public AstExpression rewrite(AstFunctionRef node) {
+    return super.rewrite(node);
   }
 
   private void checkIdentifier(Identifier ident, Location location) {

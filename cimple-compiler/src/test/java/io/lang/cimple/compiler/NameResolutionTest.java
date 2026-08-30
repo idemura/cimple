@@ -1,9 +1,11 @@
 package io.lang.cimple.compiler;
 
+import static io.lang.cimple.compiler.ast.AstUtils.extractReturnExpression;
 import static org.junit.jupiter.api.Assertions.*;
-
-import java.util.List;
+import io.lang.cimple.compiler.ast.AstCall;
+import io.lang.cimple.compiler.ast.AstVariableRef;
 import org.junit.jupiter.api.Test;
+import java.util.List;
 
 class NameResolutionTest extends AbstractSemanticsTest {
   @Test
@@ -21,13 +23,20 @@ class NameResolutionTest extends AbstractSemanticsTest {
     var semanticAnalyzer = new SemanticAnalyzer(errorConsumer);
     semanticAnalyzer.analyze(List.of(module));
     assertEquals(List.of(), errorConsumer.errors());
-    var typeMap = semanticAnalyzer.globalNameMap().collectTypes(module, errorConsumer);
-    var localNameMap =
-        semanticAnalyzer.globalNameMap().collectFunctionsAndVariables(module, errorConsumer);
-    assertSame(module.findVariable("x"), localNameMap.lookupEntity(Identifier.ofEntity("x")));
-    assertSame(module.findVariable("y"), localNameMap.lookupEntity(Identifier.ofEntity("y")));
-    assertSame(module.findFunction("f"), localNameMap.lookupEntity(Identifier.ofEntity("f")));
-    assertSame(module.findFunction("g"), localNameMap.lookupEntity(Identifier.ofEntity("g")));
+    var typeMap = semanticAnalyzer.globalNameMap().collectTypes("test", errorConsumer);
+    var localNameMap = semanticAnalyzer.globalNameMap().collectVariables("test", errorConsumer);
+    assertSame(module.findVariable("x"), localNameMap.lookupVariable("x"));
+    assertSame(module.findVariable("y"), localNameMap.lookupVariable("y"));
+    assertSame(
+        module.findFunction("f"),
+        semanticAnalyzer
+            .globalNameMap()
+            .lookupFunction("test", module.findFunction("f").signature()));
+    assertSame(
+        module.findFunction("g"),
+        semanticAnalyzer
+            .globalNameMap()
+            .lookupFunction("test", module.findFunction("g").signature()));
     assertSame(module.findType("R"), typeMap.get("R"));
   }
 
@@ -64,19 +73,34 @@ class NameResolutionTest extends AbstractSemanticsTest {
   }
 
   @Test
-  void testFunctionVariableCollisionFailure() {
+  void testFunctionAndVariableCanHaveSameName() {
     var code =
         """
         module test;
         var f int;
-        function f() {}
+        function f() int {
+          return 1;
+        }
+        function g() int {
+          return f();
+        }
+        function h() int {
+          return f;
+        }
         """;
     var module = parseCode(code);
     var sa = new SemanticAnalyzer(errorConsumer);
     sa.analyze(List.of(module));
-    assertEquals(
-        List.of("Definition of function 'f' has a name collision with variable defined at 2,5"),
-        errorConsumer.errors());
+    assertEquals(List.of(), errorConsumer.errors());
+    {
+      var call = (AstCall) extractReturnExpression(module.findFunction("g"));
+      var function = call.function();
+      assertSame(module.findFunction("f"), function.function());
+    }
+    {
+      var variable = (AstVariableRef) extractReturnExpression(module.findFunction("h"));
+      assertSame(module.findVariable("f"), variable.variable());
+    }
   }
 
   @Test

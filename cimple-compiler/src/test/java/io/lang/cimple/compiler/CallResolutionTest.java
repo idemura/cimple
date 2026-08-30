@@ -5,9 +5,9 @@ import static org.junit.jupiter.api.Assertions.*;
 
 import io.lang.cimple.compiler.ast.AstBuiltinType;
 import io.lang.cimple.compiler.ast.AstCall;
-import io.lang.cimple.compiler.ast.AstEntityRef;
 import io.lang.cimple.compiler.ast.AstLocal;
 import io.lang.cimple.compiler.ast.AstStringType;
+import io.lang.cimple.compiler.ast.AstVariableRef;
 import java.util.List;
 import org.junit.jupiter.api.Test;
 
@@ -27,7 +27,8 @@ class CallResolutionTest extends AbstractSemanticsTest {
     assertEquals(AstBuiltinType.VOID, header.resultType());
     var globalNameMap = semanticAnalyzer.globalNameMap();
     assertSame(
-        module.findFunction("f"), globalNameMap.lookupEntity(newEntityRef("test", "f").name()));
+        module.findFunction("f"),
+        globalNameMap.lookupFunction("test", module.findFunction("f").signature()));
   }
 
   @Test
@@ -49,14 +50,14 @@ class CallResolutionTest extends AbstractSemanticsTest {
     assertEquals(List.of(), errorConsumer.errors());
     {
       var expr = extractReturnExpression(module.findFunction("f"));
-      var entityRef = (AstEntityRef) expr;
-      assertSame(module.findVariable("x"), entityRef.entity());
+      var variableRef = (AstVariableRef) expr;
+      assertSame(module.findVariable("x"), variableRef.variable());
     }
     {
       var expr = extractReturnExpression(module.findFunction("g"));
       var call = (AstCall) expr;
-      var entityRef = (AstEntityRef) call.function();
-      assertSame(module.findFunction("f"), entityRef.entity());
+      var functionRef = call.function();
+      assertSame(module.findFunction("f"), functionRef.function());
     }
   }
 
@@ -80,13 +81,13 @@ class CallResolutionTest extends AbstractSemanticsTest {
     {
       var expr = extractReturnExpression(module.findFunction("g"));
       var call = (AstCall) expr;
-      var entityRef = (AstEntityRef) call.function();
-      assertSame(module.findFunction("f"), entityRef.entity());
+      var functionRef = call.function();
+      assertSame(module.findFunction("f"), functionRef.function());
     }
     {
       var expr = extractReturnExpression(module.findFunction("f"));
-      var entityRef = (AstEntityRef) expr;
-      assertSame(module.findVariable("x"), entityRef.entity());
+      var variableRef = (AstVariableRef) expr;
+      assertSame(module.findVariable("x"), variableRef.variable());
     }
   }
 
@@ -111,9 +112,9 @@ class CallResolutionTest extends AbstractSemanticsTest {
     assertEquals(List.of(), errorConsumer.errors());
 
     var call = (AstCall) extractReturnExpression(clientModule.findFunction("f"));
-    var function = (AstEntityRef) call.function();
-    assertSame(serverModule.findFunction("make"), function.entity());
-    assertEquals(Identifier.ofEntity("make").withModule("server"), function.name());
+    var function = call.function();
+    assertSame(serverModule.findFunction("make"), function.function());
+    assertEquals(Identifier.of("make").module("server"), function.name());
     assertEquals(AstBuiltinType.INT64, call.type());
   }
 
@@ -139,8 +140,8 @@ class CallResolutionTest extends AbstractSemanticsTest {
     var local = (AstLocal) statements.get(0);
     assertEquals(AstStringType.INSTANCE, local.variable().type());
     var call = (AstCall) local.variable().expression().get();
-    var function = (AstEntityRef) call.function();
-    assertSame(external, function.entity());
+    var function = call.function();
+    assertSame(external, function.function());
   }
 
   @Test
@@ -160,10 +161,10 @@ class CallResolutionTest extends AbstractSemanticsTest {
     {
       var block = module.findFunction("g").block();
       var local = (AstLocal) block.statements().get(0);
-      assertEquals(Identifier.ofEntity("t"), local.variable().name());
+      assertEquals(Identifier.of("t"), local.variable().name());
       assertEquals(AstStringType.INSTANCE, local.variable().type());
       var call = (AstCall) local.variable().expression().get();
-      assertEquals(newEntityRef("test", "f"), call.function());
+      assertEquals(newFunctionRef("test", "f"), call.function());
       assertEquals(AstStringType.INSTANCE, call.type());
     }
   }
@@ -181,7 +182,7 @@ class CallResolutionTest extends AbstractSemanticsTest {
     var module = parseCode(code);
     var sa = new SemanticAnalyzer(errorConsumer);
     sa.analyze(List.of(module));
-    assertEquals(List.of("Function 'test~f' expects 1 arguments, got 0"), errorConsumer.errors());
+    assertEquals(List.of("Undefined function: 'f()'"), errorConsumer.errors());
   }
 
   @Test
@@ -197,8 +198,6 @@ class CallResolutionTest extends AbstractSemanticsTest {
     var module = parseCode(code);
     var sa = new SemanticAnalyzer(errorConsumer);
     sa.analyze(List.of(module));
-    assertEquals(
-        List.of("Argument 0 of function 'test~f' has type 'bool', expected 'int64'"),
-        errorConsumer.errors());
+    assertEquals(List.of("Undefined function: 'f(bool)'"), errorConsumer.errors());
   }
 }

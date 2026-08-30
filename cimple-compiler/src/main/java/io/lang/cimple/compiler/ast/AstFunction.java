@@ -1,5 +1,8 @@
 package io.lang.cimple.compiler.ast;
 
+import static com.google.common.collect.ImmutableList.toImmutableList;
+
+import io.lang.cimple.compiler.FunctionSignature;
 import io.lang.cimple.compiler.Identifier;
 import io.lang.cimple.compiler.Location;
 
@@ -20,7 +23,7 @@ public final class AstFunction extends AstEntity {
   }
 
   public void makeLambdaType() {
-    var typeName = Identifier.ofEntity("_lambda").builtin();
+    var typeName = Identifier.of("_lambda").builtin();
     var type = new AstFunctionType();
     type.name(typeName);
     type.header(header);
@@ -28,12 +31,18 @@ public final class AstFunction extends AstEntity {
   }
 
   @Override
-  public AstType type() {
-    return type.get();
+  public AstFunctionType type() {
+    return (AstFunctionType) type.get();
   }
 
-  public void type(AstType type) {
+  public void type(AstFunctionType type) {
     this.type.set(type);
+  }
+
+  public FunctionSignature signature() {
+    return new FunctionSignature(
+        name.entity(),
+        header.parameters().stream().map(AstVariable::type).collect(toImmutableList()));
   }
 
   @Override

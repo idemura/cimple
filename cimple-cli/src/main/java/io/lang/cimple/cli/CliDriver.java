@@ -4,6 +4,7 @@ import static com.google.common.collect.ImmutableList.toImmutableList;
 
 import com.beust.jcommander.JCommander;
 import com.beust.jcommander.Parameter;
+import com.google.common.collect.ImmutableList;
 import io.lang.cimple.compiler.Compiler;
 import io.lang.cimple.compiler.CompilerParams;
 import io.lang.cimple.compiler.ErrorConsumer.Mode;
@@ -57,16 +58,20 @@ public class CliDriver {
     JCommander.newBuilder().addObject(this).build().parse(args);
   }
 
+  List<String> getFilesList() {
+    var builder = new ImmutableList.Builder<String>();
+    builder.add("lib/_builtin.ci");
+    builder.addAll(files);
+    return builder.build();
+  }
+
   boolean run() {
     var errorConsumer = new CliErrorConsumer();
     errorConsumer.enable(Mode.PRINT_LEVEL);
     errorConsumer.enable(Mode.PRINT_LOCATION);
-    var sources = new ArrayList<String>();
-    sources.add("lib/_builtin.ci");
-    sources.addAll(files);
     var compiler = new Compiler(compilerParams(), errorConsumer, codeGenerator());
     var sourceCodeList =
-        sources.stream().map(CliDriver::readSourceCodeFromFile).collect(toImmutableList());
+        getFilesList().stream().map(CliDriver::readSourceCodeFromFile).collect(toImmutableList());
     return compiler.compile(sourceCodeList);
   }
 

@@ -1,10 +1,23 @@
 package io.lang.cimple.compiler;
 
+import static com.google.common.base.Preconditions.checkArgument;
 import static io.lang.cimple.compiler.Constants.BUILTIN_MODULE;
 
-public record Identifier(String module, String type, String entity)
-    implements Comparable<Identifier> {
-  public static Identifier ofEntity(String entity) {
+import java.util.Objects;
+
+public final class Identifier implements Comparable<Identifier> {
+  private String module;
+  private String type;
+  private String entity;
+
+  public Identifier(String module, String type, String entity) {
+    checkArgument((type != null) ^ (entity != null));
+    this.module = module;
+    this.type = type;
+    this.entity = entity;
+  }
+
+  public static Identifier of(String entity) {
     return new Identifier(null, null, entity);
   }
 
@@ -17,19 +30,45 @@ public record Identifier(String module, String type, String entity)
   }
 
   public Identifier builtin() {
-    return withModule(BUILTIN_MODULE);
+    return copy().module(BUILTIN_MODULE);
   }
 
-  public Identifier withModule(String module) {
+  public Identifier copy() {
     return new Identifier(module, type, entity);
   }
 
-  public Identifier withType(String type) {
-    return new Identifier(module, type, entity);
+  public Identifier copyValue(Identifier other) {
+    this.module = other.module;
+    this.type = other.type;
+    this.entity = other.entity;
+    return this;
   }
 
-  public Identifier withEntity(String entity) {
-    return new Identifier(module, type, entity);
+  public String module() {
+    return module;
+  }
+
+  public Identifier module(String module) {
+    this.module = module;
+    return this;
+  }
+
+  public String type() {
+    return type;
+  }
+
+  public Identifier type(String type) {
+    this.type = type;
+    return this;
+  }
+
+  public String entity() {
+    return entity;
+  }
+
+  public Identifier entity(String entity) {
+    this.entity = entity;
+    return this;
   }
 
   @Override
@@ -43,6 +82,20 @@ public record Identifier(String module, String type, String entity)
       return cmp;
     }
     return compareNullable(entity, other.entity);
+  }
+
+  @Override
+  public int hashCode() {
+    return Objects.hash(module, type, entity);
+  }
+
+  @Override
+  public boolean equals(Object object) {
+    return this == object
+        || (object instanceof Identifier other
+            && Objects.equals(module, other.module)
+            && Objects.equals(type, other.type)
+            && Objects.equals(entity, other.entity));
   }
 
   @Override

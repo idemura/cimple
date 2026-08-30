@@ -33,7 +33,7 @@ public final class AstArrayType extends AstType {
   @Override
   public Identifier name() {
     var baseName = baseType.name();
-    return baseName.withType(baseName.type() + "[]");
+    return baseName.copy().type(baseName.type() + "[]");
   }
 
   @Override

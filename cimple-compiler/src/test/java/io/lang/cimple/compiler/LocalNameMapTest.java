@@ -8,7 +8,7 @@ import org.junit.jupiter.api.Test;
 
 class LocalNameMapTest {
   private static void assertLookup(LocalNameMap localNameMap, AstVariable variable) {
-    assertSame(variable, localNameMap.lookupEntity(Identifier.ofEntity(variable.name().entity())));
+    assertSame(variable, localNameMap.lookupVariable(variable.name().entity()));
   }
 
   @Test
@@ -52,7 +52,7 @@ class LocalNameMapTest {
     localNameMap.endScope();
     assertLookup(localNameMap, outer);
     localNameMap.endScope();
-    assertNull(localNameMap.lookupEntity(Identifier.ofEntity("x")));
+    assertNull(localNameMap.lookupVariable("x"));
   }
 
   @Test
@@ -68,7 +68,7 @@ class LocalNameMapTest {
     localNameMap.endScope();
     assertLookup(localNameMap, parameter);
     localNameMap.endScope();
-    assertNull(localNameMap.lookupEntity(Identifier.ofEntity("x")));
+    assertNull(localNameMap.lookupVariable("x"));
   }
 
   @Test
@@ -78,11 +78,11 @@ class LocalNameMapTest {
     var local = localVariable("x");
     assertNull(globalNameMap.addVariable(global));
     var localNameMap = new LocalNameMap();
-    assertNull(localNameMap.addEntity(global));
+    assertNull(localNameMap.addVariable(global));
     localNameMap.beginScope();
     assertNull(localNameMap.addLocal(local));
-    assertSame(local, localNameMap.lookupEntity(Identifier.ofEntity("x")));
+    assertSame(local, localNameMap.lookupVariable("x"));
     localNameMap.endScope();
-    assertSame(global, localNameMap.lookupEntity(Identifier.ofEntity("x")));
+    assertSame(global, localNameMap.lookupVariable("x"));
   }
 }

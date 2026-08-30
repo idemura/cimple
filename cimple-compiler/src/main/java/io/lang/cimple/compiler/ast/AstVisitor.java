@@ -119,6 +119,14 @@ public abstract class AstVisitor {
     node.acceptChildren(this);
   }
 
+  protected void visit(AstVariableRef node) {
+    visit((AstEntityRef) node);
+  }
+
+  protected void visit(AstFunctionRef node) {
+    visit((AstEntityRef) node);
+  }
+
   protected void visit(AstAssign node) {
     node.acceptChildren(this);
   }
@@ -132,6 +140,10 @@ public abstract class AstVisitor {
   }
 
   protected void visit(AstCall node) {
+    node.acceptChildren(this);
+  }
+
+  protected void visit(AstFunctionPointerCall node) {
     node.acceptChildren(this);
   }
 

@@ -1,13 +1,14 @@
 package io.lang.cimple.compiler.ast;
 
 public abstract sealed class AstExpression extends AstNode
-    permits AstCall,
-        AstAssign,
+    permits AstAssign,
         AstCompoundAssign,
         AstEntityRef,
+        AstNew,
+        AstCall,
+        AstFunctionPointerCall,
         AstArrayAccess,
         AstFieldAccess,
-        AstNew,
         AstLiteral,
         AstCast {
   protected AstExpression() {}

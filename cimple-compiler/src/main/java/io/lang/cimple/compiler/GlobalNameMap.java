@@ -3,7 +3,6 @@ package io.lang.cimple.compiler;
 import io.lang.cimple.compiler.ast.AstBuiltinType;
 import io.lang.cimple.compiler.ast.AstEntity;
 import io.lang.cimple.compiler.ast.AstFunction;
-import io.lang.cimple.compiler.ast.AstModule;
 import io.lang.cimple.compiler.ast.AstStringType;
 import io.lang.cimple.compiler.ast.AstType;
 import io.lang.cimple.compiler.ast.AstVariable;
@@ -12,7 +11,9 @@ import java.util.Map;
 
 public class GlobalNameMap {
   private final Map<Identifier, AstType> typeMap = new LinkedHashMap<>();
-  private final Map<Identifier, AstEntity> entityMap = new LinkedHashMap<>();
+  private final Map<Identifier, AstVariable> variableMap = new LinkedHashMap<>();
+  private final Map<FunctionSignature, Map<String, AstFunction>> functionMap =
+      new LinkedHashMap<>();
 
   public GlobalNameMap() {}
 
@@ -20,19 +21,21 @@ public class GlobalNameMap {
     return typeMap.putIfAbsent(type.name(), type);
   }
 
-  public AstEntity addFunction(AstFunction function) {
-    return addEntity(function);
+  public AstFunction addFunction(AstFunction function) {
+    return functionMap
+        .computeIfAbsent(function.signature(), unused -> new LinkedHashMap<>())
+        .putIfAbsent(function.name().module(), function);
   }
 
-  public AstEntity addVariable(AstVariable variable) {
-    return addEntity(variable);
+  public AstVariable addVariable(AstVariable variable) {
+    return variableMap.putIfAbsent(variable.name(), variable);
   }
 
-  public Map<String, AstType> collectTypes(AstModule module, ErrorConsumer errorConsumer) {
+  public Map<String, AstType> collectTypes(String moduleName, ErrorConsumer errorConsumer) {
     var result = new LinkedHashMap<String, AstType>();
     for (var type : typeMap.values()) {
       var name = type.name();
-      if (module.name().equals(name.module())) {
+      if (moduleName.equals(name.module())) {
         var existing = result.putIfAbsent(name.type(), type);
         if (existing != null) {
           errorConsumer.errorAt(
@@ -46,18 +49,36 @@ public class GlobalNameMap {
     return result;
   }
 
-  public LocalNameMap collectFunctionsAndVariables(AstModule module, ErrorConsumer errorConsumer) {
+  public LocalNameMap collectVariables(String moduleName, ErrorConsumer errorConsumer) {
     var result = new LocalNameMap();
-    for (var entity : entityMap.values()) {
-      var name = entity.name();
-      if (module.name().equals(name.module())) {
-        var existing = result.addEntity(entity);
+    for (var variable : variableMap.values()) {
+      var name = variable.name();
+      if (moduleName.equals(name.module())) {
+        var existing = result.addVariable(variable);
         if (existing != null) {
-          errorEntityCollision(errorConsumer, entity, existing);
+          errorEntityCollision(errorConsumer, variable, existing);
         }
       }
     }
     return result;
+  }
+
+  public AstFunction lookupFunction(String moduleName, FunctionSignature signature) {
+    var functions = functionMap.get(signature);
+    if (functions == null) {
+      return null;
+    }
+    if (moduleName != null) {
+      return functions.get(moduleName);
+    }
+    if (functions.size() != 1) {
+      return null;
+    }
+    return functions.values().iterator().next();
+  }
+
+  public AstVariable lookupVariable(Identifier name) {
+    return variableMap.get(name);
   }
 
   public AstType lookupType(Identifier name) {
@@ -65,14 +86,6 @@ public class GlobalNameMap {
       return lookupBuiltinType(name.type());
     }
     return typeMap.get(name);
-  }
-
-  public AstEntity lookupEntity(Identifier name) {
-    return entityMap.get(name);
-  }
-
-  private AstEntity addEntity(AstEntity entity) {
-    return entityMap.putIfAbsent(entity.name(), entity);
   }
 
   private static String entityKind(AstEntity entity) {

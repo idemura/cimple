@@ -1,9 +1,9 @@
 package io.lang.cimple.compiler;
 
+import com.google.common.collect.ImmutableList;
 import io.lang.cimple.compiler.ast.AstModule;
 import io.lang.cimple.compiler.ast.PrintAstVisitor;
 import io.lang.cimple.compiler.codegen.CodeGenerator;
-import java.util.ArrayList;
 import java.util.List;
 import java.util.Set;
 
@@ -50,11 +50,11 @@ public class Compiler {
   }
 
   private List<AstModule> parseModules(List<SourceCode> sourceCodeList) {
-    var modules = new ArrayList<AstModule>();
+    var modules = new ImmutableList.Builder<AstModule>();
     for (var sourceCode : sourceCodeList) {
       modules.add(parseModule(sourceCode));
     }
-    return modules;
+    return modules.build();
   }
 
   private AstModule parseModule(SourceCode sourceCode) {

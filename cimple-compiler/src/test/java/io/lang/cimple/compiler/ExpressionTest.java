@@ -1,37 +1,39 @@
 package io.lang.cimple.compiler;
 
+import static io.lang.cimple.compiler.ast.AstUtils.*;
 import static org.junit.jupiter.api.Assertions.*;
 
 import io.lang.cimple.compiler.ast.AstBuiltinType;
 import io.lang.cimple.compiler.ast.AstCall;
 import io.lang.cimple.compiler.ast.AstCompoundAssign;
-import io.lang.cimple.compiler.ast.AstEntityRef;
 import io.lang.cimple.compiler.ast.AstExpressionStatement;
 import io.lang.cimple.compiler.ast.AstFunction;
+import io.lang.cimple.compiler.ast.AstFunctionPointerCall;
 import io.lang.cimple.compiler.ast.AstLocal;
 import io.lang.cimple.compiler.ast.AstStatement;
+import io.lang.cimple.compiler.ast.AstVariableRef;
 import java.util.List;
 import org.junit.jupiter.api.Test;
 
 class ExpressionTest extends AbstractSemanticsTest {
   private static void assertOperator(AstStatement statement, AstFunction function) {
     var call = (AstCall) ((AstLocal) statement).variable().expression().get();
-    var functionRef = (AstEntityRef) call.function();
-    assertSame(function, functionRef.entity());
+    var functionRef = call.function();
+    assertSame(function, functionRef.function());
     assertEquals(AstBuiltinType.INT64, call.type());
   }
 
   private static void assertComparisonOperator(AstStatement statement, AstFunction function) {
     var call = (AstCall) ((AstLocal) statement).variable().expression().get();
-    var functionRef = (AstEntityRef) call.function();
-    assertSame(function, functionRef.entity());
+    var functionRef = call.function();
+    assertSame(function, functionRef.function());
     assertEquals(AstBuiltinType.BOOL, call.type());
   }
 
-  private static void assertCompoundOperator(Object statement, AstFunction function) {
+  private static void assertCompoundOperator(AstStatement statement, AstFunction function) {
     var expr = ((AstExpressionStatement) statement).expression().get();
     var assign = (AstCompoundAssign) expr;
-    assertSame(function, assign.operation().entity());
+    assertSame(function, assign.operation().function());
     assertEquals(AstBuiltinType.INT64, assign.type());
   }
 
@@ -160,5 +162,42 @@ class ExpressionTest extends AbstractSemanticsTest {
             "Field access requires a struct, got 'int64'",
             "Undefined field 'millis' in struct 'test~Duration'"),
         errorConsumer.errors());
+  }
+
+  @Test
+  void testFunctionPointerCall() {
+    var code =
+        """
+        module test;
+        type function Callback(x int) int;
+        function f(callback Callback) int {
+          return callback!(1);
+        }
+        """;
+    var module = parseCode(code);
+    var sa = new SemanticAnalyzer(errorConsumer);
+    sa.analyze(List.of(module));
+    assertEquals(List.of(), errorConsumer.errors());
+
+    var call = (AstFunctionPointerCall) extractReturnExpression(module.findFunction("f"));
+    var function = (AstVariableRef) call.function();
+    assertSame(module.findFunction("f").header().parameters().get(0), function.variable());
+    assertEquals(AstBuiltinType.INT64, call.type());
+  }
+
+  @Test
+  void testFunctionPointerCallTypeCheck() {
+    var code =
+        """
+        module test;
+        function f() {
+          var x = 1!(2);
+        }
+        """;
+    var module = parseCode(code);
+    var sa = new SemanticAnalyzer(errorConsumer);
+    sa.analyze(List.of(module));
+    assertEquals(
+        List.of("Calling expression of type 'int64', function expected."), errorConsumer.errors());
   }
 }

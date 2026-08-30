@@ -30,7 +30,7 @@ public final class BuiltinFunctions {
 
   static AstVariable makeParameter(String name, AstBuiltinType type) {
     var parameter = new AstVariable();
-    parameter.name(Identifier.ofEntity(name));
+    parameter.name(Identifier.of(name));
     parameter.type(type);
     parameter.setBit(AstVariable.PARAMETER);
     return parameter;
@@ -48,7 +48,7 @@ public final class BuiltinFunctions {
     header.parameters(parameters);
     header.resultType(resultType);
     var function = new AstFunction();
-    function.name(Identifier.ofEntity(name).builtin());
+    function.name(Identifier.of(name).builtin());
     function.header(header);
     function.makeLambdaType();
     return function;

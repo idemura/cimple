@@ -4,7 +4,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 public final class AstBlock extends AstNode {
-  private List<AstStatement> statements = new ArrayList<>();
+  private final List<AstStatement> statements = new ArrayList<>();
 
   public AstBlock() {}
 

@@ -5,10 +5,10 @@ import static org.junit.jupiter.api.Assertions.*;
 
 import io.lang.cimple.compiler.ast.AstArrayAccess;
 import io.lang.cimple.compiler.ast.AstBuiltinType;
-import io.lang.cimple.compiler.ast.AstEntityRef;
 import io.lang.cimple.compiler.ast.AstFunction;
 import io.lang.cimple.compiler.ast.AstLocal;
 import io.lang.cimple.compiler.ast.AstType;
+import io.lang.cimple.compiler.ast.AstVariableRef;
 import java.util.List;
 import org.junit.jupiter.api.Test;
 
@@ -20,8 +20,8 @@ class ArrayTest extends AbstractSemanticsTest {
     var access = (AstArrayAccess) local.variable().expression().get();
     assertEquals(expectedElementType, access.type());
 
-    var array = (AstEntityRef) access.array();
-    assertSame(function.header().parameters().get(0), array.entity());
+    var array = (AstVariableRef) access.array();
+    assertSame(function.header().parameters().get(0), array.variable());
     assertEquals(arrayType(expectedElementType), array.type());
     assertEquals(AstBuiltinType.INT64, access.index().type());
   }

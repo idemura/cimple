@@ -70,7 +70,7 @@ public class Tokenizer {
           case ',' -> tokens.add(takeSingleCharToken(context, COMMA));
           case '.' -> tokens.add(takeSingleCharToken(context, PERIOD));
           case '=' -> tokens.add(takeSuffixToken(context, ASSIGN, CMP_EQ));
-          case '!' -> tokens.add(takeRequiredSuffixToken(context, '!', '=', CMP_NE));
+          case '!' -> tokens.add(takeSuffixToken(context, BANG, CMP_NE));
           case ';' -> tokens.add(takeSingleCharToken(context, SEMICOLON));
           case '+' -> tokens.add(takeSuffixToken(context, PLUS, PLUS_ASSIGN));
           case '-' -> tokens.add(takeSuffixToken(context, MINUS, MINUS_ASSIGN));

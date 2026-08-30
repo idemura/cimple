@@ -77,15 +77,15 @@ public class SemanticAnalyzer {
       if (def instanceof AstEntity entity) {
         var name = entity.name();
         if (name.module() == null) {
-          entity.name(name.withModule(module.name()));
+          entity.name(qualifyName(name, module.name()));
         }
       }
     }
   }
 
   private void assignFunctionTypes(List<AstModule> modules) {
-    // Function values are resolved through AstEntityRef.type(), so every function needs its
-    // synthetic function type before any module starts resolving calls.
+    // Function references expose their type through AstFunctionRef.type(), so synthetic function
+    // types must exist before any module starts resolving calls.
     for (var module : modules) {
       for (var def : module.definitions()) {
         if (def instanceof AstFunction function) {
@@ -99,7 +99,7 @@ public class SemanticAnalyzer {
     for (var module : modules) {
       for (var def : module.definitions()) {
         if (def instanceof AstType type) {
-          type.name(type.name().withModule(module.name()));
+          type.name(qualifyName(type.name(), module.name()));
           var existing = globalNameMap.addType(type);
           if (existing != null) {
             errorConsumer.errorAt(
@@ -151,5 +151,9 @@ public class SemanticAnalyzer {
         entity.name().entity(),
         entityKind(existing),
         existing.location());
+  }
+
+  private static Identifier qualifyName(Identifier id, String module) {
+    return id.copy().module(module);
   }
 }

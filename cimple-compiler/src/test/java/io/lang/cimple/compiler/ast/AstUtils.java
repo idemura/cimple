@@ -1,6 +1,7 @@
 package io.lang.cimple.compiler.ast;
 
 import io.lang.cimple.compiler.Identifier;
+import java.util.List;
 
 public final class AstUtils {
   private AstUtils() {}
@@ -11,7 +12,7 @@ public final class AstUtils {
 
   public static AstTypeRef newTypeRef(String moduleName, String name) {
     var ref = new AstTypeRef();
-    ref.name(Identifier.ofType(name).withModule(moduleName));
+    ref.name(Identifier.ofType(name).module(moduleName));
     return ref;
   }
 
@@ -29,25 +30,29 @@ public final class AstUtils {
     return new AstArrayType(baseType);
   }
 
-  public static AstEntityRef newEntityRef(String name) {
-    return newEntityRef(null, name);
+  public static AstVariableRef newVariableRef(String name) {
+    return newVariableRef(null, name);
   }
 
-  public static AstEntityRef newEntityRef(String moduleName, String name) {
-    var ref = new AstEntityRef();
-    ref.name(Identifier.ofEntity(name).withModule(moduleName));
-    return ref;
+  public static AstVariableRef newVariableRef(String moduleName, String name) {
+    return new AstVariableRef(null, Identifier.of(name).module(moduleName));
   }
 
-  public static AstEntityRef newBuiltinEntityRef(String name) {
-    var ref = new AstEntityRef();
-    ref.name(Identifier.ofEntity(name).builtin());
-    return ref;
+  public static AstFunctionRef newFunctionRef(String name) {
+    return newFunctionRef(null, name);
+  }
+
+  public static AstFunctionRef newFunctionRef(String moduleName, String name) {
+    return new AstFunctionRef(null, Identifier.of(name).module(moduleName));
+  }
+
+  public static AstFunctionRef newBuiltinFunctionRef(String name) {
+    return new AstFunctionRef(null, Identifier.of(name).builtin());
   }
 
   public static AstStructType newStructType(String moduleName, String name) {
     var type = new AstStructType();
-    type.name(Identifier.ofType(name).withModule(moduleName));
+    type.name(Identifier.ofType(name).module(moduleName));
     return type;
   }
 
@@ -69,8 +74,9 @@ public final class AstUtils {
 
   public static AstFunction function(String name) {
     var header = new AstFunctionHeader();
+    header.parameters(List.of());
     var function = new AstFunction();
-    function.name(Identifier.ofEntity(name));
+    function.name(Identifier.of(name));
     function.header(header);
     return function;
   }
@@ -106,7 +112,7 @@ public final class AstUtils {
 
   private static AstVariable variable(String moduleName, String name, long flags, AstType type) {
     var variable = new AstVariable();
-    variable.name(Identifier.ofEntity(name).withModule(moduleName));
+    variable.name(Identifier.of(name).module(moduleName));
     if (flags != 0) {
       variable.setBit(flags);
     }

@@ -233,8 +233,13 @@ public class PrintAstVisitor extends AstVisitor {
   }
 
   @Override
-  protected void visit(AstEntityRef node) {
-    output.writeLine("IDENTIFIER %s".formatted(node.name()));
+  protected void visit(AstVariableRef node) {
+    output.writeLine("VARIABLE REF %s".formatted(node.name()));
+  }
+
+  @Override
+  protected void visit(AstFunctionRef node) {
+    output.writeLine("FUNCTION REF %s".formatted(node.name()));
   }
 
   @Override
@@ -248,6 +253,14 @@ public class PrintAstVisitor extends AstVisitor {
   @Override
   protected void visit(AstCall node) {
     output.writeLine("CALL");
+    output.indent();
+    node.acceptChildren(this);
+    output.unindent();
+  }
+
+  @Override
+  protected void visit(AstFunctionPointerCall node) {
+    output.writeLine("FUNCTION POINTER CALL");
     output.indent();
     node.acceptChildren(this);
     output.unindent();

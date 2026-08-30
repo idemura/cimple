@@ -16,6 +16,7 @@ public enum TokenType {
   TILDE("~"),
   COMMA(","),
   PERIOD("."),
+  BANG("!"),
   ASSIGN("="),
   PLUS("+"),
   PLUS_ASSIGN("+="),
@@ -34,13 +35,13 @@ public enum TokenType {
   CMP_LE("<="),
   CMP_GE(">=");
 
-  private final String symbolName;
+  private final String symbol;
 
-  TokenType(String symbolName) {
-    this.symbolName = symbolName;
+  TokenType(String symbol) {
+    this.symbol = symbol;
   }
 
-  public String symbolName() {
-    return symbolName;
+  public String symbol() {
+    return symbol;
   }
 }

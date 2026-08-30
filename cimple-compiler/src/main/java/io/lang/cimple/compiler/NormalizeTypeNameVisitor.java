@@ -16,7 +16,7 @@ class NormalizeTypeNameVisitor extends AstVisitor {
   @Override
   protected void visit(AstTypeRef node) {
     if (Objects.equals("int", node.name().type())) {
-      node.name(AstBuiltinType.INT64.name());
+      node.name(AstBuiltinType.INT64.name().copy());
     }
     super.visit(node);
   }

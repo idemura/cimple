@@ -47,6 +47,14 @@ public class AstExpressionRewriteVisitor extends AstVisitor {
     return node;
   }
 
+  protected AstExpression rewrite(AstVariableRef node) {
+    return rewrite((AstEntityRef) node);
+  }
+
+  protected AstExpression rewrite(AstFunctionRef node) {
+    return rewrite((AstEntityRef) node);
+  }
+
   protected AstExpression rewrite(AstAssign node) {
     return node;
   }
@@ -60,6 +68,10 @@ public class AstExpressionRewriteVisitor extends AstVisitor {
   }
 
   protected AstExpression rewrite(AstCall node) {
+    return node;
+  }
+
+  protected AstExpression rewrite(AstFunctionPointerCall node) {
     return node;
   }
 

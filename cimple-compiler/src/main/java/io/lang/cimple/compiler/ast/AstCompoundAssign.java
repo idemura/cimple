@@ -2,7 +2,7 @@ package io.lang.cimple.compiler.ast;
 
 public final class AstCompoundAssign extends AstExpression {
   private AstExpression target;
-  private AstEntityRef operation;
+  private AstFunctionRef operation;
   private AstExpression value;
 
   @Override
@@ -37,11 +37,11 @@ public final class AstCompoundAssign extends AstExpression {
     this.target = target;
   }
 
-  public AstEntityRef operation() {
+  public AstFunctionRef operation() {
     return operation;
   }
 
-  public void operation(AstEntityRef operation) {
+  public void operation(AstFunctionRef operation) {
     this.operation = operation;
   }
 
