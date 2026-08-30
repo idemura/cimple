@@ -3,7 +3,6 @@ package io.lang.cimple.compiler.ast;
 public final class AstFieldAccess extends AstExpression {
   private AstExpression object;
   private String fieldName;
-  private boolean method;
   private AstVariable field;
 
   @Override
@@ -24,9 +23,6 @@ public final class AstFieldAccess extends AstExpression {
 
   @Override
   public AstType type() {
-    if (method) {
-      return object.type();
-    }
     return field == null ? null : field.type();
   }
 
@@ -52,13 +48,5 @@ public final class AstFieldAccess extends AstExpression {
 
   public void field(AstVariable field) {
     this.field = field;
-  }
-
-  public boolean method() {
-    return method;
-  }
-
-  public void method(boolean method) {
-    this.method = method;
   }
 }

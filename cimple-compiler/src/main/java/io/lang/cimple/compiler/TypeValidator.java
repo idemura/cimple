@@ -58,8 +58,7 @@ class TypeValidator {
   private static boolean functionContainsType(
       AstType root, AstFunctionType functionType, Set<AstType> path) {
     var header = functionType.header();
-    if (containsDirectType(root, header.objectType(), path)
-        || containsDirectType(root, header.resultType(), path)) {
+    if (containsDirectType(root, header.resultType(), path)) {
       return true;
     }
     for (var parameter : header.parameters()) {

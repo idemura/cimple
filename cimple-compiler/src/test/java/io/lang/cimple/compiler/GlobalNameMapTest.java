@@ -28,15 +28,6 @@ class GlobalNameMapTest {
   }
 
   @Test
-  void testMethodIsStoredAsQualifiedEntity() {
-    var globalNameMap = new GlobalNameMap();
-    var method = function("Duration", "toMillis");
-    assertNull(globalNameMap.addFunction(method));
-    assertNull(globalNameMap.lookupEntity(Identifier.ofEntity("toMillis")));
-    assertSame(method, globalNameMap.lookupEntity(Identifier.ofMethod("Duration", "toMillis")));
-  }
-
-  @Test
   void testCollectTypes() {
     var globalNameMap = new GlobalNameMap();
     var errorConsumer = new ErrorConsumer();
@@ -87,14 +78,11 @@ class GlobalNameMapTest {
     var var2 = globalVariable("m2", "x");
     var function1 = freeFunction("m1", "f");
     var function2 = freeFunction("m2", "f");
-    var method = function("Duration", "toMillis");
-    method.name(method.name().withModule("m1"));
 
     assertNull(globalNameMap.addVariable(var1));
     assertNull(globalNameMap.addVariable(var2));
     assertNull(globalNameMap.addFunction(function1));
     assertNull(globalNameMap.addFunction(function2));
-    assertNull(globalNameMap.addFunction(method));
 
     assertNull(globalNameMap.lookupEntity(Identifier.ofEntity("x")));
     assertSame(var1, globalNameMap.lookupEntity(Identifier.ofEntity("x").withModule("m1")));
@@ -104,6 +92,5 @@ class GlobalNameMapTest {
     assertEquals(0, errorConsumer.errorCount());
     assertSame(var1, localNameMap.lookupEntity(Identifier.ofEntity("x")));
     assertSame(function1, localNameMap.lookupEntity(Identifier.ofEntity("f")));
-    assertNull(localNameMap.lookupEntity(Identifier.ofEntity("toMillis")));
   }
 }

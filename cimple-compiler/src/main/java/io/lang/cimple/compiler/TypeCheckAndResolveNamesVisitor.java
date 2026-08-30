@@ -1,7 +1,6 @@
 package io.lang.cimple.compiler;
 
 import static com.google.common.base.Preconditions.checkNotNull;
-import static com.google.common.base.Preconditions.checkState;
 import static io.lang.cimple.compiler.ast.AstBuiltinType.isIntegerType;
 
 import io.lang.cimple.compiler.ast.AstArrayAccess;
@@ -33,7 +32,6 @@ import io.lang.cimple.compiler.ast.AstTypeHolder;
 import io.lang.cimple.compiler.ast.AstTypeRef;
 import io.lang.cimple.compiler.ast.AstUnionType;
 import io.lang.cimple.compiler.ast.AstVariable;
-import java.util.ArrayList;
 import java.util.List;
 
 public class TypeCheckAndResolveNamesVisitor extends AstExpressionRewriteVisitor {
@@ -219,9 +217,6 @@ public class TypeCheckAndResolveNamesVisitor extends AstExpressionRewriteVisitor
 
   @Override
   public AstExpression rewrite(AstFieldAccess node) {
-    if (node.method()) {
-      return node;
-    }
     var objectType = checkNotNull(node.object().type());
     if (!(objectType instanceof AstStructType structType)) {
       errorConsumer.errorAt(
@@ -263,20 +258,12 @@ public class TypeCheckAndResolveNamesVisitor extends AstExpressionRewriteVisitor
   public AstExpression rewrite(AstCall node) {
     // Callee and argument expressions have already been rewritten by AstCall.acceptRewriter.
     var function = node.function();
-    if (function instanceof AstFieldAccess field && field.method()) {
-      resolveMethodCall(node, field);
-    }
-    function = node.function();
     // Builtin calls are selected here, once argument expressions are available.
     if (function instanceof AstEntityRef ref && ref.isBuiltin()) {
-      if (BuiltinFunctions.isArrayMethod(ref.entity())) {
-        return node;
-      }
       if (!ref.isResolved()) {
         resolveBuiltinFunction(ref);
       }
     }
-    // Method lookup and builtin resolution may replace the callee expression.
     checkCallParameters(node);
     return node;
   }
@@ -312,56 +299,6 @@ public class TypeCheckAndResolveNamesVisitor extends AstExpressionRewriteVisitor
     operatorRef.entity(function);
   }
 
-  private void resolveMethodCall(AstCall node, AstFieldAccess fieldAccess) {
-    var objectType = fieldAccess.object().type();
-    checkState(objectType != null);
-    if (objectType instanceof AstFunctionType && fieldAccess.fieldName().equals("call")) {
-      // Function values reserve `.call(...)` as explicit invocation syntax.
-      node.function(fieldAccess.object());
-      return;
-    }
-    if (objectType instanceof AstArrayType arrayType) {
-      resolveArrayMethodCall(node, fieldAccess, arrayType);
-      return;
-    }
-    if (objectType == AstBuiltinType.VOID) {
-      errorConsumer.errorAt(
-          fieldAccess.location(),
-          "Cannot resolve method '%s' for null object",
-          fieldAccess.fieldName());
-      return;
-    }
-    if (objectType instanceof AstPointerType) {
-      errorConsumer.errorAt(
-          fieldAccess.location(), "Method of pointer is not allowed", objectType.name());
-      return;
-    }
-    var methodName = objectType.name().withEntity(fieldAccess.fieldName());
-    var function = lookupMethod(objectType, fieldAccess.fieldName());
-    if (function == null) {
-      errorConsumer.errorAt(fieldAccess.location(), "Undefined method: '%s'", methodName);
-      return;
-    }
-
-    var functionRef = new AstEntityRef();
-    functionRef.name(function.name());
-    functionRef.entity(function);
-    functionRef.location(fieldAccess.location());
-
-    var arguments = new ArrayList<>(node.arguments());
-    arguments.add(function.header().objectIndex(), fieldAccess.object());
-    node.arguments(arguments);
-    node.function(functionRef);
-  }
-
-  private AstFunction lookupMethod(AstType objectType, String fieldName) {
-    return lookupFunction(objectType.name().withEntity(fieldName));
-  }
-
-  private AstFunction lookupFunction(Identifier name) {
-    return globalNameMap.lookupEntity(name) instanceof AstFunction function ? function : null;
-  }
-
   private AstEntity lookupEntity(Identifier name) {
     if (name.module() == null) {
       return localNameMap.lookupEntity(name);
@@ -369,64 +306,12 @@ public class TypeCheckAndResolveNamesVisitor extends AstExpressionRewriteVisitor
     return globalNameMap.lookupEntity(name);
   }
 
-  private void resolveArrayMethodCall(
-      AstCall node, AstFieldAccess fieldAccess, AstArrayType arrayType) {
-    var function = BuiltinFunctions.lookupArrayMethod(fieldAccess.fieldName());
-    if (function == null) {
-      errorConsumer.errorAt(
-          fieldAccess.location(), "Undefined array method: '%s'", fieldAccess.fieldName());
-      return;
-    }
-    if (function == BuiltinFunctions.ARRAY_APPEND) {
-      checkArrayAppendArguments(node, fieldAccess, arrayType);
-    } else {
-      checkArrayMethodArgumentCount(node, fieldAccess, 0);
-    }
-
-    var functionRef = new AstEntityRef();
-    functionRef.name(function.name());
-    functionRef.entity(function);
-    functionRef.location(fieldAccess.location());
-
-    var arguments = new ArrayList<>(node.arguments());
-    arguments.add(0, fieldAccess.object());
-    node.arguments(arguments);
-    node.function(functionRef);
-  }
-
-  private void checkArrayAppendArguments(
-      AstCall node, AstFieldAccess fieldAccess, AstArrayType arrayType) {
-    if (!checkArrayMethodArgumentCount(node, fieldAccess, 1)) {
-      return;
-    }
-    var value = node.arguments().get(0);
-    var valueType = checkNotNull(value.type());
-    var elementType = arrayType.baseType();
-    if (!valueType.equals(elementType)) {
-      errorConsumer.errorAt(
-          value.location(),
-          "Array method 'append' argument has type '%s', expected '%s'",
-          valueType.formatName(),
-          elementType.formatName());
-    }
-  }
-
-  private boolean checkArrayMethodArgumentCount(
-      AstCall node, AstFieldAccess fieldAccess, int expectedCount) {
-    if (node.arguments().size() == expectedCount) {
-      return true;
-    }
-    errorConsumer.errorAt(
-        node.location(),
-        "Array method '%s' expects %d arguments, got %d",
-        fieldAccess.fieldName(),
-        expectedCount,
-        node.arguments().size());
-    return false;
-  }
-
   private void checkCallParameters(AstCall call) {
-    var type = checkNotNull(call.function().type());
+    var type = call.function().type();
+    if (type == null) {
+      // A previous resolution error left the callee untyped; avoid a noisy follow-up error.
+      return;
+    }
     if (type instanceof AstFunctionType functionType) {
       checkFunctionArguments(
           functionType,

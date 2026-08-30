@@ -6,7 +6,6 @@ import static org.junit.jupiter.api.Assertions.*;
 import io.lang.cimple.compiler.ast.AstBuiltinType;
 import io.lang.cimple.compiler.ast.AstCall;
 import io.lang.cimple.compiler.ast.AstEntityRef;
-import io.lang.cimple.compiler.ast.AstFieldAccess;
 import io.lang.cimple.compiler.ast.AstLocal;
 import io.lang.cimple.compiler.ast.AstStringType;
 import java.util.List;
@@ -18,32 +17,18 @@ class CallResolutionTest extends AbstractSemanticsTest {
     var code =
         """
         module test;
-        type struct Duration {}
-        function Duration.toMillis(x int, this) {}
         function f(x int) {}
         """;
     var module = parseCode(code);
     var semanticAnalyzer = new SemanticAnalyzer(errorConsumer);
     semanticAnalyzer.analyze(List.of(module));
     assertEquals(List.of(), errorConsumer.errors());
-    {
-      var header = module.findMethod("Duration", "toMillis").header();
-      var objectType = newStructType("test", "Duration");
-      assertEquals(objectType, header.objectType());
-      assertEquals(1, header.objectIndex());
-      assertEquals(objectType, header.parameters().get(1).type());
-      assertEquals(AstBuiltinType.VOID, header.resultType());
-    }
-    {
-      var header = module.findFunction("f").header();
-      assertEquals(-1, header.objectIndex());
-      assertEquals(AstBuiltinType.VOID, header.resultType());
-    }
+    var header = module.findFunction("f").header();
+    assertEquals(AstBuiltinType.VOID, header.resultType());
     var globalNameMap = semanticAnalyzer.globalNameMap();
     assertSame(
-        module.findMethod("Duration", "toMillis"),
-        globalNameMap.lookupEntity(new Identifier("test", "Duration", "toMillis")));
-    assertNull(globalNameMap.lookupEntity(Identifier.ofEntity("toMillis")));
+        module.findFunction("f"),
+        globalNameMap.lookupEntity(newEntityRef("test", "f").name()));
   }
 
   @Test
@@ -134,52 +119,13 @@ class CallResolutionTest extends AbstractSemanticsTest {
   }
 
   @Test
-  void testMethodResolution() {
+  void testLinkTimeFunctionDeclarationResolves() {
     var code =
         """
         module test;
-        type struct Duration {
-          var seconds int;
-        }
-        function Duration.toMillis(this) int {
-          return this.seconds * 1000;
-        }
-        function f(d Duration) {
-          return d.toMillis();
-        }
-        """;
-    var module = parseCode(code);
-    var sa = new SemanticAnalyzer(errorConsumer);
-    sa.analyze(List.of(module));
-    assertEquals(List.of(), errorConsumer.errors());
-    {
-      var expr = extractReturnExpression(module.findFunction("f"));
-      var call = (AstCall) expr;
-      var function = (AstEntityRef) call.function();
-      assertSame(module.findMethod("Duration", "toMillis"), function.entity());
-      assertEquals(new Identifier("test", "Duration", "toMillis"), function.name());
-      assertEquals(1, call.arguments().size());
-      var object = (AstEntityRef) call.arguments().get(0);
-      assertEquals(Identifier.ofEntity("d"), object.name());
-      assertSame(module.findFunction("f").header().parameters().get(0), object.entity());
-    }
-    {
-      var function = module.findMethod("Duration", "toMillis");
-      assertEquals(newStructType("test", "Duration"), function.header().objectType());
-    }
-  }
-
-  @Test
-  void testLinkTimeFunctionAndMethodDeclarationsResolve() {
-    var code =
-        """
-        module test;
-        type struct Duration {}
         function external(x int) string;
-        function Duration.toMillis(this) int;
-        function f(d Duration) {
+        function f() {
           var s = external(1);
-          var m = d.toMillis();
         }
         """;
     var module = parseCode(code);
@@ -188,50 +134,14 @@ class CallResolutionTest extends AbstractSemanticsTest {
     assertEquals(List.of(), errorConsumer.errors());
 
     var external = module.findFunction("external");
-    var toMillis = module.findMethod("Duration", "toMillis");
     assertNull(external.block());
-    assertNull(toMillis.block());
 
     var statements = module.findFunction("f").block().statements();
-    {
-      var local = (AstLocal) statements.get(0);
-      assertEquals(AstStringType.INSTANCE, local.variable().type());
-      var call = (AstCall) local.variable().expression().get();
-      var function = (AstEntityRef) call.function();
-      assertSame(external, function.entity());
-    }
-    {
-      var local = (AstLocal) statements.get(1);
-      assertEquals(AstBuiltinType.INT64, local.variable().type());
-      var call = (AstCall) local.variable().expression().get();
-      var function = (AstEntityRef) call.function();
-      assertSame(toMillis, function.entity());
-    }
-  }
-
-  @Test
-  void testFunctionValueCallResolution() {
-    var code =
-        """
-        module test;
-        type function IntFn(x int) string;
-        type struct Holder {
-          var func_ptr IntFn;
-        }
-        function f(h Holder) {
-          return h.func_ptr.call(5);
-        }
-        """;
-    var module = parseCode(code);
-    var sa = new SemanticAnalyzer(errorConsumer);
-    sa.analyze(List.of(module));
-    assertEquals(List.of(), errorConsumer.errors());
-
-    var call = (AstCall) extractReturnExpression(module.findFunction("f"));
-    var function = (AstFieldAccess) call.function();
-    assertEquals("func_ptr", function.fieldName());
-    assertFalse(function.method());
-    assertEquals(AstStringType.INSTANCE, call.type());
+    var local = (AstLocal) statements.get(0);
+    assertEquals(AstStringType.INSTANCE, local.variable().type());
+    var call = (AstCall) local.variable().expression().get();
+    var function = (AstEntityRef) call.function();
+    assertSame(external, function.entity());
   }
 
   @Test

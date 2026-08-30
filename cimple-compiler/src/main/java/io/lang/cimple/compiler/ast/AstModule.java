@@ -65,22 +65,7 @@ public final class AstModule extends AstNode {
   public AstFunction findFunction(String name) {
     for (var definition : definitions) {
       if (definition instanceof AstFunction function && name.equals(function.name().entity())) {
-        var objectType = function.header().objectType();
-        if (objectType == null) {
-          return function;
-        }
-      }
-    }
-    return null;
-  }
-
-  public AstFunction findMethod(String objectTypeName, String name) {
-    for (var definition : definitions) {
-      if (definition instanceof AstFunction function && function.name().entity().equals(name)) {
-        var objectType = function.header().objectType();
-        if (objectType != null && objectTypeName.equals(objectType.name().type())) {
-          return function;
-        }
+        return function;
       }
     }
     return null;

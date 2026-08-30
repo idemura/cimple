@@ -5,10 +5,8 @@ import java.util.List;
 import java.util.Objects;
 
 public final class AstFunctionHeader extends AstNode {
-  private final AstTypeHolder objectType = new AstTypeHolder();
   private final AstTypeHolder resultType = new AstTypeHolder();
   private List<AstVariable> parameters;
-  private int objectIndex = -1;
 
   public AstFunctionHeader() {}
 
@@ -19,17 +17,15 @@ public final class AstFunctionHeader extends AstNode {
 
   @Override
   public void acceptChildren(AstVisitor visitor) {
-    // Object type ref is also assigned to the object parameter during preprocessing.
     for (var parameter : parameters) {
       parameter.accept(visitor);
     }
-    acceptSafe(objectType, visitor);
     acceptSafe(resultType, visitor);
   }
 
   @Override
   public int hashCode() {
-    return Objects.hash(objectType(), parameters, resultType());
+    return Objects.hash(parameters, resultType());
   }
 
   @Override
@@ -50,22 +46,6 @@ public final class AstFunctionHeader extends AstNode {
       }
     }
     return true;
-  }
-
-  public AstType objectType() {
-    return objectType.get();
-  }
-
-  public void objectType(AstType objectType) {
-    this.objectType.set(objectType);
-  }
-
-  public int objectIndex() {
-    return objectIndex;
-  }
-
-  public void objectIndex(int objectIndex) {
-    this.objectIndex = objectIndex;
   }
 
   public List<AstVariable> parameters() {

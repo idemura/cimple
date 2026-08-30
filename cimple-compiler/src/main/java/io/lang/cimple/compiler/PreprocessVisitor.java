@@ -6,13 +6,11 @@ import static java.lang.Long.parseLong;
 import io.lang.cimple.compiler.ast.AstAssign;
 import io.lang.cimple.compiler.ast.AstBoolLiteral;
 import io.lang.cimple.compiler.ast.AstBuiltinType;
-import io.lang.cimple.compiler.ast.AstCall;
 import io.lang.cimple.compiler.ast.AstCompoundAssign;
 import io.lang.cimple.compiler.ast.AstEntityRef;
 import io.lang.cimple.compiler.ast.AstEnumType;
 import io.lang.cimple.compiler.ast.AstExpression;
 import io.lang.cimple.compiler.ast.AstExpressionRewriteVisitor;
-import io.lang.cimple.compiler.ast.AstFieldAccess;
 import io.lang.cimple.compiler.ast.AstFunction;
 import io.lang.cimple.compiler.ast.AstFunctionHeader;
 import io.lang.cimple.compiler.ast.AstFunctionType;
@@ -32,12 +30,10 @@ import java.util.HashMap;
 // Runs AST checks and rewrites that do not require name resolution:
 //  - Validates identifiers
 //  - Marks parameters and locals
-//  - Validates method object parameters
 //  - Sets missing function result types to void
 //  - Checks that variables have either a type or an initializer
 //  - Checks duplicate function parameters, struct fields, union variants, and enum variants.
 //  - Normalizes builtin type aliases (int)
-//  - Marks method-call syntax
 //  - Rejects nested assignments
 //  - Types literal nodes
 class PreprocessVisitor extends AstExpressionRewriteVisitor {
@@ -71,53 +67,18 @@ class PreprocessVisitor extends AstExpressionRewriteVisitor {
   @Override
   protected void visit(AstFunction node) {
     checkIdentifier(node.name(), node.location());
-    checkObjectParameter(node.name(), node.header());
+    checkParameterTypes(node.name(), node.header());
     super.visit(node);
-    normalizeMethodObjectName(node);
   }
 
-  private void normalizeMethodObjectName(AstFunction node) {
-    if (node.name().type() == null || !(node.header().objectType() instanceof AstTypeRef typeRef)) {
-      return;
-    }
-    // Keep the method-map key in sync with normalized builtin type names such as int -> int64.
-    node.name(node.name().withType(typeRef.name().type()));
-  }
-
-  private void checkObjectParameter(Identifier functionName, AstFunctionHeader header) {
-    // Methods must have exactly one object parameter: the only parameter without an
-    // explicit type. Functions must not have any untyped parameters.
-    var parameters = header.parameters();
-    if (header.objectType() != null) {
-      var objectIndex = -1;
-      var invalid = false;
-      for (int i = 0; i < parameters.size(); i++) {
-        if (parameters.get(i).type() == null) {
-          if (objectIndex >= 0) {
-            errorConsumer.errorAt(
-                header.location(), "Method '%s': multiple object parameters", functionName);
-            invalid = true;
-            break;
-          }
-          objectIndex = i;
-        }
-      }
-      if (!invalid && objectIndex < 0) {
+  private void checkParameterTypes(Identifier functionName, AstFunctionHeader header) {
+    for (var parameter : header.parameters()) {
+      if (parameter.type() == null) {
         errorConsumer.errorAt(
-            header.location(), "Method '%s': missing the object parameter", functionName);
-      } else {
-        header.objectIndex(objectIndex);
-        parameters.get(objectIndex).type(header.objectType());
-      }
-    } else {
-      for (var parameter : parameters) {
-        if (parameter.type() == null) {
-          errorConsumer.errorAt(
-              parameter.location(),
-              "Function '%s' cannot have object parameter '%s'",
-              functionName,
-              parameter.name());
-        }
+            parameter.location(),
+            "Function '%s' parameter '%s' must have a type",
+            functionName,
+            parameter.name());
       }
     }
   }
@@ -141,7 +102,7 @@ class PreprocessVisitor extends AstExpressionRewriteVisitor {
   @Override
   protected void visit(AstFunctionType node) {
     checkIdentifier(node.name(), node.location());
-    checkObjectParameter(node.name(), node.header());
+    checkParameterTypes(node.name(), node.header());
     super.visit(node);
   }
 
@@ -218,16 +179,6 @@ class PreprocessVisitor extends AstExpressionRewriteVisitor {
     if (node != expressionRoot()) {
       errorConsumer.errorAt(
           node.location(), "Assignment is only allowed at the root of an expression");
-    }
-    return node;
-  }
-
-  @Override
-  public AstExpression rewrite(AstCall node) {
-    if (node.function() instanceof AstFieldAccess fieldAccess) {
-      // Method call syntax starts as field access; later resolution binds it to a method using
-      // the object's type.
-      fieldAccess.method(true);
     }
     return node;
   }
@@ -314,9 +265,7 @@ class PreprocessVisitor extends AstExpressionRewriteVisitor {
       var type = ident.type();
       if (type != null) {
         checkUnderscoreRules(type, location);
-        var method = ident.entity() != null;
-        // Allow methods for builtin types.
-        if (Keyword.isReservedTypeName(type) && !method) {
+        if (Keyword.isReservedTypeName(type)) {
           errorConsumer.errorAt(location, "Reserved word '%s' cannot be used as type name", ident);
         }
       }

@@ -589,22 +589,9 @@ public class Parser {
     takeKeyword(FUNCTION);
     var header = new AstFunctionHeader();
     var current = take(IDENTIFIER);
-    Identifier name;
-    if (tokenizer.takeIf(PERIOD)) {
-      var objectType = new AstTypeRef();
-      objectType.name(Identifier.ofType(current.value()));
-      objectType.location(current.location());
-      header.objectType(objectType);
-      header.location(tokenizer.currentLocation());
-      name = Identifier.ofType(current.value()).withEntity(take(IDENTIFIER).value());
-    } else {
-      header.location(current.location());
-      if (parsingType) {
-        name = Identifier.ofType(current.value());
-      } else {
-        name = Identifier.ofEntity(current.value());
-      }
-    }
+    header.location(current.location());
+    var name =
+        parsingType ? Identifier.ofType(current.value()) : Identifier.ofEntity(current.value());
     header.parameters(parseParameters());
     if (tokenizer.current().is(IDENTIFIER)) {
       header.resultType(parseTypeRef());

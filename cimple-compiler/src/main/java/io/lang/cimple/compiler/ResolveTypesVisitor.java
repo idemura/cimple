@@ -5,7 +5,6 @@ import static io.lang.cimple.compiler.ast.AstBuiltinType.isIntegerType;
 import io.lang.cimple.compiler.ast.AstArrayType;
 import io.lang.cimple.compiler.ast.AstBuiltinType;
 import io.lang.cimple.compiler.ast.AstEnumType;
-import io.lang.cimple.compiler.ast.AstFunction;
 import io.lang.cimple.compiler.ast.AstModule;
 import io.lang.cimple.compiler.ast.AstNew;
 import io.lang.cimple.compiler.ast.AstPointerType;
@@ -30,16 +29,6 @@ public class ResolveTypesVisitor extends AstVisitor {
     // TODO: Include import names.
     typeMap = globalNameMap.collectTypes(node, errorConsumer);
     super.visit(node);
-  }
-
-  @Override
-  protected void visit(AstFunction node) {
-    super.visit(node);
-    var objectType = node.header().objectType();
-    if (objectType != null) {
-      // When we resolved the object type, qualified function name may be affected.
-      node.name(objectType.name().withEntity(node.name().entity()));
-    }
   }
 
   @Override

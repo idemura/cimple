@@ -98,15 +98,14 @@ Modules cannot be nested.
 
 ```
 <function> := "function" <function_name> "(" <argument_list>? ")" <type_ref>? (<block> | ";")
-<function_name> := (<identifier> ".")? <identifier>
+<function_name> := <identifier>
 <type_ref> := <identifier> ("[]" | "*")*
 <argument_list> := <argument> ("," <argument>)*
 <argument> := <identifier> <type_ref>?
 <block> := "{" <statement>* "}"
 ```
 
-There are two kinds of functions: functions and methods.
-A function or method that ends with `;` has no body and is resolved at linking time.
+A function that ends with `;` has no body and is resolved at linking time.
 This section is incomplete.
 
 ## Statements
@@ -160,33 +159,9 @@ their current size and their capacity. Elements are accessed with the indexing o
 a[i]
 ```
 
-Use `.size()` to get the number of elements currently stored in the array, and `.capacity()` to get
-the number of elements the array can hold without allocating new storage.
-
-Appending is explicit. `.append(value)` adds one element to the end of the array, but it does not
-reallocate automatically. If the array has reached its capacity, `.append(value)` terminates the
-program. This is simpler than C++ `vector`: capacity growth is visible in the source code and is
-controlled by the programmer.
-
-When a larger capacity is needed, use `.makeCopy(newCapacity int)`. It creates and returns a new
-array
-with the requested capacity and copies the existing elements into it. This keeps allocation explicit
-while still supporting efficient resizing. This model allows the implementation to allocate
-uninitialized capacity internally while exposing only initialized elements to the programmer. New
-elements become part of the array when they are appended.
-
-Elements can be removed from the end with `.remove(n int)`. If the array is empty, or if `n` is
-larger than the current size, `.remove(n int)` terminates the program.
-
-Array method reference:
-
-| Method     | Arguments      | Return value    | Description                                                                   |
-|------------|----------------|-----------------|-------------------------------------------------------------------------------|
-| `size`     | none           | `int`           | Returns the current number of elements.                                       |
-| `capacity` | none           | `int`           | Returns the number of elements the array can hold without reallocating.       |
-| `append`   | `value`        | `void`          | Appends one initialized element.                                              |
-| `makeCopy` | `capacity int` | same array type | Creates a new array with the requested capacity and copies existing elements. |
-| `remove`   | `n int`        | `void`          | Removes `n` elements from the end.                                            |
+Array operations for size, capacity, append, copy, and removal are intentionally left unspecified
+while function overloading is being redesigned. They should be ordinary functions rather than a
+separate dot-call syntax.
 
 ### Struct
 
@@ -232,18 +207,7 @@ zero-initialized, so every enum type needs a valid zero value.
 type function Consumer(s string);
 ```
 
-Once you a variable of function pointer type, you can invoke the target function with `call` method:
-
-```
-function printer(s string) {
-    # ...
-}
-
-function fpTest() {
-    var fp = printer;
-    fp.call("hello");
-}
-```
+Function pointer invocation syntax is not specified yet.
 
 ### Interface
 

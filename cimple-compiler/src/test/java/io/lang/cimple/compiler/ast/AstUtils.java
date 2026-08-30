@@ -68,16 +68,9 @@ public final class AstUtils {
   }
 
   public static AstFunction function(String name) {
-    return function(null, name);
-  }
-
-  public static AstFunction function(String objectTypeName, String name) {
     var header = new AstFunctionHeader();
-    if (objectTypeName != null) {
-      header.objectType(newTypeRef(objectTypeName));
-    }
     var function = new AstFunction();
-    function.name(Identifier.ofMethod(objectTypeName, name));
+    function.name(Identifier.ofEntity(name));
     function.header(header);
     return function;
   }

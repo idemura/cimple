@@ -222,9 +222,7 @@ class ParserTest {
     var code =
         """
         module test;
-        type struct Duration {}
         function external(x int) string;
-        function Duration.toMillis(this) int;
         """;
     var module = parseCode(code, makeErrorConsumer());
     {
@@ -232,14 +230,6 @@ class ParserTest {
       assertEquals(Identifier.ofEntity("external"), f.name());
       assertEquals(newTypeRef("string"), f.header().resultType());
       assertEquals(ImmutableList.of(rawVariable("x", "int")), f.header().parameters());
-      assertNull(f.block());
-    }
-    {
-      var f = module.findMethod("Duration", "toMillis");
-      assertEquals(Identifier.ofMethod("Duration", "toMillis"), f.name());
-      assertEquals(newTypeRef("Duration"), f.header().objectType());
-      assertEquals(newTypeRef("int"), f.header().resultType());
-      assertEquals(ImmutableList.of(rawVariable("this")), f.header().parameters());
       assertNull(f.block());
     }
   }
@@ -374,25 +364,6 @@ class ParserTest {
       assertNull(type.header().resultType());
       assertEquals(ImmutableList.of(rawVariable("v", "string")), type.header().parameters());
     }
-  }
-
-  @Test
-  void testMethod() {
-    var code =
-        """
-        module test;
-        function Duration.toMillis(this) int {
-          return 6;
-        }
-        """;
-    var module = parseCode(code, makeErrorConsumer());
-    var header = module.findMethod("Duration", "toMillis").header();
-    assertEquals(newTypeRef("Duration"), header.objectType());
-    assertEquals(
-        Identifier.ofMethod("Duration", "toMillis"),
-        module.findMethod("Duration", "toMillis").name());
-    assertEquals(newTypeRef("int"), header.resultType());
-    assertEquals(ImmutableList.of(rawVariable("this")), header.parameters());
   }
 
   @Test
@@ -700,7 +671,6 @@ class ParserTest {
       var field = (AstFieldAccess) expr;
       assertEquals(newEntityRef("foo"), field.object());
       assertEquals("bar", field.fieldName());
-      assertFalse(field.method());
     }
     {
       var expr = ((AstLocal) statements.get(i++)).variable().expression().get();
@@ -708,7 +678,6 @@ class ParserTest {
       var field = (AstFieldAccess) call.function();
       assertEquals(newEntityRef("foo"), field.object());
       assertEquals("bar", field.fieldName());
-      assertFalse(field.method());
     }
     {
       var expr = ((AstLocal) statements.get(i++)).variable().expression().get();
@@ -718,23 +687,22 @@ class ParserTest {
     }
     {
       var expr = ((AstLocal) statements.get(i++)).variable().expression().get();
-      var methodCall = (AstCall) expr;
-      var methodField = (AstFieldAccess) methodCall.function();
-      assertEquals("baz", methodField.fieldName());
-      assertFalse(methodField.method());
+      var call = (AstCall) expr;
+      var field = (AstFieldAccess) call.function();
+      assertEquals("baz", field.fieldName());
       {
-        var index = (AstArrayAccess) methodField.object();
+        var index = (AstArrayAccess) field.object();
         assertEquals(AstNumberLiteral.of(3), index.index());
         {
-          var call = (AstCall) index.array();
+          var nestedCall = (AstCall) index.array();
           {
-            var field = (AstFieldAccess) call.function();
-            assertEquals(newEntityRef("foo"), field.object());
-            assertEquals("bar", field.fieldName());
+            var nestedField = (AstFieldAccess) nestedCall.function();
+            assertEquals(newEntityRef("foo"), nestedField.object());
+            assertEquals("bar", nestedField.fieldName());
           }
-          assertEquals(2, call.arguments().size());
-          assertEquals(AstNumberLiteral.of(1), call.arguments().get(0));
-          assertEquals(AstNumberLiteral.of(2), call.arguments().get(1));
+          assertEquals(2, nestedCall.arguments().size());
+          assertEquals(AstNumberLiteral.of(1), nestedCall.arguments().get(0));
+          assertEquals(AstNumberLiteral.of(2), nestedCall.arguments().get(1));
         }
       }
     }

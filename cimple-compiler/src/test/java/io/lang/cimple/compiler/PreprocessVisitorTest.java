@@ -6,10 +6,8 @@ import static org.junit.jupiter.api.Assertions.*;
 import com.google.common.collect.ImmutableList;
 import io.lang.cimple.compiler.ast.AstArrayType;
 import io.lang.cimple.compiler.ast.AstBuiltinType;
-import io.lang.cimple.compiler.ast.AstCall;
 import io.lang.cimple.compiler.ast.AstDefer;
 import io.lang.cimple.compiler.ast.AstExpressionStatement;
-import io.lang.cimple.compiler.ast.AstFieldAccess;
 import io.lang.cimple.compiler.ast.AstFor;
 import io.lang.cimple.compiler.ast.AstIf;
 import io.lang.cimple.compiler.ast.AstLocal;
@@ -92,32 +90,6 @@ class PreprocessVisitorTest extends AbstractSemanticsTest {
             "Assignment is only allowed at the root of an expression",
             "Assignment is only allowed at the root of an expression"),
         errorConsumer.errors());
-  }
-
-  @Test
-  void testMethodCallMarking() {
-    var code =
-        """
-        module test;
-        function f(m M) {
-          var x = m.f;
-          var y = m.f(1);
-        }
-        """;
-    var module = parseCode(code);
-    module.accept(new PreprocessVisitor(errorConsumer));
-    assertEquals(List.of(), errorConsumer.errors());
-
-    var statements = module.findFunction("f").block().statements();
-    {
-      var field = (AstFieldAccess) ((AstLocal) statements.get(0)).variable().expression().get();
-      assertFalse(field.method());
-    }
-    {
-      var call = (AstCall) ((AstLocal) statements.get(1)).variable().expression().get();
-      var field = (AstFieldAccess) call.function();
-      assertTrue(field.method());
-    }
   }
 
   @Test
@@ -232,27 +204,14 @@ class PreprocessVisitorTest extends AbstractSemanticsTest {
     var code =
         """
         module test;
-        type struct Duration {}
-        function Duration.toMillis(x int, this) {}
         function f(x int) {}
         """;
     var module = parseCode(code);
     module.accept(new PreprocessVisitor(errorConsumer));
     assertEquals(List.of(), errorConsumer.errors());
-    {
-      var header = module.findMethod("Duration", "toMillis").header();
-      var objectType = newTypeRef("Duration");
-      assertEquals(objectType, header.objectType());
-      assertEquals(1, header.objectIndex());
-      assertEquals(newBuiltinTypeRef("int64"), header.parameters().get(0).type());
-      assertEquals(objectType, header.parameters().get(1).type());
-      assertEquals(AstBuiltinType.VOID, header.resultType());
-    }
-    {
-      var header = module.findFunction("f").header();
-      assertEquals(-1, header.objectIndex());
-      assertEquals(AstBuiltinType.VOID, header.resultType());
-    }
+    var header = module.findFunction("f").header();
+    assertEquals(newBuiltinTypeRef("int64"), header.parameters().get(0).type());
+    assertEquals(AstBuiltinType.VOID, header.resultType());
   }
 
   @Test
@@ -300,18 +259,12 @@ class PreprocessVisitorTest extends AbstractSemanticsTest {
     var code =
         """
         module test;
-        type struct Duration {}
-        function Duration.a(x bool) {}
-        function Duration.b(x, y) {}
         function f(x) {}
         """;
     var module = parseCode(code);
     module.accept(new PreprocessVisitor(errorConsumer));
     assertEquals(
-        List.of(
-            "Method 'Duration.a': missing the object parameter",
-            "Method 'Duration.b': multiple object parameters",
-            "Function 'f' cannot have object parameter 'x'"),
+        List.of("Function 'f' parameter 'x' must have a type"),
         errorConsumer.errors());
   }
 
