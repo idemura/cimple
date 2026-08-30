@@ -203,11 +203,35 @@ zero-initialized, so every enum type needs a valid zero value.
 
 ### Function Pointers
 
+Function pointer types are defined with this syntax:
+
 ```
-type function Consumer(s string);
+"type" "function" <type_name> "(" <argument_list>? ")" <type_ref>? ";"
 ```
 
-Function pointer invocation syntax is not specified yet.
+Function values are invoked with postfix `!`:
+
+```
+<expression> "!" "(" <expression_list>? ")"
+```
+
+This syntax is intentionally different from named function calls. `f(x)` resolves `f` in the
+function namespace, while `f!(x)` evaluates `f` as an expression and invokes the function value it
+contains. This keeps function and variable namespaces separate even when they contain the same name:
+
+```
+type function Consumer(s string);
+
+function print(s string) {
+    # ...
+}
+
+function callPrinter(printer Consumer) {
+    printer!("hello");
+}
+```
+
+The expression before `!` must have a function type.
 
 ### Interface
 
@@ -222,18 +246,17 @@ type interface FileSystem {
 
 From highest to lowest:
 
-| Operators             | Associativity |
-|-----------------------|---------------|
-| `(e)` `(e type t)`    | Left-to-right |
-| `new` `.` `[]` `f(x)` | Left-to-right |
-| `*` `/` `%`           | Left-to-right |
-| `+` `-`               | Left-to-right |
-| `<` `>` `>=` `<=`     | Left-to-right |
-| `==` `!=`             | Left-to-right |
-| `!`                   | Right-to-left |
-| `&`                   | Left-to-right |
-| `\|`                  | Left-to-right |
-| `=` and op-shorthand  | None          |
+| Operators                      | Associativity |
+|--------------------------------|---------------|
+| `(e)` `(e type t)`             | Left-to-right |
+| `new` `.` `[]` `f(x)` `fp!(x)` | Left-to-right |
+| `*` `/` `%`                    | Left-to-right |
+| `+` `-`                        | Left-to-right |
+| `<` `>` `>=` `<=`              | Left-to-right |
+| `==` `!=`                      | Left-to-right |
+| `&`                            | Left-to-right |
+| `\|`                           | Left-to-right |
+| `=` and op-shorthand           | None          |
 
 Only one assignment per expression is allowed. Therefore, it does not matter whether it is
 left-to-right or right-to-left. For simplicity, the parser parses it in left-to-right order.
