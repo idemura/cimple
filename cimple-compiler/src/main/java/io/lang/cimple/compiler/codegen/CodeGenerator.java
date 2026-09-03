@@ -1,6 +1,6 @@
 package io.lang.cimple.compiler.codegen;
 
-import io.lang.cimple.compiler.ast.AstModule;
+import io.lang.cimple.compiler.AstModule;
 import java.util.List;
 
 public abstract class CodeGenerator {

@@ -1,12 +1,5 @@
 package io.lang.cimple.compiler;
 
-import io.lang.cimple.compiler.ast.AstArrayType;
-import io.lang.cimple.compiler.ast.AstFunctionType;
-import io.lang.cimple.compiler.ast.AstModule;
-import io.lang.cimple.compiler.ast.AstPointerType;
-import io.lang.cimple.compiler.ast.AstStructType;
-import io.lang.cimple.compiler.ast.AstType;
-import io.lang.cimple.compiler.ast.AstUnionType;
 import java.util.Collections;
 import java.util.IdentityHashMap;
 import java.util.Set;
@@ -57,11 +50,11 @@ class TypeValidator {
 
   private static boolean functionContainsType(
       AstType root, AstFunctionType functionType, Set<AstType> path) {
-    var header = functionType.header();
-    if (containsDirectType(root, header.resultType(), path)) {
+    var function = functionType.function();
+    if (containsDirectType(root, function.resultType(), path)) {
       return true;
     }
-    for (var parameter : header.parameters()) {
+    for (var parameter : function.parameters()) {
       if (containsDirectType(root, parameter.type(), path)) {
         return true;
       }

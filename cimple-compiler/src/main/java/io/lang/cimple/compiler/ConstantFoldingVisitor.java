@@ -1,9 +1,6 @@
 package io.lang.cimple.compiler;
 
-import io.lang.cimple.compiler.ast.AstEnumType;
-import io.lang.cimple.compiler.ast.AstExpressionRewriteVisitor;
-import io.lang.cimple.compiler.ast.AstNumberLiteral;
-import io.lang.cimple.compiler.ast.AstTypeHolder;
+import java.util.function.LongSupplier;
 
 // Folds compile-time expressions and assigns enum variant values.
 class ConstantFoldingVisitor extends AstExpressionRewriteVisitor {
@@ -22,26 +19,29 @@ class ConstantFoldingVisitor extends AstExpressionRewriteVisitor {
 
     // Assign values to the variants.
     var hasZeroValue = false;
-    var nextValue = 0L;
+    LongSupplier nextValue = () -> 0L;
     for (var variant : node.variants()) {
       Long value;
-      if (variant.valueExpression() == null) {
-        value = nextValue;
+      if (variant.expression() == null) {
+        try {
+          // TODO: Check overflow of the base type, not int64!
+          value = nextValue.getAsLong();
+        } catch (ArithmeticException e) {
+          errorConsumer.errorAt(
+              variant.tag().location(),
+              "Enum %s variant %s value overflows base type",
+              node.name(),
+              variant.tag());
+          break;
+        }
       } else {
-        var literal = (AstNumberLiteral) variant.valueExpression();
+        var literal = (AstNumberLiteral) variant.expression();
         // Type checking has already guaranteed that value expressions are integer literals.
         value = (Long) literal.value();
       }
       variant.value(value);
       hasZeroValue |= value == 0;
-      try {
-        // TODO: Check overflow of the base type, not int64!
-        nextValue = Math.addExact(value, 1);
-      } catch (ArithmeticException e) {
-        errorConsumer.errorAt(
-            variant.location(), "Enum value after variant '%s' overflows base type", variant.tag());
-        break;
-      }
+      nextValue = () -> Math.addExact(value, 1);
     }
     if (!hasZeroValue) {
       errorConsumer.errorAt(

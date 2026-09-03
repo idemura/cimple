@@ -1,17 +1,7 @@
 package io.lang.cimple.compiler;
 
-import static io.lang.cimple.compiler.ast.AstUtils.*;
 import static org.junit.jupiter.api.Assertions.*;
 
-import io.lang.cimple.compiler.ast.AstBuiltinType;
-import io.lang.cimple.compiler.ast.AstCall;
-import io.lang.cimple.compiler.ast.AstCompoundAssign;
-import io.lang.cimple.compiler.ast.AstExpressionStatement;
-import io.lang.cimple.compiler.ast.AstFunction;
-import io.lang.cimple.compiler.ast.AstFunctionPointerCall;
-import io.lang.cimple.compiler.ast.AstLocal;
-import io.lang.cimple.compiler.ast.AstStatement;
-import io.lang.cimple.compiler.ast.AstVariableRef;
 import java.util.List;
 import org.junit.jupiter.api.Test;
 

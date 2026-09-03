@@ -1,20 +1,21 @@
 package io.lang.cimple.compiler.codegen.c;
 
+import io.lang.cimple.compiler.AstArrayType;
+import io.lang.cimple.compiler.AstBuiltinType;
+import io.lang.cimple.compiler.AstEnumType;
+import io.lang.cimple.compiler.AstFunction;
+import io.lang.cimple.compiler.AstFunctionType;
+import io.lang.cimple.compiler.AstInterfaceType;
+import io.lang.cimple.compiler.AstModule;
+import io.lang.cimple.compiler.AstPointerType;
+import io.lang.cimple.compiler.AstStringType;
+import io.lang.cimple.compiler.AstStructType;
+import io.lang.cimple.compiler.AstType;
+import io.lang.cimple.compiler.AstUnionType;
+import io.lang.cimple.compiler.AstVariable;
+import io.lang.cimple.compiler.AstVisitor;
 import io.lang.cimple.compiler.Identifier;
 import io.lang.cimple.compiler.IndentWriter;
-import io.lang.cimple.compiler.ast.AstArrayType;
-import io.lang.cimple.compiler.ast.AstBuiltinType;
-import io.lang.cimple.compiler.ast.AstEnumType;
-import io.lang.cimple.compiler.ast.AstFunction;
-import io.lang.cimple.compiler.ast.AstFunctionType;
-import io.lang.cimple.compiler.ast.AstModule;
-import io.lang.cimple.compiler.ast.AstPointerType;
-import io.lang.cimple.compiler.ast.AstStringType;
-import io.lang.cimple.compiler.ast.AstStructType;
-import io.lang.cimple.compiler.ast.AstType;
-import io.lang.cimple.compiler.ast.AstUnionType;
-import io.lang.cimple.compiler.ast.AstVariable;
-import io.lang.cimple.compiler.ast.AstVisitor;
 
 class CCodeGeneratorVisitor extends AstVisitor {
   private final IndentWriter out;
@@ -103,6 +104,11 @@ class CCodeGeneratorVisitor extends AstVisitor {
     out.writeLine("");
   }
 
+  @Override
+  protected void visit(AstInterfaceType type) {
+    // Interfaces do not have a direct C representation until dispatch tables are implemented.
+  }
+
   private void emitForwardDeclarations(AstModule module) {
     var emitted = false;
     for (var definition : module.definitions()) {
@@ -131,6 +137,9 @@ class CCodeGeneratorVisitor extends AstVisitor {
       case AstFunctionType ignored ->
           throw new UnsupportedOperationException(
               "C function type emission is not implemented yet");
+      case AstInterfaceType ignored ->
+          throw new UnsupportedOperationException(
+              "C interface type emission is not implemented yet");
       case AstUnionType unionType ->
           "%s %s"
               .formatted(unionType.hasPayload() ? "struct" : "enum", cTypeName(unionType.name()));
@@ -171,8 +180,8 @@ class CCodeGeneratorVisitor extends AstVisitor {
 
   private String cTypeName(Identifier name) {
     if (params.mangleModuleName()) {
-      return "%s__%s".formatted(name.module(), name.type());
+      return "%s__%s".formatted(name.module(), name.entity());
     }
-    return name.type();
+    return name.entity();
   }
 }

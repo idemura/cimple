@@ -1,28 +1,24 @@
 package io.lang.cimple.compiler;
 
-import static com.google.common.base.Preconditions.checkArgument;
-import static io.lang.cimple.compiler.Constants.BUILTIN_MODULE;
+import static com.google.common.base.Preconditions.checkNotNull;
 
 import java.util.Objects;
 
 public final class Identifier implements Comparable<Identifier> {
+  public static final String BUILTIN_MODULE = "_builtin";
+
+  private Location location;
   private String module;
-  private String type;
   private String entity;
 
-  public Identifier(String module, String type, String entity) {
-    checkArgument((type != null) ^ (entity != null));
+  public Identifier(Location location, String module, String entity) {
+    this.location = location;
     this.module = module;
-    this.type = type;
     this.entity = entity;
   }
 
-  public static Identifier of(String entity) {
-    return new Identifier(null, null, entity);
-  }
-
-  public static Identifier ofType(String type) {
-    return new Identifier(null, type, null);
+  public Identifier(String entity) {
+    this(null, null, entity);
   }
 
   public boolean isBuiltin() {
@@ -34,13 +30,21 @@ public final class Identifier implements Comparable<Identifier> {
   }
 
   public Identifier copy() {
-    return new Identifier(module, type, entity);
+    return new Identifier(location, module, entity);
   }
 
-  public Identifier copyValue(Identifier other) {
+  public void assign(Identifier other) {
+    this.location = other.location;
     this.module = other.module;
-    this.type = other.type;
     this.entity = other.entity;
+  }
+
+  public Location location() {
+    return location;
+  }
+
+  public Identifier location(Location location) {
+    this.location = location;
     return this;
   }
 
@@ -49,16 +53,7 @@ public final class Identifier implements Comparable<Identifier> {
   }
 
   public Identifier module(String module) {
-    this.module = module;
-    return this;
-  }
-
-  public String type() {
-    return type;
-  }
-
-  public Identifier type(String type) {
-    this.type = type;
+    this.module = checkNotNull(module);
     return this;
   }
 
@@ -67,7 +62,7 @@ public final class Identifier implements Comparable<Identifier> {
   }
 
   public Identifier entity(String entity) {
-    this.entity = entity;
+    this.entity = checkNotNull(entity);
     return this;
   }
 
@@ -77,16 +72,12 @@ public final class Identifier implements Comparable<Identifier> {
     if (cmp != 0) {
       return cmp;
     }
-    cmp = compareNullable(type, other.type);
-    if (cmp != 0) {
-      return cmp;
-    }
     return compareNullable(entity, other.entity);
   }
 
   @Override
   public int hashCode() {
-    return Objects.hash(module, type, entity);
+    return Objects.hash(module, entity);
   }
 
   @Override
@@ -94,7 +85,6 @@ public final class Identifier implements Comparable<Identifier> {
     return this == object
         || (object instanceof Identifier other
             && Objects.equals(module, other.module)
-            && Objects.equals(type, other.type)
             && Objects.equals(entity, other.entity));
   }
 
@@ -105,15 +95,7 @@ public final class Identifier implements Comparable<Identifier> {
       sb.append(module);
       sb.append("~");
     }
-    if (entity != null) {
-      if (type != null) {
-        sb.append(type);
-        sb.append(".");
-      }
-      sb.append(entity);
-    } else {
-      sb.append(type);
-    }
+    sb.append(entity);
     return sb.toString();
   }
 

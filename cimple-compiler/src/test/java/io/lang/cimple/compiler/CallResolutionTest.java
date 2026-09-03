@@ -1,13 +1,7 @@
 package io.lang.cimple.compiler;
 
-import static io.lang.cimple.compiler.ast.AstUtils.*;
 import static org.junit.jupiter.api.Assertions.*;
 
-import io.lang.cimple.compiler.ast.AstBuiltinType;
-import io.lang.cimple.compiler.ast.AstCall;
-import io.lang.cimple.compiler.ast.AstLocal;
-import io.lang.cimple.compiler.ast.AstStringType;
-import io.lang.cimple.compiler.ast.AstVariableRef;
 import java.util.List;
 import org.junit.jupiter.api.Test;
 
@@ -114,7 +108,7 @@ class CallResolutionTest extends AbstractSemanticsTest {
     var call = (AstCall) extractReturnExpression(clientModule.findFunction("f"));
     var function = call.function();
     assertSame(serverModule.findFunction("make"), function.function());
-    assertEquals(Identifier.of("make").module("server"), function.name());
+    assertEquals(new Identifier("make").module("server"), function.name());
     assertEquals(AstBuiltinType.INT64, call.type());
   }
 
@@ -161,7 +155,7 @@ class CallResolutionTest extends AbstractSemanticsTest {
     {
       var block = module.findFunction("g").block();
       var local = (AstLocal) block.statements().get(0);
-      assertEquals(Identifier.of("t"), local.variable().name());
+      assertEquals(new Identifier("t"), local.variable().name());
       assertEquals(AstStringType.INSTANCE, local.variable().type());
       var call = (AstCall) local.variable().expression().get();
       assertEquals(newFunctionRef("test", "f"), call.function());

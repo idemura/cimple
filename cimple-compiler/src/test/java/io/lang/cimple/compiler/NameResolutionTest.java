@@ -1,9 +1,7 @@
 package io.lang.cimple.compiler;
 
-import static io.lang.cimple.compiler.ast.AstUtils.extractReturnExpression;
+import static io.lang.cimple.compiler.AstUtils.extractReturnExpression;
 import static org.junit.jupiter.api.Assertions.*;
-import io.lang.cimple.compiler.ast.AstCall;
-import io.lang.cimple.compiler.ast.AstVariableRef;
 import org.junit.jupiter.api.Test;
 import java.util.List;
 

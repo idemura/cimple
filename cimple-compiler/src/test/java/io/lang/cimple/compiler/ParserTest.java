@@ -1,34 +1,9 @@
 package io.lang.cimple.compiler;
 
 import static io.lang.cimple.compiler.Parser.parseCode;
-import static io.lang.cimple.compiler.ast.AstUtils.*;
 import static org.junit.jupiter.api.Assertions.*;
 
 import com.google.common.collect.ImmutableList;
-import io.lang.cimple.compiler.ast.AstArrayAccess;
-import io.lang.cimple.compiler.ast.AstArrayType;
-import io.lang.cimple.compiler.ast.AstAssign;
-import io.lang.cimple.compiler.ast.AstBreak;
-import io.lang.cimple.compiler.ast.AstCall;
-import io.lang.cimple.compiler.ast.AstCast;
-import io.lang.cimple.compiler.ast.AstCompoundAssign;
-import io.lang.cimple.compiler.ast.AstDefer;
-import io.lang.cimple.compiler.ast.AstDelete;
-import io.lang.cimple.compiler.ast.AstEnumType;
-import io.lang.cimple.compiler.ast.AstExpressionStatement;
-import io.lang.cimple.compiler.ast.AstFieldAccess;
-import io.lang.cimple.compiler.ast.AstFor;
-import io.lang.cimple.compiler.ast.AstFunctionPointerCall;
-import io.lang.cimple.compiler.ast.AstFunctionType;
-import io.lang.cimple.compiler.ast.AstIf;
-import io.lang.cimple.compiler.ast.AstLocal;
-import io.lang.cimple.compiler.ast.AstNew;
-import io.lang.cimple.compiler.ast.AstNumberLiteral;
-import io.lang.cimple.compiler.ast.AstReturn;
-import io.lang.cimple.compiler.ast.AstStructType;
-import io.lang.cimple.compiler.ast.AstUnionType;
-import io.lang.cimple.compiler.ast.AstVariable;
-import io.lang.cimple.compiler.ast.AstVariableRef;
 import java.util.List;
 import org.junit.jupiter.api.Test;
 
@@ -40,19 +15,19 @@ class ParserTest {
   }
 
   private static void assertEnumVariant(
-      AstEnumType.Variant variant, String name, String valueExpression) {
+      AstEnumVariant variant, String name, String valueExpression) {
     assertEquals(name, variant.tag());
     if (valueExpression == null) {
-      assertNull(variant.valueExpression());
+      assertNull(variant.expression());
     } else {
-      var expression = (AstNumberLiteral) variant.valueExpression();
+      var expression = (AstNumberLiteral) variant.expression();
       assertEquals(valueExpression, expression.value());
     }
   }
 
   private static void assertVariableSyntax(
       AstVariable variable, String name, String typeName, Long value) {
-    assertEquals(Identifier.of(name), variable.name());
+    assertEquals(new Identifier(name), variable.name());
     if (typeName == null) {
       assertNull(variable.type());
     } else {
@@ -135,13 +110,13 @@ class ParserTest {
     assertEquals("test", module.name());
     {
       var f = module.findFunction("f0");
-      assertEquals(Identifier.of("f0"), f.name());
+      assertEquals(new Identifier("f0"), f.name());
       assertNull(f.header().resultType());
       assertEquals(ImmutableList.of(), f.header().parameters());
     }
     {
       var f = module.findFunction("f1");
-      assertEquals(Identifier.of("f1"), f.name());
+      assertEquals(new Identifier("f1"), f.name());
       assertNull(f.header().resultType());
       var params = f.header().parameters();
       assertEquals(1, params.size());
@@ -149,7 +124,7 @@ class ParserTest {
     }
     {
       var f = module.findFunction("f2");
-      assertEquals(Identifier.of("f2"), f.name());
+      assertEquals(new Identifier("f2"), f.name());
       assertNull(f.header().resultType());
       var params = f.header().parameters();
       assertEquals(2, params.size());
@@ -158,61 +133,61 @@ class ParserTest {
     }
     {
       var f = module.findFunction("rv");
-      assertEquals(Identifier.of("rv"), f.name());
+      assertEquals(new Identifier("rv"), f.name());
       assertEquals(newTypeRef("int"), f.header().resultType());
       assertEquals(ImmutableList.of(), f.header().parameters());
     }
     {
       var v = module.findVariable("v0");
-      assertEquals(Identifier.of("v0"), v.name());
+      assertEquals(new Identifier("v0"), v.name());
       assertEquals(newTypeRef("int"), v.type());
       assertTrue(v.getBit(AstVariable.MUTABLE));
     }
     {
       var v = module.findVariable("v1");
-      assertEquals(Identifier.of("v1"), v.name());
+      assertEquals(new Identifier("v1"), v.name());
       assertEquals(newTypeRef("int"), v.type());
       assertTrue(v.getBit(AstVariable.MUTABLE));
     }
     {
       var v = module.findVariable("v2");
-      assertEquals(Identifier.of("v2"), v.name());
+      assertEquals(new Identifier("v2"), v.name());
       assertNull(v.type());
       assertTrue(v.getBit(AstVariable.MUTABLE));
     }
     {
       var v = module.findVariable("p");
-      assertEquals(Identifier.of("p"), v.name());
+      assertEquals(new Identifier("p"), v.name());
       assertEquals(pointerType(newTypeRef("int")), v.type());
       assertTrue(v.getBit(AstVariable.MUTABLE));
     }
     {
       var v = module.findVariable("pp");
-      assertEquals(Identifier.of("pp"), v.name());
+      assertEquals(new Identifier("pp"), v.name());
       assertEquals(pointerType(pointerType(newTypeRef("int"))), v.type());
       assertTrue(v.getBit(AstVariable.MUTABLE));
     }
     {
       var v = module.findVariable("a");
-      assertEquals(Identifier.of("a"), v.name());
+      assertEquals(new Identifier("a"), v.name());
       assertEquals(arrayType(newTypeRef("int")), v.type());
       assertTrue(v.getBit(AstVariable.MUTABLE));
     }
     {
       var v = module.findVariable("ap");
-      assertEquals(Identifier.of("ap"), v.name());
+      assertEquals(new Identifier("ap"), v.name());
       assertEquals(arrayType(pointerType(newTypeRef("int"))), v.type());
       assertTrue(v.getBit(AstVariable.MUTABLE));
     }
     {
       var v = module.findVariable("apa");
-      assertEquals(Identifier.of("apa"), v.name());
+      assertEquals(new Identifier("apa"), v.name());
       assertEquals(arrayType(pointerType(arrayType(newTypeRef("int")))), v.type());
       assertTrue(v.getBit(AstVariable.MUTABLE));
     }
     {
       var v = module.findVariable("c0");
-      assertEquals(Identifier.of("c0"), v.name());
+      assertEquals(new Identifier("c0"), v.name());
       assertEquals(newTypeRef("int"), v.type());
       assertFalse(v.getBit(AstVariable.MUTABLE));
     }
@@ -228,7 +203,7 @@ class ParserTest {
     var module = parseCode(code, makeErrorConsumer());
     {
       var f = module.findFunction("external");
-      assertEquals(Identifier.of("external"), f.name());
+      assertEquals(new Identifier("external"), f.name());
       assertEquals(newTypeRef("string"), f.header().resultType());
       assertEquals(ImmutableList.of(rawVariable("x", "int")), f.header().parameters());
       assertNull(f.block());
@@ -251,30 +226,30 @@ class ParserTest {
     assertEquals("test", module.name());
     {
       var type = (AstStructType) module.findType("Empty");
-      assertEquals(Identifier.ofType("Empty"), type.name());
+      assertEquals(new IdentifierType("Empty"), type.name());
       assertEquals(ImmutableList.of(), type.fields());
     }
     {
       var type = (AstStructType) module.findType("Point");
-      assertEquals(Identifier.ofType("Point"), type.name());
+      assertEquals(new IdentifierType("Point"), type.name());
       var fields = type.fields();
       assertEquals(3, fields.size());
       int j = 0;
       {
         var f = fields.get(j++);
-        assertEquals(Identifier.of("x"), f.name());
+        assertEquals(new Identifier("x"), f.name());
         assertEquals(newTypeRef("int"), f.type());
         assertTrue(f.getBit(AstVariable.MUTABLE));
       }
       {
         var f = fields.get(j++);
-        assertEquals(Identifier.of("y"), f.name());
+        assertEquals(new Identifier("y"), f.name());
         assertEquals(newTypeRef("int"), f.type());
         assertTrue(f.getBit(AstVariable.MUTABLE));
       }
       {
         var f = fields.get(j++);
-        assertEquals(Identifier.of("name"), f.name());
+        assertEquals(new Identifier("name"), f.name());
         assertEquals(newTypeRef("string"), f.type());
         assertFalse(f.getBit(AstVariable.MUTABLE));
       }
@@ -294,7 +269,7 @@ class ParserTest {
     var module = parseCode(code, makeErrorConsumer());
     assertEquals("test", module.name());
     var type = (AstUnionType) module.findType("Maybe");
-    assertEquals(Identifier.ofType("Maybe"), type.name());
+    assertEquals(new IdentifierType("Maybe"), type.name());
     assertEquals(
         ImmutableList.of(unionVariant("None", null), unionVariant("Some", "string")),
         type.variants());
@@ -314,7 +289,7 @@ class ParserTest {
     var module = parseCode(code, makeErrorConsumer());
     assertEquals("test", module.name());
     var type = (AstEnumType) module.findType("Color");
-    assertEquals(Identifier.ofType("Color"), type.name());
+    assertEquals(new IdentifierType("Color"), type.name());
     assertEquals(newTypeRef("int32"), type.baseType());
     var variants = type.variants();
     assertEquals(3, variants.size());
@@ -346,7 +321,7 @@ class ParserTest {
     assertEquals("test", module.name());
     {
       var type = (AstFunctionType) module.findType("Compare");
-      assertEquals(Identifier.ofType("Compare"), type.name());
+      assertEquals(new IdentifierType("Compare"), type.name());
       assertEquals(newTypeRef("bool"), type.header().resultType());
       var params = type.header().parameters();
       assertEquals(2, params.size());
@@ -355,15 +330,49 @@ class ParserTest {
     }
     {
       var type = (AstFunctionType) module.findType("Supplier");
-      assertEquals(Identifier.ofType("Supplier"), type.name());
+      assertEquals(new IdentifierType("Supplier"), type.name());
       assertEquals(newTypeRef("string"), type.header().resultType());
       assertEquals(ImmutableList.of(), type.header().parameters());
     }
     {
       var type = (AstFunctionType) module.findType("Consumer");
-      assertEquals(Identifier.ofType("Consumer"), type.name());
+      assertEquals(new IdentifierType("Consumer"), type.name());
       assertNull(type.header().resultType());
       assertEquals(ImmutableList.of(rawVariable("v", "string")), type.header().parameters());
+    }
+  }
+
+  @Test
+  void testInterfaceType() {
+    var code =
+        """
+        module test;
+        type interface Reader {
+          function read(buffer string) int;
+          function close();
+        }
+        """;
+    var module = parseCode(code, makeErrorConsumer());
+    var type = (AstInterfaceType) module.findType("Reader");
+    assertEquals(new IdentifierType("Reader"), type.name());
+    var functions = type.functions();
+    assertEquals(2, functions.size());
+    {
+      var function = functions.get(0);
+      assertEquals(new Identifier("read"), function.name());
+      assertEquals(new Identifier("read"), function.header().name());
+      assertNull(function.block());
+      assertEquals(newTypeRef("int"), function.header().resultType());
+      assertEquals(
+          ImmutableList.of(rawVariable("buffer", "string")), function.header().parameters());
+    }
+    {
+      var function = functions.get(1);
+      assertEquals(new Identifier("close"), function.name());
+      assertEquals(new Identifier("close"), function.header().name());
+      assertNull(function.block());
+      assertNull(function.header().resultType());
+      assertEquals(ImmutableList.of(), function.header().parameters());
     }
   }
 
@@ -938,7 +947,7 @@ class ParserTest {
     {
       var stmt = (AstFor) statements.get(i++);
       var init = stmt.init().variable();
-      assertEquals(Identifier.of("i"), init.name());
+      assertEquals(new Identifier("i"), init.name());
       assertNull(init.type());
       assertEquals(AstNumberLiteral.of(0), init.expression().get());
       assertEquals(newVariableRef("true"), stmt.condition().get());
@@ -948,7 +957,7 @@ class ParserTest {
     {
       var stmt = (AstFor) statements.get(i++);
       var init = stmt.init().variable();
-      assertEquals(Identifier.of("i"), init.name());
+      assertEquals(new Identifier("i"), init.name());
       assertNull(init.type());
       assertEquals(AstNumberLiteral.of(0), init.expression().get());
       assertEquals(newVariableRef("true"), stmt.condition().get());

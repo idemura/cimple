@@ -2,11 +2,6 @@ package io.lang.cimple.compiler;
 
 import static org.junit.jupiter.api.Assertions.*;
 import com.google.common.collect.ImmutableList;
-import io.lang.cimple.compiler.ast.AstBuiltinType;
-import io.lang.cimple.compiler.ast.AstFunction;
-import io.lang.cimple.compiler.ast.AstFunctionHeader;
-import io.lang.cimple.compiler.ast.AstType;
-import io.lang.cimple.compiler.ast.AstVariable;
 import org.junit.jupiter.api.Test;
 import java.util.List;
 
@@ -19,16 +14,15 @@ class FunctionSignatureTest {
     var parameters = new ImmutableList.Builder<AstVariable>();
     for (var i = 0; i < parameterTypes.length; i++) {
       var parameter = new AstVariable();
-      parameter.name(Identifier.of("p" + i));
+      parameter.name(new Identifier("p" + i));
       parameter.type(parameterTypes[i]);
       parameters.add(parameter);
     }
 
-    var header = new AstFunctionHeader();
-    header.parameters(parameters.build());
-
     var function = new AstFunction();
-    function.name(Identifier.of(name).module(moduleName));
+    var identifier = new Identifier(name).module(moduleName);
+    var header = new AstFunctionHeader(identifier, parameters.build(), null);
+    function.name(identifier);
     function.header(header);
     return function;
   }

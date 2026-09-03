@@ -2,11 +2,6 @@ package io.lang.cimple.compiler;
 
 import static io.lang.cimple.compiler.TypeValidator.checkRecursiveTypeDefinitions;
 
-import io.lang.cimple.compiler.ast.AstEntity;
-import io.lang.cimple.compiler.ast.AstFunction;
-import io.lang.cimple.compiler.ast.AstModule;
-import io.lang.cimple.compiler.ast.AstType;
-import io.lang.cimple.compiler.ast.AstVariable;
 import java.util.List;
 
 public class SemanticAnalyzer {
@@ -47,7 +42,6 @@ public class SemanticAnalyzer {
       return false;
     }
 
-    assignFunctionTypes(modules);
     for (var module : modules) {
       module.accept(new TypeCheckAndResolveNamesVisitor(globalNameMap, errorConsumer));
       if (hasErrors()) {
@@ -73,23 +67,12 @@ public class SemanticAnalyzer {
   }
 
   private void qualifyTopLevelNames(AstModule module) {
+    var moduleName = module.name().entity();
     for (var def : module.definitions()) {
       if (def instanceof AstEntity entity) {
         var name = entity.name();
         if (name.module() == null) {
-          entity.name(qualifyName(name, module.name()));
-        }
-      }
-    }
-  }
-
-  private void assignFunctionTypes(List<AstModule> modules) {
-    // Function references expose their type through AstFunctionRef.type(), so synthetic function
-    // types must exist before any module starts resolving calls.
-    for (var module : modules) {
-      for (var def : module.definitions()) {
-        if (def instanceof AstFunction function) {
-          function.makeLambdaType();
+          entity.name().module(moduleName);
         }
       }
     }
@@ -97,9 +80,10 @@ public class SemanticAnalyzer {
 
   private void collectTypes(List<AstModule> modules) {
     for (var module : modules) {
+      var moduleName = module.name().entity();
       for (var def : module.definitions()) {
         if (def instanceof AstType type) {
-          type.name(qualifyName(type.name(), module.name()));
+          type.name().module(moduleName);
           var existing = globalNameMap.addType(type);
           if (existing != null) {
             errorConsumer.errorAt(
@@ -128,7 +112,7 @@ public class SemanticAnalyzer {
             if (existing != null) {
               errorEntityCollision(variable, existing);
             }
-            variable.setBit(AstVariable.GLOBAL);
+            variable.flags(AstVariable.GLOBAL);
           }
           default -> {}
         }

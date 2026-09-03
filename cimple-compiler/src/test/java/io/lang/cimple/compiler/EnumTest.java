@@ -2,10 +2,6 @@ package io.lang.cimple.compiler;
 
 import static org.junit.jupiter.api.Assertions.*;
 
-import io.lang.cimple.compiler.ast.AstBuiltinType;
-import io.lang.cimple.compiler.ast.AstEnumType;
-import io.lang.cimple.compiler.ast.AstModule;
-import io.lang.cimple.compiler.ast.AstNumberLiteral;
 import java.util.List;
 import org.junit.jupiter.api.Test;
 
@@ -155,7 +151,7 @@ class EnumTest extends AbstractSemanticsTest {
     var module = parseCode(code);
     var literal = new AstNumberLiteral(1.5);
     literal.type(AstBuiltinType.FLOAT64);
-    enumType(module, "E").variants().get(0).valueExpression(literal);
+    enumType(module, "E").variants().get(0).expression(literal);
 
     new SemanticAnalyzer(errorConsumer).analyze(List.of(module));
     assertEquals(

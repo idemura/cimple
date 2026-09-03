@@ -1,11 +1,5 @@
 package io.lang.cimple.compiler;
 
-import io.lang.cimple.compiler.ast.AstBuiltinType;
-import io.lang.cimple.compiler.ast.AstEntity;
-import io.lang.cimple.compiler.ast.AstFunction;
-import io.lang.cimple.compiler.ast.AstStringType;
-import io.lang.cimple.compiler.ast.AstType;
-import io.lang.cimple.compiler.ast.AstVariable;
 import java.util.LinkedHashMap;
 import java.util.Map;
 
@@ -36,7 +30,7 @@ public class GlobalNameMap {
     for (var type : typeMap.values()) {
       var name = type.name();
       if (moduleName.equals(name.module())) {
-        var existing = result.putIfAbsent(name.type(), type);
+        var existing = result.putIfAbsent(name.entity(), type);
         if (existing != null) {
           errorConsumer.errorAt(
               type.location(),
@@ -83,7 +77,7 @@ public class GlobalNameMap {
 
   public AstType lookupType(Identifier name) {
     if (name.isBuiltin()) {
-      return lookupBuiltinType(name.type());
+      return lookupBuiltinType(name.entity());
     }
     return typeMap.get(name);
   }

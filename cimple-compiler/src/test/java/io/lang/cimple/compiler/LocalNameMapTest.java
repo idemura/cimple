@@ -1,9 +1,7 @@
 package io.lang.cimple.compiler;
 
-import static io.lang.cimple.compiler.ast.AstUtils.*;
 import static org.junit.jupiter.api.Assertions.*;
 
-import io.lang.cimple.compiler.ast.AstVariable;
 import org.junit.jupiter.api.Test;
 
 class LocalNameMapTest {

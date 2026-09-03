@@ -3,30 +3,6 @@ package io.lang.cimple.compiler;
 import static java.lang.Double.parseDouble;
 import static java.lang.Long.parseLong;
 
-import io.lang.cimple.compiler.ast.AstAssign;
-import io.lang.cimple.compiler.ast.AstBoolLiteral;
-import io.lang.cimple.compiler.ast.AstBuiltinType;
-import io.lang.cimple.compiler.ast.AstCall;
-import io.lang.cimple.compiler.ast.AstCompoundAssign;
-import io.lang.cimple.compiler.ast.AstEnumType;
-import io.lang.cimple.compiler.ast.AstExpression;
-import io.lang.cimple.compiler.ast.AstExpressionRewriteVisitor;
-import io.lang.cimple.compiler.ast.AstFunction;
-import io.lang.cimple.compiler.ast.AstFunctionHeader;
-import io.lang.cimple.compiler.ast.AstFunctionRef;
-import io.lang.cimple.compiler.ast.AstFunctionType;
-import io.lang.cimple.compiler.ast.AstLocal;
-import io.lang.cimple.compiler.ast.AstModule;
-import io.lang.cimple.compiler.ast.AstNew;
-import io.lang.cimple.compiler.ast.AstNullLiteral;
-import io.lang.cimple.compiler.ast.AstNumberLiteral;
-import io.lang.cimple.compiler.ast.AstStringLiteral;
-import io.lang.cimple.compiler.ast.AstStringType;
-import io.lang.cimple.compiler.ast.AstStructType;
-import io.lang.cimple.compiler.ast.AstTypeRef;
-import io.lang.cimple.compiler.ast.AstUnionType;
-import io.lang.cimple.compiler.ast.AstVariable;
-import io.lang.cimple.compiler.ast.AstVariableRef;
 import java.util.HashMap;
 
 // Runs AST checks and rewrites that do not require name resolution:
@@ -34,7 +10,7 @@ import java.util.HashMap;
 //  - Marks parameters and locals
 //  - Sets missing function result types to void
 //  - Checks that variables have either a type or an initializer
-//  - Checks duplicate function parameters, struct fields, union variants, and enum variants.
+//  - Checks duplicate function parameters, struct fields, union variants, and enum variants
 //  - Normalizes builtin type aliases (int)
 //  - Rejects nested assignments
 //  - Types literal nodes
@@ -50,16 +26,13 @@ class PreprocessVisitor extends AstExpressionRewriteVisitor {
   @Override
   protected void visit(AstModule node) {
     module = node;
-    checkName(node.name(), node.location());
+    checkIdentifier(node.name());
     super.visit(node);
   }
 
   @Override
-  protected void visit(AstFunctionHeader node) {
-    for (var parameter : node.parameters()) {
-      parameter.setBit(AstVariable.PARAMETER);
-    }
-    // Default the result type to void when it is omitted.
+  protected void visit(AstFunction node) {
+    checkIdentifier(node.name());
     if (node.resultType() == null) {
       node.resultType(AstBuiltinType.VOID);
     }
@@ -67,27 +40,8 @@ class PreprocessVisitor extends AstExpressionRewriteVisitor {
   }
 
   @Override
-  protected void visit(AstFunction node) {
-    checkIdentifier(node.name(), node.location());
-    checkParameterTypes(node.name(), node.header());
-    super.visit(node);
-  }
-
-  private void checkParameterTypes(Identifier functionName, AstFunctionHeader header) {
-    for (var parameter : header.parameters()) {
-      if (parameter.type() == null) {
-        errorConsumer.errorAt(
-            parameter.location(),
-            "Function '%s' parameter '%s' must have a type",
-            functionName,
-            parameter.name());
-      }
-    }
-  }
-
-  @Override
   protected void visit(AstVariable node) {
-    checkIdentifier(node.name(), node.location());
+    checkIdentifier(node.name());
     if (!node.getBit(AstVariable.PARAMETER) && node.type() == null && node.expression() == null) {
       errorConsumer.errorAt(
           node.location(), "Variable '%s' must have a type or an initializer", node.name());
@@ -103,20 +57,18 @@ class PreprocessVisitor extends AstExpressionRewriteVisitor {
 
   @Override
   protected void visit(AstFunctionType node) {
-    checkIdentifier(node.name(), node.location());
-    checkParameterTypes(node.name(), node.header());
     super.visit(node);
   }
 
   @Override
-  protected void visit(AstLocal node) {
-    node.variable().setBit(AstVariable.LOCAL);
+  protected void visit(AstInterfaceType node) {
+    checkIdentifier(node.name());
     super.visit(node);
   }
 
   @Override
   protected void visit(AstStructType node) {
-    checkIdentifier(node.name(), node.location());
+    checkIdentifier(node.name());
     var fieldMap = new HashMap<String, AstVariable>();
     for (var field : node.fields()) {
       var existing = fieldMap.putIfAbsent(field.name().entity(), field);
@@ -133,35 +85,41 @@ class PreprocessVisitor extends AstExpressionRewriteVisitor {
 
   @Override
   protected void visit(AstUnionType node) {
-    checkIdentifier(node.name(), node.location());
-    var variantMap = new HashMap<String, AstUnionType.Variant>();
+    checkIdentifier(node.name());
+    var variantMap = new HashMap<Identifier, AstUnionVariant>();
     for (var variant : node.variants()) {
-      checkTagName(variant.tag(), node.location());
+      checkIdentifier(variant.tag());
       var existing = variantMap.putIfAbsent(variant.tag(), variant);
       if (existing != null) {
         errorConsumer.errorAt(
-            variant.location(),
+            variant.tag().location(),
             "Duplicate union variant '%s'. First defined at %s.",
             variant.tag(),
-            existing.location());
+            existing.tag().location());
       }
     }
     super.visit(node);
   }
 
   @Override
+  protected void visit(AstLocal node) {
+    node.variable().flags(AstVariable.LOCAL);
+    super.visit(node);
+  }
+
+  @Override
   protected void visit(AstEnumType node) {
-    checkIdentifier(node.name(), node.location());
-    var variantMap = new HashMap<String, AstEnumType.Variant>();
+    checkIdentifier(node.name());
+    var variantMap = new HashMap<String, AstEnumVariant>();
     for (var variant : node.variants()) {
-      checkTagName(variant.tag(), node.location());
-      var existing = variantMap.putIfAbsent(variant.tag(), variant);
+      checkIdentifier(variant.tag());
+      var existing = variantMap.putIfAbsent(variant.tag().entity(), variant);
       if (existing != null) {
         errorConsumer.errorAt(
-            variant.location(),
+            variant.tag().location(),
             "Duplicate enum variant '%s'. First defined at %s.",
-            variant.tag(),
-            existing.location());
+            variant.tag().entity(),
+            existing.tag().location());
       }
     }
     super.visit(node);
@@ -217,13 +175,12 @@ class PreprocessVisitor extends AstExpressionRewriteVisitor {
     var value = (String) node.value();
     try {
       if (value.contains(".")) {
-        number = new AstNumberLiteral(parseDouble(value));
+        number = new AstNumberLiteral(node.location(), parseDouble(value));
         number.type(AstBuiltinType.FLOAT64);
       } else {
-        number = new AstNumberLiteral(parseLong(value));
+        number = new AstNumberLiteral(node.location(), parseLong(value));
         number.type(AstBuiltinType.INT64);
       }
-      number.location(node.location());
       return number;
     } catch (NumberFormatException e) {
       errorConsumer.errorAt(node.location(), "Invalid number '%s': %s", value, e.getMessage());
@@ -239,29 +196,24 @@ class PreprocessVisitor extends AstExpressionRewriteVisitor {
 
   @Override
   public AstExpression rewrite(AstVariableRef node) {
-    var newNode =
-        switch (node.name().entity()) {
-          case "true" -> {
-            var literal = new AstBoolLiteral(true);
-            literal.type(AstBuiltinType.BOOL);
-            yield literal;
-          }
-          case "false" -> {
-            var literal = new AstBoolLiteral(false);
-            literal.type(AstBuiltinType.BOOL);
-            yield literal;
-          }
-          case "null" -> {
-            var literal = new AstNullLiteral();
-            literal.type(AstBuiltinType.NULL);
-            yield literal;
-          }
-          default -> node;
-        };
-    if (newNode != node) {
-      newNode.location(node.location());
-    }
-    return newNode;
+    return switch (node.name().entity()) {
+      case "true" -> {
+        var literal = new AstBoolLiteral(node.location(), true);
+        literal.type(AstBuiltinType.BOOL);
+        yield literal;
+      }
+      case "false" -> {
+        var literal = new AstBoolLiteral(node.location(), false);
+        literal.type(AstBuiltinType.BOOL);
+        yield literal;
+      }
+      case "null" -> {
+        var literal = new AstNullLiteral(node.location());
+        literal.type(AstBuiltinType.NULL);
+        yield literal;
+      }
+      default -> node;
+    };
   }
 
   @Override
@@ -269,28 +221,15 @@ class PreprocessVisitor extends AstExpressionRewriteVisitor {
     return super.rewrite(node);
   }
 
-  private void checkIdentifier(Identifier ident, Location location) {
-    if (!ident.isBuiltin()) {
-      checkName(ident.module(), location);
-      var type = ident.type();
-      if (type != null) {
-        checkUnderscoreRules(type, location);
-        if (Keyword.isReservedTypeName(type)) {
-          errorConsumer.errorAt(location, "Reserved word '%s' cannot be used as type name", ident);
-        }
-      }
-      checkName(ident.entity(), location);
+  private void checkIdentifier(Identifier name) {
+    if (name == null) {
+      return;
     }
+    checkNameString(name.module(), name.location());
+    checkNameString(name.entity(), name.location());
   }
 
-  private void checkTagName(String tag, Location location) {
-    checkUnderscoreRules(tag, location);
-    if (Keyword.isReservedTypeName(tag)) {
-      errorConsumer.errorAt(location, "Reserved word '%s' cannot be used as tag", tag);
-    }
-  }
-
-  private void checkName(String name, Location location) {
+  private void checkNameString(String name, Location location) {
     if (name == null) {
       return;
     }
@@ -301,10 +240,6 @@ class PreprocessVisitor extends AstExpressionRewriteVisitor {
   }
 
   private void checkUnderscoreRules(String name, Location location) {
-    if (module.builtin()) {
-      // Exception for builtin modules.
-      return;
-    }
     if (name.startsWith("_")) {
       errorConsumer.errorAt(location, "Identifier '%s' cannot start with '_'", name);
     }

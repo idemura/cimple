@@ -2,38 +2,9 @@ package io.lang.cimple.compiler;
 
 import static com.google.common.base.Preconditions.checkArgument;
 import static com.google.common.base.Preconditions.checkNotNull;
-import static io.lang.cimple.compiler.ast.AstBuiltinType.isIntegerType;
+import static io.lang.cimple.compiler.AstBuiltinType.isIntegerType;
+
 import com.google.common.collect.ImmutableList;
-import io.lang.cimple.compiler.ast.AstArrayAccess;
-import io.lang.cimple.compiler.ast.AstArrayType;
-import io.lang.cimple.compiler.ast.AstBlock;
-import io.lang.cimple.compiler.ast.AstBreak;
-import io.lang.cimple.compiler.ast.AstBuiltinType;
-import io.lang.cimple.compiler.ast.AstCall;
-import io.lang.cimple.compiler.ast.AstCompoundAssign;
-import io.lang.cimple.compiler.ast.AstDelete;
-import io.lang.cimple.compiler.ast.AstEnumType;
-import io.lang.cimple.compiler.ast.AstExpression;
-import io.lang.cimple.compiler.ast.AstExpressionRewriteVisitor;
-import io.lang.cimple.compiler.ast.AstFieldAccess;
-import io.lang.cimple.compiler.ast.AstFor;
-import io.lang.cimple.compiler.ast.AstFunction;
-import io.lang.cimple.compiler.ast.AstFunctionHeader;
-import io.lang.cimple.compiler.ast.AstFunctionPointerCall;
-import io.lang.cimple.compiler.ast.AstFunctionRef;
-import io.lang.cimple.compiler.ast.AstFunctionType;
-import io.lang.cimple.compiler.ast.AstLocal;
-import io.lang.cimple.compiler.ast.AstModule;
-import io.lang.cimple.compiler.ast.AstNumberLiteral;
-import io.lang.cimple.compiler.ast.AstPointerType;
-import io.lang.cimple.compiler.ast.AstStringType;
-import io.lang.cimple.compiler.ast.AstStructType;
-import io.lang.cimple.compiler.ast.AstType;
-import io.lang.cimple.compiler.ast.AstTypeHolder;
-import io.lang.cimple.compiler.ast.AstTypeRef;
-import io.lang.cimple.compiler.ast.AstUnionType;
-import io.lang.cimple.compiler.ast.AstVariable;
-import io.lang.cimple.compiler.ast.AstVariableRef;
 import java.util.List;
 
 public class TypeCheckAndResolveNamesVisitor extends AstExpressionRewriteVisitor {
@@ -51,12 +22,7 @@ public class TypeCheckAndResolveNamesVisitor extends AstExpressionRewriteVisitor
   @Override
   protected void visit(AstModule node) {
     module = node;
-    localNameMap = globalNameMap.collectVariables(module.name(), errorConsumer);
-    super.visit(node);
-  }
-
-  @Override
-  protected void visit(AstFunctionHeader node) {
+    localNameMap = globalNameMap.collectVariables(module.name().entity(), errorConsumer);
     super.visit(node);
   }
 
@@ -64,7 +30,7 @@ public class TypeCheckAndResolveNamesVisitor extends AstExpressionRewriteVisitor
   protected void visit(AstFunction node) {
     try {
       localNameMap.beginScope();
-      for (var parameter : node.header().parameters()) {
+      for (var parameter : node.parameters()) {
         registerLocal(parameter);
       }
       super.visit(node);
@@ -110,13 +76,13 @@ public class TypeCheckAndResolveNamesVisitor extends AstExpressionRewriteVisitor
     super.visit(node);
 
     for (var variant : node.variants()) {
-      var valueExpression = variant.valueExpression();
+      var valueExpression = variant.expression();
       if (valueExpression != null) {
         if (valueExpression instanceof AstNumberLiteral) {
           var valueType = checkNotNull(valueExpression.type());
           if (!isIntegerType(valueType)) {
             errorConsumer.errorAt(
-                variant.location(),
+                variant.tag().location(),
                 "Enum variant '%s' value has type '%s', expected integer",
                 variant.tag(),
                 valueType.formatName());
@@ -124,7 +90,7 @@ public class TypeCheckAndResolveNamesVisitor extends AstExpressionRewriteVisitor
         } else {
           // TODO: Remove one constant folding works.
           errorConsumer.errorAt(
-              variant.location(),
+              variant.tag().location(),
               "Enum variant '%s' value must be a number literal",
               variant.tag());
         }
@@ -177,7 +143,7 @@ public class TypeCheckAndResolveNamesVisitor extends AstExpressionRewriteVisitor
   @Override
   protected void visit(AstDelete node) {
     super.visit(node);
-    var expression = node.expression().get();
+    var expression = node.expression();
     switch (expression.type()) {
       case AstPointerType pointerType -> {
         // TODO: Generate defer call.
@@ -209,7 +175,7 @@ public class TypeCheckAndResolveNamesVisitor extends AstExpressionRewriteVisitor
       errorConsumer.errorAt(node.location(), "Undefined name: '%s'", node.name());
       return node;
     }
-    node.name().copyValue(variable.name());
+    node.name().assign(variable.name());
     node.variable(variable);
     return node;
   }
@@ -274,18 +240,26 @@ public class TypeCheckAndResolveNamesVisitor extends AstExpressionRewriteVisitor
     if (!function.isResolved()) {
       return node;
     }
-    checkFunctionCallParameters(
-        function.type(), node.arguments(), node.location(), calleeExpressionMessage(function));
+    checkFunctionArguments(
+        function.function(), node.arguments(), node.location(), calleeExpressionMessage(function));
     return node;
   }
 
   @Override
   public AstExpression rewrite(AstFunctionPointerCall node) {
-    checkFunctionCallParameters(
-        node.function().type(),
-        node.arguments(),
-        node.location(),
-        calleeExpressionMessage(node.function()));
+    var function = node.function();
+    if (function.type() instanceof AstFunctionType functionType) {
+      checkFunctionArguments(
+          functionType.function(),
+          node.arguments(),
+          node.location(),
+          calleeExpressionMessage(node.function()));
+    } else {
+      errorConsumer.errorAt(
+          node.location(),
+          "Function pointer call requires a function type. Instead: '%s'",
+          function.type());
+    }
     return node;
   }
 
@@ -313,10 +287,9 @@ public class TypeCheckAndResolveNamesVisitor extends AstExpressionRewriteVisitor
           case ">" -> BuiltinFunctions.GT_I64;
           case ">=" -> BuiltinFunctions.GE_I64;
           default ->
-              throw new IllegalStateException(
-                  "Unknown builtin entity '%s'".formatted(ref.name()));
+              throw new IllegalStateException("Unknown builtin entity '%s'".formatted(ref.name()));
         };
-    ref.name().copyValue(function.name());
+    ref.name().assign(function.name());
     ref.function(function);
   }
 
@@ -335,7 +308,7 @@ public class TypeCheckAndResolveNamesVisitor extends AstExpressionRewriteVisitor
           ref.location(), "Undefined function: '%s'", formatSignature(name.module(), signature));
       return;
     }
-    ref.name().copyValue(function.name());
+    ref.name().assign(function.name());
     ref.function(function);
   }
 
@@ -366,38 +339,21 @@ public class TypeCheckAndResolveNamesVisitor extends AstExpressionRewriteVisitor
   }
 
   private void checkFunctionCallParameters(
-      AstType type, List<AstExpression> arguments, Location location, String functionName) {
-    if (type == null) {
-      // A previous resolution error left the callee untyped; avoid a noisy follow-up error.
-      return;
-    }
-    if (type instanceof AstFunctionType functionType) {
-      checkFunctionArguments(functionType, arguments, location, functionName);
-    } else {
-      errorConsumer.errorAt(
-          location, "Calling expression of type '%s', function expected.", type.formatName());
-    }
+      AstFunction function, List<AstExpression> arguments, Location location, String functionName) {
+    // if (function == null) {
+    //   // A previous resolution error left the callee untyped; avoid a noisy follow-up error.
+    //   return;
+    // }
   }
 
   private void checkBinaryOperatorArguments(
       AstFunctionRef operation, List<AstExpression> arguments, Location location) {
-    var type = checkNotNull(operation.type());
-    if (type instanceof AstFunctionType functionType) {
-      checkFunctionArguments(functionType, arguments, location, operation.name().toString());
-    } else {
-      errorConsumer.errorAt(
-          operation.location(),
-          "Operator expression of type '%s', function expected.",
-          type.formatName());
-    }
+    checkFunctionArguments(operation.function(), arguments, location, operation.name().toString());
   }
 
   private void checkFunctionArguments(
-      AstFunctionType functionType,
-      List<AstExpression> arguments,
-      Location location,
-      String functionName) {
-    var parameters = functionType.header().parameters();
+      AstFunction function, List<AstExpression> arguments, Location location, String functionName) {
+    var parameters = function.parameters();
     if (arguments.size() != parameters.size()) {
       errorConsumer.errorAt(
           location,

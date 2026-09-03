@@ -1,8 +1,6 @@
 package io.lang.cimple.compiler;
 
 import com.google.common.collect.ImmutableList;
-import io.lang.cimple.compiler.ast.AstModule;
-import io.lang.cimple.compiler.ast.PrintAstVisitor;
 import io.lang.cimple.compiler.codegen.CodeGenerator;
 import java.util.List;
 import java.util.Set;
@@ -65,7 +63,6 @@ public class Compiler {
       debugOutput.writeLine("\n");
     }
     var module = new Parser(tokenizer, errorConsumer).parse();
-    module.builtin(isBuiltinFile(sourceCode.fileName()));
     if (params.printAst()) {
       debugOutput.writeLine("Parse tree\n");
       new PrintAstVisitor(debugOutput).print(module);

@@ -1,17 +1,7 @@
 package io.lang.cimple.compiler;
 
-import static io.lang.cimple.compiler.ast.AstBuiltinType.isIntegerType;
+import static io.lang.cimple.compiler.AstBuiltinType.isIntegerType;
 
-import io.lang.cimple.compiler.ast.AstArrayType;
-import io.lang.cimple.compiler.ast.AstBuiltinType;
-import io.lang.cimple.compiler.ast.AstEnumType;
-import io.lang.cimple.compiler.ast.AstModule;
-import io.lang.cimple.compiler.ast.AstNew;
-import io.lang.cimple.compiler.ast.AstPointerType;
-import io.lang.cimple.compiler.ast.AstType;
-import io.lang.cimple.compiler.ast.AstTypeHolder;
-import io.lang.cimple.compiler.ast.AstTypeRef;
-import io.lang.cimple.compiler.ast.AstVisitor;
 import java.util.Map;
 
 public class ResolveTypesVisitor extends AstVisitor {
@@ -27,7 +17,7 @@ public class ResolveTypesVisitor extends AstVisitor {
   @Override
   protected void visit(AstModule node) {
     // TODO: Include import names.
-    typeMap = globalNameMap.collectTypes(node.name(), errorConsumer);
+    typeMap = globalNameMap.collectTypes(node.name().entity(), errorConsumer);
     super.visit(node);
   }
 
@@ -72,21 +62,21 @@ public class ResolveTypesVisitor extends AstVisitor {
       return resolvedType;
     }
     if (type instanceof AstPointerType pointerType) {
-      pointerType.baseType(resolveTypeRefSafe(pointerType.baseType()));
+      pointerType.resolve(this::resolveTypeRefSafe);
     }
     if (type instanceof AstArrayType arrayType) {
-      arrayType.baseType(resolveTypeRefSafe(arrayType.baseType()));
+      arrayType.resolve(this::resolveTypeRefSafe);
     }
     return type;
   }
 
   private AstType lookupType(Identifier name) {
     if (name.module() == null) {
-      var builtinType = GlobalNameMap.lookupBuiltinType(name.type());
+      var builtinType = GlobalNameMap.lookupBuiltinType(name.entity());
       if (builtinType != null) {
         return builtinType;
       }
-      return typeMap.get(name.type());
+      return typeMap.get(name.entity());
     }
     return globalNameMap.lookupType(name);
   }
