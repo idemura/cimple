@@ -22,7 +22,7 @@ public final class AstEnumType extends AstType {
   public void acceptChildren(AstVisitor visitor) {
     acceptSafe(baseType, visitor);
     for (var variant : variants) {
-      acceptSafe(variant.expression(), visitor);
+      variant.accept(visitor);
     }
   }
 

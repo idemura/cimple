@@ -18,7 +18,7 @@ public final class AstUnionType extends AstType {
   @Override
   public void acceptChildren(AstVisitor visitor) {
     for (var variant : variants) {
-      acceptSafe(variant.typeHolder(), visitor);
+      variant.accept(visitor);
     }
   }
 

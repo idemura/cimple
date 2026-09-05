@@ -88,7 +88,6 @@ class PreprocessVisitor extends AstExpressionRewriteVisitor {
     checkIdentifier(node.name());
     var variantMap = new HashMap<Identifier, AstUnionVariant>();
     for (var variant : node.variants()) {
-      checkIdentifier(variant.tag());
       var existing = variantMap.putIfAbsent(variant.tag(), variant);
       if (existing != null) {
         errorConsumer.errorAt(
@@ -98,6 +97,12 @@ class PreprocessVisitor extends AstExpressionRewriteVisitor {
             existing.tag().location());
       }
     }
+    super.visit(node);
+  }
+
+  @Override
+  protected void visit(AstUnionVariant node) {
+    checkTagName(node.tag());
     super.visit(node);
   }
 
@@ -112,7 +117,6 @@ class PreprocessVisitor extends AstExpressionRewriteVisitor {
     checkIdentifier(node.name());
     var variantMap = new HashMap<String, AstEnumVariant>();
     for (var variant : node.variants()) {
-      checkIdentifier(variant.tag());
       var existing = variantMap.putIfAbsent(variant.tag().entity(), variant);
       if (existing != null) {
         errorConsumer.errorAt(
@@ -122,6 +126,12 @@ class PreprocessVisitor extends AstExpressionRewriteVisitor {
             existing.tag().location());
       }
     }
+    super.visit(node);
+  }
+
+  @Override
+  protected void visit(AstEnumVariant node) {
+    checkTagName(node.tag());
     super.visit(node);
   }
 
@@ -236,6 +246,14 @@ class PreprocessVisitor extends AstExpressionRewriteVisitor {
     checkUnderscoreRules(name, location);
     if (Keyword.isReservedName(name)) {
       errorConsumer.errorAt(location, "Reserved word '%s' cannot be used as name", name);
+    }
+  }
+
+  private void checkTagName(Identifier name) {
+    checkUnderscoreRules(name.entity(), name.location());
+    if (Keyword.isReservedTypeName(name.entity())) {
+      errorConsumer.errorAt(
+          name.location(), "Reserved word '%s' cannot be used as tag", name.entity());
     }
   }
 

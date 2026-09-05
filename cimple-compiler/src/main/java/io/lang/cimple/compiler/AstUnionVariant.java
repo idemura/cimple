@@ -2,13 +2,24 @@ package io.lang.cimple.compiler;
 
 import java.util.Objects;
 
-public final class AstUnionVariant {
+public final class AstUnionVariant extends AstNode {
   private final Identifier tag;
   private final AstTypeHolder type;
 
   public AstUnionVariant(Identifier tag, AstType type) {
+    super(tag.location());
     this.tag = tag;
     this.type = new AstTypeHolder(type);
+  }
+
+  @Override
+  public void accept(AstVisitor visitor) {
+    visitor.visit(this);
+  }
+
+  @Override
+  public void acceptChildren(AstVisitor visitor) {
+    type.accept(visitor);
   }
 
   @Override
@@ -28,9 +39,5 @@ public final class AstUnionVariant {
 
   public AstType valueType() {
     return type.get();
-  }
-
-  AstTypeHolder typeHolder() {
-    return type;
   }
 }

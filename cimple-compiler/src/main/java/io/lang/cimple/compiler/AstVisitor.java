@@ -55,7 +55,15 @@ public abstract class AstVisitor {
     node.acceptChildren(this);
   }
 
+  protected void visit(AstUnionVariant node) {
+    node.acceptChildren(this);
+  }
+
   protected void visit(AstEnumType node) {
+    node.acceptChildren(this);
+  }
+
+  protected void visit(AstEnumVariant node) {
     node.acceptChildren(this);
   }
 
