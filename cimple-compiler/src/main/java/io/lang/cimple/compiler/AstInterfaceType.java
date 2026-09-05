@@ -8,6 +8,7 @@ public final class AstInterfaceType extends AstType {
   private final ImmutableList<AstFunction> functions;
 
   public AstInterfaceType(Identifier name, ImmutableList<AstFunction> functions) {
+    super(name.location());
     this.name = name;
     this.functions = functions;
   }

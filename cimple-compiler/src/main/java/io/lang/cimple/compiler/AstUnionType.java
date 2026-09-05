@@ -1,11 +1,13 @@
 package io.lang.cimple.compiler;
 
 import com.google.common.collect.ImmutableList;
+
 public final class AstUnionType extends AstType {
   private final Identifier name;
   private final ImmutableList<AstUnionVariant> variants;
 
   public AstUnionType(Identifier name, ImmutableList<AstUnionVariant> variants) {
+    super(name.location());
     this.name = name;
     this.variants = variants;
   }

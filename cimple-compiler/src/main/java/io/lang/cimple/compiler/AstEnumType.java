@@ -8,6 +8,7 @@ public final class AstEnumType extends AstType {
   private final ImmutableList<AstEnumVariant> variants;
 
   public AstEnumType(Identifier name, AstType baseType, ImmutableList<AstEnumVariant> variants) {
+    super(name.location());
     this.name = name;
     this.baseType = new AstTypeHolder(baseType);
     this.variants = variants;

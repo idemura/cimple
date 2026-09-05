@@ -7,6 +7,7 @@ public final class AstStructType extends AstType {
   private final ImmutableList<AstVariable> fields;
 
   public AstStructType(Identifier name, ImmutableList<AstVariable> fields) {
+    super(name.location());
     this.name = name;
     this.fields = fields;
   }

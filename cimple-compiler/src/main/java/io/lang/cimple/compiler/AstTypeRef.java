@@ -4,6 +4,7 @@ public final class AstTypeRef extends AstType {
   private final Identifier name;
 
   public AstTypeRef(Identifier name) {
+    super(name.location());
     this.name = name;
   }
 
