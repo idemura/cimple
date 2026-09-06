@@ -5,13 +5,13 @@ import static com.google.common.collect.ImmutableList.toImmutableList;
 import com.google.common.collect.ImmutableList;
 
 public final class AstNew extends AstExpression {
-  private final AstTypeHolder type;
+  private final AstTypeHolder type = new AstTypeHolder();
   private ImmutableList<AstExpression> arguments;
 
   public AstNew(Location location, AstType type, ImmutableList<AstExpression> arguments) {
     super(location);
-    this.type = new AstTypeHolder(type);
     this.arguments = arguments;
+    type(type);
   }
 
   @Override
