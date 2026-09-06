@@ -15,6 +15,10 @@ public abstract sealed class AstType extends AstNode
         AstEnumType {
   protected AstType() {}
 
+  protected AstType(Location location) {
+    super(location);
+  }
+
   public abstract Identifier name();
 
   public String formatName() {
@@ -33,7 +37,7 @@ public abstract sealed class AstType extends AstNode
   @Override
   public boolean equals(Object object) {
     return this == object
-        || (object instanceof AstFunctionType other && Objects.equals(name(), other.name()));
+        || (object instanceof AstType other && Objects.equals(name(), other.name()));
   }
 
   @Override
