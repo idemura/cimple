@@ -49,9 +49,4 @@ public final class AstBuiltinType extends AstType {
   public Identifier name() {
     return name;
   }
-
-  @Override
-  public String toString() {
-    return name.toString();
-  }
 }

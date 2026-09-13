@@ -21,14 +21,6 @@ public abstract sealed class AstType extends AstNode
 
   public abstract Identifier name();
 
-  public String formatName() {
-    var name = name();
-    if (name.isBuiltin()) {
-      return name.entity();
-    }
-    return name.toString();
-  }
-
   @Override
   public int hashCode() {
     return name().hashCode();
@@ -42,6 +34,10 @@ public abstract sealed class AstType extends AstNode
 
   @Override
   public String toString() {
-    return name().toString();
+    var name = name();
+    if (name.isBuiltin()) {
+      return name.entity();
+    }
+    return name.toString();
   }
 }

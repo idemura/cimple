@@ -85,7 +85,7 @@ public class TypeCheckAndResolveNamesVisitor extends AstExpressionRewriteVisitor
                 variant.tag().location(),
                 "Enum variant '%s' value has type '%s', expected integer",
                 variant.tag(),
-                valueType.formatName());
+                valueType);
           }
         } else {
           // TODO: Remove one constant folding works.
@@ -157,9 +157,7 @@ public class TypeCheckAndResolveNamesVisitor extends AstExpressionRewriteVisitor
       }
       default -> {
         errorConsumer.errorAt(
-            node.location(),
-            "Delete expression of type '%s', expected pointer",
-            expression.type().formatName());
+            node.location(), "Delete expression of type '%s', expected pointer", expression.type());
       }
     }
   }
@@ -193,7 +191,7 @@ public class TypeCheckAndResolveNamesVisitor extends AstExpressionRewriteVisitor
     var objectType = checkNotNull(node.object().type());
     if (!(objectType instanceof AstStructType structType)) {
       errorConsumer.errorAt(
-          node.location(), "Field access requires a struct, got '%s'", objectType.formatName());
+          node.location(), "Field access requires a struct, got '%s'", objectType);
       return node;
     }
     for (var field : structType.fields()) {
@@ -214,15 +212,12 @@ public class TypeCheckAndResolveNamesVisitor extends AstExpressionRewriteVisitor
   public AstExpression rewrite(AstArrayAccess node) {
     var arrayType = checkNotNull(node.array().type());
     if (!(arrayType instanceof AstArrayType)) {
-      errorConsumer.errorAt(
-          node.location(), "Array access requires an array, got '%s'", arrayType.formatName());
+      errorConsumer.errorAt(node.location(), "Array access requires an array, got '%s'", arrayType);
     }
     var indexType = checkNotNull(node.index().type());
     if (!AstBuiltinType.INT64.equals(indexType)) {
       errorConsumer.errorAt(
-          node.index().location(),
-          "Array index has type '%s', expected 'int64'",
-          indexType.formatName());
+          node.index().location(), "Array index has type '%s', expected 'int64'", indexType);
     }
     return node;
   }
@@ -372,8 +367,8 @@ public class TypeCheckAndResolveNamesVisitor extends AstExpressionRewriteVisitor
             "Argument %d of function '%s' has type '%s', expected '%s'",
             i,
             functionName,
-            argumentType.formatName(),
-            parameterType.formatName());
+            argumentType,
+            parameterType);
       }
     }
   }

@@ -43,7 +43,7 @@ public class ResolveTypesVisitor extends AstVisitor {
           node.location(),
           "Enum '%s' base type must be an integer type, got '%s'",
           node.name(),
-          node.baseType().formatName());
+          node.baseType());
     }
   }
 
