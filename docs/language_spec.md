@@ -242,6 +242,20 @@ type interface FileSystem {
 }
 ```
 
+Interfaces cannot inherit from other interfaces. Interface hierarchies are intentionally avoided so
+that every interface definition is self-contained and grep-friendly.
+
+Types implement interfaces explicitly. A type may implement several interfaces, but the interfaces
+themselves remain independent of each other.
+
+```
+implement interface <interface_name>(<type_ref>);
+```
+
+All functions required by the interface must be defined in the same file as the `implement`
+statement. This keeps the implementation unit explicit: finding the `implement interface` statement
+also finds the functions that satisfy the interface.
+
 ## Operator Precedence
 
 From highest to lowest:
