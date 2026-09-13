@@ -1,4 +1,4 @@
-module _builtin;
+module builtin;
 
 function bitand(a int, b int) int;
 function bitor(a int, b int) int;

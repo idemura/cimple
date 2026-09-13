@@ -5,7 +5,7 @@ import static com.google.common.base.Preconditions.checkNotNull;
 import java.util.Objects;
 
 public final class Identifier implements Comparable<Identifier> {
-  public static final String BUILTIN_MODULE = "_builtin";
+  public static final String BUILTIN_MODULE = "builtin";
 
   private Location location;
   private String module;

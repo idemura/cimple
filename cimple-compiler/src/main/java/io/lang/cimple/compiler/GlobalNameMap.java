@@ -17,7 +17,7 @@ public class GlobalNameMap {
 
   public AstFunction addFunction(AstFunction function) {
     return functionMap
-        .computeIfAbsent(function.signature(), unused -> new LinkedHashMap<>())
+        .computeIfAbsent(function.signature(), key -> new LinkedHashMap<>())
         .putIfAbsent(function.name().module(), function);
   }
 

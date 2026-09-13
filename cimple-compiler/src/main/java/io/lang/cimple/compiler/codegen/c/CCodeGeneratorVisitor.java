@@ -44,6 +44,16 @@ class CCodeGeneratorVisitor extends AstVisitor {
         definition.accept(this);
       }
     }
+    for (var definition : node.definitions()) {
+      if (definition instanceof AstVariable) {
+        definition.accept(this);
+      }
+    }
+    for (var definition : node.definitions()) {
+      if (definition instanceof AstFunction) {
+        definition.accept(this);
+      }
+    }
   }
 
   @Override

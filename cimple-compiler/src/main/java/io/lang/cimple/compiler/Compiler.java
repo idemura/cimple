@@ -6,7 +6,7 @@ import java.util.List;
 import java.util.Set;
 
 public class Compiler {
-  private static final Set<String> BUILTIN_FILES = Set.of("lib/_builtin.ci");
+  private static final Set<String> BUILTIN_FILES = Set.of("lib/builtin.ci");
 
   private final CompilerParams params;
   private final IndentWriter debugOutput;

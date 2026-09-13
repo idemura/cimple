@@ -60,7 +60,7 @@ public class CliDriver {
 
   List<String> getFilesList() {
     var builder = new ImmutableList.Builder<String>();
-    builder.add("lib/_builtin.ci");
+    builder.add("lib/builtin.ci");
     builder.addAll(files);
     return builder.build();
   }

@@ -308,11 +308,7 @@ public class TypeCheckAndResolveNamesVisitor extends AstExpressionRewriteVisitor
   private static FunctionSignature callSignature(String name, List<AstExpression> arguments) {
     var argumentTypes = new ImmutableList.Builder<AstType>();
     for (var argument : arguments) {
-      var type = argument.type();
-      if (type == null) {
-        return null;
-      }
-      argumentTypes.add(type);
+      argumentTypes.add(checkNotNull(argument.type()));
     }
     return new FunctionSignature(name, argumentTypes.build());
   }
