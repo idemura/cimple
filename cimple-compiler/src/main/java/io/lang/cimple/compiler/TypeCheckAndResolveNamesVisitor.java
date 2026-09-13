@@ -251,9 +251,7 @@ public class TypeCheckAndResolveNamesVisitor extends AstExpressionRewriteVisitor
           calleeExpressionMessage(node.function()));
     } else {
       errorConsumer.errorAt(
-          node.location(),
-          "Function pointer call requires a function type. Instead: '%s'",
-          function.type());
+          node.location(), "Calling expression of type '%s', function expected.", function.type());
     }
     return node;
   }

@@ -1,116 +1,212 @@
 package io.lang.cimple.compiler;
 
+import static org.junit.jupiter.api.Assertions.*;
+
+import com.google.common.collect.ImmutableList;
+import java.util.ArrayList;
 import java.util.List;
 
-public final class AstUtils {
-  private AstUtils() {}
+final class AstUtils {
+  AstUtils() {}
 
-  public static AstTypeRef newTypeRef(String name) {
+  static void analyze(String code, ErrorConsumer errorConsumer) {
+    var module = Parser.parseCode(code, errorConsumer);
+    new SemanticAnalyzer(errorConsumer).analyze(List.of(module));
+  }
+
+  static AstTypeRef newTypeRef(String name) {
     return newTypeRef(null, name);
   }
 
-  public static AstTypeRef newTypeRef(String moduleName, String name) {
-    var ref = new AstTypeRef();
-    ref.name(new IdentifierType(name).module(moduleName));
-    return ref;
+  static AstTypeRef newTypeRef(String moduleName, String name) {
+    return new AstTypeRef(identifier(moduleName, name));
   }
 
-  public static AstTypeRef newBuiltinTypeRef(String name) {
-    var ref = new AstTypeRef();
-    ref.name(new IdentifierType(name).builtin());
-    return ref;
+  static AstTypeRef newBuiltinTypeRef(String name) {
+    return new AstTypeRef(new Identifier(name).builtin());
   }
 
-  public static AstPointerType pointerType(AstType baseType) {
-    return new AstPointerType(baseType);
-  }
-
-  public static AstArrayType arrayType(AstType baseType) {
-    return new AstArrayType(baseType);
-  }
-
-  public static AstVariableRef newVariableRef(String name) {
+  static AstVariableRef newVariableRef(String name) {
     return newVariableRef(null, name);
   }
 
-  public static AstVariableRef newVariableRef(String moduleName, String name) {
-    return new AstVariableRef(null, new Identifier(name).module(moduleName));
+  static AstVariableRef newVariableRef(String moduleName, String name) {
+    return new AstVariableRef(identifier(moduleName, name));
   }
 
-  public static AstFunctionRef newFunctionRef(String name) {
+  static AstFunctionRef newFunctionRef(String name) {
     return newFunctionRef(null, name);
   }
 
-  public static AstFunctionRef newFunctionRef(String moduleName, String name) {
-    return new AstFunctionRef(null, new Identifier(name).module(moduleName));
+  static AstFunctionRef newFunctionRef(String moduleName, String name) {
+    return new AstFunctionRef(identifier(moduleName, name));
   }
 
-  public static AstFunctionRef newBuiltinFunctionRef(String name) {
-    return new AstFunctionRef(null, new Identifier(name).builtin());
+  static AstFunctionRef newBuiltinFunctionRef(String name) {
+    return new AstFunctionRef(new Identifier(name).builtin());
   }
 
-  public static AstStructType newStructType(String moduleName, String name) {
-    var type = new AstStructType();
-    type.name(new IdentifierType(name).module(moduleName));
-    return type;
+  static AstStructType newStructType(String moduleName, String name) {
+    return new AstStructType(identifier(moduleName, name), ImmutableList.of());
   }
 
-  public static AstBoolLiteral boolLiteral(boolean value) {
-    var literal = new AstBoolLiteral(value);
-    literal.type(AstBuiltinType.BOOL);
-    return literal;
+  static AstBoolLiteral boolLiteral(boolean value) {
+    return new AstBoolLiteral(null, value);
   }
 
-  public static AstNullLiteral nullLiteral() {
-    var literal = new AstNullLiteral();
-    literal.type(AstBuiltinType.NULL);
-    return literal;
+  static AstNullLiteral nullLiteral() {
+    return new AstNullLiteral(null);
   }
 
-  public static AstExpression extractReturnExpression(AstFunction function) {
-    return ((AstReturn) function.block().statements().get(0)).expression().get();
+  static AstExpression extractReturnExpression(AstFunction function) {
+    return ((AstReturn) function.block().statements().get(0)).expression();
   }
 
-  public static AstFunction function(String name) {
-    var identifier = new Identifier(name);
-    var header = new AstFunctionHeader(identifier, List.of(), null);
-    var function = new AstFunction();
-    function.name(identifier);
-    function.header(header);
-    return function;
+  static AstFunction function(String name) {
+    return new AstFunction(new Identifier(name), ImmutableList.of(), null, null);
   }
 
-  public static AstVariable rawVariable(String name, String typeName) {
+  static AstFunction function(String name, AstType... parameterTypes) {
+    return function("test", name, parameterTypes);
+  }
+
+  static AstFunction function(String moduleName, String name, AstType... parameterTypes) {
+    return new AstFunction(
+        entityName(moduleName, name), ImmutableList.copyOf(parameters(parameterTypes)), null, null);
+  }
+
+  static AstFunction freeFunction(String moduleName, String name, AstType... parameterTypes) {
+    return function(moduleName, name, parameterTypes);
+  }
+
+  static List<AstVariable> parameters(AstType... parameterTypes) {
+    var parameters = new ArrayList<AstVariable>();
+    for (var i = 0; i < parameterTypes.length; i++) {
+      var parameter = parameter("p" + i);
+      parameter.type(parameterTypes[i]);
+      parameters.add(parameter);
+    }
+    return parameters;
+  }
+
+  static AstVariable rawVariable(String name, String typeName) {
     return variable(null, name, 0, newTypeRef(typeName));
   }
 
-  public static AstVariable rawVariable(String name) {
+  static AstVariable rawVariable(String name) {
     return variable(null, name, 0, null);
   }
 
-  public static AstVariable globalVariable(String moduleName, String name) {
+  static AstVariable globalVariable(String moduleName, String name) {
     return variable(moduleName, name, AstVariable.GLOBAL, null);
   }
 
-  public static AstVariable localVariable(String name) {
+  static AstVariable localVariable(String name) {
     return variable(null, name, AstVariable.LOCAL, null);
   }
 
-  public static AstVariable parameter(String name) {
+  static AstVariable parameter(String name) {
     return variable(null, name, AstVariable.PARAMETER, null);
   }
 
-  public static AstUnionVariant unionVariant(String name, String typeName) {
-    return new AstUnionVariant(null, name, typeName == null ? null : newTypeRef(typeName));
+  static AstUnionVariant unionVariant(String name, String typeName) {
+    return new AstUnionVariant(
+        new Identifier(name), typeName == null ? null : newTypeRef(typeName));
   }
 
-  private static AstVariable variable(String moduleName, String name, long flags, AstType type) {
-    var variable = new AstVariable();
-    variable.name(new Identifier(name).module(moduleName));
-    if (flags != 0) {
-      variable.setFlags(flags);
+  static Identifier typeName(String moduleName, String name) {
+    return entityName(moduleName, name);
+  }
+
+  static Identifier entityName(String moduleName, String name) {
+    return new Identifier(name).module(moduleName);
+  }
+
+  static void assertLookup(LocalNameMap localNameMap, AstVariable variable) {
+    assertSame(variable, localNameMap.lookupVariable(variable.name().entity()));
+  }
+
+  static void assertEnumVariant(AstEnumVariant variant, String name, String valueExpression) {
+    assertEquals(new Identifier(name), variant.tag());
+    if (valueExpression == null) {
+      assertNull(variant.expression());
+    } else {
+      var expression = (AstNumberLiteral) variant.expression();
+      assertEquals(valueExpression, expression.value());
     }
+  }
+
+  static void assertVariantValue(AstEnumType enumType, int index, String name, long value) {
+    var variant = enumType.variants().get(index);
+    assertEquals(new Identifier(name), variant.tag());
+    assertEquals(value, variant.value());
+  }
+
+  static void assertVariableSyntax(AstVariable variable, String name, String typeName, Long value) {
+    assertEquals(new Identifier(name), variable.name());
+    if (typeName == null) {
+      assertNull(variable.type());
+    } else {
+      assertEquals(newTypeRef(typeName), variable.type());
+    }
+    if (value == null) {
+      assertNull(variable.expression());
+    } else {
+      assertEquals(AstNumberLiteral.of(value), variable.expression());
+    }
+    assertTrue(variable.getBit(AstVariable.MUTABLE));
+  }
+
+  static void assertArrayAccess(AstFunction function, AstType expectedElementType) {
+    var local = (AstLocal) function.block().statements().get(0);
+    assertEquals(expectedElementType, local.variable().type());
+
+    var access = (AstArrayAccess) local.variable().expression();
+    assertEquals(expectedElementType, access.type());
+
+    var array = (AstVariableRef) access.array();
+    assertSame(function.parameters().get(0), array.variable());
+    assertEquals(new AstArrayType(expectedElementType), array.type());
+    assertEquals(AstBuiltinType.INT64, access.index().type());
+  }
+
+  static void assertOperator(AstStatement statement, AstFunction function) {
+    var call = (AstCall) ((AstLocal) statement).variable().expression();
+    var functionRef = call.function();
+    assertSame(function, functionRef.function());
+    assertEquals(AstBuiltinType.INT64, call.type());
+  }
+
+  static void assertComparisonOperator(AstStatement statement, AstFunction function) {
+    var call = (AstCall) ((AstLocal) statement).variable().expression();
+    var functionRef = call.function();
+    assertSame(function, functionRef.function());
+    assertEquals(AstBuiltinType.BOOL, call.type());
+  }
+
+  static void assertCompoundOperator(AstStatement statement, AstFunction function) {
+    var expr = ((AstExpressionStatement) statement).expression();
+    var assign = (AstCompoundAssign) expr;
+    assertSame(function, assign.operation().function());
+    assertEquals(AstBuiltinType.INT64, assign.type());
+  }
+
+  static AstEnumType enumType(AstModule module, String name) {
+    return (AstEnumType) module.findType(name);
+  }
+
+  static AstVariable variable(String moduleName, String name, long flags, AstType type) {
+    var variable = new AstVariable(identifier(moduleName, name), type, null);
     variable.type(type);
+    variable.flags(flags);
     return variable;
+  }
+
+  static Identifier identifier(String moduleName, String name) {
+    var identifier = new Identifier(name);
+    if (moduleName != null) {
+      identifier.module(moduleName);
+    }
+    return identifier;
   }
 }

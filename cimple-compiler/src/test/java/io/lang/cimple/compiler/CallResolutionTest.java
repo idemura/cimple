@@ -1,11 +1,12 @@
 package io.lang.cimple.compiler;
 
+import static io.lang.cimple.compiler.AstUtils.*;
 import static org.junit.jupiter.api.Assertions.*;
 
 import java.util.List;
 import org.junit.jupiter.api.Test;
 
-class CallResolutionTest extends AbstractSemanticsTest {
+class CallResolutionTest extends AbstractTest {
   @Test
   void testNormalizeFunctionHeader() {
     var code =
@@ -17,12 +18,11 @@ class CallResolutionTest extends AbstractSemanticsTest {
     var semanticAnalyzer = new SemanticAnalyzer(errorConsumer);
     semanticAnalyzer.analyze(List.of(module));
     assertEquals(List.of(), errorConsumer.errors());
-    var header = module.findFunction("f").header();
-    assertEquals(AstBuiltinType.VOID, header.resultType());
+    var function = module.findFunction("f");
+    assertEquals(AstBuiltinType.VOID, function.resultType());
     var globalNameMap = semanticAnalyzer.globalNameMap();
     assertSame(
-        module.findFunction("f"),
-        globalNameMap.lookupFunction("test", module.findFunction("f").signature()));
+        module.findFunction("f"), globalNameMap.lookupFunction("test", function.signature()));
   }
 
   @Test
@@ -133,7 +133,7 @@ class CallResolutionTest extends AbstractSemanticsTest {
     var statements = module.findFunction("f").block().statements();
     var local = (AstLocal) statements.get(0);
     assertEquals(AstStringType.INSTANCE, local.variable().type());
-    var call = (AstCall) local.variable().expression().get();
+    var call = (AstCall) local.variable().expression();
     var function = call.function();
     assertSame(external, function.function());
   }
@@ -157,7 +157,7 @@ class CallResolutionTest extends AbstractSemanticsTest {
       var local = (AstLocal) block.statements().get(0);
       assertEquals(new Identifier("t"), local.variable().name());
       assertEquals(AstStringType.INSTANCE, local.variable().type());
-      var call = (AstCall) local.variable().expression().get();
+      var call = (AstCall) local.variable().expression();
       assertEquals(newFunctionRef("test", "f"), call.function());
       assertEquals(AstStringType.INSTANCE, call.type());
     }

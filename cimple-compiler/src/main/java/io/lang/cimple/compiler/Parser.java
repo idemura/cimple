@@ -137,7 +137,6 @@ public class Parser {
     builder.name(parseName());
     take(LCURLY);
     while (!tokenizer.takeIf(RCURLY)) {
-      var location = tokenizer.currentLocation();
       var tag = parseName();
       AstType valueType;
       if (tokenizer.takeIf(LPAREN)) {
@@ -281,9 +280,9 @@ public class Parser {
     builder.location(takeKeyword(IF));
     builder.branch(parseExpression(), parseBlock());
     while (isKeyword(ELSE)) {
-      tokenizer.step();
+      tokenizer.take();
       if (isKeyword(IF)) {
-        tokenizer.step();
+        tokenizer.take();
         builder.branch(parseExpression(), parseBlock());
       } else {
         builder.elseBlock(parseBlock());
@@ -304,6 +303,7 @@ public class Parser {
     if (tokenizer.takeIf(SEMICOLON)) {
       builder.increment(parseExpression());
     }
+    builder.block(parseBlock());
     return builder.build();
   }
 
@@ -345,7 +345,7 @@ public class Parser {
       return expr;
     }
     if (isCompoundAssignment(current.type())) {
-      tokenizer.step();
+      tokenizer.take();
       var value = parseAssignment();
       if (value == null) {
         throw errorConsumer.fatalAt(current.location(), "Expected expression after %s", current);
@@ -476,6 +476,7 @@ public class Parser {
   //   - <literal>
   private AstExpression parsePrimary() {
     if (tokenizer.current().is(LPAREN)) {
+      take(LPAREN);
       var expression = parseExpression();
       if (isKeyword(TYPE)) {
         expression = new AstCast(takeKeyword(TYPE), expression, parseTypeRef());
@@ -518,7 +519,7 @@ public class Parser {
       return false;
     } else {
       throw errorConsumer.fatalAt(
-          tokenizer.currentLocation(), "Invalid function call: , or ) expected");
+          tokenizer.current().location(), "Invalid function call: , or ) expected");
     }
   }
 
@@ -527,7 +528,12 @@ public class Parser {
     if (!tokenizer.current().is(RPAREN)) {
       do {
         var name = parseName();
-        var type = parseTypeRef();
+        AstType type;
+        if (tokenizer.current().is(IDENTIFIER)) {
+          type = parseTypeRef();
+        } else {
+          type = null;
+        }
         builder.parameter(new AstVariable(name, type, null));
       } while (tokenizer.takeIf(COMMA));
     }
@@ -535,13 +541,12 @@ public class Parser {
   }
 
   private AstType parseTypeRef() {
-    AstType type = new AstTypeRef(parseName());
-    tokenizer.step();
+    AstType type = new AstTypeRef(parseQualifiedName());
     while (true) {
       if (tokenizer.takeIf(STAR)) {
         type = new AstPointerType(type);
       } else if (tokenizer.current().is(LBRACKET)) {
-        tokenizer.step();
+        tokenizer.take();
         take(RBRACKET);
         type = new AstArrayType(type);
       } else {
@@ -573,7 +578,7 @@ public class Parser {
   }
 
   private CompilerException fatalAtCurrentLocation(String pattern, Object... args) {
-    return errorConsumer.fatalAt(tokenizer.currentLocation(), pattern, args);
+    return errorConsumer.fatalAt(tokenizer.current().location(), pattern, args);
   }
 
   private Token take(TokenType type) {

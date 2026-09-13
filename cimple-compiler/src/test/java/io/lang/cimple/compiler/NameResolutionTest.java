@@ -1,11 +1,12 @@
 package io.lang.cimple.compiler;
 
-import static io.lang.cimple.compiler.AstUtils.extractReturnExpression;
+import static io.lang.cimple.compiler.AstUtils.*;
 import static org.junit.jupiter.api.Assertions.*;
-import org.junit.jupiter.api.Test;
-import java.util.List;
 
-class NameResolutionTest extends AbstractSemanticsTest {
+import java.util.List;
+import org.junit.jupiter.api.Test;
+
+class NameResolutionTest extends AbstractTest {
   @Test
   void testPopulateNameMap() {
     var code =

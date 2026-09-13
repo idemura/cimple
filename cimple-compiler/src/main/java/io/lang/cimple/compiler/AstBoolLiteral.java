@@ -2,7 +2,7 @@ package io.lang.cimple.compiler;
 
 public final class AstBoolLiteral extends AstLiteral {
   public AstBoolLiteral(Location location, boolean value) {
-    super(location, value);
+    super(location, value, AstBuiltinType.BOOL);
   }
 
   @Override

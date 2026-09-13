@@ -1,12 +1,13 @@
 package io.lang.cimple.compiler;
 
+import static io.lang.cimple.compiler.AstUtils.*;
 import static org.junit.jupiter.api.Assertions.*;
 
 import com.google.common.collect.ImmutableList;
 import java.util.List;
 import org.junit.jupiter.api.Test;
 
-class PreprocessVisitorTest extends AbstractSemanticsTest {
+class PreprocessVisitorTest extends AbstractTest {
   @Test
   void testRewriteTrueFalseNullLiterals() {
     var code =
@@ -26,23 +27,21 @@ class PreprocessVisitorTest extends AbstractSemanticsTest {
     module.accept(new PreprocessVisitor(errorConsumer));
     var statements = module.findFunction("f").block().statements();
     int i = 0;
-    assertEquals(boolLiteral(true), ((AstIf) statements.get(i++)).conditions().get(0).get());
+    assertEquals(boolLiteral(true), ((AstIf) statements.get(i++)).conditions().get(0));
     {
       var stmt = (AstDefer) statements.get(i++);
       var deferStatements = stmt.block().statements();
       assertEquals(1, deferStatements.size());
-      assertEquals(
-          nullLiteral(), ((AstExpressionStatement) deferStatements.get(0)).expression().get());
+      assertEquals(nullLiteral(), ((AstExpressionStatement) deferStatements.get(0)).expression());
     }
-    assertEquals(
-        boolLiteral(false), ((AstLocal) statements.get(i++)).variable().expression().get());
+    assertEquals(boolLiteral(false), ((AstLocal) statements.get(i++)).variable().expression());
     {
       var stmt = (AstFor) statements.get(i++);
-      assertEquals(nullLiteral(), stmt.init().variable().expression().get());
-      assertEquals(boolLiteral(true), stmt.condition().get());
-      assertEquals(boolLiteral(true), stmt.increment().get());
+      assertEquals(nullLiteral(), stmt.init().variable().expression());
+      assertEquals(boolLiteral(true), stmt.condition());
+      assertEquals(boolLiteral(true), stmt.increment());
     }
-    assertEquals(boolLiteral(true), ((AstReturn) statements.get(i++)).expression().get());
+    assertEquals(boolLiteral(true), ((AstReturn) statements.get(i++)).expression());
   }
 
   @Test
@@ -198,9 +197,9 @@ class PreprocessVisitorTest extends AbstractSemanticsTest {
     var module = parseCode(code);
     module.accept(new PreprocessVisitor(errorConsumer));
     assertEquals(List.of(), errorConsumer.errors());
-    var header = module.findFunction("f").header();
-    assertEquals(newBuiltinTypeRef("int64"), header.parameters().get(0).type());
-    assertEquals(AstBuiltinType.VOID, header.resultType());
+    var function = module.findFunction("f");
+    assertEquals(newBuiltinTypeRef("int64"), function.parameters().get(0).type());
+    assertEquals(AstBuiltinType.VOID, function.resultType());
   }
 
   @Test
@@ -221,8 +220,7 @@ class PreprocessVisitorTest extends AbstractSemanticsTest {
     assertEquals(newBuiltinTypeRef("int64"), module.findVariable("g").type());
     assertEquals(
         newBuiltinTypeRef("int64"), ((AstStructType) module.findType("R")).fields().get(0).type());
-    assertEquals(
-        newBuiltinTypeRef("int64"), module.findFunction("f").header().parameters().get(0).type());
+    assertEquals(newBuiltinTypeRef("int64"), module.findFunction("f").parameters().get(0).type());
   }
 
   @Test
@@ -239,7 +237,7 @@ class PreprocessVisitorTest extends AbstractSemanticsTest {
     assertEquals(List.of(), errorConsumer.errors());
 
     var local = (AstLocal) module.findFunction("f").block().statements().get(0);
-    var newExpr = (AstNew) local.variable().expression().get();
+    var newExpr = (AstNew) local.variable().expression();
     assertEquals(new AstArrayType(newBuiltinTypeRef("int64")), newExpr.type());
   }
 

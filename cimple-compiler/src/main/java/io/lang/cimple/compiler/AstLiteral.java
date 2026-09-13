@@ -5,11 +5,12 @@ import java.util.Objects;
 public abstract sealed class AstLiteral extends AstExpression
     permits AstBoolLiteral, AstNullLiteral, AstNumberLiteral, AstStringLiteral {
   private final Object value;
-  private final AstTypeHolder type = new AstTypeHolder();
+  private final AstTypeHolder type;
 
-  protected AstLiteral(Location location, Object value) {
+  protected AstLiteral(Location location, Object value, AstType type) {
     super(location);
     this.value = value;
+    this.type = new AstTypeHolder(type);
   }
 
   @Override

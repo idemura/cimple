@@ -33,9 +33,7 @@ class PreprocessVisitor extends AstExpressionRewriteVisitor {
   @Override
   protected void visit(AstFunction node) {
     checkIdentifier(node.name());
-    if (node.resultType() == null) {
-      node.resultType(AstBuiltinType.VOID);
-    }
+    checkFunctionSignature(node);
     super.visit(node);
   }
 
@@ -57,20 +55,23 @@ class PreprocessVisitor extends AstExpressionRewriteVisitor {
 
   @Override
   protected void visit(AstFunctionType node) {
-    super.visit(node);
+    checkTypeName(node.name());
+    checkFunctionSignature(node.function());
+    node.function().acceptChildren(this);
   }
 
   @Override
   protected void visit(AstInterfaceType node) {
-    checkIdentifier(node.name());
+    checkTypeName(node.name());
     super.visit(node);
   }
 
   @Override
   protected void visit(AstStructType node) {
-    checkIdentifier(node.name());
+    checkTypeName(node.name());
     var fieldMap = new HashMap<String, AstVariable>();
     for (var field : node.fields()) {
+      field.flags(AstVariable.FIELD);
       var existing = fieldMap.putIfAbsent(field.name().entity(), field);
       if (existing != null) {
         errorConsumer.errorAt(
@@ -85,7 +86,7 @@ class PreprocessVisitor extends AstExpressionRewriteVisitor {
 
   @Override
   protected void visit(AstUnionType node) {
-    checkIdentifier(node.name());
+    checkTypeName(node.name());
     var variantMap = new HashMap<Identifier, AstUnionVariant>();
     for (var variant : node.variants()) {
       var existing = variantMap.putIfAbsent(variant.tag(), variant);
@@ -114,7 +115,7 @@ class PreprocessVisitor extends AstExpressionRewriteVisitor {
 
   @Override
   protected void visit(AstEnumType node) {
-    checkIdentifier(node.name());
+    checkTypeName(node.name());
     var variantMap = new HashMap<String, AstEnumVariant>();
     for (var variant : node.variants()) {
       var existing = variantMap.putIfAbsent(variant.tag().entity(), variant);
@@ -133,6 +134,31 @@ class PreprocessVisitor extends AstExpressionRewriteVisitor {
   protected void visit(AstEnumVariant node) {
     checkTagName(node.tag());
     super.visit(node);
+  }
+
+  private void checkFunctionSignature(AstFunction function) {
+    if (function.resultType() == null) {
+      function.resultType(AstBuiltinType.VOID);
+    }
+    var parameterMap = new HashMap<String, AstVariable>();
+    for (var parameter : function.parameters()) {
+      parameter.flags(AstVariable.PARAMETER);
+      if (parameter.type() == null) {
+        errorConsumer.errorAt(
+            parameter.location(),
+            "Function '%s' parameter '%s' must have a type",
+            function.name(),
+            parameter.name());
+      }
+      var existing = parameterMap.putIfAbsent(parameter.name().entity(), parameter);
+      if (existing != null) {
+        errorConsumer.errorAt(
+            parameter.location(),
+            "Duplicate function parameter '%s'. First defined at %s.",
+            parameter.name().entity(),
+            existing.location());
+      }
+    }
   }
 
   @Override
@@ -166,13 +192,13 @@ class PreprocessVisitor extends AstExpressionRewriteVisitor {
 
   @Override
   public AstExpression rewrite(AstNullLiteral node) {
-    node.type(AstBuiltinType.NULL);
+    // Type is already assigned on creation
     return node;
   }
 
   @Override
   public AstExpression rewrite(AstBoolLiteral node) {
-    node.type(AstBuiltinType.BOOL);
+    // Type is already assigned on creation
     return node;
   }
 
@@ -207,21 +233,9 @@ class PreprocessVisitor extends AstExpressionRewriteVisitor {
   @Override
   public AstExpression rewrite(AstVariableRef node) {
     return switch (node.name().entity()) {
-      case "true" -> {
-        var literal = new AstBoolLiteral(node.location(), true);
-        literal.type(AstBuiltinType.BOOL);
-        yield literal;
-      }
-      case "false" -> {
-        var literal = new AstBoolLiteral(node.location(), false);
-        literal.type(AstBuiltinType.BOOL);
-        yield literal;
-      }
-      case "null" -> {
-        var literal = new AstNullLiteral(node.location());
-        literal.type(AstBuiltinType.NULL);
-        yield literal;
-      }
+      case "true" -> new AstBoolLiteral(node.location(), true);
+      case "false" -> new AstBoolLiteral(node.location(), false);
+      case "null" -> new AstNullLiteral(node.location());
       default -> node;
     };
   }
@@ -246,6 +260,14 @@ class PreprocessVisitor extends AstExpressionRewriteVisitor {
     checkUnderscoreRules(name, location);
     if (Keyword.isReservedName(name)) {
       errorConsumer.errorAt(location, "Reserved word '%s' cannot be used as name", name);
+    }
+  }
+
+  private void checkTypeName(Identifier name) {
+    checkUnderscoreRules(name.entity(), name.location());
+    if (Keyword.isReservedTypeName(name.entity())) {
+      errorConsumer.errorAt(
+          name.location(), "Reserved word '%s' cannot be used as type name", name.entity());
     }
   }
 

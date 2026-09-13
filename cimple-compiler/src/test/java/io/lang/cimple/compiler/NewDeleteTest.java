@@ -1,11 +1,12 @@
 package io.lang.cimple.compiler;
 
+import static io.lang.cimple.compiler.AstUtils.*;
 import static org.junit.jupiter.api.Assertions.*;
 
 import java.util.List;
 import org.junit.jupiter.api.Test;
 
-class NewDeleteTest extends AbstractSemanticsTest {
+class NewDeleteTest extends AbstractTest {
   @Test
   void testNewExpression() {
     var code =
@@ -27,7 +28,7 @@ class NewDeleteTest extends AbstractSemanticsTest {
     var statements = module.findFunction("f").block().statements();
     {
       var stmt = (AstLocal) statements.get(0);
-      assertEquals(pointerType(newStructType("test", "Duration")), stmt.variable().type());
+      assertEquals(new AstPointerType(newStructType("test", "Duration")), stmt.variable().type());
     }
   }
 

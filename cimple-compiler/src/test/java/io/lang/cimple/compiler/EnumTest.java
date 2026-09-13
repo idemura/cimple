@@ -1,21 +1,12 @@
 package io.lang.cimple.compiler;
 
+import static io.lang.cimple.compiler.AstUtils.*;
 import static org.junit.jupiter.api.Assertions.*;
 
 import java.util.List;
 import org.junit.jupiter.api.Test;
 
-class EnumTest extends AbstractSemanticsTest {
-  private static AstEnumType enumType(AstModule module, String name) {
-    return (AstEnumType) module.findType(name);
-  }
-
-  private static void assertVariantValue(AstEnumType enumType, int index, String name, long value) {
-    var variant = enumType.variants().get(index);
-    assertEquals(name, variant.tag());
-    assertEquals(value, variant.value());
-  }
-
+class EnumTest extends AbstractTest {
   @Test
   void testEnumValueAssignment() {
     var code =
@@ -149,7 +140,7 @@ class EnumTest extends AbstractSemanticsTest {
         }
         """;
     var module = parseCode(code);
-    var literal = new AstNumberLiteral(1.5);
+    var literal = new AstNumberLiteral(null, 1.5);
     literal.type(AstBuiltinType.FLOAT64);
     enumType(module, "E").variants().get(0).expression(literal);
 

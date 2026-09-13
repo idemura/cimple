@@ -21,9 +21,10 @@ import static io.lang.cimple.compiler.TokenType.SEMICOLON;
 import static io.lang.cimple.compiler.TokenType.SLASH_ASSIGN;
 import static io.lang.cimple.compiler.TokenType.STAR_ASSIGN;
 import static org.junit.jupiter.api.Assertions.*;
+
 import com.google.common.collect.ImmutableList;
-import org.junit.jupiter.api.Test;
 import java.util.List;
+import org.junit.jupiter.api.Test;
 
 class TokenizerTest {
   @Test

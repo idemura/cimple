@@ -37,7 +37,10 @@ public final class AstFunctionPointerCall extends AstExpression {
 
   @Override
   public AstType type() {
-    return ((AstFunctionType) function.type()).function().resultType();
+    if (function.type() instanceof AstFunctionType functionType) {
+      return functionType.function().resultType();
+    }
+    return AstBuiltinType.VOID;
   }
 
   public AstExpression function() {

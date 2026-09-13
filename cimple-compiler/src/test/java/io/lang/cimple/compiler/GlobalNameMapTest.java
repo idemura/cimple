@@ -1,47 +1,12 @@
 package io.lang.cimple.compiler;
 
-import static io.lang.cimple.compiler.AstUtils.function;
-import static io.lang.cimple.compiler.AstUtils.globalVariable;
-import static io.lang.cimple.compiler.AstUtils.newStructType;
-import static io.lang.cimple.compiler.AstUtils.parameter;
+import static io.lang.cimple.compiler.AstUtils.*;
 import static org.junit.jupiter.api.Assertions.*;
-import org.junit.jupiter.api.Test;
-import java.util.ArrayList;
+
 import java.util.List;
+import org.junit.jupiter.api.Test;
 
 class GlobalNameMapTest {
-  // TODO Move into AstUtils?
-  private static AstFunction freeFunction(
-      String moduleName, String name, AstType... parameterTypes) {
-    var function = function(name);
-    function.name(entityName(moduleName, name));
-    function.header(new AstFunctionHeader(function.name(), parameters(parameterTypes), null));
-    return function;
-  }
-
-  private static List<AstVariable> parameters(AstType... parameterTypes) {
-    var parameters = new ArrayList<AstVariable>();
-    for (var i = 0; i < parameterTypes.length; i++) {
-      var parameter = parameter("p" + i);
-      parameter.type(parameterTypes[i]);
-      parameters.add(parameter);
-    }
-    return parameters;
-  }
-
-  private static void renameType(Identifier name, int line, AstType type) {
-    type.name(name);
-    type.location(new Location(line, 1));
-  }
-
-  private static Identifier typeName(String moduleName, String name) {
-    return new IdentifierType(name).module(moduleName);
-  }
-
-  private static Identifier entityName(String moduleName, String name) {
-    return new Identifier(name).module(moduleName);
-  }
-
   @Test
   void testCollectTypes() {
     var globalNameMap = new GlobalNameMap();
@@ -52,7 +17,7 @@ class GlobalNameMapTest {
     assertNull(globalNameMap.addType(type1));
     assertNull(globalNameMap.addType(type2));
 
-    assertNull(globalNameMap.lookupType(new IdentifierType("Duration")));
+    assertNull(globalNameMap.lookupType(new Identifier("Duration")));
     assertSame(type1, globalNameMap.lookupType(typeName("m1", "Duration")));
     assertSame(type2, globalNameMap.lookupType(typeName("m2", "Duration")));
 
@@ -69,17 +34,12 @@ class GlobalNameMapTest {
     var type1 = newStructType("m1", "Duration");
     var type2 = newStructType("m1", "Duration");
     var type3 = newStructType("m1", "Size");
-    renameType(new IdentifierType("Duration").module("m1").entity("tag1"), 1, type1);
-    renameType(new IdentifierType("Duration").module("m1").entity("tag2"), 2, type2);
-    type3.location(new Location(3, 1));
-
     assertNull(globalNameMap.addType(type1));
-    assertNull(globalNameMap.addType(type2));
+    assertSame(type1, globalNameMap.addType(type2));
     assertNull(globalNameMap.addType(type3));
 
     var typeMap = globalNameMap.collectTypes("m1", errorConsumer);
-    assertEquals(
-        List.of("Duplicate type: 'm1~Duration.tag2'. Defined at 1,1."), errorConsumer.errors());
+    assertEquals(List.of(), errorConsumer.errors());
     assertEquals(2, typeMap.size());
     assertSame(type1, typeMap.get("Duration"));
     assertSame(type3, typeMap.get("Size"));

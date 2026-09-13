@@ -1,11 +1,43 @@
 package io.lang.cimple.compiler;
 
-import static io.lang.cimple.compiler.TokenType.*;
+import static io.lang.cimple.compiler.TokenType.ASSIGN;
+import static io.lang.cimple.compiler.TokenType.BANG;
+import static io.lang.cimple.compiler.TokenType.CMP_EQ;
+import static io.lang.cimple.compiler.TokenType.CMP_GE;
+import static io.lang.cimple.compiler.TokenType.CMP_GT;
+import static io.lang.cimple.compiler.TokenType.CMP_LE;
+import static io.lang.cimple.compiler.TokenType.CMP_LT;
+import static io.lang.cimple.compiler.TokenType.CMP_NE;
+import static io.lang.cimple.compiler.TokenType.COLON;
+import static io.lang.cimple.compiler.TokenType.COMMA;
+import static io.lang.cimple.compiler.TokenType.IDENTIFIER;
+import static io.lang.cimple.compiler.TokenType.LBRACKET;
+import static io.lang.cimple.compiler.TokenType.LCURLY;
+import static io.lang.cimple.compiler.TokenType.LPAREN;
+import static io.lang.cimple.compiler.TokenType.MINUS;
+import static io.lang.cimple.compiler.TokenType.MINUS_ASSIGN;
+import static io.lang.cimple.compiler.TokenType.NUMBER;
+import static io.lang.cimple.compiler.TokenType.PERCENT;
+import static io.lang.cimple.compiler.TokenType.PERCENT_ASSIGN;
+import static io.lang.cimple.compiler.TokenType.PERIOD;
+import static io.lang.cimple.compiler.TokenType.PLUS;
+import static io.lang.cimple.compiler.TokenType.PLUS_ASSIGN;
+import static io.lang.cimple.compiler.TokenType.RBRACKET;
+import static io.lang.cimple.compiler.TokenType.RCURLY;
+import static io.lang.cimple.compiler.TokenType.RPAREN;
+import static io.lang.cimple.compiler.TokenType.SEMICOLON;
+import static io.lang.cimple.compiler.TokenType.SLASH;
+import static io.lang.cimple.compiler.TokenType.SLASH_ASSIGN;
+import static io.lang.cimple.compiler.TokenType.STAR;
+import static io.lang.cimple.compiler.TokenType.STAR_ASSIGN;
+import static io.lang.cimple.compiler.TokenType.STRING;
+import static io.lang.cimple.compiler.TokenType.TILDE;
 import static java.lang.Character.isDigit;
 import static java.lang.Character.isJavaIdentifierPart;
 import static java.lang.Character.isJavaIdentifierStart;
 import static java.lang.Character.isWhitespace;
 
+import com.google.common.collect.ImmutableList;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -87,17 +119,12 @@ public class Tokenizer {
     }
   }
 
-  public List<Token> tokenList() {
-    return List.copyOf(tokens);
+  public ImmutableList<Token> tokenList() {
+    return ImmutableList.copyOf(tokens);
   }
 
   public boolean done() {
     return pos == tokens.size();
-  }
-
-  public void step() {
-    checkPosition();
-    pos++;
   }
 
   public Token take() {
@@ -115,26 +142,9 @@ public class Tokenizer {
     return true;
   }
 
-  // Returns the current token location. At end of input, returns null instead of throwing.
-  Location currentLocation() {
-    if (pos < tokens.size()) {
-      return tokens.get(pos).location();
-    } else {
-      return null;
-    }
-  }
-
-  Token current() {
+  public Token current() {
     checkPosition();
     return tokens.get(pos);
-  }
-
-  Token next() {
-    if (pos + 1 < tokens.size()) {
-      return tokens.get(pos + 1);
-    } else {
-      return null;
-    }
   }
 
   private void skipWhitespace(SplitContext context) {

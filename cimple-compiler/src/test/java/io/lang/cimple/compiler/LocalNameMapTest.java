@@ -1,14 +1,11 @@
 package io.lang.cimple.compiler;
 
+import static io.lang.cimple.compiler.AstUtils.*;
 import static org.junit.jupiter.api.Assertions.*;
 
 import org.junit.jupiter.api.Test;
 
 class LocalNameMapTest {
-  private static void assertLookup(LocalNameMap localNameMap, AstVariable variable) {
-    assertSame(variable, localNameMap.lookupVariable(variable.name().entity()));
-  }
-
   @Test
   void testAddLocalNoCollision() {
     var localNameMap = new LocalNameMap();

@@ -2,7 +2,7 @@ package io.lang.cimple.compiler;
 
 public final class AstStringLiteral extends AstLiteral {
   public AstStringLiteral(Location location, String value) {
-    super(location, value);
+    super(location, value, null);
   }
 
   @Override

@@ -1,16 +1,12 @@
 package io.lang.cimple.compiler;
 
+import static io.lang.cimple.compiler.AstUtils.*;
 import static org.junit.jupiter.api.Assertions.*;
 
 import java.util.List;
 import org.junit.jupiter.api.Test;
 
-class ForLoopTest extends AbstractSemanticsTest {
-  private void analyze(String code) {
-    var module = parseCode(code);
-    new SemanticAnalyzer(errorConsumer).analyze(List.of(module));
-  }
-
+class ForLoopTest extends AbstractTest {
   @Test
   void testBreakInsideForLoop() {
     var code =
@@ -22,7 +18,7 @@ class ForLoopTest extends AbstractSemanticsTest {
           }
         }
         """;
-    analyze(code);
+    analyze(code, errorConsumer);
     assertEquals(List.of(), errorConsumer.errors());
   }
 
@@ -35,7 +31,7 @@ class ForLoopTest extends AbstractSemanticsTest {
           break;
         }
         """;
-    analyze(code);
+    analyze(code, errorConsumer);
     assertEquals(List.of("'break' is only allowed inside a loop"), errorConsumer.errors());
   }
 
@@ -49,7 +45,7 @@ class ForLoopTest extends AbstractSemanticsTest {
           }
         }
         """;
-    analyze(code);
+    analyze(code, errorConsumer);
     assertEquals(List.of(), errorConsumer.errors());
   }
 
@@ -63,7 +59,7 @@ class ForLoopTest extends AbstractSemanticsTest {
           }
         }
         """;
-    analyze(code);
+    analyze(code, errorConsumer);
     assertEquals(
         List.of("Duplicate local variable: 'i'. Defined at 2,12."), errorConsumer.errors());
   }
@@ -79,7 +75,7 @@ class ForLoopTest extends AbstractSemanticsTest {
           }
         }
         """;
-    analyze(code);
+    analyze(code, errorConsumer);
     assertEquals(List.of("Duplicate local variable: 'i'. Defined at 3,7."), errorConsumer.errors());
   }
 
@@ -94,7 +90,7 @@ class ForLoopTest extends AbstractSemanticsTest {
           }
         }
         """;
-    analyze(code);
+    analyze(code, errorConsumer);
     assertEquals(
         List.of("Duplicate local variable: 'i'. Defined at 3,11."), errorConsumer.errors());
   }

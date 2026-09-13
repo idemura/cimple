@@ -1,7 +1,7 @@
 package io.lang.cimple.compiler.codegen.c;
 
-import io.lang.cimple.compiler.IndentWriter;
 import io.lang.cimple.compiler.AstModule;
+import io.lang.cimple.compiler.IndentWriter;
 import io.lang.cimple.compiler.codegen.CodeGenerator;
 import java.util.List;
 

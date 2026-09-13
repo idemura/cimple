@@ -34,10 +34,10 @@ public class ResolveTypesVisitor extends AstVisitor {
 
   @Override
   protected void visit(AstEnumType node) {
-    super.visit(node);
     if (node.baseType() == null) {
       node.baseType(AstBuiltinType.INT64);
     }
+    super.visit(node);
     if (!isIntegerType(node.baseType())) {
       errorConsumer.errorAt(
           node.location(),

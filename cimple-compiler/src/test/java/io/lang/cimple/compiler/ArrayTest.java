@@ -1,24 +1,11 @@
 package io.lang.cimple.compiler;
 
+import static io.lang.cimple.compiler.AstUtils.*;
 import static org.junit.jupiter.api.Assertions.*;
-
-import java.util.List;
 import org.junit.jupiter.api.Test;
+import java.util.List;
 
-class ArrayTest extends AbstractSemanticsTest {
-  private static void assertArrayAccess(AstFunction function, AstType expectedElementType) {
-    var local = (AstLocal) function.block().statements().get(0);
-    assertEquals(expectedElementType, local.variable().type());
-
-    var access = (AstArrayAccess) local.variable().expression().get();
-    assertEquals(expectedElementType, access.type());
-
-    var array = (AstVariableRef) access.array();
-    assertSame(function.header().parameters().get(0), array.variable());
-    assertEquals(arrayType(expectedElementType), array.type());
-    assertEquals(AstBuiltinType.INT64, access.index().type());
-  }
-
+class ArrayTest extends AbstractTest {
   @Test
   void testArrayAccessType() {
     var code =
@@ -57,7 +44,7 @@ class ArrayTest extends AbstractSemanticsTest {
     var statements = module.findFunction("f").block().statements();
     assertEquals(2, statements.size());
     var local = (AstLocal) statements.get(0);
-    assertEquals(arrayType(AstBuiltinType.INT64), local.variable().type());
+    assertEquals(new AstArrayType(AstBuiltinType.INT64), local.variable().type());
   }
 
   @Test

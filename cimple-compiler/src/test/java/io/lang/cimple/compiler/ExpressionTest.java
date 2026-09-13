@@ -1,32 +1,12 @@
 package io.lang.cimple.compiler;
 
+import static io.lang.cimple.compiler.AstUtils.*;
 import static org.junit.jupiter.api.Assertions.*;
 
 import java.util.List;
 import org.junit.jupiter.api.Test;
 
-class ExpressionTest extends AbstractSemanticsTest {
-  private static void assertOperator(AstStatement statement, AstFunction function) {
-    var call = (AstCall) ((AstLocal) statement).variable().expression().get();
-    var functionRef = call.function();
-    assertSame(function, functionRef.function());
-    assertEquals(AstBuiltinType.INT64, call.type());
-  }
-
-  private static void assertComparisonOperator(AstStatement statement, AstFunction function) {
-    var call = (AstCall) ((AstLocal) statement).variable().expression().get();
-    var functionRef = call.function();
-    assertSame(function, functionRef.function());
-    assertEquals(AstBuiltinType.BOOL, call.type());
-  }
-
-  private static void assertCompoundOperator(AstStatement statement, AstFunction function) {
-    var expr = ((AstExpressionStatement) statement).expression().get();
-    var assign = (AstCompoundAssign) expr;
-    assertSame(function, assign.operation().function());
-    assertEquals(AstBuiltinType.INT64, assign.type());
-  }
-
+class ExpressionTest extends AbstractTest {
   @Test
   void testExpression() {
     var code =
@@ -171,7 +151,7 @@ class ExpressionTest extends AbstractSemanticsTest {
 
     var call = (AstFunctionPointerCall) extractReturnExpression(module.findFunction("f"));
     var function = (AstVariableRef) call.function();
-    assertSame(module.findFunction("f").header().parameters().get(0), function.variable());
+    assertSame(module.findFunction("f").parameters().get(0), function.variable());
     assertEquals(AstBuiltinType.INT64, call.type());
   }
 

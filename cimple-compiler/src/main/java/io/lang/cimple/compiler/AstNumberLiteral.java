@@ -7,7 +7,7 @@ public final class AstNumberLiteral extends AstLiteral {
   }
 
   public AstNumberLiteral(Location location, Object value) {
-    super(location, value);
+    super(location, value, null);
     // The exact numeric type is assigned later during semantic analysis.
   }
 
