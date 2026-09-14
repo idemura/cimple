@@ -1,24 +1,12 @@
 package io.lang.cimple.compiler;
 
-import static io.lang.cimple.compiler.AstTreeUtils.wildcard;
+import static io.lang.cimple.compiler.AstTreeUtils.*;
 import static org.junit.jupiter.api.Assertions.*;
 
 import com.google.common.collect.ImmutableList;
 import org.junit.jupiter.api.Test;
 
 class FunctionSignatureTest {
-  private AstFunctionType functionType(
-      String name, AstType resultType, AstType... parameterTypes) {
-    var parameters = new ImmutableList.Builder<AstVariable>();
-    for (var i = 0; i < parameterTypes.length; i++) {
-      parameters.add(
-          new AstVariable(new Identifier("p" + i), parameterTypes[i], null));
-    }
-    return new AstFunctionType(
-        new AstFunction(
-            new Identifier(name), ImmutableList.of(), parameters.build(), resultType, null));
-  }
-
   @Test
   void testEqualsUsesNameAndParameterTypes() {
     var base = new FunctionSignature("copy", ImmutableList.of(AstBuiltinType.INT64));

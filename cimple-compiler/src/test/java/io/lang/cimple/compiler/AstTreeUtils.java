@@ -98,6 +98,17 @@ final class AstTreeUtils {
     return function(moduleName, name, parameterTypes);
   }
 
+  static AstFunctionType functionType(
+      String name, AstType resultType, AstType... parameterTypes) {
+    return new AstFunctionType(
+        new AstFunction(
+            new Identifier(name),
+            ImmutableList.of(),
+            ImmutableList.copyOf(parameters(parameterTypes)),
+            resultType,
+            null));
+  }
+
   static List<AstVariable> parameters(AstType... parameterTypes) {
     var parameters = new ArrayList<AstVariable>();
     for (var i = 0; i < parameterTypes.length; i++) {
