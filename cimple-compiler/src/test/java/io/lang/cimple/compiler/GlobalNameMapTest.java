@@ -1,12 +1,23 @@
 package io.lang.cimple.compiler;
 
-import static io.lang.cimple.compiler.AstUtils.*;
+import static io.lang.cimple.compiler.AstTreeUtils.*;
 import static org.junit.jupiter.api.Assertions.*;
 
+import com.google.common.collect.ImmutableList;
 import java.util.List;
 import org.junit.jupiter.api.Test;
 
 class GlobalNameMapTest {
+  private AstFunction genericArrayFunction(String moduleName, String functionName, String typeName) {
+    var wildcard = wildcard(typeName);
+    return new AstFunction(
+        entityName(moduleName, functionName),
+        ImmutableList.of(wildcard),
+        ImmutableList.of(variable(null, "a", AstVariable.PARAMETER, new AstArrayType(wildcard))),
+        null,
+        null);
+  }
+
   @Test
   void testCollectTypes() {
     var globalNameMap = new GlobalNameMap();
@@ -101,5 +112,37 @@ class GlobalNameMapTest {
 
     assertNull(globalNameMap.addFunction(function1));
     assertSame(function1, globalNameMap.addFunction(function2));
+  }
+
+  @Test
+  void testGenericArraySignatureCollidesWithConcreteArraySignature() {
+    var globalNameMap = new GlobalNameMap();
+    var concrete = freeFunction("m1", "f", new AstArrayType(AstBuiltinType.INT64));
+    var generic = genericArrayFunction("m1", "f", "T");
+
+    assertNull(globalNameMap.addFunction(concrete));
+    assertSame(concrete, globalNameMap.addFunction(generic));
+  }
+
+  @Test
+  void testEquivalentGenericArraySignaturesCollide() {
+    var globalNameMap = new GlobalNameMap();
+    var first = genericArrayFunction("m1", "f", "T");
+    var second = genericArrayFunction("m1", "f", "S");
+
+    assertNull(globalNameMap.addFunction(first));
+    assertSame(first, globalNameMap.addFunction(second));
+  }
+
+  @Test
+  void testConcreteArraySignaturesCanCoexist() {
+    var globalNameMap = new GlobalNameMap();
+    var intArray = freeFunction("m1", "f", new AstArrayType(AstBuiltinType.INT64));
+    var boolArray = freeFunction("m1", "f", new AstArrayType(AstBuiltinType.BOOL));
+
+    assertNull(globalNameMap.addFunction(intArray));
+    assertNull(globalNameMap.addFunction(boolArray));
+    assertSame(intArray, globalNameMap.lookupFunction("m1", intArray.signature()));
+    assertSame(boolArray, globalNameMap.lookupFunction("m1", boolArray.signature()));
   }
 }

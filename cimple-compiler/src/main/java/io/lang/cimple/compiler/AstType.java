@@ -1,9 +1,11 @@
 package io.lang.cimple.compiler;
 
+import java.util.Map;
 import java.util.Objects;
 
 public abstract sealed class AstType extends AstNode
     permits AstTypeRef,
+        AstTypeWildcard,
         AstPointerType,
         AstArrayType,
         AstBuiltinType,
@@ -20,6 +22,14 @@ public abstract sealed class AstType extends AstNode
   }
 
   public abstract Identifier name();
+
+  public boolean containsWildcard() {
+    return false;
+  }
+
+  public AstType substitute(Map<AstTypeWildcard, AstType> substitutions) {
+    return this;
+  }
 
   @Override
   public int hashCode() {

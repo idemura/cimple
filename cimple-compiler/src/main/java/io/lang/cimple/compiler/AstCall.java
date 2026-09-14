@@ -2,10 +2,12 @@ package io.lang.cimple.compiler;
 
 import static com.google.common.collect.ImmutableList.toImmutableList;
 
+import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.ImmutableList;
 
 public final class AstCall extends AstExpression {
   private final AstFunctionRef function;
+  private ImmutableMap<AstTypeWildcard, AstType> deducedWildcards = ImmutableMap.of();
   private ImmutableList<AstExpression> arguments;
 
   public AstCall(AstFunctionRef function, ImmutableList<AstExpression> arguments) {
@@ -38,7 +40,7 @@ public final class AstCall extends AstExpression {
     if (!function.isResolved()) {
       return null;
     }
-    return function.function().resultType();
+    return function.function().resultType().substitute(deducedWildcards);
   }
 
   public AstFunctionRef function() {
@@ -47,5 +49,13 @@ public final class AstCall extends AstExpression {
 
   public ImmutableList<AstExpression> arguments() {
     return arguments;
+  }
+
+  public ImmutableMap<AstTypeWildcard, AstType> deducedWildcards() {
+    return deducedWildcards;
+  }
+
+  public void deducedWildcards(ImmutableMap<AstTypeWildcard, AstType> deducedWildcards) {
+    this.deducedWildcards = deducedWildcards;
   }
 }

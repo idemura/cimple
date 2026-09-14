@@ -1,6 +1,6 @@
 package io.lang.cimple.compiler;
 
-import static io.lang.cimple.compiler.AstUtils.*;
+import static io.lang.cimple.compiler.AstAssertionUtils.*;
 import static org.junit.jupiter.api.Assertions.*;
 
 import java.util.List;
@@ -18,7 +18,7 @@ class ForLoopTest extends AbstractTest {
           }
         }
         """;
-    analyze(code, errorConsumer);
+    analyze(code);
     assertEquals(List.of(), errorConsumer.errors());
   }
 
@@ -31,7 +31,7 @@ class ForLoopTest extends AbstractTest {
           break;
         }
         """;
-    analyze(code, errorConsumer);
+    analyze(code);
     assertEquals(List.of("'break' is only allowed inside a loop"), errorConsumer.errors());
   }
 
@@ -45,7 +45,7 @@ class ForLoopTest extends AbstractTest {
           }
         }
         """;
-    analyze(code, errorConsumer);
+    analyze(code);
     assertEquals(List.of(), errorConsumer.errors());
   }
 
@@ -59,7 +59,7 @@ class ForLoopTest extends AbstractTest {
           }
         }
         """;
-    analyze(code, errorConsumer);
+    analyze(code);
     assertEquals(
         List.of("Duplicate local variable: 'i'. Defined at 2,12."), errorConsumer.errors());
   }
@@ -75,7 +75,7 @@ class ForLoopTest extends AbstractTest {
           }
         }
         """;
-    analyze(code, errorConsumer);
+    analyze(code);
     assertEquals(List.of("Duplicate local variable: 'i'. Defined at 3,7."), errorConsumer.errors());
   }
 
@@ -90,7 +90,7 @@ class ForLoopTest extends AbstractTest {
           }
         }
         """;
-    analyze(code, errorConsumer);
+    analyze(code);
     assertEquals(
         List.of("Duplicate local variable: 'i'. Defined at 3,11."), errorConsumer.errors());
   }

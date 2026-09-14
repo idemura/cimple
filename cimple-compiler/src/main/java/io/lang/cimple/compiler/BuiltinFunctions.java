@@ -38,6 +38,7 @@ public final class BuiltinFunctions {
 
   private static AstFunction makeBuiltinFunction(
       String name, AstType resultType, ImmutableList<AstVariable> parameters) {
-    return new AstFunction(new Identifier(name).builtin(), parameters, resultType, null);
+    return new AstFunction(
+        new Identifier(name).builtin(), ImmutableList.of(), parameters, resultType, null);
   }
 }

@@ -4,6 +4,7 @@ import com.google.common.collect.ImmutableList;
 
 public final class AstFunctionBuilder {
   private Identifier name;
+  private final ImmutableList.Builder<AstTypeWildcard> wildcards = ImmutableList.builder();
   private final ImmutableList.Builder<AstVariable> parameters = ImmutableList.builder();
   private AstType resultType;
   private AstBlock block;
@@ -18,6 +19,10 @@ public final class AstFunctionBuilder {
     parameters.add(parameter);
   }
 
+  public void wildcard(AstTypeWildcard wildcard) {
+    wildcards.add(wildcard);
+  }
+
   public void resultType(AstType resultType) {
     this.resultType = resultType;
   }
@@ -27,6 +32,6 @@ public final class AstFunctionBuilder {
   }
 
   public AstFunction build() {
-    return new AstFunction(name, parameters.build(), resultType, block);
+    return new AstFunction(name, wildcards.build(), parameters.build(), resultType, block);
   }
 }

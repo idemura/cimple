@@ -19,6 +19,10 @@ public abstract class AstVisitor {
     node.acceptChildren(this);
   }
 
+  protected void visit(AstTypeWildcard node) {
+    node.acceptChildren(this);
+  }
+
   protected void visit(AstTypeRef node) {
     node.acceptChildren(this);
   }

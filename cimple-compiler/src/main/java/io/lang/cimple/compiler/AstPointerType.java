@@ -1,5 +1,6 @@
 package io.lang.cimple.compiler;
 
+import java.util.Map;
 import java.util.function.Function;
 
 public final class AstPointerType extends AstType {
@@ -38,6 +39,19 @@ public final class AstPointerType extends AstType {
 
   public AstType baseType() {
     return baseType;
+  }
+
+  @Override
+  public boolean containsWildcard() {
+    return baseType.containsWildcard();
+  }
+
+  @Override
+  public AstType substitute(Map<AstTypeWildcard, AstType> substitutions) {
+    if (containsWildcard()) {
+      throw new UnsupportedOperationException("Generic pointer types are not supported yet");
+    }
+    return this;
   }
 
   public void resolve(Function<AstType, AstType> function) {

@@ -71,6 +71,15 @@ public class GlobalNameMap {
     return functions.values().iterator().next();
   }
 
+  public FunctionMatch lookupFunctionMatch(String moduleName, FunctionSignature signature) {
+    var function = lookupFunction(moduleName, signature);
+    if (function == null) {
+      return null;
+    }
+    var substitutions = function.signature().match(signature);
+    return substitutions == null ? null : new FunctionMatch(function, substitutions);
+  }
+
   public AstVariable lookupVariable(Identifier name) {
     return variableMap.get(name);
   }

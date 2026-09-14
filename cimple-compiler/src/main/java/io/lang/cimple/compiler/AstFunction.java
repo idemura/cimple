@@ -8,14 +8,20 @@ import java.util.Objects;
 
 public final class AstFunction extends AstEntity {
   private final Identifier name;
+  private final ImmutableList<AstTypeWildcard> wildcards;
   private final ImmutableList<AstVariable> parameters;
   private final AstTypeHolder resultType;
   private final AstBlock block;
 
   public AstFunction(
-      Identifier name, ImmutableList<AstVariable> parameters, AstType resultType, AstBlock block) {
+      Identifier name,
+      ImmutableList<AstTypeWildcard> wildcards,
+      ImmutableList<AstVariable> parameters,
+      AstType resultType,
+      AstBlock block) {
     super(name.location());
     this.name = name;
+    this.wildcards = wildcards;
     this.parameters = parameters;
     this.resultType = new AstTypeHolder(resultType);
     this.block = block;
@@ -59,6 +65,9 @@ public final class AstFunction extends AstEntity {
 
   @Override
   public void acceptChildren(AstVisitor visitor) {
+    for (var wildcard : wildcards) {
+      wildcard.accept(visitor);
+    }
     for (var parameter : parameters) {
       parameter.accept(visitor);
     }
@@ -68,6 +77,10 @@ public final class AstFunction extends AstEntity {
 
   public ImmutableList<AstVariable> parameters() {
     return parameters;
+  }
+
+  public ImmutableList<AstTypeWildcard> wildcards() {
+    return wildcards;
   }
 
   public AstType resultType() {

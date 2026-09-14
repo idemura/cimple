@@ -1,5 +1,6 @@
 package io.lang.cimple.compiler;
 
+import java.util.Map;
 import java.util.function.Function;
 
 public final class AstArrayType extends AstType {
@@ -38,6 +39,16 @@ public final class AstArrayType extends AstType {
 
   public AstType baseType() {
     return baseType;
+  }
+
+  @Override
+  public boolean containsWildcard() {
+    return baseType.containsWildcard();
+  }
+
+  @Override
+  public AstType substitute(Map<AstTypeWildcard, AstType> substitutions) {
+    return new AstArrayType(baseType.substitute(substitutions));
   }
 
   public void resolve(Function<AstType, AstType> function) {

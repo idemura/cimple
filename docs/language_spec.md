@@ -115,6 +115,51 @@ exported.
 A function that ends with `;` has no body and is resolved at linking time.
 This section is incomplete.
 
+### Function Generics
+
+Function generics are declared with a `generic` prefix:
+
+```
+generic (<type_name>, ...) function <function_name>(<argument_list>?) <type_ref>? (<block> | ";")
+```
+
+Examples:
+
+```
+generic (T) function size(a T[]) int64;
+generic (T) function first(a T[]) T;
+generic (T, U) function convert(x T, fallback U) U;
+```
+
+Generic parameters are type wildcards. Type arguments are inferred from function parameter types
+only; callers do not write explicit type arguments.
+
+Every declared wildcard must appear in the function parameter types. Result type usage does not make
+a wildcard inferable, and wildcard uses inside the function body do not count.
+
+Not allowed:
+
+```
+generic (T) function make() T;
+generic (T, U) function convert(x T) U;
+```
+
+`T[]` is supported because arrays are treated as type families. Pointer generics are not defined
+yet, so `T*`, `T[]*`, and other wildcard-under-pointer forms are unsupported.
+
+Generic and non-generic functions use the same global function lookup model: a function is resolved
+by its name and parameter types. A wildcard signature that overlaps a concrete signature is not
+allowed:
+
+```
+function f(a int[]);
+generic (T) function f(a T[]);
+```
+
+This rule keeps lookup predictable and avoids a separate generic function namespace. It also keeps
+the language close to C linkage while still allowing generic families where the parameter types make
+the choice unambiguous.
+
 ## Statements
 
 ```

@@ -1,6 +1,7 @@
 package io.lang.cimple.compiler;
 
-import static io.lang.cimple.compiler.AstUtils.*;
+import static io.lang.cimple.compiler.AstAssertionUtils.*;
+import static io.lang.cimple.compiler.AstTreeUtils.*;
 import static org.junit.jupiter.api.Assertions.*;
 
 import org.junit.jupiter.api.Test;

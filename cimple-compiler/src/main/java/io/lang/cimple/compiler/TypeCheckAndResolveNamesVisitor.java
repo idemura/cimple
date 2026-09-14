@@ -4,6 +4,7 @@ import static com.google.common.base.Preconditions.checkArgument;
 import static com.google.common.base.Preconditions.checkNotNull;
 import static io.lang.cimple.compiler.AstBuiltinType.isIntegerType;
 
+import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.ImmutableList;
 import java.util.List;
 
@@ -229,14 +230,18 @@ public class TypeCheckAndResolveNamesVisitor extends AstExpressionRewriteVisitor
       if (function.isBuiltin()) {
         resolveBuiltinFunction(function);
       } else {
-        resolveFunction(function, node.arguments());
+        node.deducedWildcards(resolveFunction(function, node.arguments()));
       }
     }
     if (!function.isResolved()) {
       return node;
     }
     checkFunctionArguments(
-        function.function(), node.arguments(), node.location(), calleeExpressionMessage(function));
+        function.function(),
+        node.arguments(),
+        node.location(),
+        calleeExpressionMessage(function),
+        node.deducedWildcards());
     return node;
   }
 
@@ -248,7 +253,8 @@ public class TypeCheckAndResolveNamesVisitor extends AstExpressionRewriteVisitor
           functionType.function(),
           node.arguments(),
           node.location(),
-          calleeExpressionMessage(node.function()));
+          calleeExpressionMessage(node.function()),
+          ImmutableMap.of());
     } else {
       errorConsumer.errorAt(
           node.location(), "Calling expression of type '%s', function expected.", function.type());
@@ -286,23 +292,26 @@ public class TypeCheckAndResolveNamesVisitor extends AstExpressionRewriteVisitor
     ref.function(function);
   }
 
-  private void resolveFunction(AstFunctionRef ref, List<AstExpression> arguments) {
+  private ImmutableMap<AstTypeWildcard, AstType> resolveFunction(
+      AstFunctionRef ref, List<AstExpression> arguments) {
     if (ref.isBuiltin()) {
-      return;
+      return ImmutableMap.of();
     }
     var name = ref.name();
     var signature = callSignature(name.entity(), arguments);
     if (signature == null) {
-      return;
+      return ImmutableMap.of();
     }
-    var function = globalNameMap.lookupFunction(name.module(), signature);
-    if (function == null) {
+    var match = globalNameMap.lookupFunctionMatch(name.module(), signature);
+    if (match == null) {
       errorConsumer.errorAt(
           ref.location(), "Undefined function: '%s'", formatSignature(name.module(), signature));
-      return;
+      return ImmutableMap.of();
     }
+    var function = match.function();
     ref.name().assign(function.name());
     ref.function(function);
+    return match.substitutions();
   }
 
   private static FunctionSignature callSignature(String name, List<AstExpression> arguments) {
@@ -342,6 +351,15 @@ public class TypeCheckAndResolveNamesVisitor extends AstExpressionRewriteVisitor
 
   private void checkFunctionArguments(
       AstFunction function, List<AstExpression> arguments, Location location, String functionName) {
+    checkFunctionArguments(function, arguments, location, functionName, ImmutableMap.of());
+  }
+
+  private void checkFunctionArguments(
+      AstFunction function,
+      List<AstExpression> arguments,
+      Location location,
+      String functionName,
+      ImmutableMap<AstTypeWildcard, AstType> genericArguments) {
     var parameters = function.parameters();
     if (arguments.size() != parameters.size()) {
       errorConsumer.errorAt(
@@ -354,7 +372,7 @@ public class TypeCheckAndResolveNamesVisitor extends AstExpressionRewriteVisitor
     }
     for (int i = 0; i < arguments.size(); i++) {
       var argumentType = checkNotNull(arguments.get(i).type());
-      var parameterType = checkNotNull(parameters.get(i).type());
+      var parameterType = checkNotNull(parameters.get(i).type()).substitute(genericArguments);
       if (!argumentType.equals(parameterType)) {
         errorConsumer.errorAt(
             arguments.get(i).location(),
