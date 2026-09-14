@@ -1,6 +1,6 @@
 package io.lang.cimple.compiler;
 
-import static io.lang.cimple.compiler.AstUtils.*;
+import static io.lang.cimple.compiler.AstTreeUtils.*;
 import static org.junit.jupiter.api.Assertions.*;
 
 import com.google.common.collect.ImmutableList;

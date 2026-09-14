@@ -54,6 +54,12 @@ class PreprocessVisitor extends AstExpressionRewriteVisitor {
   }
 
   @Override
+  protected void visit(AstTypeWildcard node) {
+    checkTypeName(node.name());
+    super.visit(node);
+  }
+
+  @Override
   protected void visit(AstFunctionType node) {
     checkTypeName(node.name());
     checkFunctionSignature(node.function());
@@ -139,6 +145,17 @@ class PreprocessVisitor extends AstExpressionRewriteVisitor {
   private void checkFunctionSignature(AstFunction function) {
     if (function.resultType() == null) {
       function.resultType(AstBuiltinType.VOID);
+    }
+    var wildcardMap = new HashMap<String, AstTypeWildcard>();
+    for (var wildcard : function.wildcards()) {
+      var existing = wildcardMap.putIfAbsent(wildcard.name().entity(), wildcard);
+      if (existing != null) {
+        errorConsumer.errorAt(
+            wildcard.location(),
+            "Duplicate generic parameter '%s'. First defined at %s.",
+            wildcard.name(),
+            existing.location());
+      }
     }
     var parameterMap = new HashMap<String, AstVariable>();
     for (var parameter : function.parameters()) {
