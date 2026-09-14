@@ -1,6 +1,7 @@
 package io.lang.cimple.compiler;
 
-import static io.lang.cimple.compiler.AstUtils.*;
+import static io.lang.cimple.compiler.AstAssertionUtils.*;
+import static io.lang.cimple.compiler.AstTreeUtils.*;
 import static org.junit.jupiter.api.Assertions.*;
 
 import com.google.common.collect.ImmutableList;
@@ -174,6 +175,54 @@ class ParserTest extends AbstractTest {
       assertEquals(newTypeRef("string"), f.resultType());
       assertEquals(ImmutableList.of(rawVariable("x", "int")), f.parameters());
       assertNull(f.block());
+    }
+  }
+
+  @Test
+  void testGenericFunctionSyntax() {
+    var code =
+        """
+        module test;
+        generic (T) function size(a T[]);
+        generic (T) function first(a T[]) T {
+          return a[0];
+        }
+        """;
+    var module = parseCode(code);
+    {
+      var function = module.findFunction("size");
+      assertEquals(ImmutableList.of(wildcard("T")), function.wildcards());
+      assertEquals(
+          ImmutableList.of(
+              new AstVariable(new Identifier("a"), new AstArrayType(newTypeRef("T")), null)),
+          function.parameters());
+      assertNull(function.block());
+    }
+    {
+      var function = module.findFunction("first");
+      assertEquals(ImmutableList.of(wildcard("T")), function.wildcards());
+      assertEquals(newTypeRef("T"), function.resultType());
+      assertNotNull(function.block());
+    }
+  }
+
+  @Test
+  void testGenericFunctionSyntaxFailures() {
+    {
+      var code =
+          """
+          module test;
+          generic () function f();
+          """;
+      assertThrows(CompilerException.class, () -> parseCode(code));
+    }
+    {
+      var code =
+          """
+          module test;
+          generic (T,) function f();
+          """;
+      assertThrows(CompilerException.class, () -> parseCode(code));
     }
   }
 

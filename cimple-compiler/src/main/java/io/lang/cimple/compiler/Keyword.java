@@ -19,6 +19,7 @@ public enum Keyword {
   FLOAT64("float64"),
   FOR("for"),
   FUNCTION("function"),
+  GENERIC("generic"),
   IF("if"),
   IMPLEMENT("implement"),
   IMPORT("import"),

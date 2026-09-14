@@ -8,6 +8,7 @@ import static io.lang.cimple.compiler.Keyword.ELSE;
 import static io.lang.cimple.compiler.Keyword.ENUM;
 import static io.lang.cimple.compiler.Keyword.FOR;
 import static io.lang.cimple.compiler.Keyword.FUNCTION;
+import static io.lang.cimple.compiler.Keyword.GENERIC;
 import static io.lang.cimple.compiler.Keyword.IF;
 import static io.lang.cimple.compiler.Keyword.INTERFACE;
 import static io.lang.cimple.compiler.Keyword.MODULE;
@@ -81,7 +82,7 @@ public class Parser {
 
     while (!tokenizer.done()) {
       switch (currentKeyword()) {
-        case FUNCTION:
+        case FUNCTION, GENERIC:
           builder.definition(parseFunction(false));
           break;
         case TYPE:
@@ -192,6 +193,14 @@ public class Parser {
 
   private AstFunction parseFunction(boolean declarationOnly) {
     var builder = new AstFunctionBuilder();
+    if (isKeyword(GENERIC)) {
+      takeKeyword(GENERIC);
+      take(LPAREN);
+      do {
+        builder.wildcard(new AstTypeWildcard(parseName()));
+      } while (tokenizer.takeIf(COMMA));
+      take(RPAREN);
+    }
     takeKeyword(FUNCTION);
     builder.name(parseName());
     parseParameters(builder);
