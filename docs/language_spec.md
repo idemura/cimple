@@ -94,12 +94,10 @@ The Cimple compiler compiles all `.ci` files in the directory.
 They **must** share the same module identifier.
 Modules cannot be nested.
 
-Module names matter only for type names. Every function lives in the global function namespace and
-is resolved by its name and parameter types. This keeps function lookup compatible with C linkage
-while still allowing overload-like behavior through signatures.
+Module names matter only for type names.
 
-Global variables are module-private. They are visible only inside their own module and cannot be
-exported.
+Module-level variables are file-private. A module-level variable is visible only inside the file
+where it is declared and cannot be exported.
 
 ## Functions
 
@@ -159,6 +157,15 @@ generic (T) function f(a T[]);
 This rule keeps lookup predictable and avoids a separate generic function namespace. It also keeps
 the language close to C linkage while still allowing generic families where the parameter types make
 the choice unambiguous.
+
+# Function resolution
+
+Functions do not belong to modules. They share one global namespace and are resolved by matching
+the function name and the types of call arguments against the declared parameter types. A
+function's defining module does not participate in lookup.
+
+Parameter types retain their module qualification. Consequently, functions associated with types
+from different modules remain distinct in an argument-dependent-lookup model.
 
 ## Statements
 
