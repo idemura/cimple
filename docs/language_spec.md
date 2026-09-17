@@ -113,7 +113,7 @@ where it is declared and cannot be exported.
 A function that ends with `;` has no body and is resolved at linking time.
 This section is incomplete.
 
-### Function Generics
+## Function Generics
 
 Function generics are declared with a `generic` prefix:
 
@@ -160,12 +160,160 @@ the choice unambiguous.
 
 # Function resolution
 
-Functions do not belong to modules. They share one global namespace and are resolved by matching
-the function name and the types of call arguments against the declared parameter types. A
-function's defining module does not participate in lookup.
+The goal of function resolution in Ci is to be simple, unambiguous, and easy to perform mentally.
+Functions do not belong to modules. They share one global namespace and are resolved by their name
+and parameter types. A function's defining module does not participate in lookup.
+Parameter types retain their module identity, so functions can still be associated with types from
+different modules without placing the functions themselves into those modules.
 
-Parameter types retain their module qualification. Consequently, functions associated with types
-from different modules remain distinct in an argument-dependent-lookup model.
+The following rules apply within a group of functions that have the same name and the same number
+of parameters. A function's result type does not participate in resolution. These rules currently
+cover non-generic functions only; generic function resolution is intentionally left unspecified.
+
+First, consider resolution without interfaces. Before a call is resolved, all integer arguments are
+promoted to `int`. The compiler then looks for an exact match between the argument types and the
+function parameter types. There is no ranking of conversions and no search for a "best" overload.
+That is the entire rule. Smaller integer types are storage types and cannot be used as function
+parameter types.
+
+Interfaces do not make resolution more complicated when arguments already have interface types.
+Interfaces cannot inherit from one another, so an interface-typed argument can exactly match only
+the same interface type. Every interface function has exactly one parameter without an explicit
+type. That parameter has the enclosing interface type and is the argument used for virtual
+dispatch:
+
+```
+type interface ISocket {
+  function write(message string, socket);
+}
+
+type interface IFile {
+  function write(message string, file);
+}
+
+function foo(file IFile, socket ISocket) {
+  var message = "Hello";
+  write(message, socket); # Exact match with the ISocket overload.
+  write(message, file);   # Exact match with the IFile overload.
+}
+```
+
+Ambiguity becomes possible because a concrete type may implement several interfaces:
+
+```
+type struct Sink {}
+
+implement interface IFile(Sink) {
+  function write(message string, sink) {
+    # ...
+  }
+}
+
+implement interface ISocket(Sink) {
+  function write(message string, sink) {
+    # ...
+  }
+}
+
+function foo(sink Sink) {
+  var message = "Hello";
+  write(message, sink); # Invalid: Sink can be used as either IFile or ISocket.
+}
+```
+
+Ci resolves every argument independently. At each argument position, the compiler collects the
+compatible parameter types from the same name-and-arity group. A concrete argument is compatible
+with its own type and with every interface it implements. Exactly one parameter type must be
+compatible at each position. No compatible type means that no function matches; more than one means
+that the argument is ambiguous. The compiler does not use other arguments to choose a type for an
+ambiguous argument. This deliberately rejects calls that could otherwise be resolved by considering
+the whole argument list. After every argument has resolved to one parameter type, the resulting
+parameter list must exactly match a declared function:
+
+```
+type interface IFile {
+  function write(message string, file);
+}
+
+type interface ISocket {
+  function write(number int, socket);
+}
+
+type struct Sink {}
+
+implement interface IFile(Sink) {
+  function write(message string, sink) {
+    # ...
+  }
+}
+
+implement interface ISocket(Sink) {
+  function write(number int, sink) {
+    # ...
+  }
+}
+
+function foo(sink Sink) {
+  write("Hello", sink); # Invalid: the second argument can be IFile or ISocket.
+  write(10, sink);      # Invalid for the same reason.
+}
+```
+
+The first argument appears to select `IFile` in the first call and `ISocket` in the second call.
+Nevertheless, both calls are invalid because the second argument is ambiguous by itself. This rule
+avoids overload resolution whose result depends on reasoning across several arguments.
+
+An explicit cast gives an expression one specific interface type and therefore makes resolution
+unambiguous:
+
+```
+function foo(sink Sink) {
+  var message = "Hello";
+  write(message, (sink type ISocket)); # Selects the ISocket overload.
+  write(message, (sink type IFile));   # Selects the IFile overload.
+}
+```
+
+Interface values are pointer-like. A bare `null` can represent every interface or pointer type, but
+Ci does not infer its type from an overload set. It therefore has no unique lookup type and must be
+cast explicitly before it can be passed to a function:
+
+```
+function foo() {
+  var message = "Hello";
+  write(message, null);                  # Invalid: null has no unique lookup type.
+  write(message, (null type IFile));     # Selects the IFile overload.
+  write(message, (null type ISocket));   # Selects the ISocket overload.
+}
+```
+
+An interface function declaration participates in the global function namespace. Functions defined
+as part of an interface implementation are only virtual-dispatch targets. They do not become
+additional functions in the global namespace and are not considered during ordinary name
+resolution:
+
+```
+implement interface IFile(Sink) {
+  function write(message string, sink) {
+    # ...
+  }
+}
+```
+
+Defining the same function for `Sink` outside the implementation context is an error:
+
+```
+function write(message string, sink Sink) {
+  # Invalid: overlaps the IFile and ISocket forms for Sink.
+}
+```
+
+Such a function would introduce another possible meaning for an argument of type `Sink`. Ci rejects
+the declaration instead of adding exact-match precedence or another overload-ranking rule. The
+compiler reports a collision whenever a concrete overload and an interface overload in the same
+name-and-arity group have a concrete/interface pair at the same position, regardless of their other
+parameter types. The language favors rules that remain simple for humans over accepting every call
+a compiler could theoretically disambiguate.
 
 ## Statements
 
@@ -296,10 +444,14 @@ The expression before `!` must have a function type.
 
 ```
 type interface FileSystem {
-    function open(name string) File*;
-    function close(f File*);
+    function open(fileSystem, name string) File*;
+    function close(fileSystem, file File*);
 }
 ```
+
+Every function declared in an interface must have exactly one parameter without an explicit type.
+Within the interface, this parameter has the enclosing interface type and identifies the argument
+used for virtual dispatch. All other parameters must have explicit types.
 
 Interfaces cannot inherit from other interfaces. Interface hierarchies are intentionally avoided so
 that every interface definition is self-contained and grep-friendly.
@@ -308,12 +460,19 @@ Types implement interfaces explicitly. A type may implement several interfaces, 
 themselves remain independent of each other.
 
 ```
-implement interface <interface_name>(<type_ref>);
+implement interface <interface_name>(<type_ref>) {
+    <function_definition>*
+}
 ```
 
-All functions required by the interface must be defined in the same file as the `implement`
-statement. This keeps the implementation unit explicit: finding the `implement interface` statement
-also finds the functions that satisfy the interface.
+All functions required by the interface must be defined inside the `implement interface` block.
+Each implementation function must have exactly one untyped parameter at the same position as the
+interface function's untyped parameter. In the implementation, this parameter has the concrete type
+named by `<type_ref>`. Its name does not need to match the parameter name in the interface.
+
+This keeps the implementation unit explicit: finding the block also finds the functions that
+satisfy the interface. Implementation functions are virtual-dispatch targets and do not enter the
+global function namespace as additional overloads.
 
 ## Operator Precedence
 
