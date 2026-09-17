@@ -1,5 +1,6 @@
 package io.lang.cimple.compiler;
 
+import com.google.common.collect.ImmutableList;
 import java.util.Map;
 import java.util.Objects;
 
@@ -22,6 +23,10 @@ public abstract sealed class AstType extends AstNode
   }
 
   public abstract Identifier name();
+
+  public ImmutableList<AstInterfaceType> implementedInterfaces() {
+    return ImmutableList.of();
+  }
 
   public boolean containsWildcard() {
     return false;

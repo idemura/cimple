@@ -302,10 +302,9 @@ public class TypeCheckAndResolveNamesVisitor extends AstExpressionRewriteVisitor
     if (signature == null) {
       return ImmutableMap.of();
     }
-    var match = globalNameMap.lookupFunctionMatch(name.module(), signature);
+    var match = globalNameMap.lookupFunctionMatch(signature);
     if (match == null) {
-      errorConsumer.errorAt(
-          ref.location(), "Undefined function: '%s'", formatSignature(name.module(), signature));
+      errorConsumer.errorAt(ref.location(), "Undefined function: '%s'", signature);
       return ImmutableMap.of();
     }
     var function = match.function();
@@ -322,26 +321,11 @@ public class TypeCheckAndResolveNamesVisitor extends AstExpressionRewriteVisitor
     return new FunctionSignature(name, argumentTypes.build());
   }
 
-  private static String formatSignature(String moduleName, FunctionSignature signature) {
-    if (moduleName == null) {
-      return signature.toString();
-    }
-    return "%s~%s".formatted(moduleName, signature);
-  }
-
   private AstVariable lookupVariable(Identifier name) {
     if (name.module() == null) {
       return localNameMap.lookupVariable(name.entity());
     }
     return globalNameMap.lookupVariable(name);
-  }
-
-  private void checkFunctionCallParameters(
-      AstFunction function, List<AstExpression> arguments, Location location, String functionName) {
-    // if (function == null) {
-    //   // A previous resolution error left the callee untyped; avoid a noisy follow-up error.
-    //   return;
-    // }
   }
 
   private void checkBinaryOperatorArguments(

@@ -76,17 +76,15 @@ class GlobalNameMapTest {
   }
 
   @Test
-  void testLookupFunctions() {
+  void testFunctionNamespaceIsGlobal() {
     var globalNameMap = new GlobalNameMap();
     var function1 = freeFunction("m1", "f");
     var function2 = freeFunction("m2", "f");
 
     assertNull(globalNameMap.addFunction(function1));
-    assertNull(globalNameMap.addFunction(function2));
+    assertSame(function1, globalNameMap.addFunction(function2));
 
-    assertNull(globalNameMap.lookupFunction(null, function1.signature()));
-    assertSame(function1, globalNameMap.lookupFunction("m1", function1.signature()));
-    assertSame(function2, globalNameMap.lookupFunction("m2", function2.signature()));
+    assertSame(function1, globalNameMap.lookupFunction(function1.signature()));
   }
 
   @Test
@@ -98,10 +96,8 @@ class GlobalNameMapTest {
     assertNull(globalNameMap.addFunction(function1));
     assertNull(globalNameMap.addFunction(function2));
 
-    assertSame(function1, globalNameMap.lookupFunction(null, function1.signature()));
-    assertSame(function2, globalNameMap.lookupFunction(null, function2.signature()));
-    assertSame(function1, globalNameMap.lookupFunction("m1", function1.signature()));
-    assertNull(globalNameMap.lookupFunction("m2", function1.signature()));
+    assertSame(function1, globalNameMap.lookupFunction(function1.signature()));
+    assertSame(function2, globalNameMap.lookupFunction(function2.signature()));
   }
 
   @Test
@@ -142,7 +138,7 @@ class GlobalNameMapTest {
 
     assertNull(globalNameMap.addFunction(intArray));
     assertNull(globalNameMap.addFunction(boolArray));
-    assertSame(intArray, globalNameMap.lookupFunction("m1", intArray.signature()));
-    assertSame(boolArray, globalNameMap.lookupFunction("m1", boolArray.signature()));
+    assertSame(intArray, globalNameMap.lookupFunction(intArray.signature()));
+    assertSame(boolArray, globalNameMap.lookupFunction(boolArray.signature()));
   }
 }

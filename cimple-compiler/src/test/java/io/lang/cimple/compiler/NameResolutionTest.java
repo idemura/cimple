@@ -28,14 +28,10 @@ class NameResolutionTest extends AbstractTest {
     assertSame(module.findVariable("y"), localNameMap.lookupVariable("y"));
     assertSame(
         module.findFunction("f"),
-        semanticAnalyzer
-            .globalNameMap()
-            .lookupFunction("test", module.findFunction("f").signature()));
+        semanticAnalyzer.globalNameMap().lookupFunction(module.findFunction("f").signature()));
     assertSame(
         module.findFunction("g"),
-        semanticAnalyzer
-            .globalNameMap()
-            .lookupFunction("test", module.findFunction("g").signature()));
+        semanticAnalyzer.globalNameMap().lookupFunction(module.findFunction("g").signature()));
     assertSame(module.findType("R"), typeMap.get("R"));
   }
 

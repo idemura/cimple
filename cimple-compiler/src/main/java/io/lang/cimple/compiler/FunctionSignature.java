@@ -2,8 +2,8 @@ package io.lang.cimple.compiler;
 
 import static java.util.stream.Collectors.joining;
 
-import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.ImmutableList;
+import com.google.common.collect.ImmutableMap;
 import java.util.LinkedHashMap;
 import java.util.Map;
 import java.util.Objects;
@@ -66,7 +66,8 @@ public record FunctionSignature(String name, ImmutableList<AstType> parameterTyp
       var existing = substitutions.putIfAbsent(wildcard, actual);
       return existing == null || existing.equals(actual);
     }
-    if (pattern instanceof AstArrayType patternArray && actual instanceof AstArrayType actualArray) {
+    if (pattern instanceof AstArrayType patternArray
+        && actual instanceof AstArrayType actualArray) {
       return matchType(patternArray.baseType(), actualArray.baseType(), substitutions);
     }
     return typesEqual(pattern, actual);

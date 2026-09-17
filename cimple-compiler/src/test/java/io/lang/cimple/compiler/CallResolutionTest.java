@@ -21,8 +21,7 @@ class CallResolutionTest extends AbstractTest {
     var function = module.findFunction("f");
     assertEquals(AstBuiltinType.VOID, function.resultType());
     var globalNameMap = semanticAnalyzer.globalNameMap();
-    assertSame(
-        module.findFunction("f"), globalNameMap.lookupFunction("test", function.signature()));
+    assertSame(module.findFunction("f"), globalNameMap.lookupFunction(function.signature()));
   }
 
   @Test
@@ -92,7 +91,7 @@ class CallResolutionTest extends AbstractTest {
             """
             module client;
             function f() int {
-              return server~make();
+              return make();
             }
             """);
     var serverModule =
@@ -108,7 +107,7 @@ class CallResolutionTest extends AbstractTest {
     var call = (AstCall) extractReturnExpression(clientModule.findFunction("f"));
     var function = call.function();
     assertSame(serverModule.findFunction("make"), function.function());
-    assertEquals(new Identifier("make").module("server"), function.name());
+    assertEquals(new Identifier("make"), function.name());
     assertEquals(AstBuiltinType.INT64, call.type());
   }
 
@@ -158,7 +157,7 @@ class CallResolutionTest extends AbstractTest {
       assertEquals(new Identifier("t"), local.variable().name());
       assertEquals(AstStringType.INSTANCE, local.variable().type());
       var call = (AstCall) local.variable().expression();
-      assertEquals(newFunctionRef("test", "f"), call.function());
+      assertEquals(newFunctionRef("f"), call.function());
       assertEquals(AstStringType.INSTANCE, call.type());
     }
   }

@@ -32,9 +32,9 @@ public class SemanticAnalyzer {
       }
     }
 
-    // After type resolution, variable and free functions remain with nonqualified names.
+    // Global variables are module-private, so only their names carry module qualification.
     for (var module : modules) {
-      qualifyTopLevelNames(module);
+      qualifyGlobalVariableNames(module);
     }
 
     collectFunctionsAndVariables(modules);
@@ -66,13 +66,13 @@ public class SemanticAnalyzer {
     return errorConsumer.errorCount() > 0;
   }
 
-  private void qualifyTopLevelNames(AstModule module) {
+  private void qualifyGlobalVariableNames(AstModule module) {
     var moduleName = module.name().entity();
     for (var def : module.definitions()) {
-      if (def instanceof AstEntity entity) {
-        var name = entity.name();
+      if (def instanceof AstVariable variable) {
+        var name = variable.name();
         if (name.module() == null) {
-          entity.name().module(moduleName);
+          name.module(moduleName);
         }
       }
     }
@@ -135,9 +135,5 @@ public class SemanticAnalyzer {
         entity.name().entity(),
         entityKind(existing),
         existing.location());
-  }
-
-  private static Identifier qualifyName(Identifier id, String module) {
-    return id.copy().module(module);
   }
 }

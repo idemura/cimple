@@ -1,13 +1,20 @@
 package io.lang.cimple.compiler;
 
+import java.util.ArrayList;
 import java.util.LinkedHashMap;
+import java.util.List;
 import java.util.Map;
 
 public class GlobalNameMap {
+  private record FunctionKey(String name, int parameterCount) {
+    private static FunctionKey of(FunctionSignature signature) {
+      return new FunctionKey(signature.name(), signature.parameterTypes().size());
+    }
+  }
+
   private final Map<Identifier, AstType> typeMap = new LinkedHashMap<>();
   private final Map<Identifier, AstVariable> variableMap = new LinkedHashMap<>();
-  private final Map<FunctionSignature, Map<String, AstFunction>> functionMap =
-      new LinkedHashMap<>();
+  private final Map<FunctionKey, List<AstFunction>> functionMap = new LinkedHashMap<>();
 
   public GlobalNameMap() {}
 
@@ -16,9 +23,16 @@ public class GlobalNameMap {
   }
 
   public AstFunction addFunction(AstFunction function) {
-    return functionMap
-        .computeIfAbsent(function.signature(), key -> new LinkedHashMap<>())
-        .putIfAbsent(function.name().module(), function);
+    var signature = function.signature();
+    var functions =
+        functionMap.computeIfAbsent(FunctionKey.of(signature), ignored -> new ArrayList<>());
+    for (var existing : functions) {
+      if (existing.signature().equals(signature)) {
+        return existing;
+      }
+    }
+    functions.add(function);
+    return null;
   }
 
   public AstVariable addVariable(AstVariable variable) {
@@ -57,22 +71,25 @@ public class GlobalNameMap {
     return result;
   }
 
-  public AstFunction lookupFunction(String moduleName, FunctionSignature signature) {
-    var functions = functionMap.get(signature);
+  public AstFunction lookupFunction(FunctionSignature signature) {
+    var functions = functionMap.get(FunctionKey.of(signature));
     if (functions == null) {
       return null;
     }
-    if (moduleName != null) {
-      return functions.get(moduleName);
+    AstFunction result = null;
+    for (var function : functions) {
+      if (function.signature().equals(signature)) {
+        if (result != null) {
+          return null;
+        }
+        result = function;
+      }
     }
-    if (functions.size() != 1) {
-      return null;
-    }
-    return functions.values().iterator().next();
+    return result;
   }
 
-  public FunctionMatch lookupFunctionMatch(String moduleName, FunctionSignature signature) {
-    var function = lookupFunction(moduleName, signature);
+  public FunctionMatch lookupFunctionMatch(FunctionSignature signature) {
+    var function = lookupFunction(signature);
     if (function == null) {
       return null;
     }
